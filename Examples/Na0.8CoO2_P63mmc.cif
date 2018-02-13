@@ -1,0 +1,72 @@
+#======================================================================
+
+# CRYSTAL DATA
+
+#----------------------------------------------------------------------
+
+data_VESTA_phase_1
+
+
+_pd_phase_name                         ''
+_cell_length_a                         2.85000
+_cell_length_b                         2.85000
+_cell_length_c                         10.80000
+_cell_angle_alpha                      90
+_cell_angle_beta                       90
+_cell_angle_gamma                      120
+_symmetry_space_group_name_H-M         'P 63/m m c'
+_symmetry_Int_Tables_number            194
+
+loop_
+_symmetry_equiv_pos_as_xyz
+   'x, y, z'
+   '-x, -y, -z'
+   '-y, x-y, z'
+   'y, -x+y, -z'
+   '-x+y, -x, z'
+   'x-y, x, -z'
+   '-x, -y, z+1/2'
+   'x, y, -z+1/2'
+   'y, -x+y, z+1/2'
+   '-y, x-y, -z+1/2'
+   'x-y, x, z+1/2'
+   '-x+y, -x, -z+1/2'
+   'y, x, -z'
+   '-y, -x, z'
+   'x-y, -y, -z'
+   '-x+y, y, z'
+   '-x, -x+y, -z'
+   'x, x-y, z'
+   '-y, -x, -z+1/2'
+   'y, x, z+1/2'
+   '-x+y, y, -z+1/2'
+   'x-y, -y, z+1/2'
+   'x, x-y, -z+1/2'
+   '-x, -x+y, z+1/2'
+
+loop_
+   _atom_site_label
+   _atom_site_occupancy
+   _atom_site_fract_x
+   _atom_site_fract_y
+   _atom_site_fract_z
+   _atom_site_adp_type
+   _atom_site_U_iso_or_equiv
+   _atom_site_type_symbol
+   Co1        1.0     0.000000      0.000000      0.000000     Uiso  0.004500 Co
+   O1         1.0     0.333333     -0.333333      0.0908(5)    Uiso  0.004956 O
+   Na1        0.2000  0.000000      0.000000      0.250000     Uiso  0.040333 Na
+   Na2        0.6000  0.666667      0.333333      0.250000     Uiso  0.011889 Na
+
+loop_
+   _atom_site_aniso_label
+   _atom_site_aniso_U_11
+   _atom_site_aniso_U_22
+   _atom_site_aniso_U_33
+   _atom_site_aniso_U_12
+   _atom_site_aniso_U_13
+   _atom_site_aniso_U_23
+   Co1	 0.00600  0.00600  0.00150  0.00300  0.00000  0.00000
+   O1	 0.00500  0.00500  0.00500  0.00260  0.00000  0.00000
+   Na1	 0.05600  0.05600  0.00900  0.02800  0.00000  0.00000
+   Na2	 0.01900  0.01900 -0.00300  0.00900  0.00000  0.00000

@@ -1,0 +1,146 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module Dans_Diffraction.classes_scattering</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_scattering</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/dgpor/dropbox/python/dans_diffraction/classes_scattering.py">c:\users\dgpor\dropbox\python\dans_diffraction\classes_scattering.py</a></font></td></tr></table>
+    <p><tt><a href="#Scattering">Scattering</a>&nbsp;Class&nbsp;"classes_scattering.py"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Scattering">Scattering</a>&nbsp;functions&nbsp;for&nbsp;Crystal&nbsp;class.<br>
+&nbsp;<br>
+By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
+Diamond<br>
+2017<br>
+&nbsp;<br>
+Version&nbsp;1.1<br>
+Last&nbsp;updated:&nbsp;06/01/18<br>
+&nbsp;<br>
+Version&nbsp;History:<br>
+10/09/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
+30/10/17&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Main&nbsp;functions&nbsp;finshed,&nbsp;some&nbsp;testing&nbsp;done<br>
+06/01/18&nbsp;1.1&nbsp;&nbsp;&nbsp;&nbsp;Renamed&nbsp;classes_scattering.py<br>
+&nbsp;<br>
+@author:&nbsp;DGPorter</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="Dans_Diffraction.functions_crystallography.html">Dans_Diffraction.functions_crystallography</a><br>
+<a href="Dans_Diffraction.functions_general.html">Dans_Diffraction.functions_general</a><br>
+</td><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+<a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_scattering.html#Scattering">Scattering</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Scattering">class <strong>Scattering</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Various&nbsp;scattering&nbsp;functions<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Scattering-__init__"><strong>__init__</strong></a>(self, xtl)</dt><dd><tt>initialise</tt></dd></dl>
+
+<dl><dt><a name="Scattering-magnetic_neutron"><strong>magnetic_neutron</strong></a>(self, HKL)</dt><dd><tt>Calculate&nbsp;the&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;neutron&nbsp;rules&nbsp;and&nbsp;form&nbsp;factor<br>
+&nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-magnetic_neutron">magnetic_neutron</a>([1,0,0])<br>
+&nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-magnetic_neutron">magnetic_neutron</a>([[1,0,0],[2,0,0],[3,0,0])<br>
+Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.</tt></dd></dl>
+
+<dl><dt><a name="Scattering-neutron"><strong>neutron</strong></a>(self, HKL)</dt><dd><tt>Calculate&nbsp;the&nbsp;squared&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;neutron&nbsp;scattering&nbsp;length<br>
+&nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-neutron">neutron</a>([1,0,0])<br>
+&nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-neutron">neutron</a>([[1,0,0],[2,0,0],[3,0,0])<br>
+Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.</tt></dd></dl>
+
+<dl><dt><a name="Scattering-print_intensity"><strong>print_intensity</strong></a>(self, HKL)</dt><dd><tt>Print&nbsp;intensities&nbsp;calcualted&nbsp;in&nbsp;different&nbsp;ways</tt></dd></dl>
+
+<dl><dt><a name="Scattering-print_scattering_coordinates"><strong>print_scattering_coordinates</strong></a>(self, hkl, azim_zero<font color="#909090">=[1, 0, 0]</font>, psi<font color="#909090">=0</font>)</dt><dd><tt>Transform&nbsp;magnetic&nbsp;vector&nbsp;into&nbsp;components&nbsp;within&nbsp;the&nbsp;scattering&nbsp;plane<br>
+&nbsp;&nbsp;&nbsp;&nbsp;***warning&nbsp;-&nbsp;may&nbsp;not&nbsp;be&nbsp;correct&nbsp;for&nbsp;non-cubic&nbsp;systems***</tt></dd></dl>
+
+<dl><dt><a name="Scattering-scatteringcomponents"><strong>scatteringcomponents</strong></a>(self, mxmymz, hkl, azim_zero<font color="#909090">=[1, 0, 0]</font>, psi<font color="#909090">=0</font>)</dt><dd><tt>Transform&nbsp;magnetic&nbsp;vector&nbsp;into&nbsp;components&nbsp;within&nbsp;the&nbsp;scattering&nbsp;plane<br>
+&nbsp;&nbsp;&nbsp;&nbsp;***warning&nbsp;-&nbsp;may&nbsp;not&nbsp;be&nbsp;correct&nbsp;for&nbsp;non-cubic&nbsp;systems***</tt></dd></dl>
+
+<dl><dt><a name="Scattering-x_ray"><strong>x_ray</strong></a>(self, HKL)</dt><dd><tt>Calculate&nbsp;the&nbsp;squared&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;x-ray&nbsp;scattering&nbsp;factors<br>
+&nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-x_ray">x_ray</a>([1,0,0])<br>
+&nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-x_ray">x_ray</a>([[1,0,0],[2,0,0],[3,0,0])<br>
+Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.</tt></dd></dl>
+
+<dl><dt><a name="Scattering-x_ray_fast"><strong>x_ray_fast</strong></a>(self, HKL)</dt><dd><tt>Calculate&nbsp;the&nbsp;squared&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;atomic&nbsp;number&nbsp;as&nbsp;scattering&nbsp;length<br>
+&nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-x_ray_fast">x_ray_fast</a>([1,0,0])<br>
+&nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-x_ray_fast">x_ray_fast</a>([[1,0,0],[2,0,0],[3,0,0])<br>
+Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.</tt></dd></dl>
+
+<dl><dt><a name="Scattering-xray_magnetic"><strong>xray_magnetic</strong></a>(self, HKL)</dt><dd><tt>Calculate&nbsp;the&nbsp;non-resonant&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor&nbsp;<br>
+for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;x-ray&nbsp;rules&nbsp;and&nbsp;form&nbsp;factor<br>
+&nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-xray_magnetic">xray_magnetic</a>([1,0,0])<br>
+&nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-xray_magnetic">xray_magnetic</a>([[1,0,0],[2,0,0],[3,0,0])<br>
+Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.<br>
+&nbsp;<br>
+From&nbsp;Hill+McMorrow&nbsp;Acta&nbsp;Cryst.&nbsp;1996&nbsp;A52,&nbsp;236-244&nbsp;Equ.&nbsp;(2)<br>
+Book:&nbsp;"X-ray&nbsp;<a href="#Scattering">Scattering</a>&nbsp;and&nbsp;Absorption&nbsp;by&nbsp;Magnetic&nbsp;Materials"&nbsp;by&nbsp;Loevesy&nbsp;and&nbsp;Collins.&nbsp;Ch&nbsp;2.&nbsp;Eqn.2.21+1<br>
+No&nbsp;orbital&nbsp;component&nbsp;assumed<br>
+magnetic&nbsp;moments&nbsp;assumed&nbsp;to&nbsp;be&nbsp;in&nbsp;the&nbsp;same&nbsp;reference&nbsp;frame&nbsp;as&nbsp;the&nbsp;polarisation</tt></dd></dl>
+
+<dl><dt><a name="Scattering-xray_resonant"><strong>xray_resonant</strong></a>(self, HKL, energy_kev<font color="#909090">=None</font>, polarisation<font color="#909090">='sp'</font>, F0<font color="#909090">=1</font>, F1<font color="#909090">=1</font>, F2<font color="#909090">=1</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>, PSI<font color="#909090">=[0]</font>, disp<font color="#909090">=False</font>)</dt><dd><tt>Calculate&nbsp;structure&nbsp;factors&nbsp;using&nbsp;resonant&nbsp;scattering&nbsp;factors&nbsp;in&nbsp;the&nbsp;dipolar&nbsp;approximation<br>
+&nbsp;&nbsp;I&nbsp;=&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-xray_resonant">xray_resonant</a>(HKL,energy_kev,polarisation,F0,F1,F2)<br>
+Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth<br>
+&nbsp;&nbsp;&nbsp;&nbsp;psi&nbsp;=&nbsp;azimuthal&nbsp;angle&nbsp;defining&nbsp;the&nbsp;scattering&nbsp;plane<br>
+&nbsp;<br>
+Uses&nbsp;the&nbsp;E1E1&nbsp;resonant&nbsp;x-ray&nbsp;scattering&nbsp;amplitude:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fxr_n&nbsp;=&nbsp;(ef.ei)*F0&nbsp;-i(ef&nbsp;X&nbsp;ei).z_n*F1&nbsp;+&nbsp;(ef.z_n)(ei.z_n)F2<br>
+&nbsp;<br>
+Where&nbsp;ei&nbsp;and&nbsp;ef&nbsp;are&nbsp;the&nbsp;initial&nbsp;and&nbsp;final&nbsp;polarisation&nbsp;states,&nbsp;respectively,<br>
+and&nbsp;z_n&nbsp;is&nbsp;a&nbsp;unit&nbsp;vector&nbsp;in&nbsp;the&nbsp;direction&nbsp;of&nbsp;the&nbsp;magnetic&nbsp;moment&nbsp;of&nbsp;the&nbsp;nth&nbsp;ion.<br>
+The&nbsp;polarisation&nbsp;states&nbsp;are&nbsp;determined&nbsp;to&nbsp;be&nbsp;one&nbsp;of&nbsp;the&nbsp;natural&nbsp;synchrotron&nbsp;<br>
+states,&nbsp;where&nbsp;sigma&nbsp;(s)&nbsp;is&nbsp;perpendicular&nbsp;to&nbsp;the&nbsp;scattering&nbsp;plane&nbsp;and&nbsp;pi&nbsp;(p)&nbsp;is<br>
+parallel&nbsp;to&nbsp;it.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;s-s&nbsp;&nbsp;s-p&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;p-s&nbsp;&nbsp;p-p&nbsp;)<br>
+&nbsp;<br>
+From&nbsp;Hill+McMorrow&nbsp;Acta&nbsp;Cryst.&nbsp;1996&nbsp;A52,&nbsp;236-244&nbsp;Equ.&nbsp;(15)</tt></dd></dl>
+
+<dl><dt><a name="Scattering-xray_resonant_scattering_factor"><strong>xray_resonant_scattering_factor</strong></a>(self, HKL, energy_kev<font color="#909090">=None</font>, polarisation<font color="#909090">='sp'</font>, F0<font color="#909090">=1</font>, F1<font color="#909090">=1</font>, F2<font color="#909090">=1</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>, psi<font color="#909090">=0</font>, disp<font color="#909090">=False</font>)</dt><dd><tt>Calcualte&nbsp;fxres,&nbsp;the&nbsp;resonant&nbsp;x-ray&nbsp;scattering&nbsp;factor<br>
+&nbsp;&nbsp;fxres&nbsp;=&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-xray_resonant_scattering_factor">xray_resonant_scattering_factor</a>(HKL,energy_kev,polarisation,F0,F1,F2,azim_zero,psi)<br>
+energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth&nbsp;{[1,0,0]}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;psi&nbsp;=&nbsp;azimuthal&nbsp;angle&nbsp;defining&nbsp;the&nbsp;scattering&nbsp;plane&nbsp;{0}<br>
+&nbsp;<br>
+Uses&nbsp;the&nbsp;E1E1&nbsp;resonant&nbsp;x-ray&nbsp;scattering&nbsp;amplitude:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fxr_n&nbsp;=&nbsp;(ef.ei)*F0&nbsp;-i(ef&nbsp;X&nbsp;ei).z_n*F1&nbsp;+&nbsp;(ef.z_n)(ei.z_n)F2<br>
+&nbsp;<br>
+Where&nbsp;ei&nbsp;and&nbsp;ef&nbsp;are&nbsp;the&nbsp;initial&nbsp;and&nbsp;final&nbsp;polarisation&nbsp;states,&nbsp;respectively,<br>
+and&nbsp;z_n&nbsp;is&nbsp;a&nbsp;unit&nbsp;vector&nbsp;in&nbsp;the&nbsp;direction&nbsp;of&nbsp;the&nbsp;magnetic&nbsp;moment&nbsp;of&nbsp;the&nbsp;nth&nbsp;ion.<br>
+The&nbsp;polarisation&nbsp;states&nbsp;are&nbsp;determined&nbsp;to&nbsp;be&nbsp;one&nbsp;of&nbsp;the&nbsp;natural&nbsp;synchrotron&nbsp;<br>
+states,&nbsp;where&nbsp;sigma&nbsp;(s)&nbsp;is&nbsp;perpendicular&nbsp;to&nbsp;the&nbsp;scattering&nbsp;plane&nbsp;and&nbsp;pi&nbsp;(p)&nbsp;is<br>
+parallel&nbsp;to&nbsp;it.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;s-s&nbsp;&nbsp;s-p&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;p-s&nbsp;&nbsp;p-p&nbsp;)<br>
+&nbsp;<br>
+From&nbsp;Hill+McMorrow&nbsp;Acta&nbsp;Cryst.&nbsp;1996&nbsp;A52,&nbsp;236-244&nbsp;Equ.&nbsp;(15)</tt></dd></dl>
+
+</td></tr></table></td></tr></table>
+</body></html>

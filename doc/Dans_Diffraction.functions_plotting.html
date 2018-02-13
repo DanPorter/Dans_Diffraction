@@ -1,0 +1,703 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module Dans_Diffraction.functions_plotting</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_plotting</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/dgpor/dropbox/python/dans_diffraction/functions_plotting.py">c:\users\dgpor\dropbox\python\dans_diffraction\functions_plotting.py</a></font></td></tr></table>
+    <p><tt>Module:&nbsp;Handy&nbsp;plotting&nbsp;functions&nbsp;"functions_plotting.py"<br>
+&nbsp;<br>
+Contains&nbsp;various&nbsp;plotting&nbsp;shortcuts&nbsp;using&nbsp;matplotlib.pyplot<br>
+&nbsp;<br>
+By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
+Diamond<br>
+2018<br>
+&nbsp;<br>
+Usage:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Run&nbsp;this&nbsp;file&nbsp;in&nbsp;an&nbsp;interactive&nbsp;console<br>
+&nbsp;&nbsp;&nbsp;&nbsp;OR<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;from&nbsp;Dans_Diffraction&nbsp;import&nbsp;functions_general&nbsp;as&nbsp;fg<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;<br>
+Version&nbsp;1.0<br>
+Last&nbsp;updated:&nbsp;06/01/18<br>
+&nbsp;<br>
+Version&nbsp;History:<br>
+06/01/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created&nbsp;from&nbsp;DansGeneralProgs.py&nbsp;V2.3<br>
+&nbsp;<br>
+@author:&nbsp;DGPorter</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="Dans_Diffraction.functions_crystallography.html">Dans_Diffraction.functions_crystallography</a><br>
+<a href="Dans_Diffraction.functions_general.html">Dans_Diffraction.functions_general</a><br>
+</td><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+<a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
+<a href="mpl_toolkits.mplot3d.proj3d.html">mpl_toolkits.mplot3d.proj3d</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="matplotlib.patches.html#FancyArrowPatch">matplotlib.patches.FancyArrowPatch</a>(<a href="matplotlib.patches.html#Patch">matplotlib.patches.Patch</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="Dans_Diffraction.functions_plotting.html#Arrow3D">Arrow3D</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Arrow3D">class <strong>Arrow3D</strong></a>(<a href="matplotlib.patches.html#FancyArrowPatch">matplotlib.patches.FancyArrowPatch</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>FancyArrow3D&nbsp;patch&nbsp;for&nbsp;3D&nbsp;arrows,&nbsp;by&nbsp;CT&nbsp;Zhu<br>
+&nbsp;<a href="http://stackoverflow.com/questions/22867620/putting-arrowheads-on-vectors-in-matplotlibs-3d-plot">http://stackoverflow.com/questions/22867620/putting-arrowheads-on-vectors-in-matplotlibs-3d-plot</a><br>
+Useage:&nbsp;<br>
+&nbsp;&nbsp;fig&nbsp;=&nbsp;plt.figure()<br>
+&nbsp;&nbsp;ax&nbsp;=&nbsp;fig.add_subplot(111,&nbsp;projection='3d')<br>
+&nbsp;&nbsp;ax.plot([0,1],[0,0],[0,0],'k-')<br>
+&nbsp;&nbsp;ax.plot([0,0],[0,1],[0,0],'k-')<br>
+&nbsp;&nbsp;ax.plot([0,0],[0,0],[0,1],'k-')<br>
+&nbsp;&nbsp;v&nbsp;=&nbsp;<a href="#Arrow3D">Arrow3D</a>([0,1],[0,1],[0,1],&nbsp;mutation_scale=20,&nbsp;lw=3,&nbsp;arrowstyle="-|&gt;",&nbsp;color="r")<br>
+&nbsp;&nbsp;ax.add_artist(v)<br>
+&nbsp;&nbsp;plt.show()<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="Dans_Diffraction.functions_plotting.html#Arrow3D">Arrow3D</a></dd>
+<dd><a href="matplotlib.patches.html#FancyArrowPatch">matplotlib.patches.FancyArrowPatch</a></dd>
+<dd><a href="matplotlib.patches.html#Patch">matplotlib.patches.Patch</a></dd>
+<dd><a href="matplotlib.artist.html#Artist">matplotlib.artist.Artist</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Arrow3D-__init__"><strong>__init__</strong></a>(self, xs, ys, zs, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="Arrow3D-draw"><strong>draw</strong></a>(self, renderer)</dt></dl>
+
+<hr>
+Methods inherited from <a href="matplotlib.patches.html#FancyArrowPatch">matplotlib.patches.FancyArrowPatch</a>:<br>
+<dl><dt><a name="Arrow3D-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Arrow3D-get_arrowstyle"><strong>get_arrowstyle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;arrowstyle&nbsp;object</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_connectionstyle"><strong>get_connectionstyle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;ConnectionStyle&nbsp;instance</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_dpi_cor"><strong>get_dpi_cor</strong></a>(self)</dt><dd><tt>dpi_cor&nbsp;is&nbsp;currently&nbsp;used&nbsp;for&nbsp;linewidth-related&nbsp;things&nbsp;and<br>
+shink&nbsp;factor.&nbsp;Mutation&nbsp;scale&nbsp;is&nbsp;not&nbsp;affected&nbsp;by&nbsp;this.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_mutation_aspect"><strong>get_mutation_aspect</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;aspect&nbsp;ratio&nbsp;of&nbsp;the&nbsp;bbox&nbsp;mutation.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_mutation_scale"><strong>get_mutation_scale</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;mutation&nbsp;scale.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_path"><strong>get_path</strong></a>(self)</dt><dd><tt>return&nbsp;the&nbsp;path&nbsp;of&nbsp;the&nbsp;arrow&nbsp;in&nbsp;the&nbsp;data&nbsp;coordinate.&nbsp;Use<br>
+<a href="#Arrow3D-get_path_in_displaycoord">get_path_in_displaycoord</a>()&nbsp;method&nbsp;to&nbsp;retrieve&nbsp;the&nbsp;arrow&nbsp;path<br>
+in&nbsp;the&nbsp;display&nbsp;coord.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_path_in_displaycoord"><strong>get_path_in_displaycoord</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;mutated&nbsp;path&nbsp;of&nbsp;the&nbsp;arrow&nbsp;in&nbsp;the&nbsp;display&nbsp;coord</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_arrowstyle"><strong>set_arrowstyle</strong></a>(self, arrowstyle<font color="#909090">=None</font>, **kw)</dt><dd><tt>Set&nbsp;the&nbsp;arrow&nbsp;style.<br>
+&nbsp;<br>
+*arrowstyle*&nbsp;can&nbsp;be&nbsp;a&nbsp;string&nbsp;with&nbsp;arrowstyle&nbsp;name&nbsp;with&nbsp;optional<br>
+&nbsp;comma-separated&nbsp;attributes.&nbsp;Alternatively,&nbsp;the&nbsp;attrs&nbsp;can<br>
+&nbsp;be&nbsp;provided&nbsp;as&nbsp;keywords.<br>
+&nbsp;<br>
+&nbsp;<a href="#Arrow3D-set_arrowstyle">set_arrowstyle</a>("Fancy,head_length=0.2")<br>
+&nbsp;<a href="#Arrow3D-set_arrowstyle">set_arrowstyle</a>("fancy",&nbsp;head_length=0.2)<br>
+&nbsp;<br>
+Old&nbsp;attrs&nbsp;simply&nbsp;are&nbsp;forgotten.<br>
+&nbsp;<br>
+Without&nbsp;argument&nbsp;(or&nbsp;with&nbsp;arrowstyle=None),&nbsp;return<br>
+available&nbsp;box&nbsp;styles&nbsp;as&nbsp;a&nbsp;list&nbsp;of&nbsp;strings.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_connectionstyle"><strong>set_connectionstyle</strong></a>(self, connectionstyle, **kw)</dt><dd><tt>Set&nbsp;the&nbsp;connection&nbsp;style.<br>
+&nbsp;<br>
+*connectionstyle*&nbsp;can&nbsp;be&nbsp;a&nbsp;string&nbsp;with&nbsp;connectionstyle&nbsp;name&nbsp;with<br>
+&nbsp;optional&nbsp;comma-separated&nbsp;attributes.&nbsp;Alternatively,&nbsp;the&nbsp;attrs&nbsp;can&nbsp;be<br>
+&nbsp;probided&nbsp;as&nbsp;keywords.<br>
+&nbsp;<br>
+&nbsp;<a href="#Arrow3D-set_connectionstyle">set_connectionstyle</a>("arc,angleA=0,armA=30,rad=10")<br>
+&nbsp;<a href="#Arrow3D-set_connectionstyle">set_connectionstyle</a>("arc",&nbsp;angleA=0,armA=30,rad=10)<br>
+&nbsp;<br>
+Old&nbsp;attrs&nbsp;simply&nbsp;are&nbsp;forgotten.<br>
+&nbsp;<br>
+Without&nbsp;argument&nbsp;(or&nbsp;with&nbsp;connectionstyle=None),&nbsp;return<br>
+available&nbsp;styles&nbsp;as&nbsp;a&nbsp;list&nbsp;of&nbsp;strings.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_dpi_cor"><strong>set_dpi_cor</strong></a>(self, dpi_cor)</dt><dd><tt>dpi_cor&nbsp;is&nbsp;currently&nbsp;used&nbsp;for&nbsp;linewidth-related&nbsp;things&nbsp;and<br>
+shink&nbsp;factor.&nbsp;Mutation&nbsp;scale&nbsp;is&nbsp;not&nbsp;affected&nbsp;by&nbsp;this.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_mutation_aspect"><strong>set_mutation_aspect</strong></a>(self, aspect)</dt><dd><tt>Set&nbsp;the&nbsp;aspect&nbsp;ratio&nbsp;of&nbsp;the&nbsp;bbox&nbsp;mutation.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_mutation_scale"><strong>set_mutation_scale</strong></a>(self, scale)</dt><dd><tt>Set&nbsp;the&nbsp;mutation&nbsp;scale.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_patchA"><strong>set_patchA</strong></a>(self, patchA)</dt><dd><tt>set&nbsp;the&nbsp;begin&nbsp;patch.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_patchB"><strong>set_patchB</strong></a>(self, patchB)</dt><dd><tt>set&nbsp;the&nbsp;begin&nbsp;patch</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_positions"><strong>set_positions</strong></a>(self, posA, posB)</dt><dd><tt>set&nbsp;the&nbsp;begin&nbsp;end&nbsp;end&nbsp;positions&nbsp;of&nbsp;the&nbsp;connecting<br>
+path.&nbsp;Use&nbsp;current&nbsp;vlaue&nbsp;if&nbsp;None.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="matplotlib.patches.html#Patch">matplotlib.patches.Patch</a>:<br>
+<dl><dt><a name="Arrow3D-contains"><strong>contains</strong></a>(self, mouseevent, radius<font color="#909090">=None</font>)</dt><dd><tt>Test&nbsp;whether&nbsp;the&nbsp;mouse&nbsp;event&nbsp;occurred&nbsp;in&nbsp;the&nbsp;patch.<br>
+&nbsp;<br>
+Returns&nbsp;T/F,&nbsp;{}</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-contains_point"><strong>contains_point</strong></a>(self, point, radius<font color="#909090">=None</font>)</dt><dd><tt>Returns&nbsp;*True*&nbsp;if&nbsp;the&nbsp;given&nbsp;point&nbsp;is&nbsp;inside&nbsp;the&nbsp;path<br>
+(transformed&nbsp;with&nbsp;its&nbsp;transform&nbsp;attribute).</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_aa"><strong>get_aa</strong></a> = get_antialiased(self)</dt><dd><tt>Returns&nbsp;True&nbsp;if&nbsp;the&nbsp;:class:`Patch`&nbsp;is&nbsp;to&nbsp;be&nbsp;drawn&nbsp;with&nbsp;antialiasing.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_antialiased"><strong>get_antialiased</strong></a>(self)</dt><dd><tt>Returns&nbsp;True&nbsp;if&nbsp;the&nbsp;:class:`Patch`&nbsp;is&nbsp;to&nbsp;be&nbsp;drawn&nbsp;with&nbsp;antialiasing.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_capstyle"><strong>get_capstyle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;current&nbsp;capstyle</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_data_transform"><strong>get_data_transform</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;:class:`~matplotlib.transforms.Transform`&nbsp;instance&nbsp;which<br>
+maps&nbsp;data&nbsp;coordinates&nbsp;to&nbsp;physical&nbsp;coordinates.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_ec"><strong>get_ec</strong></a> = get_edgecolor(self)</dt><dd><tt>Return&nbsp;the&nbsp;edge&nbsp;color&nbsp;of&nbsp;the&nbsp;:class:`Patch`.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_edgecolor"><strong>get_edgecolor</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;edge&nbsp;color&nbsp;of&nbsp;the&nbsp;:class:`Patch`.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_extents"><strong>get_extents</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;:class:`~matplotlib.transforms.Bbox`&nbsp;object&nbsp;defining<br>
+the&nbsp;axis-aligned&nbsp;extents&nbsp;of&nbsp;the&nbsp;:class:`Patch`.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_facecolor"><strong>get_facecolor</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;face&nbsp;color&nbsp;of&nbsp;the&nbsp;:class:`Patch`.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_fc"><strong>get_fc</strong></a> = get_facecolor(self)</dt><dd><tt>Return&nbsp;the&nbsp;face&nbsp;color&nbsp;of&nbsp;the&nbsp;:class:`Patch`.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_fill"><strong>get_fill</strong></a>(self)</dt><dd><tt>return&nbsp;whether&nbsp;fill&nbsp;is&nbsp;set</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_hatch"><strong>get_hatch</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;current&nbsp;hatching&nbsp;pattern</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_joinstyle"><strong>get_joinstyle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;current&nbsp;joinstyle</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_linestyle"><strong>get_linestyle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;linestyle.&nbsp;&nbsp;Will&nbsp;be&nbsp;one&nbsp;of&nbsp;['solid'&nbsp;|&nbsp;'dashed'&nbsp;|<br>
+'dashdot'&nbsp;|&nbsp;'dotted']</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_linewidth"><strong>get_linewidth</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;line&nbsp;width&nbsp;in&nbsp;points.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_ls"><strong>get_ls</strong></a> = get_linestyle(self)</dt><dd><tt>Return&nbsp;the&nbsp;linestyle.&nbsp;&nbsp;Will&nbsp;be&nbsp;one&nbsp;of&nbsp;['solid'&nbsp;|&nbsp;'dashed'&nbsp;|<br>
+'dashdot'&nbsp;|&nbsp;'dotted']</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_lw"><strong>get_lw</strong></a> = get_linewidth(self)</dt><dd><tt>Return&nbsp;the&nbsp;line&nbsp;width&nbsp;in&nbsp;points.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_patch_transform"><strong>get_patch_transform</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;:class:`~matplotlib.transforms.Transform`&nbsp;instance&nbsp;which<br>
+takes&nbsp;patch&nbsp;coordinates&nbsp;to&nbsp;data&nbsp;coordinates.<br>
+&nbsp;<br>
+For&nbsp;example,&nbsp;one&nbsp;may&nbsp;define&nbsp;a&nbsp;patch&nbsp;of&nbsp;a&nbsp;circle&nbsp;which&nbsp;represents&nbsp;a<br>
+radius&nbsp;of&nbsp;5&nbsp;by&nbsp;providing&nbsp;coordinates&nbsp;for&nbsp;a&nbsp;unit&nbsp;circle,&nbsp;and&nbsp;a<br>
+transform&nbsp;which&nbsp;scales&nbsp;the&nbsp;coordinates&nbsp;(the&nbsp;patch&nbsp;coordinate)&nbsp;by&nbsp;5.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_transform"><strong>get_transform</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;:class:`~matplotlib.transforms.Transform`&nbsp;applied<br>
+to&nbsp;the&nbsp;:class:`Patch`.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_verts"><strong>get_verts</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;vertices&nbsp;used&nbsp;in&nbsp;this&nbsp;patch<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;patch&nbsp;contains&nbsp;Bezier&nbsp;curves,&nbsp;the&nbsp;curves&nbsp;will&nbsp;be<br>
+interpolated&nbsp;by&nbsp;line&nbsp;segments.&nbsp;&nbsp;To&nbsp;access&nbsp;the&nbsp;curves&nbsp;as<br>
+curves,&nbsp;use&nbsp;:meth:`get_path`.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_window_extent"><strong>get_window_extent</strong></a>(self, renderer<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="Arrow3D-set_aa"><strong>set_aa</strong></a>(self, aa)</dt><dd><tt>alias&nbsp;for&nbsp;set_antialiased</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_alpha"><strong>set_alpha</strong></a>(self, alpha)</dt><dd><tt>Set&nbsp;the&nbsp;alpha&nbsp;tranparency&nbsp;of&nbsp;the&nbsp;patch.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;float&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_antialiased"><strong>set_antialiased</strong></a>(self, aa)</dt><dd><tt>Set&nbsp;whether&nbsp;to&nbsp;use&nbsp;antialiased&nbsp;rendering<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;[True&nbsp;|&nbsp;False]&nbsp;&nbsp;or&nbsp;None&nbsp;for&nbsp;default</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_capstyle"><strong>set_capstyle</strong></a>(self, s)</dt><dd><tt>Set&nbsp;the&nbsp;patch&nbsp;capstyle<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;['butt'&nbsp;|&nbsp;'round'&nbsp;|&nbsp;'projecting']</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_color"><strong>set_color</strong></a>(self, c)</dt><dd><tt>Set&nbsp;both&nbsp;the&nbsp;edgecolor&nbsp;and&nbsp;the&nbsp;facecolor.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;matplotlib&nbsp;color&nbsp;spec<br>
+&nbsp;<br>
+..&nbsp;seealso::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;:meth:`set_facecolor`,&nbsp;:meth:`set_edgecolor`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;setting&nbsp;the&nbsp;edge&nbsp;or&nbsp;face&nbsp;color&nbsp;individually.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_ec"><strong>set_ec</strong></a>(self, color)</dt><dd><tt>alias&nbsp;for&nbsp;set_edgecolor</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_edgecolor"><strong>set_edgecolor</strong></a>(self, color)</dt><dd><tt>Set&nbsp;the&nbsp;patch&nbsp;edge&nbsp;color<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;mpl&nbsp;color&nbsp;spec,&nbsp;or&nbsp;None&nbsp;for&nbsp;default,&nbsp;or&nbsp;'none'&nbsp;for&nbsp;no&nbsp;color</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_facecolor"><strong>set_facecolor</strong></a>(self, color)</dt><dd><tt>Set&nbsp;the&nbsp;patch&nbsp;face&nbsp;color<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;mpl&nbsp;color&nbsp;spec,&nbsp;or&nbsp;None&nbsp;for&nbsp;default,&nbsp;or&nbsp;'none'&nbsp;for&nbsp;no&nbsp;color</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_fc"><strong>set_fc</strong></a>(self, color)</dt><dd><tt>alias&nbsp;for&nbsp;set_facecolor</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_fill"><strong>set_fill</strong></a>(self, b)</dt><dd><tt>Set&nbsp;whether&nbsp;to&nbsp;fill&nbsp;the&nbsp;patch<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;[True&nbsp;|&nbsp;False]</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_hatch"><strong>set_hatch</strong></a>(self, hatch)</dt><dd><tt>Set&nbsp;the&nbsp;hatching&nbsp;pattern<br>
+&nbsp;<br>
+*hatch*&nbsp;can&nbsp;be&nbsp;one&nbsp;of::<br>
+&nbsp;<br>
+&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;-&nbsp;diagonal&nbsp;hatching<br>
+&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;-&nbsp;back&nbsp;diagonal<br>
+&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;-&nbsp;vertical<br>
+&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;-&nbsp;horizontal<br>
+&nbsp;&nbsp;+&nbsp;&nbsp;&nbsp;-&nbsp;crossed<br>
+&nbsp;&nbsp;x&nbsp;&nbsp;&nbsp;-&nbsp;crossed&nbsp;diagonal<br>
+&nbsp;&nbsp;o&nbsp;&nbsp;&nbsp;-&nbsp;small&nbsp;circle<br>
+&nbsp;&nbsp;O&nbsp;&nbsp;&nbsp;-&nbsp;large&nbsp;circle<br>
+&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;-&nbsp;dots<br>
+&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;-&nbsp;stars<br>
+&nbsp;<br>
+Letters&nbsp;can&nbsp;be&nbsp;combined,&nbsp;in&nbsp;which&nbsp;case&nbsp;all&nbsp;the&nbsp;specified<br>
+hatchings&nbsp;are&nbsp;done.&nbsp;&nbsp;If&nbsp;same&nbsp;letter&nbsp;repeats,&nbsp;it&nbsp;increases&nbsp;the<br>
+density&nbsp;of&nbsp;hatching&nbsp;of&nbsp;that&nbsp;pattern.<br>
+&nbsp;<br>
+Hatching&nbsp;is&nbsp;supported&nbsp;in&nbsp;the&nbsp;PostScript,&nbsp;PDF,&nbsp;SVG&nbsp;and&nbsp;Agg<br>
+backends&nbsp;only.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;['/'&nbsp;|&nbsp;'\\'&nbsp;|&nbsp;'|'&nbsp;|&nbsp;'-'&nbsp;|&nbsp;'+'&nbsp;|&nbsp;'x'&nbsp;|&nbsp;'o'&nbsp;|&nbsp;'O'&nbsp;|&nbsp;'.'&nbsp;|&nbsp;'*']</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_joinstyle"><strong>set_joinstyle</strong></a>(self, s)</dt><dd><tt>Set&nbsp;the&nbsp;patch&nbsp;joinstyle<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;['miter'&nbsp;|&nbsp;'round'&nbsp;|&nbsp;'bevel']</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_linestyle"><strong>set_linestyle</strong></a>(self, ls)</dt><dd><tt>Set&nbsp;the&nbsp;patch&nbsp;linestyle<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;['solid'&nbsp;|&nbsp;'dashed'&nbsp;|&nbsp;'dashdot'&nbsp;|&nbsp;'dotted']</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_linewidth"><strong>set_linewidth</strong></a>(self, w)</dt><dd><tt>Set&nbsp;the&nbsp;patch&nbsp;linewidth&nbsp;in&nbsp;points<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;float&nbsp;or&nbsp;None&nbsp;for&nbsp;default</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_ls"><strong>set_ls</strong></a>(self, ls)</dt><dd><tt>alias&nbsp;for&nbsp;set_linestyle</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_lw"><strong>set_lw</strong></a>(self, lw)</dt><dd><tt>alias&nbsp;for&nbsp;set_linewidth</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-update_from"><strong>update_from</strong></a>(self, other)</dt><dd><tt>Updates&nbsp;this&nbsp;:class:`Patch`&nbsp;from&nbsp;the&nbsp;properties&nbsp;of&nbsp;*other*.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="matplotlib.patches.html#Patch">matplotlib.patches.Patch</a>:<br>
+<dl><dt><strong>fill</strong></dt>
+<dd><tt>return&nbsp;whether&nbsp;fill&nbsp;is&nbsp;set</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="matplotlib.patches.html#Patch">matplotlib.patches.Patch</a>:<br>
+<dl><dt><strong>validCap</strong> = (u'butt', u'round', u'projecting')</dl>
+
+<dl><dt><strong>validJoin</strong> = (u'miter', u'round', u'bevel')</dl>
+
+<dl><dt><strong>zorder</strong> = 1</dl>
+
+<hr>
+Methods inherited from <a href="matplotlib.artist.html#Artist">matplotlib.artist.Artist</a>:<br>
+<dl><dt><a name="Arrow3D-__getstate__"><strong>__getstate__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Arrow3D-add_callback"><strong>add_callback</strong></a>(self, func)</dt><dd><tt>Adds&nbsp;a&nbsp;callback&nbsp;function&nbsp;that&nbsp;will&nbsp;be&nbsp;called&nbsp;whenever&nbsp;one&nbsp;of<br>
+the&nbsp;:class:`Artist`'s&nbsp;properties&nbsp;changes.<br>
+&nbsp;<br>
+Returns&nbsp;an&nbsp;*id*&nbsp;that&nbsp;is&nbsp;useful&nbsp;for&nbsp;removing&nbsp;the&nbsp;callback&nbsp;with<br>
+:meth:`remove_callback`&nbsp;later.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-convert_xunits"><strong>convert_xunits</strong></a>(self, x)</dt><dd><tt>For&nbsp;artists&nbsp;in&nbsp;an&nbsp;axes,&nbsp;if&nbsp;the&nbsp;xaxis&nbsp;has&nbsp;units&nbsp;support,<br>
+convert&nbsp;*x*&nbsp;using&nbsp;xaxis&nbsp;unit&nbsp;type</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-convert_yunits"><strong>convert_yunits</strong></a>(self, y)</dt><dd><tt>For&nbsp;artists&nbsp;in&nbsp;an&nbsp;axes,&nbsp;if&nbsp;the&nbsp;yaxis&nbsp;has&nbsp;units&nbsp;support,<br>
+convert&nbsp;*y*&nbsp;using&nbsp;yaxis&nbsp;unit&nbsp;type</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-findobj"><strong>findobj</strong></a>(self, match<font color="#909090">=None</font>, include_self<font color="#909090">=True</font>)</dt><dd><tt>Find&nbsp;artist&nbsp;objects.<br>
+&nbsp;<br>
+Recursively&nbsp;find&nbsp;all&nbsp;:class:`~matplotlib.artist.Artist`&nbsp;instances<br>
+contained&nbsp;in&nbsp;self.<br>
+&nbsp;<br>
+*match*&nbsp;can&nbsp;be<br>
+&nbsp;<br>
+&nbsp;&nbsp;-&nbsp;None:&nbsp;return&nbsp;all&nbsp;objects&nbsp;contained&nbsp;in&nbsp;artist.<br>
+&nbsp;<br>
+&nbsp;&nbsp;-&nbsp;function&nbsp;with&nbsp;signature&nbsp;``boolean&nbsp;=&nbsp;match(artist)``<br>
+&nbsp;&nbsp;&nbsp;&nbsp;used&nbsp;to&nbsp;filter&nbsp;matches<br>
+&nbsp;<br>
+&nbsp;&nbsp;-&nbsp;class&nbsp;instance:&nbsp;e.g.,&nbsp;Line2D.&nbsp;&nbsp;Only&nbsp;return&nbsp;artists&nbsp;of&nbsp;class&nbsp;type.<br>
+&nbsp;<br>
+If&nbsp;*include_self*&nbsp;is&nbsp;True&nbsp;(default),&nbsp;include&nbsp;self&nbsp;in&nbsp;the&nbsp;list&nbsp;to&nbsp;be<br>
+checked&nbsp;for&nbsp;a&nbsp;match.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_agg_filter"><strong>get_agg_filter</strong></a>(self)</dt><dd><tt>return&nbsp;filter&nbsp;function&nbsp;to&nbsp;be&nbsp;used&nbsp;for&nbsp;agg&nbsp;filter</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_alpha"><strong>get_alpha</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;alpha&nbsp;value&nbsp;used&nbsp;for&nbsp;blending&nbsp;-&nbsp;not&nbsp;supported&nbsp;on&nbsp;all<br>
+backends</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_animated"><strong>get_animated</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;artist's&nbsp;animated&nbsp;state</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_axes"><strong>get_axes</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;:class:`~matplotlib.axes.Axes`&nbsp;instance&nbsp;the&nbsp;artist<br>
+resides&nbsp;in,&nbsp;or&nbsp;*None*</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_children"><strong>get_children</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;child&nbsp;:class:`Artist`s&nbsp;this<br>
+:class:`Artist`&nbsp;contains.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_clip_box"><strong>get_clip_box</strong></a>(self)</dt><dd><tt>Return&nbsp;artist&nbsp;clipbox</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_clip_on"><strong>get_clip_on</strong></a>(self)</dt><dd><tt>Return&nbsp;whether&nbsp;artist&nbsp;uses&nbsp;clipping</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_clip_path"><strong>get_clip_path</strong></a>(self)</dt><dd><tt>Return&nbsp;artist&nbsp;clip&nbsp;path</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_contains"><strong>get_contains</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;_contains&nbsp;test&nbsp;used&nbsp;by&nbsp;the&nbsp;artist,&nbsp;or&nbsp;*None*&nbsp;for&nbsp;default.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_figure"><strong>get_figure</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;:class:`~matplotlib.figure.Figure`&nbsp;instance&nbsp;the<br>
+artist&nbsp;belongs&nbsp;to.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_gid"><strong>get_gid</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;group&nbsp;id</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_label"><strong>get_label</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;label&nbsp;used&nbsp;for&nbsp;this&nbsp;artist&nbsp;in&nbsp;the&nbsp;legend.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_path_effects"><strong>get_path_effects</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Arrow3D-get_picker"><strong>get_picker</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;picker&nbsp;object&nbsp;used&nbsp;by&nbsp;this&nbsp;artist</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_rasterized"><strong>get_rasterized</strong></a>(self)</dt><dd><tt>return&nbsp;True&nbsp;if&nbsp;the&nbsp;artist&nbsp;is&nbsp;to&nbsp;be&nbsp;rasterized</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_sketch_params"><strong>get_sketch_params</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;sketch&nbsp;parameters&nbsp;for&nbsp;the&nbsp;artist.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+sketch_params&nbsp;:&nbsp;tuple&nbsp;or&nbsp;`None`<br>
+&nbsp;<br>
+A&nbsp;3-tuple&nbsp;with&nbsp;the&nbsp;following&nbsp;elements:<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;`scale`:&nbsp;The&nbsp;amplitude&nbsp;of&nbsp;the&nbsp;wiggle&nbsp;perpendicular&nbsp;to&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;source&nbsp;line.<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;`length`:&nbsp;The&nbsp;length&nbsp;of&nbsp;the&nbsp;wiggle&nbsp;along&nbsp;the&nbsp;line.<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;`randomness`:&nbsp;The&nbsp;scale&nbsp;factor&nbsp;by&nbsp;which&nbsp;the&nbsp;length&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;shrunken&nbsp;or&nbsp;expanded.<br>
+&nbsp;<br>
+May&nbsp;return&nbsp;`None`&nbsp;if&nbsp;no&nbsp;sketch&nbsp;parameters&nbsp;were&nbsp;set.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_snap"><strong>get_snap</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;snap&nbsp;setting&nbsp;which&nbsp;may&nbsp;be:<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;True:&nbsp;snap&nbsp;vertices&nbsp;to&nbsp;the&nbsp;nearest&nbsp;pixel&nbsp;center<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;False:&nbsp;leave&nbsp;vertices&nbsp;as-is<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;None:&nbsp;(auto)&nbsp;If&nbsp;the&nbsp;path&nbsp;contains&nbsp;only&nbsp;rectilinear&nbsp;line<br>
+&nbsp;&nbsp;&nbsp;&nbsp;segments,&nbsp;round&nbsp;to&nbsp;the&nbsp;nearest&nbsp;pixel&nbsp;center<br>
+&nbsp;<br>
+Only&nbsp;supported&nbsp;by&nbsp;the&nbsp;Agg&nbsp;and&nbsp;MacOSX&nbsp;backends.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_transformed_clip_path_and_affine"><strong>get_transformed_clip_path_and_affine</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;clip&nbsp;path&nbsp;with&nbsp;the&nbsp;non-affine&nbsp;part&nbsp;of&nbsp;its<br>
+transformation&nbsp;applied,&nbsp;and&nbsp;the&nbsp;remaining&nbsp;affine&nbsp;part&nbsp;of&nbsp;its<br>
+transformation.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_url"><strong>get_url</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;url</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_visible"><strong>get_visible</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;artist's&nbsp;visiblity</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-get_zorder"><strong>get_zorder</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;:class:`Artist`'s&nbsp;zorder.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-have_units"><strong>have_units</strong></a>(self)</dt><dd><tt>Return&nbsp;*True*&nbsp;if&nbsp;units&nbsp;are&nbsp;set&nbsp;on&nbsp;the&nbsp;*x*&nbsp;or&nbsp;*y*&nbsp;axes</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-hitlist"><strong>hitlist</strong></a>(self, event)</dt><dd><tt>List&nbsp;the&nbsp;children&nbsp;of&nbsp;the&nbsp;artist&nbsp;which&nbsp;contain&nbsp;the&nbsp;mouse&nbsp;event&nbsp;*event*.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-is_figure_set"><strong>is_figure_set</strong></a>(self)</dt><dd><tt>Returns&nbsp;True&nbsp;if&nbsp;the&nbsp;artist&nbsp;is&nbsp;assigned&nbsp;to&nbsp;a<br>
+:class:`~matplotlib.figure.Figure`.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-is_transform_set"><strong>is_transform_set</strong></a>(self)</dt><dd><tt>Returns&nbsp;*True*&nbsp;if&nbsp;:class:`Artist`&nbsp;has&nbsp;a&nbsp;transform&nbsp;explicitly<br>
+set.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-pchanged"><strong>pchanged</strong></a>(self)</dt><dd><tt>Fire&nbsp;an&nbsp;event&nbsp;when&nbsp;property&nbsp;changed,&nbsp;calling&nbsp;all&nbsp;of&nbsp;the<br>
+registered&nbsp;callbacks.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-pick"><strong>pick</strong></a>(self, mouseevent)</dt><dd><tt>call&nbsp;signature::<br>
+&nbsp;<br>
+&nbsp;&nbsp;<a href="#Arrow3D-pick">pick</a>(mouseevent)<br>
+&nbsp;<br>
+each&nbsp;child&nbsp;artist&nbsp;will&nbsp;fire&nbsp;a&nbsp;pick&nbsp;event&nbsp;if&nbsp;*mouseevent*&nbsp;is&nbsp;over<br>
+the&nbsp;artist&nbsp;and&nbsp;the&nbsp;artist&nbsp;has&nbsp;picker&nbsp;set</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-pickable"><strong>pickable</strong></a>(self)</dt><dd><tt>Return&nbsp;*True*&nbsp;if&nbsp;:class:`Artist`&nbsp;is&nbsp;pickable.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-properties"><strong>properties</strong></a>(self)</dt><dd><tt>return&nbsp;a&nbsp;dictionary&nbsp;mapping&nbsp;property&nbsp;name&nbsp;-&gt;&nbsp;value&nbsp;for&nbsp;all&nbsp;Artist&nbsp;props</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-remove"><strong>remove</strong></a>(self)</dt><dd><tt>Remove&nbsp;the&nbsp;artist&nbsp;from&nbsp;the&nbsp;figure&nbsp;if&nbsp;possible.&nbsp;&nbsp;The&nbsp;effect<br>
+will&nbsp;not&nbsp;be&nbsp;visible&nbsp;until&nbsp;the&nbsp;figure&nbsp;is&nbsp;redrawn,&nbsp;e.g.,&nbsp;with<br>
+:meth:`matplotlib.axes.Axes.draw_idle`.&nbsp;&nbsp;Call<br>
+:meth:`matplotlib.axes.Axes.relim`&nbsp;to&nbsp;update&nbsp;the&nbsp;axes&nbsp;limits<br>
+if&nbsp;desired.<br>
+&nbsp;<br>
+Note:&nbsp;:meth:`~matplotlib.axes.Axes.relim`&nbsp;will&nbsp;not&nbsp;see<br>
+collections&nbsp;even&nbsp;if&nbsp;the&nbsp;collection&nbsp;was&nbsp;added&nbsp;to&nbsp;axes&nbsp;with<br>
+*autolim*&nbsp;=&nbsp;True.<br>
+&nbsp;<br>
+Note:&nbsp;there&nbsp;is&nbsp;no&nbsp;support&nbsp;for&nbsp;removing&nbsp;the&nbsp;artist's&nbsp;legend&nbsp;entry.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-remove_callback"><strong>remove_callback</strong></a>(self, oid)</dt><dd><tt>Remove&nbsp;a&nbsp;callback&nbsp;based&nbsp;on&nbsp;its&nbsp;*id*.<br>
+&nbsp;<br>
+..&nbsp;seealso::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;:meth:`add_callback`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;adding&nbsp;callbacks</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set"><strong>set</strong></a>(self, **kwargs)</dt><dd><tt>A&nbsp;tkstyle&nbsp;set&nbsp;command,&nbsp;pass&nbsp;*kwargs*&nbsp;to&nbsp;set&nbsp;properties</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_agg_filter"><strong>set_agg_filter</strong></a>(self, filter_func)</dt><dd><tt>set&nbsp;agg_filter&nbsp;fuction.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_animated"><strong>set_animated</strong></a>(self, b)</dt><dd><tt>Set&nbsp;the&nbsp;artist's&nbsp;animation&nbsp;state.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;[True&nbsp;|&nbsp;False]</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_axes"><strong>set_axes</strong></a>(self, axes)</dt><dd><tt>Set&nbsp;the&nbsp;:class:`~matplotlib.axes.Axes`&nbsp;instance&nbsp;in&nbsp;which&nbsp;the<br>
+artist&nbsp;resides,&nbsp;if&nbsp;any.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;an&nbsp;:class:`~matplotlib.axes.Axes`&nbsp;instance</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_clip_box"><strong>set_clip_box</strong></a>(self, clipbox)</dt><dd><tt>Set&nbsp;the&nbsp;artist's&nbsp;clip&nbsp;:class:`~matplotlib.transforms.Bbox`.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;a&nbsp;:class:`matplotlib.transforms.Bbox`&nbsp;instance</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_clip_on"><strong>set_clip_on</strong></a>(self, b)</dt><dd><tt>Set&nbsp;whether&nbsp;artist&nbsp;uses&nbsp;clipping.<br>
+&nbsp;<br>
+When&nbsp;False&nbsp;artists&nbsp;will&nbsp;be&nbsp;visible&nbsp;out&nbsp;side&nbsp;of&nbsp;the&nbsp;axes&nbsp;which<br>
+can&nbsp;lead&nbsp;to&nbsp;unexpected&nbsp;results.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;[True&nbsp;|&nbsp;False]</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_clip_path"><strong>set_clip_path</strong></a>(self, path, transform<font color="#909090">=None</font>)</dt><dd><tt>Set&nbsp;the&nbsp;artist's&nbsp;clip&nbsp;path,&nbsp;which&nbsp;may&nbsp;be:<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;a&nbsp;:class:`~matplotlib.patches.Patch`&nbsp;(or&nbsp;subclass)&nbsp;instance<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;a&nbsp;:class:`~matplotlib.path.Path`&nbsp;instance,&nbsp;in&nbsp;which&nbsp;case<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;an&nbsp;optional&nbsp;:class:`~matplotlib.transforms.Transform`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;instance&nbsp;may&nbsp;be&nbsp;provided,&nbsp;which&nbsp;will&nbsp;be&nbsp;applied&nbsp;to&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;path&nbsp;before&nbsp;using&nbsp;it&nbsp;for&nbsp;clipping.<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;*None*,&nbsp;to&nbsp;remove&nbsp;the&nbsp;clipping&nbsp;path<br>
+&nbsp;<br>
+For&nbsp;efficiency,&nbsp;if&nbsp;the&nbsp;path&nbsp;happens&nbsp;to&nbsp;be&nbsp;an&nbsp;axis-aligned<br>
+rectangle,&nbsp;this&nbsp;method&nbsp;will&nbsp;set&nbsp;the&nbsp;clipping&nbsp;box&nbsp;to&nbsp;the<br>
+corresponding&nbsp;rectangle&nbsp;and&nbsp;set&nbsp;the&nbsp;clipping&nbsp;path&nbsp;to&nbsp;*None*.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;[&nbsp;(:class:`~matplotlib.path.Path`,<br>
+:class:`~matplotlib.transforms.Transform`)&nbsp;|<br>
+:class:`~matplotlib.patches.Patch`&nbsp;|&nbsp;None&nbsp;]</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_contains"><strong>set_contains</strong></a>(self, picker)</dt><dd><tt>Replace&nbsp;the&nbsp;contains&nbsp;test&nbsp;used&nbsp;by&nbsp;this&nbsp;artist.&nbsp;The&nbsp;new&nbsp;picker<br>
+should&nbsp;be&nbsp;a&nbsp;callable&nbsp;function&nbsp;which&nbsp;determines&nbsp;whether&nbsp;the<br>
+artist&nbsp;is&nbsp;hit&nbsp;by&nbsp;the&nbsp;mouse&nbsp;event::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hit,&nbsp;props&nbsp;=&nbsp;picker(artist,&nbsp;mouseevent)<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;mouse&nbsp;event&nbsp;is&nbsp;over&nbsp;the&nbsp;artist,&nbsp;return&nbsp;*hit*&nbsp;=&nbsp;*True*<br>
+and&nbsp;*props*&nbsp;is&nbsp;a&nbsp;dictionary&nbsp;of&nbsp;properties&nbsp;you&nbsp;want&nbsp;returned<br>
+with&nbsp;the&nbsp;contains&nbsp;test.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;a&nbsp;callable&nbsp;function</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_figure"><strong>set_figure</strong></a>(self, fig)</dt><dd><tt>Set&nbsp;the&nbsp;:class:`~matplotlib.figure.Figure`&nbsp;instance&nbsp;the&nbsp;artist<br>
+belongs&nbsp;to.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;a&nbsp;:class:`matplotlib.figure.Figure`&nbsp;instance</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_gid"><strong>set_gid</strong></a>(self, gid)</dt><dd><tt>Sets&nbsp;the&nbsp;(group)&nbsp;id&nbsp;for&nbsp;the&nbsp;artist<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;an&nbsp;id&nbsp;string</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_label"><strong>set_label</strong></a>(self, s)</dt><dd><tt>Set&nbsp;the&nbsp;label&nbsp;to&nbsp;*s*&nbsp;for&nbsp;auto&nbsp;legend.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;string&nbsp;or&nbsp;anything&nbsp;printable&nbsp;with&nbsp;'%s'&nbsp;conversion.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_lod"><strong>set_lod</strong></a>(self, on)</dt><dd><tt>Set&nbsp;Level&nbsp;of&nbsp;Detail&nbsp;on&nbsp;or&nbsp;off.&nbsp;&nbsp;If&nbsp;on,&nbsp;the&nbsp;artists&nbsp;may&nbsp;examine<br>
+things&nbsp;like&nbsp;the&nbsp;pixel&nbsp;width&nbsp;of&nbsp;the&nbsp;axes&nbsp;and&nbsp;draw&nbsp;a&nbsp;subset&nbsp;of<br>
+their&nbsp;contents&nbsp;accordingly<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;[True&nbsp;|&nbsp;False]</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_path_effects"><strong>set_path_effects</strong></a>(self, path_effects)</dt><dd><tt>set&nbsp;path_effects,&nbsp;which&nbsp;should&nbsp;be&nbsp;a&nbsp;list&nbsp;of&nbsp;instances&nbsp;of<br>
+matplotlib.patheffect._Base&nbsp;class&nbsp;or&nbsp;its&nbsp;derivatives.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_picker"><strong>set_picker</strong></a>(self, picker)</dt><dd><tt>Set&nbsp;the&nbsp;epsilon&nbsp;for&nbsp;picking&nbsp;used&nbsp;by&nbsp;this&nbsp;artist<br>
+&nbsp;<br>
+*picker*&nbsp;can&nbsp;be&nbsp;one&nbsp;of&nbsp;the&nbsp;following:<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;*None*:&nbsp;picking&nbsp;is&nbsp;disabled&nbsp;for&nbsp;this&nbsp;artist&nbsp;(default)<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;A&nbsp;boolean:&nbsp;if&nbsp;*True*&nbsp;then&nbsp;picking&nbsp;will&nbsp;be&nbsp;enabled&nbsp;and&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;artist&nbsp;will&nbsp;fire&nbsp;a&nbsp;pick&nbsp;event&nbsp;if&nbsp;the&nbsp;mouse&nbsp;event&nbsp;is&nbsp;over<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;artist<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;A&nbsp;float:&nbsp;if&nbsp;picker&nbsp;is&nbsp;a&nbsp;number&nbsp;it&nbsp;is&nbsp;interpreted&nbsp;as&nbsp;an<br>
+&nbsp;&nbsp;&nbsp;&nbsp;epsilon&nbsp;tolerance&nbsp;in&nbsp;points&nbsp;and&nbsp;the&nbsp;artist&nbsp;will&nbsp;fire<br>
+&nbsp;&nbsp;&nbsp;&nbsp;off&nbsp;an&nbsp;event&nbsp;if&nbsp;it's&nbsp;data&nbsp;is&nbsp;within&nbsp;epsilon&nbsp;of&nbsp;the&nbsp;mouse<br>
+&nbsp;&nbsp;&nbsp;&nbsp;event.&nbsp;&nbsp;For&nbsp;some&nbsp;artists&nbsp;like&nbsp;lines&nbsp;and&nbsp;patch&nbsp;collections,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;artist&nbsp;may&nbsp;provide&nbsp;additional&nbsp;data&nbsp;to&nbsp;the&nbsp;pick&nbsp;event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;is&nbsp;generated,&nbsp;e.g.,&nbsp;the&nbsp;indices&nbsp;of&nbsp;the&nbsp;data&nbsp;within<br>
+&nbsp;&nbsp;&nbsp;&nbsp;epsilon&nbsp;of&nbsp;the&nbsp;pick&nbsp;event<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;A&nbsp;function:&nbsp;if&nbsp;picker&nbsp;is&nbsp;callable,&nbsp;it&nbsp;is&nbsp;a&nbsp;user&nbsp;supplied<br>
+&nbsp;&nbsp;&nbsp;&nbsp;function&nbsp;which&nbsp;determines&nbsp;whether&nbsp;the&nbsp;artist&nbsp;is&nbsp;hit&nbsp;by&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mouse&nbsp;event::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hit,&nbsp;props&nbsp;=&nbsp;picker(artist,&nbsp;mouseevent)<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;determine&nbsp;the&nbsp;hit&nbsp;test.&nbsp;&nbsp;if&nbsp;the&nbsp;mouse&nbsp;event&nbsp;is&nbsp;over&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;artist,&nbsp;return&nbsp;*hit=True*&nbsp;and&nbsp;props&nbsp;is&nbsp;a&nbsp;dictionary&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;properties&nbsp;you&nbsp;want&nbsp;added&nbsp;to&nbsp;the&nbsp;PickEvent&nbsp;attributes.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;[None|float|boolean|callable]</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_rasterized"><strong>set_rasterized</strong></a>(self, rasterized)</dt><dd><tt>Force&nbsp;rasterized&nbsp;(bitmap)&nbsp;drawing&nbsp;in&nbsp;vector&nbsp;backend&nbsp;output.<br>
+&nbsp;<br>
+Defaults&nbsp;to&nbsp;None,&nbsp;which&nbsp;implies&nbsp;the&nbsp;backend's&nbsp;default&nbsp;behavior<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;[True&nbsp;|&nbsp;False&nbsp;|&nbsp;None]</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_sketch_params"><strong>set_sketch_params</strong></a>(self, scale<font color="#909090">=None</font>, length<font color="#909090">=None</font>, randomness<font color="#909090">=None</font>)</dt><dd><tt>Sets&nbsp;the&nbsp;the&nbsp;sketch&nbsp;parameters.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+&nbsp;<br>
+scale&nbsp;:&nbsp;float,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;amplitude&nbsp;of&nbsp;the&nbsp;wiggle&nbsp;perpendicular&nbsp;to&nbsp;the&nbsp;source<br>
+&nbsp;&nbsp;&nbsp;&nbsp;line,&nbsp;in&nbsp;pixels.&nbsp;&nbsp;If&nbsp;scale&nbsp;is&nbsp;`None`,&nbsp;or&nbsp;not&nbsp;provided,&nbsp;no<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sketch&nbsp;filter&nbsp;will&nbsp;be&nbsp;provided.<br>
+&nbsp;<br>
+length&nbsp;:&nbsp;float,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;length&nbsp;of&nbsp;the&nbsp;wiggle&nbsp;along&nbsp;the&nbsp;line,&nbsp;in&nbsp;pixels<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(default&nbsp;128.0)<br>
+&nbsp;<br>
+randomness&nbsp;:&nbsp;float,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;scale&nbsp;factor&nbsp;by&nbsp;which&nbsp;the&nbsp;length&nbsp;is&nbsp;shrunken&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;expanded&nbsp;(default&nbsp;16.0)</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_snap"><strong>set_snap</strong></a>(self, snap)</dt><dd><tt>Sets&nbsp;the&nbsp;snap&nbsp;setting&nbsp;which&nbsp;may&nbsp;be:<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;True:&nbsp;snap&nbsp;vertices&nbsp;to&nbsp;the&nbsp;nearest&nbsp;pixel&nbsp;center<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;False:&nbsp;leave&nbsp;vertices&nbsp;as-is<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;None:&nbsp;(auto)&nbsp;If&nbsp;the&nbsp;path&nbsp;contains&nbsp;only&nbsp;rectilinear&nbsp;line<br>
+&nbsp;&nbsp;&nbsp;&nbsp;segments,&nbsp;round&nbsp;to&nbsp;the&nbsp;nearest&nbsp;pixel&nbsp;center<br>
+&nbsp;<br>
+Only&nbsp;supported&nbsp;by&nbsp;the&nbsp;Agg&nbsp;and&nbsp;MacOSX&nbsp;backends.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_transform"><strong>set_transform</strong></a>(self, t)</dt><dd><tt>Set&nbsp;the&nbsp;:class:`~matplotlib.transforms.Transform`&nbsp;instance<br>
+used&nbsp;by&nbsp;this&nbsp;artist.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;:class:`~matplotlib.transforms.Transform`&nbsp;instance</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_url"><strong>set_url</strong></a>(self, url)</dt><dd><tt>Sets&nbsp;the&nbsp;url&nbsp;for&nbsp;the&nbsp;artist<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;a&nbsp;url&nbsp;string</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_visible"><strong>set_visible</strong></a>(self, b)</dt><dd><tt>Set&nbsp;the&nbsp;artist's&nbsp;visiblity.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;[True&nbsp;|&nbsp;False]</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set_zorder"><strong>set_zorder</strong></a>(self, level)</dt><dd><tt>Set&nbsp;the&nbsp;zorder&nbsp;for&nbsp;the&nbsp;artist.&nbsp;&nbsp;Artists&nbsp;with&nbsp;lower&nbsp;zorder<br>
+values&nbsp;are&nbsp;drawn&nbsp;first.<br>
+&nbsp;<br>
+ACCEPTS:&nbsp;any&nbsp;number</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-update"><strong>update</strong></a>(self, props)</dt><dd><tt>Update&nbsp;the&nbsp;properties&nbsp;of&nbsp;this&nbsp;:class:`Artist`&nbsp;from&nbsp;the<br>
+dictionary&nbsp;*prop*.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="matplotlib.artist.html#Artist">matplotlib.artist.Artist</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="matplotlib.artist.html#Artist">matplotlib.artist.Artist</a>:<br>
+<dl><dt><strong>aname</strong> = u'Artist'</dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-UV_arrows"><strong>UV_arrows</strong></a>(UV)</dt><dd><tt>Plot&nbsp;arrows&nbsp;with&nbsp;a*,b*&nbsp;on&nbsp;current&nbsp;figure</tt></dd></dl>
+ <dl><dt><a name="-axis_lattice_points"><strong>axis_lattice_points</strong></a>(vec_a<font color="#909090">=[1, 0, 0]</font>, vec_b<font color="#909090">=[0, 1, 0]</font>, axis<font color="#909090">=[-4, 4, -4, 4]</font>)</dt><dd><tt>Generate&nbsp;a&nbsp;2D&nbsp;lattice&nbsp;of&nbsp;points&nbsp;generated&nbsp;by&nbsp;2&nbsp;vectors&nbsp;within&nbsp;a&nbsp;2D&nbsp;axis</tt></dd></dl>
+ <dl><dt><a name="-labels"><strong>labels</strong></a>(ttl<font color="#909090">=None</font>, xvar<font color="#909090">=None</font>, yvar<font color="#909090">=None</font>, zvar<font color="#909090">=None</font>, size<font color="#909090">='Normal'</font>)</dt><dd><tt>Add&nbsp;good&nbsp;labels&nbsp;to&nbsp;current&nbsp;plot&nbsp;<br>
+&nbsp;<a href="#-labels">labels</a>(title,xlabel,ylabel,zlabel,size)<br>
+&nbsp;<br>
+&nbsp;size&nbsp;=&nbsp;'normal',&nbsp;'big'</tt></dd></dl>
+ <dl><dt><a name="-newplot"><strong>newplot</strong></a>(*args, **kwargs)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;a&nbsp;simple&nbsp;plot</tt></dd></dl>
+ <dl><dt><a name="-newplot3"><strong>newplot3</strong></a>(*args, **kwargs)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;a&nbsp;simple&nbsp;3D&nbsp;plot<br>
+Automatically&nbsp;tiles&nbsp;1&nbsp;dimensional&nbsp;x&nbsp;and&nbsp;y&nbsp;arrays&nbsp;to&nbsp;match&nbsp;2D&nbsp;z&nbsp;array,<br>
+assuming&nbsp;z.shape&nbsp;=&nbsp;(len(x),len(y))<br>
+&nbsp;<br>
+E.G.<br>
+&nbsp;&nbsp;<a href="#-newplot3">newplot3</a>([1,2,3,4],[9,8,7],[[2,4,6],[8,10,12],[14,16,18],[20,22,24]],'-o')</tt></dd></dl>
+ <dl><dt><a name="-plot_arrow"><strong>plot_arrow</strong></a>(x, y, z<font color="#909090">=None</font>, col<font color="#909090">='r'</font>, width<font color="#909090">=2</font>, arrow_size<font color="#909090">=40</font>)</dt><dd><tt>Plot&nbsp;arrow&nbsp;in&nbsp;2D&nbsp;or&nbsp;3D&nbsp;on&nbsp;current&nbsp;axes<br>
+Usage&nbsp;2D:<br>
+&nbsp;&nbsp;<a href="#-plot_arrow">plot_arrow</a>([xi,xf],[yi,yf])<br>
+Usage&nbsp;3D:<br>
+&nbsp;&nbsp;<a href="#-plot_arrow">plot_arrow</a>([xi,xf],[yi,yf],[zi,zf])<br>
+&nbsp;<br>
+Options:<br>
+&nbsp;&nbsp;width&nbsp;=&nbsp;line&nbsp;width&nbsp;(Def.&nbsp;=&nbsp;2)<br>
+&nbsp;&nbsp;arrow_size&nbsp;=&nbsp;size&nbsp;of&nbsp;arrow&nbsp;head&nbsp;(Def.&nbsp;=&nbsp;40)<br>
+&nbsp;&nbsp;col&nbsp;=&nbsp;arrow&nbsp;color&nbsp;(Deg.&nbsp;=&nbsp;red)</tt></dd></dl>
+ <dl><dt><a name="-plot_cell"><strong>plot_cell</strong></a>(cell_centre<font color="#909090">=[0, 0, 0]</font>, CELL<font color="#909090">=array([[ 1.,  0.,  0.],
+       [ 0.,  1.,  0.],
+       [ 0.,  0.,  1.]])</font>)</dt><dd><tt>Plot&nbsp;a&nbsp;box&nbsp;defined&nbsp;by&nbsp;a&nbsp;unit&nbsp;cell&nbsp;on&nbsp;the&nbsp;current&nbsp;plot</tt></dd></dl>
+ <dl><dt><a name="-plot_lattice_lines"><strong>plot_lattice_lines</strong></a>(Q, vec_a<font color="#909090">=[1, 0, 0]</font>, vec_b<font color="#909090">=[0, 1, 0]</font>, linewidth<font color="#909090">=0.5</font>, shade<font color="#909090">=1.0</font>, color<font color="#909090">='k'</font>)</dt><dd><tt>Add&nbsp;lines&nbsp;defining&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;to&nbsp;the&nbsp;current&nbsp;plot</tt></dd></dl>
+ <dl><dt><a name="-plot_lattice_points2D"><strong>plot_lattice_points2D</strong></a>(Q, markersize<font color="#909090">=12</font>, color<font color="#909090">='b'</font>, marker<font color="#909090">='o'</font>)</dt><dd><tt>Add&nbsp;lines&nbsp;defining&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;to&nbsp;the&nbsp;current&nbsp;plot</tt></dd></dl>
+ <dl><dt><a name="-plot_vector_arrows"><strong>plot_vector_arrows</strong></a>(vec_a, vec_b, vec_a_lab<font color="#909090">=None</font>, vec_b_lab<font color="#909090">=None</font>, arrow_size<font color="#909090">=40</font>, color<font color="#909090">='b'</font>, fontsize<font color="#909090">=18</font>)</dt><dd><tt>Plot&nbsp;vector&nbsp;arrows&nbsp;for&nbsp;Cell&nbsp;on&nbsp;current&nbsp;axis</tt></dd></dl>
+ <dl><dt><a name="-plot_vector_lines"><strong>plot_vector_lines</strong></a>(vec_a<font color="#909090">=[1, 0, 0]</font>, vec_b<font color="#909090">=[0, 1, 0]</font>, linewidth<font color="#909090">=0.5</font>, shade<font color="#909090">=1.0</font>, color<font color="#909090">='k'</font>)</dt><dd><tt>Add&nbsp;lines&nbsp;defining&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;to&nbsp;the&nbsp;current&nbsp;plot</tt></dd></dl>
+ <dl><dt><a name="-saveplot"><strong>saveplot</strong></a>(name, dpi<font color="#909090">=None</font>)</dt><dd><tt>Saves&nbsp;current&nbsp;figure&nbsp;as&nbsp;a&nbsp;png&nbsp;in&nbsp;the&nbsp;savedir&nbsp;directory<br>
+E.G.<br>
+---select&nbsp;figure&nbsp;to&nbsp;save&nbsp;by&nbsp;clicking&nbsp;on&nbsp;it---<br>
+<a href="#-saveplot">saveplot</a>('test')</tt></dd></dl>
+ <dl><dt><a name="-sliderplot"><strong>sliderplot</strong></a>(YY, X<font color="#909090">=None</font>, slidervals<font color="#909090">=None</font>, *args, **kwargs)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;a&nbsp;simple&nbsp;2D&nbsp;plot&nbsp;with&nbsp;a&nbsp;slider&nbsp;to&nbsp;go&nbsp;through&nbsp;a&nbsp;third&nbsp;dimension<br>
+YY&nbsp;=&nbsp;[nxm]:&nbsp;y&nbsp;axis&nbsp;data&nbsp;(initially&nbsp;plots&nbsp;Y[0,:])<br>
+&nbsp;X&nbsp;=&nbsp;[n]&nbsp;or&nbsp;[nxm]:&nbsp;&nbsp;x&nbsp;axis&nbsp;data&nbsp;(can&nbsp;be&nbsp;1D&nbsp;or&nbsp;2D,&nbsp;either&nbsp;same&nbsp;length&nbsp;or&nbsp;shape&nbsp;as&nbsp;Y)<br>
+&nbsp;slidervals&nbsp;=&nbsp;None&nbsp;or&nbsp;[m]:&nbsp;Values&nbsp;to&nbsp;give&nbsp;in&nbsp;the&nbsp;slider<br>
+&nbsp;<br>
+E.G.<br>
+&nbsp;&nbsp;<a href="#-sliderplot">sliderplot</a>([1,2,3],[[2,4,6],[8,10,12],[14,16,18],[20,22,24]],slidervals=[3,6,9,12])</tt></dd></dl>
+ <dl><dt><a name="-sliderplot2D"><strong>sliderplot2D</strong></a>(ZZZ, XX<font color="#909090">=None</font>, YY<font color="#909090">=None</font>, slidervals<font color="#909090">=None</font>, *args, **kwargs)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;an&nbsp;image&nbsp;plot&nbsp;with&nbsp;a&nbsp;slider&nbsp;to&nbsp;go&nbsp;through&nbsp;a&nbsp;third&nbsp;dimension<br>
+ZZZ&nbsp;=&nbsp;[nxmxo]:&nbsp;z&nbsp;axis&nbsp;data<br>
+&nbsp;XX&nbsp;=&nbsp;[nxm]&nbsp;or&nbsp;[n]:&nbsp;&nbsp;x&nbsp;axis&nbsp;data<br>
+&nbsp;YY&nbsp;=&nbsp;[nxm]&nbsp;or&nbsp;[m]:&nbsp;y&nbsp;axis&nbsp;data&nbsp;<br>
+&nbsp;slidervals&nbsp;=&nbsp;None&nbsp;or&nbsp;[o]:&nbsp;Values&nbsp;to&nbsp;give&nbsp;in&nbsp;the&nbsp;slider<br>
+&nbsp;<br>
+if&nbsp;XX&nbsp;and/or&nbsp;YY&nbsp;have&nbsp;a&nbsp;single&nbsp;dimension,&nbsp;the&nbsp;2D&nbsp;values&nbsp;are&nbsp;generated&nbsp;via&nbsp;meshgrid&nbsp;<br>
+&nbsp;<br>
+E.G.<br>
+&nbsp;&nbsp;<a href="#-sliderplot">sliderplot</a>([1,2,3],[[2,4,6],[8,10,12],[14,16,18],[20,22,24]],slidervals=[3,6,9,12])</tt></dd></dl>
+ <dl><dt><a name="-vecplot"><strong>vecplot</strong></a>(UV, mode<font color="#909090">='hk0'</font>, linewidth<font color="#909090">=1</font>, alpha<font color="#909090">=0.2</font>, color<font color="#909090">='k'</font>)</dt><dd><tt>Plot&nbsp;grid&nbsp;of&nbsp;a,b&nbsp;vectors</tt></dd></dl>
+</td></tr></table>
+</body></html>
