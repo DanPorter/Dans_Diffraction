@@ -1479,7 +1479,7 @@ class Multi_Crystal(Multi_Plotting):
         
         fmt = '(%3.0f,%3.0f,%3.0f) %8.2f %8.2f %9.2f %s' 
         
-        print('Energy = %6.3f keV' % energy_kev()
+        print('Energy = %6.3f keV' % energy_kev())
         print('%s Reflection: (%3.0f,%3.0f,%3.0f)' % (self.crystal_list[0].name,HKL[0],HKL[1],HKL[2]))
         print ('( h, k, l) TwoTheta Angle    Intensity Crystal')
         for n in range(0,len(TTH_list)):
