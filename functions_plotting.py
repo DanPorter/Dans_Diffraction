@@ -73,7 +73,7 @@ def labels(ttl=None,xvar=None,yvar=None,zvar=None,size='Normal'):
 
 def saveplot(name,dpi=None):
     """
-    Saves current figure as a png in the savedir directory
+    Saves current figure as a png in the home directory
     E.G.
     ---select figure to save by clicking on it---
     saveplot('test')
@@ -83,7 +83,8 @@ def saveplot(name,dpi=None):
         name = str(aa)
     
     gcf = plt.gcf()
-    savefile = os.path.join(os.path.abspath(os.path.dirname(__file__)), '{}.png'.format(fg.saveable(name)))
+    def_directory = os.path.expanduser('~')
+    savefile = os.path.join(def_directory, '{}.png'.format(saveable(name)))
     gcf.savefig(savefile,dpi=dpi)
     print( 'Saved Figure {} as {}'.format(gcf.number,savefile) )
 

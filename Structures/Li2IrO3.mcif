@@ -1,0 +1,162 @@
+# Created by the Bilbao Crystallographic Server
+# http://www.cryst.ehu.es
+# Date: 06/12/2016 01:19:16
+# Database entry: 1.1.41 Li2IrO3
+# Cif-like file for the case 1.1.41
+
+
+data_5yOhtAoR
+_audit_creation_date            2016-06-12
+_audit_creation_method          "Bilbao Crystallographic Server"
+
+_chemical_name_systematic
+;
+;
+_chemical_name_common                    ?
+_chemical_formula_moiety                 ?
+_chemical_formula_structural             ?
+_chemical_formula_analytical             ?
+_chemical_formula_iupac                  ?
+_chemical_formula_sum                    'Li2 Ir O3'
+_chemical_formula_weight                 ?
+_chemical_melting_point                  ?
+_chemical_compound_source                ?
+_chemical_absolute_configuration         .
+
+
+_citation_journal_abbrev        "Phys. Rev. B"
+_citation_journal_volume        93
+_citation_page_first            ?
+_citation_page_last             ?
+_citation_article_id            195158
+_citation_year                  2016
+_citation_DOI                   10.1103/PhysRevB.93.195158
+
+loop_
+_citation_author_name
+"Williams, S.C"
+
+_atomic_positions_source_database_code_ICSD   246025
+_atomic_positions_source_other               .
+
+_transition_temperature     15
+_experiment_temperature     5
+
+loop_
+_irrep_id
+_irrep_dimension
+_irrep_small_dimension
+_irrep_direction_type
+_irrep_action
+_irrep_modes_number
+_irrep_presence
+mB1 2 1 . primary 3 .
+
+_exptl_crystal_magnetic_properties_details
+;
+alpha-polymorph
+REXS,NPD
+positional structure from room temperature icsd file. mixed Li/Ir occupacies of Ir and Li sites in this structure have been disregarded
+counterrotation of mixed helical/cycloid spin chains symmetry-dictated by the MSSG of the phase.
+;
+
+_active_magnetic_irreps_details
+;
+1k magnetic structure
+k-maximal magnetic symmetry (2 possible)
+the active irrep fully determines the MSSG
+;
+
+_parent_space_group.name_H-M              'C 2/m'
+_parent_space_group.IT_number             12
+_parent_space_group.transform_to_standard_Pp_abc    ''
+
+_cell_modulation_dimension               1
+
+loop_
+_cell_wave_vector_seq_id
+_cell_wave_vector_x
+_cell_wave_vector_y
+_cell_wave_vector_z
+1 0.319(5) 0.000000 0.000000
+
+
+_space_group.magn_ssg_transform_from_parent_Pp_abc   'a,b,c;0,0,0'
+
+_space_group.magn_ssg_name_BNS     "C2/m1'(\a0\g)00s"
+_space_group.magn_point_group "2/m1'"
+_space_group.magn_point_group_number "5.2.13"
+_cell_length_a                 5.1633(2)
+_cell_length_b                 8.9294(3)
+_cell_length_c                 5.1219(2)
+_cell_angle_alpha              90
+_cell_angle_beta               109.759(3)
+_cell_angle_gamma              90
+
+loop_
+_space_group_symop.magn_ssg_id
+_space_group_symop.magn_ssg_operation_algebraic
+1 x1,x2,x3,x4,+1
+2 -x1,x2,-x3,-x4,+1
+3 -x1,-x2,-x3,-x4,+1
+4 x1,-x2,x3,x4,+1
+
+loop_
+_space_group_symop.magn_ssg_centering_id
+_space_group_symop.magn_ssg_centering_algebraic
+1 x1,x2,x3,x4,+1
+2 x1+1/2,x2+1/2,x3,x4,+1
+3 x1,x2,x3,x4+1/2,-1
+4 x1+1/2,x2+1/2,x3,x4+1/2,-1
+
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ir1 Ir 0 0.3332(2) 0 1
+Li2 Li 0 0 0 1
+Li3 Li 0 0.809(6) 0.5 1
+Li4 Li 0 0.5 0.5 1
+O1 O 0.252(4) 0.3160(10) 0.759(2) 1
+O2 O 0.256(5) 0 0.788(3) 1
+
+loop_
+_magnetic_atom_site_moment_symmetry_constraints_label
+_atom_site_magnetic_moment_symmetry_constraints_mxmymz
+Ir1 0,0,0
+
+loop_
+_atom_site_moment_label
+_atom_site_moment_crystalaxis_x
+_atom_site_moment_crystalaxis_y
+_atom_site_moment_crystalaxis_z
+Ir1 0 0 0
+
+loop_
+_atom_site_Fourier_wave_vector_seq_id
+_atom_site_Fourier_wave_vector_q1_coeff
+1 1
+
+loop_
+_atom_site_moment_Fourier_atom_site_label
+_atom_site_moment_Fourier_axis
+_atom_site_moment_Fourier_wave_vector_seq_id
+_atom_site_moment_Fourier_param_cos
+_atom_site_moment_Fourier_param_sin
+Ir1 x 1 0 -0.05
+Ir1 y 1 0.40(5) 0
+Ir1 z 1 0 -0.30
+
+loop_
+_atom_site_moment_Fourier_atom_site_sym_constraints_label
+_atom_site_moment_Fourier_sym_constraints_axis
+_atom_site_moment_Fourier_wave_vector_sym_constraints_seq_id
+_atom_site_moment_Fourier_sym_constraints_param_cos
+_atom_site_moment_Fourier_sym_constraints_param_sin
+Ir1 x 1 0 Mxsin1
+Ir1 y 1 Mycos1 0
+Ir1 z 1 0 Mzsin1
+

@@ -346,38 +346,61 @@ def stfm(val,err):
           '110 (5)' = stfm(110.25,5)
           '0.0015300 (5)' = stfm(0.00153,0.0000005)
           '1.56(2)E+6' = stfm(1.5632e6,1.53e4)
+    
+    Notes:
+     - Errors less than 0.01% of values will be given as 0
+     - The maximum length of string is 13 characters
+     - Errors greater then 10x the value will cause the value to be rounded to zero
     """
-    if np.log10(np.abs(err)) >= 0.:
+    
+    # Determine the number of significant figures from the error
+    if err == 0. or val/float(err) >= 1E5:
+        # Zero error - give value to 4 sig. fig.
+        out = '{:1.5G}'.format(val)
+        if 'E' in out:
+            out = '{}(0)E{}'.format(*out.split('E'))
+        else:
+            out = out + ' (0)'
+        return out
+    elif np.log10(np.abs(err)) > 0.:
+        # Error > 0
         sigfig = np.ceil(np.log10(np.abs(err)))-1
         dec = 0.
-    elif err == 0.:
-        return '{} (0)'.format(val)
     elif np.isnan(err):
+        # nan error
         return '{} (-)'.format(val)
     else:
+        # error < 0
         sigfig = np.floor(np.log10(np.abs(err))+0.025)
         dec = -sigfig
     
+    # Round value and error to the number of significant figures
     rval = round(val/(10.**sigfig))*(10.**sigfig)
     rerr = round(err/(10.**sigfig))*(10.**sigfig)
-    if np.log10(rval) > 0:
-        ln = np.ceil(np.log10(rval))
-    else:
-        ln = sigfig
+    # size of value and error
+    pw = np.floor(np.log10(np.abs(rval)))
+    pwr = np.floor(np.log10(np.abs(rerr)))
+    
+    max_pw = max(pw,pwr)
+    ln = max_pw - sigfig # power difference
     
     if np.log10(np.abs(err)) < 0:
         rerr = err/(10.**sigfig)
-        ln = ln + dec + 1
+    
+    # Small numbers - exponential notation
+    if max_pw < -3.:
+        rval = rval/(10.**max_pw)
+        fmt = '{'+'0:1.{:1.0f}f'.format(ln)+'}({1:1.0f})E{2:1.0f}'
+        return fmt.format(rval,rerr,max_pw)
     
     # Large numbers - exponential notation
-    if np.log10(np.abs(rval)) > 4.:
-        pw = np.floor(np.log10(np.abs(rval)))
-        rval = rval/(10.**pw)
+    if max_pw >= 4.:
+        rval = rval/(10.**max_pw)
         rerr = rerr/(10.**sigfig)
-        fmt = '{0:1.2f}({1:1.0f})E{2:+1.0f}'
-        return fmt.format(rval,rerr,pw)
+        fmt = '{'+'0:1.{:1.0f}f'.format(ln)+'}({1:1.0f})E+{2:1.0f}'
+        return fmt.format(rval,rerr,max_pw)
     
-    fmt = '{'+'0:{0:1.0f}.{1:1.0f}f'.format(ln,dec+0)+'} ({1:1.0f})'
+    fmt = '{'+'0:0.{:1.0f}f'.format(dec+0)+'} ({1:1.0f})'
     return fmt.format(rval,rerr)
 
 def readstfm(string):

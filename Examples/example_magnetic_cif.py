@@ -1,5 +1,5 @@
 """
-CrystalProgs Examples
+Dans_Diffraction Examples
 Calculate list of reflections
 """
 
@@ -13,9 +13,9 @@ from Dans_Diffraction import Crystal
 cf=os.path.dirname(__file__)
 
 
-f1 = cf+'/Ca3CoMnO6.mcif' # from Bilbao magnetic server R-3c
-f2 = cf+'/Li2IrO3.mcif' # from Bilbao magnetic server C2/m
-f3 = cf+'/Sr3LiRuO6_C2\'c\'.mcif' # from isodistort R-3c
+f1 = cf+'/../Structures/Ca3CoMnO6.mcif' # from Bilbao magnetic server R-3c
+f2 = cf+'/../Structures/Li2IrO3.mcif' # from Bilbao magnetic server C2/m
+f3 = cf+'/../Structures/Sr3LiRuO6_C2\'c\'.mcif' # from isodistort R-3c
 
 xtl1 = Crystal(f1)
 xtl2 = Crystal(f2)

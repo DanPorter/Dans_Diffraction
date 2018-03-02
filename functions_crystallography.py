@@ -11,26 +11,20 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 2.0
-Last updated: 06/01/18
+Version 2.1
+Last updated: 02/03/18
 
 Version History:
 09/07/15 0.1    Version History started.
 30/10/17 1.0    Many updates
 06/01/18 2.0    Renamed functions_crystallography.py
+02/03/18 2.1    Removed call to tkinter
 
 @author: DGPorter
 """
 
-#from __future__ import division # changes divide to float version
-#import __future__
 import sys, os, re
 import numpy as np
-#import matplotlib.pyplot as plt
-#from mpl_toolkits.mplot3d import Axes3D
-#from mpl_toolkits.mplot3d import proj3d
-from tkFileDialog import askopenfilename # GUI open file (in readcif)
-from Tkinter import Tk # for GUI open file
 
 from Dans_Diffraction import functions_general as fg
 
@@ -50,13 +44,6 @@ def readcif(filename=None):
       crys[key] = value
     keys are give by crys.keys()
     """
-    
-    # GUI filename
-    if filename is None:
-        root = Tk().withdraw() # from Tkinter
-        filename = askopenfilename(initialdir=os.path.expanduser('~'),\
-        filetypes=[('cif file','.cif'),('magnetic cif','.mcif'),('All files','.*')]) # from tkFileDialog
-        print(filename)
     
     # Get file name
     (dirName,filetitle)=os.path.split(filename)

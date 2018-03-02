@@ -1,5 +1,5 @@
 """
-CrystalProgs Examples
+Dans_Diffraction Examples
 Calculate list of reflections in a pressure cell with 
 limited opening window.
 """
@@ -10,14 +10,14 @@ import matplotlib.pyplot as plt # Plotting
 
 from Dans_Diffraction import functions_general as fg
 from Dans_Diffraction import functions_crystallography as fc
-from Dans_Diffraction.classes_crystal import Crystal
+from Dans_Diffraction import Crystal
+from Dans_Diffraction import structure_list
 
 cf=os.path.dirname(__file__)
 
 
-#f = cf+'/Sr3Ir2O7.cif'
-f = cf+'/Diamond.cif'
-
+dia = structure_list.Diamond.build()
+f = structure_list.Sr3Ir2O7.filename
 xtl = Crystal(f)
 
 en = 12

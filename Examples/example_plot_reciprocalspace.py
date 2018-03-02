@@ -1,5 +1,5 @@
 """
-CrystalProgs Examples
+Dans_Diffraction Examples
 Generate a plane in reciprocal space
 """
 
@@ -11,8 +11,8 @@ from Dans_Diffraction.classes_crystal import Crystal
 cf=os.path.dirname(__file__)
 
 
-f = cf+'/Diamond.cif'
-f = cf+'/Na0.8CoO2_P63mmc.cif'
+f = cf+'/../Structures/Diamond.cif'
+f = cf+'/../Structures/Na0.8CoO2_P63mmc.cif'
 
 xtl = Crystal(f)
 

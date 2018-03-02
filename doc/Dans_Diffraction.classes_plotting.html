@@ -157,7 +157,11 @@ E.G.&nbsp;hk&nbsp;plot&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
 <dl><dt><a name="Plotting-simulate_0kl"><strong>simulate_0kl</strong></a>(self, H<font color="#909090">=0</font>, **kwargs)</dt><dd><tt>Plots&nbsp;the&nbsp;(H)kl&nbsp;layer&nbsp;of&nbsp;reciprocal&nbsp;space<br>
 &nbsp;for&nbsp;inputs,&nbsp;see&nbsp;help(xtl.simulate_intensity_cut)</tt></dd></dl>
 
-<dl><dt><a name="Plotting-simulate_azimuth"><strong>simulate_azimuth</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, polarisation<font color="#909090">='sp'</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;scan&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering</tt></dd></dl>
+<dl><dt><a name="Plotting-simulate_azimuth"><strong>simulate_azimuth</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, polarisation<font color="#909090">='sp'</font>, F0<font color="#909090">=1</font>, F1<font color="#909090">=1</font>, F2<font color="#909090">=1</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;scan&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
 
 <dl><dt><a name="Plotting-simulate_ewald_coverage"><strong>simulate_ewald_coverage</strong></a>(self, energy_kev<font color="#909090">=8.0</font>, sample_normal<font color="#909090">=[0, 0, 1]</font>, sample_para<font color="#909090">=[1, 0, 0]</font>, phi<font color="#909090">=0</font>, chi<font color="#909090">=0</font>, **kwargs)</dt><dd><tt>NOT&nbsp;FINISHED<br>
 Plot&nbsp;ewald&nbsp;space&nbsp;coverage&nbsp;within&nbsp;a&nbsp;particular&nbsp;scattering&nbsp;plane<br>
@@ -280,7 +284,11 @@ E.G.&nbsp;hk&nbsp;plot&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
 <dl><dt><a name="Plotting_Superstructure-simulate_0kl"><strong>simulate_0kl</strong></a>(self, H<font color="#909090">=0</font>, **kwargs)</dt><dd><tt>Plots&nbsp;the&nbsp;(H)kl&nbsp;layer&nbsp;of&nbsp;reciprocal&nbsp;space<br>
 &nbsp;for&nbsp;inputs,&nbsp;see&nbsp;help(xtl.simulate_intensity_cut)</tt></dd></dl>
 
-<dl><dt><a name="Plotting_Superstructure-simulate_azimuth"><strong>simulate_azimuth</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, polarisation<font color="#909090">='sp'</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;scan&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering</tt></dd></dl>
+<dl><dt><a name="Plotting_Superstructure-simulate_azimuth"><strong>simulate_azimuth</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, polarisation<font color="#909090">='sp'</font>, F0<font color="#909090">=1</font>, F1<font color="#909090">=1</font>, F2<font color="#909090">=1</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;scan&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
 
 <dl><dt><a name="Plotting_Superstructure-simulate_ewald_coverage"><strong>simulate_ewald_coverage</strong></a>(self, energy_kev<font color="#909090">=8.0</font>, sample_normal<font color="#909090">=[0, 0, 1]</font>, sample_para<font color="#909090">=[1, 0, 0]</font>, phi<font color="#909090">=0</font>, chi<font color="#909090">=0</font>, **kwargs)</dt><dd><tt>NOT&nbsp;FINISHED<br>
 Plot&nbsp;ewald&nbsp;space&nbsp;coverage&nbsp;within&nbsp;a&nbsp;particular&nbsp;scattering&nbsp;plane<br>

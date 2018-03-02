@@ -1,0 +1,137 @@
+# Created by the Bilbao Crystallographic Server
+# http://www.cryst.ehu.es
+# Date: 02/17/2016 16:24:39
+# Database entry: 0.3 Ca3LiOsO6
+# Cif-like file for the case 0.3
+
+
+data_5yOhtAoR
+_audit_creation_date            2016-02-17
+_audit_creation_method          "Bilbao Crystallographic Server"
+
+_chemical_name_systematic
+;
+;
+_chemical_name_common                    ?
+_chemical_formula_moiety                 ?
+_chemical_formula_structural             ?
+_chemical_formula_analytical             ?
+_chemical_formula_iupac                  ?
+_chemical_formula_sum                    'Ca3 Li Os O6'
+_chemical_formula_weight                 ?
+_chemical_melting_point                  ?
+_chemical_compound_source                ?
+_chemical_absolute_configuration         .
+
+
+_citation_journal_abbrev        "PHYSICAL REVIEW B"
+_citation_journal_volume        86
+_citation_page_first            ?
+_citation_page_last             ?
+_citation_article_id            054403
+_citation_year                  2012
+_citation_DOI                   ?
+
+loop_
+_citation_author_name
+"Calder, S."
+
+_atomic_positions_source_database_code_ICSD  .
+_atomic_positions_source_other               .
+
+_transition_temperature     117.1
+_experiment_temperature     4
+
+loop_
+_irrep_id
+_irrep_dimension
+_irrep_small_dimension
+_irrep_direction_type
+_irrep_action
+_irrep_modes_number
+_irrep_presence
+mGM3+ 2 2 special primary ? ?
+mGM2+ 1 1 . secondary ? ?
+
+_exptl_crystal_magnetic_properties_details
+;
+NPD, MRXS
+binary axis kept along a (or equivalent)
+weak ferromagnetism expected on the plane perpendicular to the binary axis.
+;
+
+_active_magnetic_irreps_details
+;
+1k magnetic structure
+allowed mz corresponds to a secondary irrep mode (mGM2+),  ferromagnetic.
+the mGM3+ irrep also includes a ferromagnetic mode perpendicular to x, and on the plane xy, but not detected.
+;
+
+_parent_space_group.name_H-M                        'R -3c'
+_parent_space_group.IT_number                       167
+_parent_space_group.transform_to_standard_Pp_abc    'a,b,c;0,0,0'
+
+loop_
+_magnetic_propagation_vector_seq_id
+_magnetic_propagation_vector_kxkykz
+k1 0,0,0
+
+_magnetic_space_group.standard_setting              'no'
+_magnetic_space_group.transform_from_parent_Pp_abc  'a,b,c;0,0,0'
+_magnetic_space_group.transform_to_standard_Pp_abc  '-a/3-2b/3-2c/3,-a,a/3+2b/3-c/3;0,1/2,0'
+
+loop_
+_magnetic_atom_site_moment_symmetry_constraints_label
+_atom_site_magnetic_moment_symmetry_constraints_mxmymz
+Os mx,my,mz
+
+_space_group.magn_number_BNS   15.89
+_space_group.magn_name_BNS     "C 2'/c' "
+_space_group.magn_point_group "2'/m'"
+_space_group.magn_point_group_number "5.5.16"
+_cell_length_a                 9.2570
+_cell_length_b                 9.2570
+_cell_length_c                 10.7630
+_cell_angle_alpha              90.0000
+_cell_angle_beta               90.0000
+_cell_angle_gamma              120.0000
+
+loop_
+_space_group_symop.magn_id
+_space_group_symop.magn_operation_xyz
+_space_group_symop.magn_operation_mxmymz
+1 x,y,z,+1 mx,my,mz
+2 -x,-y,-z,+1 mx,my,mz
+3 x-y+1/3,-y+2/3,-z+1/6,-1 -mx+my,my,mz
+4 -x+y+1/3,y+2/3,z+1/6,-1 -mx+my,my,mz
+
+loop_
+_space_group_symop.magn_centering_id
+_space_group_symop.magn_centering_xyz
+_space_group_symop.magn_centering_mxmymz
+1 x,y,z,+1 mx,my,mz
+2 x+2/3,y+1/3,z+1/3,+1 mx,my,mz
+3 x+1/3,y+2/3,z+2/3,+1 mx,my,mz
+
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Os Os 0.00000 0.00000 0.00000 1
+Ca1 Ca 0.64600 0.00000 0.25000 1
+Ca2 Ca 0.00000 0.64600 0.25000 1
+O1 O 0.02810 0.84380 0.39420 1
+O2 O -0.84380 -0.8157 0.39420 1
+O3 O 0.8157 -0.02810 0.39420 1
+Li Li 0.00000 0.00000 0.25000 1
+
+loop_
+_atom_site_moment_label
+_atom_site_moment_crystalaxis_x
+_atom_site_moment_crystalaxis_y
+_atom_site_moment_crystalaxis_z
+Os 2.2 0.0 0.0
+

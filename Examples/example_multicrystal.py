@@ -1,5 +1,5 @@
 """
-CrystalProgs Examples
+Dans_Diffraction Examples
 Calculate list of reflections
 """
 
@@ -11,8 +11,8 @@ from Dans_Diffraction.classes_crystal import Crystal, Multi_Crystal
 cf=os.path.dirname(__file__)
 
 
-f1 = cf+'/Diamond.cif'
-f2 = cf+'/Na0.8CoO2_P63mmc.cif'
+f1 = cf+'/../Structures/Diamond.cif'
+f2 = cf+'/../Structures/Na0.8CoO2_P63mmc.cif'
 
 diamond = Crystal(f1)
 nacoo2 = Crystal(f2)

@@ -19,9 +19,6 @@ E.G.&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;f&nbsp;=&nbsp;'Folder/Diamond.cif'<br>
 &nbsp;&nbsp;&nbsp;&nbsp;xtl&nbsp;=&nbsp;<a href="#Crystal">Crystal</a>(f)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;xtl.info()&nbsp;&gt;&gt;&nbsp;print&nbsp;information&nbsp;about&nbsp;the&nbsp;crystal<br>
-&nbsp;&nbsp;&nbsp;&nbsp;xtl.hkl([1,0,0])&nbsp;&gt;&gt;&nbsp;print&nbsp;reflection&nbsp;intensity&nbsp;and&nbsp;two-theta<br>
-&nbsp;&nbsp;&nbsp;&nbsp;xtl.print_all_reflection()&nbsp;&gt;&gt;&nbsp;prints&nbsp;all&nbsp;allowed&nbsp;reflections<br>
-&nbsp;&nbsp;&nbsp;&nbsp;xtl.print_all_extinctions()&nbsp;&gt;&gt;&nbsp;prints&nbsp;all&nbsp;non-allowed&nbsp;reflections<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Crystal">Crystal</a>&nbsp;properties&nbsp;are&nbsp;stored&nbsp;within&nbsp;lower&nbsp;classes:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;xtl.<a href="#Cell">Cell</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&nbsp;lattice&nbsp;parameters<br>
@@ -39,12 +36,13 @@ Diamond<br>
 2017<br>
 &nbsp;<br>
 Version&nbsp;2.0<br>
-Last&nbsp;updated:&nbsp;06/01/18<br>
+Last&nbsp;updated:&nbsp;13/02/18<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 27/07/17&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
 30/10/17&nbsp;1.1&nbsp;&nbsp;&nbsp;&nbsp;Many&nbsp;minor&nbsp;updates.<br>
 06/01/18&nbsp;2.0&nbsp;&nbsp;&nbsp;&nbsp;Name&nbsp;change&nbsp;and&nbsp;other&nbsp;updates<br>
+13/02/18&nbsp;2.1&nbsp;&nbsp;&nbsp;&nbsp;Move&nbsp;scattering&nbsp;commands&nbsp;to&nbsp;xtl.Scatter<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -248,9 +246,8 @@ E.G.<br>
 &nbsp;&nbsp;xtl.<a href="#Atoms">Atoms</a>.uvw()&nbsp;&gt;&gt;&nbsp;give&nbsp;the&nbsp;symmetric&nbsp;atomic&nbsp;positions<br>
 &nbsp;&nbsp;xtl.<a href="#Symmetry">Symmetry</a>.symmetry_operations&nbsp;&gt;&gt;&nbsp;give&nbsp;symmetry&nbsp;operations<br>
 &nbsp;&nbsp;xtl.Structure.uvw()&nbsp;&gt;&gt;&nbsp;give&nbsp;the&nbsp;full,&nbsp;unsymmetrised&nbsp;structure<br>
-&nbsp;&nbsp;xtl.<a href="#Crystal-hkl">hkl</a>([1,0,0],8.00)&nbsp;&gt;&gt;&nbsp;prints&nbsp;the&nbsp;intensity&nbsp;and&nbsp;two-theta&nbsp;of&nbsp;this&nbsp;reflection&nbsp;at&nbsp;this&nbsp;energy<br>
-&nbsp;&nbsp;xtl.<a href="#Crystal-print_all_reflections">print_all_reflections</a>(8.00)&nbsp;&gt;&gt;&nbsp;print&nbsp;all&nbsp;allowed&nbsp;reflections,&nbsp;with&nbsp;intensities,&nbsp;at&nbsp;this&nbsp;energy<br>
-&nbsp;&nbsp;xtl.print_all_extinctions(8.00)&nbsp;&gt;&gt;&nbsp;print&nbsp;all&nbsp;non-allowed&nbsp;reflections&nbsp;at&nbsp;this&nbsp;energy<br>
+&nbsp;&nbsp;xtl.Scatter.hkl([1,0,0],8.00)&nbsp;&gt;&gt;&nbsp;prints&nbsp;the&nbsp;intensity&nbsp;and&nbsp;two-theta&nbsp;of&nbsp;this&nbsp;reflection&nbsp;at&nbsp;this&nbsp;energy<br>
+&nbsp;&nbsp;xtl.Scatter.print_all_reflections(8.00)&nbsp;&gt;&gt;&nbsp;print&nbsp;all&nbsp;allowed&nbsp;reflections,&nbsp;with&nbsp;intensities,&nbsp;at&nbsp;this&nbsp;energy<br>
 &nbsp;<br>
 To&nbsp;create&nbsp;your&nbsp;own&nbsp;crystal&nbsp;(BCC&nbsp;example):<br>
 &nbsp;&nbsp;xtl&nbsp;=&nbsp;<a href="#Crystal-name">Crystal</a>()<br>
@@ -259,23 +256,18 @@ To&nbsp;create&nbsp;your&nbsp;own&nbsp;crystal&nbsp;(BCC&nbsp;example):<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v=[0,0.5],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;w=[0,0.5],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type=['Fe','Fe'])<br>
-&nbsp;&nbsp;xtl.<a href="#Crystal-hkl">hkl</a>([[1,0,0],[1,1,0],[1,1,1],[2,0,0]])<br>
-&nbsp;<br>
-To&nbsp;change&nbsp;the&nbsp;scattering&nbsp;type:<br>
-&nbsp;&nbsp;xtl._scattering_type&nbsp;=&nbsp;'xray'<br>
-Options:&nbsp;'xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant'<br>
+&nbsp;&nbsp;xtl.hkl([[1,0,0],[1,1,0],[1,1,1],[2,0,0]])<br>
 &nbsp;<br>
 Also,&nbsp;see:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;help(xtl.<a href="#Cell">Cell</a>)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;help(xtl.<a href="#Atoms">Atoms</a>)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;help(xtl.<a href="#Symmetry">Symmetry</a>)<br>&nbsp;</tt></td></tr>
+&nbsp;&nbsp;&nbsp;&nbsp;help(xtl.<a href="#Symmetry">Symmetry</a>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;help(xtl.Scatter)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="Crystal-__init__"><strong>__init__</strong></a>(self, filename<font color="#909090">=None</font>)</dt><dd><tt>Initialise&nbsp;the&nbsp;<a href="#Crystal">Crystal</a>&nbsp;class,&nbsp;read&nbsp;from&nbsp;cif&nbsp;file&nbsp;if&nbsp;given.</tt></dd></dl>
 
 <dl><dt><a name="Crystal-add_parent"><strong>add_parent</strong></a>(self, parent, P)</dt><dd><tt>Add&nbsp;parent&nbsp;structure,&nbsp;returning&nbsp;<a href="#Crystal">Crystal</a>&nbsp;as&nbsp;superstructure</tt></dd></dl>
-
-<dl><dt><a name="Crystal-find_close_reflections"><strong>find_close_reflections</strong></a>(self, HKL, energy_kev<font color="#909090">=None</font>, max_twotheta<font color="#909090">=2</font>, max_angle<font color="#909090">=10</font>)</dt><dd><tt>Find&nbsp;and&nbsp;print&nbsp;list&nbsp;of&nbsp;reflections&nbsp;close&nbsp;to&nbsp;the&nbsp;given&nbsp;one</tt></dd></dl>
 
 <dl><dt><a name="Crystal-generate_lattice"><strong>generate_lattice</strong></a>(self, U<font color="#909090">=1</font>, V<font color="#909090">=1</font>, W<font color="#909090">=0</font>)</dt><dd><tt>Generate&nbsp;lattice&nbsp;of&nbsp;a&nbsp;cell<br>
 &nbsp;latt&nbsp;=&nbsp;genlatt(crys,U=1,V=1,W=0)</tt></dd></dl>
@@ -302,83 +294,13 @@ Returns&nbsp;a&nbsp;superstructure&nbsp;<a href="#Crystal">Crystal</a>&nbsp;clas
 Use&nbsp;&gt;&gt;hasattr(su,'Parent')&nbsp;to&nbsp;check&nbsp;if&nbsp;the&nbsp;current&nbsp;object&nbsp;is&nbsp;a<br>
 superstructure&nbsp;<a href="#Crystal">Crystal</a>&nbsp;class</tt></dd></dl>
 
-<dl><dt><a name="Crystal-hkl"><strong>hkl</strong></a>(self, HKL, energy_kev<font color="#909090">=None</font>)</dt><dd><tt>Calculate&nbsp;the&nbsp;two-theta&nbsp;and&nbsp;intensity&nbsp;of&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;display&nbsp;the&nbsp;result</tt></dd></dl>
-
 <dl><dt><a name="Crystal-info"><strong>info</strong></a>(self)</dt><dd><tt>Prints&nbsp;information&nbsp;about&nbsp;the&nbsp;crystal&nbsp;structure</tt></dd></dl>
-
-<dl><dt><a name="Crystal-intensity"><strong>intensity</strong></a>(self, HKL)</dt><dd><tt>Calculate&nbsp;the&nbsp;squared&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL<br>
-&nbsp;&nbsp;<a href="#Crystal">Crystal</a>.<a href="#Crystal-intensity">intensity</a>([1,0,0])<br>
-&nbsp;&nbsp;<a href="#Crystal">Crystal</a>.<a href="#Crystal-intensity">intensity</a>([[1,0,0],[2,0,0],[3,0,0])<br>
-Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.<br>
-&nbsp;<br>
-Notes:<br>
--&nbsp;Uses&nbsp;x-ray&nbsp;atomic&nbsp;form&nbsp;factors,&nbsp;calculated&nbsp;from&nbsp;approximated&nbsp;tables&nbsp;in&nbsp;the&nbsp;ITC<br>
--&nbsp;This&nbsp;may&nbsp;be&nbsp;a&nbsp;little&nbsp;slow&nbsp;for&nbsp;large&nbsp;numbers&nbsp;of&nbsp;reflections,&nbsp;as&nbsp;it&nbsp;is&nbsp;not&nbsp;currently<br>
-&nbsp;possible&nbsp;to&nbsp;use&nbsp;accelerated&nbsp;calculation&nbsp;methods&nbsp;in&nbsp;Jython.<br>
--&nbsp;Debye-Waller&nbsp;factor&nbsp;(atomic&nbsp;displacement)&nbsp;is&nbsp;applied&nbsp;for&nbsp;isotropic&nbsp;ADPs<br>
--&nbsp;<a href="#Crystal">Crystal</a>.scale&nbsp;is&nbsp;used&nbsp;to&nbsp;scale&nbsp;the&nbsp;complex&nbsp;structure&nbsp;factor,&nbsp;so&nbsp;the&nbsp;intensity&nbsp;is&nbsp;&nbsp;<br>
-&nbsp;reduced&nbsp;by&nbsp;(<a href="#Crystal">Crystal</a>.scale)^2<br>
--&nbsp;Testing&nbsp;against&nbsp;structure&nbsp;factors&nbsp;calculated&nbsp;by&nbsp;Vesta.exe&nbsp;is&nbsp;very&nbsp;close,&nbsp;though&nbsp;there<br>
-&nbsp;&nbsp;are&nbsp;some&nbsp;discrepancies,&nbsp;probably&nbsp;due&nbsp;to&nbsp;the&nbsp;method&nbsp;of&nbsp;calculation&nbsp;of&nbsp;the&nbsp;form&nbsp;factor.</tt></dd></dl>
 
 <dl><dt><a name="Crystal-new_atoms"><strong>new_atoms</strong></a>(self, u<font color="#909090">=[0]</font>, v<font color="#909090">=[0]</font>, w<font color="#909090">=[0]</font>, type<font color="#909090">=None</font>, label<font color="#909090">=None</font>, occupancy<font color="#909090">=None</font>, uiso<font color="#909090">=None</font>, mxmymz<font color="#909090">=None</font>)</dt><dd><tt>Replace&nbsp;current&nbsp;atomic&nbsp;positions&nbsp;with&nbsp;new&nbsp;ones&nbsp;and&nbsp;regenerate&nbsp;structure</tt></dd></dl>
 
 <dl><dt><a name="Crystal-new_cell"><strong>new_cell</strong></a>(self, latt<font color="#909090">=[1.0]</font>)</dt><dd><tt>Replace&nbsp;the&nbsp;lattice&nbsp;parameters</tt></dd></dl>
 
-<dl><dt><a name="Crystal-print_all_reflections"><strong>print_all_reflections</strong></a>(self, energy_kev<font color="#909090">=None</font>, print_symmetric<font color="#909090">=False</font>, min_intensity<font color="#909090">=0.01</font>, max_intensity<font color="#909090">=None</font>)</dt><dd><tt>Prints&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;allowed&nbsp;reflections&nbsp;at&nbsp;this&nbsp;energy<br>
-&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;energy&nbsp;in&nbsp;keV<br>
-&nbsp;&nbsp;&nbsp;&nbsp;print_symmetric&nbsp;=&nbsp;False*/True&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;with&nbsp;the&nbsp;same&nbsp;intensity&nbsp;at&nbsp;the&nbsp;same&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;min_intensity&nbsp;=&nbsp;None/&nbsp;0.01&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;less&nbsp;than&nbsp;this&nbsp;(remove&nbsp;extinctions)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;max_intensity&nbsp;=&nbsp;None/&nbsp;0.01&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;greater&nbsp;than&nbsp;this&nbsp;(show&nbsp;extinctions&nbsp;only)</tt></dd></dl>
-
-<dl><dt><a name="Crystal-print_atomic_contributions"><strong>print_atomic_contributions</strong></a>(self, HKL)</dt><dd><tt>Prints&nbsp;the&nbsp;atomic&nbsp;contributions&nbsp;to&nbsp;the&nbsp;structure&nbsp;factor</tt></dd></dl>
-
-<dl><dt><a name="Crystal-print_ref_reflections"><strong>print_ref_reflections</strong></a>(self, energy_kev<font color="#909090">=None</font>, min_intensity<font color="#909090">=0.01</font>, max_intensity<font color="#909090">=None</font>)</dt><dd><tt>Prints&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;allowed&nbsp;reflections&nbsp;at&nbsp;this&nbsp;energy&nbsp;in&nbsp;the&nbsp;reflection&nbsp;geometry<br>
-&nbsp;&nbsp;&nbsp;&nbsp;energy&nbsp;=&nbsp;energy&nbsp;in&nbsp;keV<br>
-&nbsp;&nbsp;&nbsp;&nbsp;min_intensity&nbsp;=&nbsp;None/&nbsp;0.01&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;less&nbsp;than&nbsp;this&nbsp;(remove&nbsp;extinctions)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;max_intensity&nbsp;=&nbsp;None/&nbsp;0.01&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;greater&nbsp;than&nbsp;this&nbsp;(show&nbsp;extinctions&nbsp;only)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;|<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|___/____<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\__<br>
-&nbsp;<br>
-Note,&nbsp;to&nbsp;change&nbsp;min/max&nbsp;theta&nbsp;values&nbsp;or&nbsp;specular&nbsp;direciton,&nbsp;change&nbsp;the&nbsp;following&nbsp;attributres&nbsp;of&nbsp;<br>
-the&nbsp;crystal&nbsp;object:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_max_two_theta</strong>&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;detector&nbsp;(two-theta)&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_min_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;minimum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;-opening&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_max_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;opening&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_theta_offset</strong>&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;sample&nbsp;offset&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_specular_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface</tt></dd></dl>
-
-<dl><dt><a name="Crystal-print_symmetric_reflections"><strong>print_symmetric_reflections</strong></a>(self, HKL)</dt><dd><tt>Prints&nbsp;equivalent&nbsp;reflections</tt></dd></dl>
-
-<dl><dt><a name="Crystal-print_tran_reflections"><strong>print_tran_reflections</strong></a>(self, energy_kev<font color="#909090">=None</font>, min_intensity<font color="#909090">=0.01</font>, max_intensity<font color="#909090">=None</font>)</dt><dd><tt>Prints&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;allowed&nbsp;reflections&nbsp;at&nbsp;this&nbsp;energy&nbsp;in&nbsp;the&nbsp;transmission&nbsp;geometry<br>
-&nbsp;&nbsp;&nbsp;&nbsp;energy&nbsp;=&nbsp;energy&nbsp;in&nbsp;keV<br>
-&nbsp;&nbsp;&nbsp;&nbsp;min_intensity&nbsp;=&nbsp;None/&nbsp;0.01&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;less&nbsp;than&nbsp;this&nbsp;(remove&nbsp;extinctions)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;max_intensity&nbsp;=&nbsp;None/&nbsp;0.01&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;greater&nbsp;than&nbsp;this&nbsp;(show&nbsp;extinctions&nbsp;only)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&lt;--&nbsp;||&nbsp;--&lt;--&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;<br>
-Note,&nbsp;to&nbsp;change&nbsp;min/max&nbsp;theta&nbsp;values&nbsp;or&nbsp;specular&nbsp;direciton,&nbsp;change&nbsp;the&nbsp;following&nbsp;attributres&nbsp;of&nbsp;<br>
-the&nbsp;crystal&nbsp;object:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_max_two_theta</strong>&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;detector&nbsp;(two-theta)&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_min_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;minimum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;-opening&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_max_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;opening&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_theta_offset</strong>&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;sample&nbsp;offset&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_parallel_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface,&nbsp;parallel&nbsp;to&nbsp;beam&nbsp;at&nbsp;theta&nbsp;=&nbsp;0</tt></dd></dl>
-
-<dl><dt><a name="Crystal-setup_scatter"><strong>setup_scatter</strong></a>(self, type<font color="#909090">=None</font>, specular<font color="#909090">=None</font>, parallel<font color="#909090">=None</font>, theta_offset<font color="#909090">=None</font>, min_theta<font color="#909090">=None</font>, max_theta<font color="#909090">=None</font>, min_twotheta<font color="#909090">=None</font>, max_twotheta<font color="#909090">=None</font>)</dt><dd><tt>Simple&nbsp;way&nbsp;to&nbsp;set&nbsp;scattering&nbsp;parameters,&nbsp;each&nbsp;parameter&nbsp;is&nbsp;internal&nbsp;to&nbsp;xtl&nbsp;(self)<br>
-&nbsp;<br>
-type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering</strong>&nbsp;type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;'xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant'<br>
-max_twotheta:&nbsp;self.<strong>_scattering_max_two_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;detector&nbsp;(two-theta)&nbsp;angle<br>
-min_theta&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_min_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;minimum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;-opening&nbsp;angle<br>
-max_theta&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_max_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;opening&nbsp;angle<br>
-theta_offset:&nbsp;self.<strong>_scattering_theta_offset</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;sample&nbsp;offset&nbsp;angle<br>
-specular&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_specular_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface<br>
-parallel&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_parallel_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface</tt></dd></dl>
-
-<dl><dt><a name="Crystal-tth"><strong>tth</strong></a>(self, HKL, energy_kev<font color="#909090">=None</font>)</dt><dd><tt>Calculate&nbsp;two-theta&nbsp;of&nbsp;the&nbsp;requested&nbsp;HKL</tt></dd></dl>
+<dl><dt><a name="Crystal-start_gui"><strong>start_gui</strong></a>(self)</dt><dd><tt>Start&nbsp;<a href="#Crystal">Crystal</a>&nbsp;GUI</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -511,8 +433,6 @@ Data and other attributes defined here:<br>
 Methods inherited from <a href="Dans_Diffraction.classes_crystal.html#Crystal">Crystal</a>:<br>
 <dl><dt><a name="Superstructure-add_parent"><strong>add_parent</strong></a>(self, parent, P)</dt><dd><tt>Add&nbsp;parent&nbsp;structure,&nbsp;returning&nbsp;<a href="#Crystal">Crystal</a>&nbsp;as&nbsp;superstructure</tt></dd></dl>
 
-<dl><dt><a name="Superstructure-find_close_reflections"><strong>find_close_reflections</strong></a>(self, HKL, energy_kev<font color="#909090">=None</font>, max_twotheta<font color="#909090">=2</font>, max_angle<font color="#909090">=10</font>)</dt><dd><tt>Find&nbsp;and&nbsp;print&nbsp;list&nbsp;of&nbsp;reflections&nbsp;close&nbsp;to&nbsp;the&nbsp;given&nbsp;one</tt></dd></dl>
-
 <dl><dt><a name="Superstructure-generate_lattice"><strong>generate_lattice</strong></a>(self, U<font color="#909090">=1</font>, V<font color="#909090">=1</font>, W<font color="#909090">=0</font>)</dt><dd><tt>Generate&nbsp;lattice&nbsp;of&nbsp;a&nbsp;cell<br>
 &nbsp;latt&nbsp;=&nbsp;genlatt(crys,U=1,V=1,W=0)</tt></dd></dl>
 
@@ -538,83 +458,13 @@ Returns&nbsp;a&nbsp;superstructure&nbsp;<a href="#Crystal">Crystal</a>&nbsp;clas
 Use&nbsp;&gt;&gt;hasattr(su,'Parent')&nbsp;to&nbsp;check&nbsp;if&nbsp;the&nbsp;current&nbsp;object&nbsp;is&nbsp;a<br>
 superstructure&nbsp;<a href="#Crystal">Crystal</a>&nbsp;class</tt></dd></dl>
 
-<dl><dt><a name="Superstructure-hkl"><strong>hkl</strong></a>(self, HKL, energy_kev<font color="#909090">=None</font>)</dt><dd><tt>Calculate&nbsp;the&nbsp;two-theta&nbsp;and&nbsp;intensity&nbsp;of&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;display&nbsp;the&nbsp;result</tt></dd></dl>
-
 <dl><dt><a name="Superstructure-info"><strong>info</strong></a>(self)</dt><dd><tt>Prints&nbsp;information&nbsp;about&nbsp;the&nbsp;crystal&nbsp;structure</tt></dd></dl>
-
-<dl><dt><a name="Superstructure-intensity"><strong>intensity</strong></a>(self, HKL)</dt><dd><tt>Calculate&nbsp;the&nbsp;squared&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL<br>
-&nbsp;&nbsp;<a href="#Crystal">Crystal</a>.<a href="#Superstructure-intensity">intensity</a>([1,0,0])<br>
-&nbsp;&nbsp;<a href="#Crystal">Crystal</a>.<a href="#Superstructure-intensity">intensity</a>([[1,0,0],[2,0,0],[3,0,0])<br>
-Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.<br>
-&nbsp;<br>
-Notes:<br>
--&nbsp;Uses&nbsp;x-ray&nbsp;atomic&nbsp;form&nbsp;factors,&nbsp;calculated&nbsp;from&nbsp;approximated&nbsp;tables&nbsp;in&nbsp;the&nbsp;ITC<br>
--&nbsp;This&nbsp;may&nbsp;be&nbsp;a&nbsp;little&nbsp;slow&nbsp;for&nbsp;large&nbsp;numbers&nbsp;of&nbsp;reflections,&nbsp;as&nbsp;it&nbsp;is&nbsp;not&nbsp;currently<br>
-&nbsp;possible&nbsp;to&nbsp;use&nbsp;accelerated&nbsp;calculation&nbsp;methods&nbsp;in&nbsp;Jython.<br>
--&nbsp;Debye-Waller&nbsp;factor&nbsp;(atomic&nbsp;displacement)&nbsp;is&nbsp;applied&nbsp;for&nbsp;isotropic&nbsp;ADPs<br>
--&nbsp;<a href="#Crystal">Crystal</a>.scale&nbsp;is&nbsp;used&nbsp;to&nbsp;scale&nbsp;the&nbsp;complex&nbsp;structure&nbsp;factor,&nbsp;so&nbsp;the&nbsp;intensity&nbsp;is&nbsp;&nbsp;<br>
-&nbsp;reduced&nbsp;by&nbsp;(<a href="#Crystal">Crystal</a>.scale)^2<br>
--&nbsp;Testing&nbsp;against&nbsp;structure&nbsp;factors&nbsp;calculated&nbsp;by&nbsp;Vesta.exe&nbsp;is&nbsp;very&nbsp;close,&nbsp;though&nbsp;there<br>
-&nbsp;&nbsp;are&nbsp;some&nbsp;discrepancies,&nbsp;probably&nbsp;due&nbsp;to&nbsp;the&nbsp;method&nbsp;of&nbsp;calculation&nbsp;of&nbsp;the&nbsp;form&nbsp;factor.</tt></dd></dl>
 
 <dl><dt><a name="Superstructure-new_atoms"><strong>new_atoms</strong></a>(self, u<font color="#909090">=[0]</font>, v<font color="#909090">=[0]</font>, w<font color="#909090">=[0]</font>, type<font color="#909090">=None</font>, label<font color="#909090">=None</font>, occupancy<font color="#909090">=None</font>, uiso<font color="#909090">=None</font>, mxmymz<font color="#909090">=None</font>)</dt><dd><tt>Replace&nbsp;current&nbsp;atomic&nbsp;positions&nbsp;with&nbsp;new&nbsp;ones&nbsp;and&nbsp;regenerate&nbsp;structure</tt></dd></dl>
 
 <dl><dt><a name="Superstructure-new_cell"><strong>new_cell</strong></a>(self, latt<font color="#909090">=[1.0]</font>)</dt><dd><tt>Replace&nbsp;the&nbsp;lattice&nbsp;parameters</tt></dd></dl>
 
-<dl><dt><a name="Superstructure-print_all_reflections"><strong>print_all_reflections</strong></a>(self, energy_kev<font color="#909090">=None</font>, print_symmetric<font color="#909090">=False</font>, min_intensity<font color="#909090">=0.01</font>, max_intensity<font color="#909090">=None</font>)</dt><dd><tt>Prints&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;allowed&nbsp;reflections&nbsp;at&nbsp;this&nbsp;energy<br>
-&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;energy&nbsp;in&nbsp;keV<br>
-&nbsp;&nbsp;&nbsp;&nbsp;print_symmetric&nbsp;=&nbsp;False*/True&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;with&nbsp;the&nbsp;same&nbsp;intensity&nbsp;at&nbsp;the&nbsp;same&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;min_intensity&nbsp;=&nbsp;None/&nbsp;0.01&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;less&nbsp;than&nbsp;this&nbsp;(remove&nbsp;extinctions)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;max_intensity&nbsp;=&nbsp;None/&nbsp;0.01&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;greater&nbsp;than&nbsp;this&nbsp;(show&nbsp;extinctions&nbsp;only)</tt></dd></dl>
-
-<dl><dt><a name="Superstructure-print_atomic_contributions"><strong>print_atomic_contributions</strong></a>(self, HKL)</dt><dd><tt>Prints&nbsp;the&nbsp;atomic&nbsp;contributions&nbsp;to&nbsp;the&nbsp;structure&nbsp;factor</tt></dd></dl>
-
-<dl><dt><a name="Superstructure-print_ref_reflections"><strong>print_ref_reflections</strong></a>(self, energy_kev<font color="#909090">=None</font>, min_intensity<font color="#909090">=0.01</font>, max_intensity<font color="#909090">=None</font>)</dt><dd><tt>Prints&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;allowed&nbsp;reflections&nbsp;at&nbsp;this&nbsp;energy&nbsp;in&nbsp;the&nbsp;reflection&nbsp;geometry<br>
-&nbsp;&nbsp;&nbsp;&nbsp;energy&nbsp;=&nbsp;energy&nbsp;in&nbsp;keV<br>
-&nbsp;&nbsp;&nbsp;&nbsp;min_intensity&nbsp;=&nbsp;None/&nbsp;0.01&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;less&nbsp;than&nbsp;this&nbsp;(remove&nbsp;extinctions)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;max_intensity&nbsp;=&nbsp;None/&nbsp;0.01&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;greater&nbsp;than&nbsp;this&nbsp;(show&nbsp;extinctions&nbsp;only)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;|<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|___/____<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\__<br>
-&nbsp;<br>
-Note,&nbsp;to&nbsp;change&nbsp;min/max&nbsp;theta&nbsp;values&nbsp;or&nbsp;specular&nbsp;direciton,&nbsp;change&nbsp;the&nbsp;following&nbsp;attributres&nbsp;of&nbsp;<br>
-the&nbsp;crystal&nbsp;object:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_max_two_theta</strong>&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;detector&nbsp;(two-theta)&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_min_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;minimum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;-opening&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_max_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;opening&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_theta_offset</strong>&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;sample&nbsp;offset&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_specular_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface</tt></dd></dl>
-
-<dl><dt><a name="Superstructure-print_symmetric_reflections"><strong>print_symmetric_reflections</strong></a>(self, HKL)</dt><dd><tt>Prints&nbsp;equivalent&nbsp;reflections</tt></dd></dl>
-
-<dl><dt><a name="Superstructure-print_tran_reflections"><strong>print_tran_reflections</strong></a>(self, energy_kev<font color="#909090">=None</font>, min_intensity<font color="#909090">=0.01</font>, max_intensity<font color="#909090">=None</font>)</dt><dd><tt>Prints&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;allowed&nbsp;reflections&nbsp;at&nbsp;this&nbsp;energy&nbsp;in&nbsp;the&nbsp;transmission&nbsp;geometry<br>
-&nbsp;&nbsp;&nbsp;&nbsp;energy&nbsp;=&nbsp;energy&nbsp;in&nbsp;keV<br>
-&nbsp;&nbsp;&nbsp;&nbsp;min_intensity&nbsp;=&nbsp;None/&nbsp;0.01&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;less&nbsp;than&nbsp;this&nbsp;(remove&nbsp;extinctions)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;max_intensity&nbsp;=&nbsp;None/&nbsp;0.01&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;greater&nbsp;than&nbsp;this&nbsp;(show&nbsp;extinctions&nbsp;only)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&lt;--&nbsp;||&nbsp;--&lt;--&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;<br>
-Note,&nbsp;to&nbsp;change&nbsp;min/max&nbsp;theta&nbsp;values&nbsp;or&nbsp;specular&nbsp;direciton,&nbsp;change&nbsp;the&nbsp;following&nbsp;attributres&nbsp;of&nbsp;<br>
-the&nbsp;crystal&nbsp;object:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_max_two_theta</strong>&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;detector&nbsp;(two-theta)&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_min_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;minimum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;-opening&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_max_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;opening&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_theta_offset</strong>&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;sample&nbsp;offset&nbsp;angle<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_parallel_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface,&nbsp;parallel&nbsp;to&nbsp;beam&nbsp;at&nbsp;theta&nbsp;=&nbsp;0</tt></dd></dl>
-
-<dl><dt><a name="Superstructure-setup_scatter"><strong>setup_scatter</strong></a>(self, type<font color="#909090">=None</font>, specular<font color="#909090">=None</font>, parallel<font color="#909090">=None</font>, theta_offset<font color="#909090">=None</font>, min_theta<font color="#909090">=None</font>, max_theta<font color="#909090">=None</font>, min_twotheta<font color="#909090">=None</font>, max_twotheta<font color="#909090">=None</font>)</dt><dd><tt>Simple&nbsp;way&nbsp;to&nbsp;set&nbsp;scattering&nbsp;parameters,&nbsp;each&nbsp;parameter&nbsp;is&nbsp;internal&nbsp;to&nbsp;xtl&nbsp;(self)<br>
-&nbsp;<br>
-type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering</strong>&nbsp;type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;'xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant'<br>
-max_twotheta:&nbsp;self.<strong>_scattering_max_two_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;detector&nbsp;(two-theta)&nbsp;angle<br>
-min_theta&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_min_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;minimum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;-opening&nbsp;angle<br>
-max_theta&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_max_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;opening&nbsp;angle<br>
-theta_offset:&nbsp;self.<strong>_scattering_theta_offset</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;sample&nbsp;offset&nbsp;angle<br>
-specular&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_specular_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface<br>
-parallel&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_parallel_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface</tt></dd></dl>
-
-<dl><dt><a name="Superstructure-tth"><strong>tth</strong></a>(self, HKL, energy_kev<font color="#909090">=None</font>)</dt><dd><tt>Calculate&nbsp;two-theta&nbsp;of&nbsp;the&nbsp;requested&nbsp;HKL</tt></dd></dl>
+<dl><dt><a name="Superstructure-start_gui"><strong>start_gui</strong></a>(self)</dt><dd><tt>Start&nbsp;<a href="#Crystal">Crystal</a>&nbsp;GUI</tt></dd></dl>
 
 <hr>
 Data and other attributes inherited from <a href="Dans_Diffraction.classes_crystal.html#Crystal">Crystal</a>:<br>
