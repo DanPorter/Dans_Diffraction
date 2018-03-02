@@ -281,7 +281,7 @@ class Plotting:
         pixels = 2000*q_max # reduce this to make convolution faster
         pixel_size = q_max/(1.0*pixels)
         peak_width_pixels = peak_width/(1.0*pixel_size)
-        mesh = np.zeros([pixels])
+        mesh = np.zeros([int(pixels)])
         mesh_q = np.linspace(0,q_max,pixels)
         mesh_tth = fc.cal2theta(mesh_q, energy_kev)
         #mesh_d = fc.caldspace(mesh_q)
