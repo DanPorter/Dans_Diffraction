@@ -282,10 +282,8 @@ def plot_arrow(x,y,z=None, col='r', width=2, arrow_size=40):
         dy = y[1] - y[0]
         
         plt.arrow(x0,y0,dx,dy, width=arrow_size/4000.0, color = col,length_includes_head=True)
-        plt.show()
         #V = FancyArrowPatch(x,y, mutation_scale=arrow_size, lw=width, arrowstyle="-|>", color=col)
         #plt.gca().add_artist(V)
-        #plt.show()
         return
     
     # 3D Arrow
