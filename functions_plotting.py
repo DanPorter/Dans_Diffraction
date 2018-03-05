@@ -14,11 +14,12 @@ Usage:
     - from Dans_Diffraction import functions_general as fg
     
 
-Version 1.0
-Last updated: 06/01/18
+Version 1.1
+Last updated: 05/03/18
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
+05/03/18 1.1    Removed plt.show from arrow functions
 
 @author: DGPorter
 """
@@ -258,7 +259,6 @@ def plot_cell(cell_centre=[0,0,0],CELL=np.eye(3)):
     bpos = np.dot(uvw,CELL)
     bpos = bpos + cell_centre
     plt.plot(bpos[:,0],bpos[:,1],bpos[:,2],c='k') # cell box
-    plt.show()
 
 def plot_arrow(x,y,z=None, col='r', width=2, arrow_size=40):
     """
@@ -291,7 +291,6 @@ def plot_arrow(x,y,z=None, col='r', width=2, arrow_size=40):
     # 3D Arrow
     V = Arrow3D(x,y,z, mutation_scale=arrow_size, lw=width, arrowstyle="-|>", color=col)
     plt.gca().add_artist(V)
-    plt.show()
 
 class Arrow3D(FancyArrowPatch):
     """
@@ -365,8 +364,6 @@ def vecplot(UV,mode='hk0',linewidth=1,alpha=0.2,color='k'):
             uv3 = lp - UV[0,:] + UV[1,:]
             ax.plot([lp[0],uv3[0]],[lp[1],uv3[1]],'-',linewidth=linewidth,alpha=alpha,color=color)
     ax.axis(axsize)
-    plt.show()
-    return
 
 def UV_arrows(UV):
     """
@@ -381,7 +378,6 @@ def UV_arrows(UV):
     plt.annotate("a", (0.1 + UV[0,0],UV[0,1]-0.2))
     plt.annotate("b", (UV[1,0]-0.2,0.1 + UV[1,1]))
     ax.axis(axsize)
-    plt.show()
 
 def plot_lattice_points2D(Q,markersize=12,color='b',marker='o'):
     "Add lines defining the reciprocal lattice to the current plot"
@@ -391,7 +387,6 @@ def plot_lattice_points2D(Q,markersize=12,color='b',marker='o'):
     
     ax.plot(Q[:,0],Q[:,1],markersize=markersize,color=color,marker=marker)
     ax.axis(axsize)
-    plt.show()
 
 def plot_lattice_lines(Q,vec_a=[1,0,0],vec_b=[0,1,0],linewidth=0.5,shade=1.0,color='k'):
     "Add lines defining the reciprocal lattice to the current plot"
@@ -425,7 +420,6 @@ def plot_lattice_lines(Q,vec_a=[1,0,0],vec_b=[0,1,0],linewidth=0.5,shade=1.0,col
             uv3_2 = lp - A + B
             ax.plot([uv3_1[0],uv3_2[0]],[uv3_1[1],uv3_2[1]],'-',linewidth=linewidth,alpha=shade,color=color)
     ax.axis(axsize)
-    plt.show()
 
 def axis_lattice_points(vec_a=[1,0,0],vec_b=[0,1,0],axis=[-4,4,-4,4]):
     """
@@ -494,7 +488,6 @@ def plot_vector_lines(vec_a=[1,0,0],vec_b=[0,1,0],linewidth=0.5,shade=1.0,color=
             uv3_2 = lp - A - B
             ax.plot([uv3_1[0],uv3_2[0]],[uv3_1[1],uv3_2[1]],'-',linewidth=linewidth,alpha=shade,color=color)
     ax.axis(axsize)
-    plt.show()
 
 def plot_vector_arrows(vec_a,vec_b,vec_a_lab=None,vec_b_lab=None,arrow_size=40,color='b',fontsize = 18):
     """
@@ -516,4 +509,3 @@ def plot_vector_arrows(vec_a,vec_b,vec_a_lab=None,vec_b_lab=None,arrow_size=40,c
     plt.text(vec_b[0,0],vec_b[0,1],vec_b_lab,fontname='Times',weight='bold',size=fontsize)
     
     ax.axis(axsize)
-    plt.show()

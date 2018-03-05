@@ -2,6 +2,11 @@
 CIF Directory
 Various standard structures to load into Dans_Diffraction.
 
+Usage:
+    from classes_structures import Structures
+    structure_list = Structures() # builds database of all cif files in Structures Directory
+    xtl = structure_list.Silicon.build() # builds Crystal class of selected structure
+
 By Dan Porter, PhD
 Diamond
 2018
@@ -54,10 +59,14 @@ class Structures:
     
     def info(self):
         "Print Available Structures"
-        for s in list:
+        for s in self.list:
             print(s)
 
 class Build_Crystal:
+    """
+    Storage Class for filename and build command
+    Builds a Crystal class.
+    """
     def __init__(self,filename):
         self.filename = filename
     

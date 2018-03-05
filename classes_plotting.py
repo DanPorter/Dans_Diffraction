@@ -8,13 +8,14 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.0
-Last updated: 06/01/18
+Version 1.2
+Last updated: 05/03/18
 
 Version History:
 18/08/17 0.1    Program created
 30/10/17 1.0    Main functions finished.
 06/10/18 1.1    Program renamed
+05/03/18 1.2    Added plt.show() to functions
 
 @author: DGPorter
 """
@@ -358,6 +359,7 @@ class Plotting:
         ylab = u'Intensity'
         ttl = '%s\nE = %1.3f keV' % (self.xtl.name,energy_kev)
         fp.labels(ttl,xlab,ylab)
+        plt.show()
     
     def generate_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],
                                     q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
@@ -484,6 +486,7 @@ class Plotting:
         ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0],y_axis[1],y_axis[2])
         ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name,centre[0],centre[1],centre[2])
         fp.labels(ttl,xlab,ylab)
+        plt.show()
     
     def simulate_hk0(self,L=0,**kwargs):
         """
@@ -550,6 +553,7 @@ class Plotting:
         
         ttl = '%s\nE = %1.3f keV' % (self.xtl.name,energy_kev)
         fp.labels(ttl)
+        plt.show()
     
     def plot_3Dlattice(self,q_max=4.0,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],cut_width=0.05):
         """
@@ -583,6 +587,7 @@ class Plotting:
         plt.plot(Q[inplot,0],Q[inplot,1],Q[inplot,2],'ro')
         
         fp.labels(self.xtl.name,'Qx','Qy','Qz')
+        plt.show()
     
     def quick_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0], q_max=4.0,cut_width=0.05):
         """
@@ -674,6 +679,7 @@ class Plotting:
         ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0],y_axis[1],y_axis[2])
         ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name,centre[0],centre[1],centre[2])
         fp.labels(ttl,xlab,ylab)
+        plt.show()
     
     def simulate_azimuth(self,hkl,energy_kev=None,polarisation='sp',F0=1,F1=1,F2=1,azim_zero=[1,0,0]):
         """
@@ -704,6 +710,7 @@ class Plotting:
         plt.xlim([-180,180])
         plt.ylim([0,1.1*np.max(IXR)])
         fp.labels(ttl,'psi [Deg]',pol)
+        plt.show()
 
 class Plotting_Superstructure(Plotting):
     """
@@ -844,6 +851,7 @@ class Plotting_Superstructure(Plotting):
         ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0],y_axis[1],y_axis[2])
         ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name,centre[0],centre[1],centre[2])
         fp.labels(ttl,xlab,ylab)
+        plt.show()
 
 class Multi_Plotting:
     """
@@ -945,6 +953,7 @@ class Multi_Plotting:
         ttl = 'E = %1.3f keV' % (energy_kev)
         plt.legend(loc=0,fontsize=18,frameon=False)
         fp.labels(ttl,xlab,ylab)
+        plt.show()
     
     def simulate_intensity_cut(self,x_axis_crystal=[[1,0,0]],y_axis_crystal=[[0,1,0]],centre=[0,0,0],
                                     q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
@@ -1074,6 +1083,7 @@ class Multi_Plotting:
         ylab = u'Qy [$\AA^{-1}$]' 
         #ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.name,centre[0],centre[1],centre[2])
         fp.labels(None,xlab,ylab)
+        plt.show()
     
     def quick_intensity_cut(self,x_axis_crystal=[[1,0,0]],y_axis_crystal=[[0,1,0]],centre=[0,0,0], q_max=4.0,cut_width=0.05):
         """
@@ -1170,3 +1180,4 @@ class Multi_Plotting:
         fp.labels(None,xlab,ylab)
         names = [xtl.name for xtl in self.crystal_list]
         plt.legend(legend_entries,names,frameon=True,fontsize=16)
+        plt.show()
