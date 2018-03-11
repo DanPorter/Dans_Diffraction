@@ -1,0 +1,134 @@
+# Created by the Bilbao Crystallographic Server
+# http://www.cryst.ehu.es
+# Date: 02/24/2016 19:35:35
+# Database entry: 0.26 TmAgGe
+# Cif-like file for the case 0.26
+
+
+data_5yOhtAoR
+_audit_creation_date            2016-02-24
+_audit_creation_method          "Bilbao Crystallographic Server"
+
+_chemical_name_systematic
+;
+;
+_chemical_name_common                    ?
+_chemical_formula_moiety                 ?
+_chemical_formula_structural             ?
+_chemical_formula_analytical             ?
+_chemical_formula_iupac                  ?
+_chemical_formula_sum                    'Tm Ag Ge'
+_chemical_formula_weight                 ?
+_chemical_melting_point                  ?
+_chemical_compound_source                ?
+_chemical_absolute_configuration         .
+
+
+_citation_journal_abbrev        "Journal of Magnetism and Magnetic Materials"
+_citation_journal_volume        321
+_citation_page_first            3256
+_citation_page_last             3261
+_citation_article_id            .
+_citation_year                  2009
+_citation_DOI                   ?
+
+loop_
+_citation_author_name
+"Baran, S."
+
+_atomic_positions_source_database_code_ICSD   164587
+_atomic_positions_source_other               .
+
+_transition_temperature     4.2
+_experiment_temperature     1.5
+
+loop_
+_irrep_id
+_irrep_dimension
+_irrep_small_dimension
+_irrep_direction_type
+_irrep_action
+_irrep_modes_number
+_irrep_presence
+mGM6 2 2 special primary 2 ?
+mGM2 1 1 . secondary 1 ?
+
+_exptl_crystal_magnetic_properties_details
+;
+NPD
+stabilized under magnetic field, no threshold value given
+;
+
+_active_magnetic_irreps_details
+;
+1k magnetic structure
+secondary irrep (mGM2) allowed but not present. It corresponds to a possible non-zero my for Tm1_1
+;
+
+_parent_space_group.name_H-M                        'P -62m'
+_parent_space_group.IT_number                       189
+_parent_space_group.transform_to_standard_Pp_abc    'a,b,c;0,0,0'
+
+loop_
+_magnetic_propagation_vector_seq_id
+_magnetic_propagation_vector_kxkykz
+k1 0,0,0
+
+_magnetic_space_group.standard_setting              'no'
+_magnetic_space_group.transform_from_parent_Pp_abc  'a,b,c;0,0,0'
+_magnetic_space_group.transform_to_standard_Pp_abc  'c,-a+b,-a-b;0,0,0'
+
+loop_
+_magnetic_atom_site_moment_symmetry_constraints_label
+_atom_site_magnetic_moment_symmetry_constraints_mxmymz
+Tm1_1 mx,my,0
+Tm1_2 mx,mx,0
+
+_space_group.magn_number_BNS   38.191
+_space_group.magn_name_BNS     "A m' m' 2"
+_space_group.magn_point_group "m'm'2"
+_space_group.magn_point_group_number "7.4.23"
+_cell_length_a                 7.0260
+_cell_length_b                 7.0260
+_cell_length_c                 4.1430
+_cell_angle_alpha              90.0000
+_cell_angle_beta               90.0000
+_cell_angle_gamma              120.0000
+
+loop_
+_space_group_symop.magn_id
+_space_group_symop.magn_operation_xyz
+_space_group_symop.magn_operation_mxmymz
+1 x,y,z,+1 mx,my,mz
+2 y,x,-z,+1 my,mx,-mz
+3 x,y,-z,-1 mx,my,-mz
+4 y,x,z,-1 my,mx,mz
+
+loop_
+_space_group_symop.magn_centering_id
+_space_group_symop.magn_centering_xyz
+_space_group_symop.magn_centering_mxmymz
+1 x,y,z,+1 mx,my,mz
+
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Tm1_1 Tm -0.42400 0.00000 0.50000 1
+Tm1_2 Tm -0.57600 -0.57600 0.50000 1
+Ag1_1 Ag 0.25000 0.00000 0.00000 1
+Ag1_2 Ag 0.75000 0.75000 0.00000 1
+Ge1_1 Ge 0.333333 -0.333333 0.00000 1
+Ge2_1 Ge 0.00000 0.00000 0.50000 1
+
+loop_
+_atom_site_moment_label
+_atom_site_moment_crystalaxis_x
+_atom_site_moment_crystalaxis_y
+_atom_site_moment_crystalaxis_z
+Tm1_1 6.44 0.0 0.0
+Tm1_2 6.44 6.44 0.0
+

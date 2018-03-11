@@ -1,5 +1,13 @@
 """
 DansCrystalGUI.py
+  Creates a graphical user interface for Dans_Diffraction software. 
+  Based on tkinter.
+  
+  Usage:
+      ipython -i -matplotlib tk DansCrystalGUI.py
+  
+  Requires:
+      numpy, matplotlib, tkinter
 """
 
 # Built-ins
@@ -850,9 +858,7 @@ class String_Viewer:
         self.root.destroy()
 
 if __name__ == '__main__':
-    from Dans_Diffraction import Crystal,Multi_Crystal
-    dd= 'C:/Users/dgpor/Dropbox/Structure Files/'
-    #dd= 'C:/Users/grp66007/Dropbox/Structure Files/'
-    f = dd+'Na0.8CoO2_P63mmc.cif'
-    xtl = Crystal(f)
+    from Dans_Diffraction import Crystal,Multi_Crystal,Structures
+    S = Structures()
+    xtl = S.Diamond.build()
     Crystalgui(xtl)

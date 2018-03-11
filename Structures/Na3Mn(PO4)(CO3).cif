@@ -1,0 +1,79 @@
+
+#(C) 2016 by FIZ Karlsruhe - Leibniz Institute for Information Infrastructure.  All rights reserved.
+data_237799-ICSD
+_database_code_ICSD 237799
+_audit_creation_date 2015-08-01
+_chemical_name_systematic 'Trisodium manganese(II) carbonophosphate'
+_chemical_formula_structural 'Na3 Mn (P O4) (C O3)'
+_chemical_formula_sum 'C1 Mn1 Na3 O7 P1'
+_chemical_name_structure_type Na3MnPO4CO3
+_exptl_crystal_density_diffrn 2.97
+_cell_measurement_temperature 300.
+_publ_section_title
+
+;
+Synthesis, computed stability, and crystal structure of a new family of
+inorganic compounds: Carbonophosphates
+;
+loop_
+_citation_id
+_citation_journal_full
+_citation_year
+_citation_journal_volume
+_citation_page_first
+_citation_page_last
+_citation_journal_id_ASTM
+primary 'Journal of the American Chemical Society' 2012 134 19619 19627 JACSAT
+loop_
+_publ_author_name
+'Chen, Hailong'
+'Hautier, Geoffroy'
+'Ceder, Gerbrand'
+_cell_length_a 8.98593(11)
+_cell_length_b 6.73577(5)
+_cell_length_c 5.15998(4)
+_cell_angle_alpha 90.
+_cell_angle_beta 90.1225(12)
+_cell_angle_gamma 90.
+_cell_volume 312.31
+_cell_formula_units_Z 2
+_symmetry_space_group_name_H-M 'P 1 21/m 1'
+_symmetry_Int_Tables_number 11
+loop_
+_symmetry_equiv_pos_site_id
+_symmetry_equiv_pos_as_xyz
+1 'x, -y+1/2, z'
+2 '-x, -y, -z'
+3 '-x, y+1/2, -z'
+4 'x, y, z'
+loop_
+_atom_type_symbol
+_atom_type_oxidation_number
+Mn2+ 2
+P5+ 5
+Na1+ 1
+C4+ 4
+O2- -2
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_B_iso_or_equiv
+_atom_site_occupancy
+_atom_site_attached_hydrogens
+Mn1 Mn2+ 2 e 0.36374(19) 0.75 0.77456(35) 0.00757 1. 0
+P1 P5+ 2 e 0.41224(30) 0.25 0.7064(6) 0.01714 1. 0
+Na1 Na1+ 4 f 0.74339(20) 0.99822(29) 0.7495(7) 0.00931 1. 0
+Na2 Na1+ 2 e 0.08374(35) 0.25 0.7636(9) 0.01147 1. 0
+C1 C4+ 2 e 0.0660(9) 0.75 0.7471(23) 0.0076 1. 0
+O1 O2- 2 e 0.1091(6) 0.75 0.9618(11) 0.00815 1. 0
+O2 O2- 2 e 0.1436(6) 0.75 0.5413(11) 0.0012 1. 0
+O3 O2- 2 e 0.9257(6) 0.75 0.7184(12) 0.0176 1. 0
+O4 O2- 4 f 0.31927(31) 0.4273(5) 0.7848(9) 0.02955 1. 0
+O5 O2- 2 e 0.5764(6) 0.25 0.8126(11) 0.02888 1. 0
+O6 O2- 2 e 0.5683(6) 0.75 0.6070(9) 0.01413 1. 0
+#End of TTdata_237799-ICSD

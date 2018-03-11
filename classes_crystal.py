@@ -43,7 +43,6 @@ from Dans_Diffraction import functions_general as fg
 from Dans_Diffraction import functions_crystallography as fc
 from Dans_Diffraction.classes_properties import Properties
 from Dans_Diffraction.classes_scattering import Scattering
-from Dans_Diffraction.classes_gui import Crystalgui
 from Dans_Diffraction.classes_plotting import Plotting, Multi_Plotting, Plotting_Superstructure
 
 
@@ -228,7 +227,11 @@ class Crystal:
     
     def start_gui(self):
         "Start Crystal GUI"
-        Crystalgui(self)
+        try:
+            from Dans_Diffraction.classes_gui import Crystalgui
+            Crystalgui(self)
+        except ImportError:
+            print('Sorry, you need to install tkinter!')
     
     def info(self):
         "Prints information about the crystal structure"
@@ -845,7 +848,10 @@ class Symmetry:
         keys = cifvals.keys()
         
         # Get symmetry operations
-        ops = ['+1/2','+1/3','+2/3','+1/6','+5/6'] # replace these in magnetic symmetry operations
+        ops = ['+1/2','+1/3','+2/3','+1/4','+3/4','+1/6','+5/6',\
+               '1/2+','1/3+','2/3+','1/4+','3/4+','1/6+','5/6+',\
+               '-1/2','-1/3','-2/3','-1/4','-3/4','-1/6','-5/6',\
+               '1/2-','1/3-','2/3-','1/4-','3/4-','1/6-','5/6-'] # replace these in magnetic symmetry operations
         if '_symmetry_equiv_pos_as_xyz' in keys:
             symops = cifvals['_symmetry_equiv_pos_as_xyz']
             symcen = ['x,y,z']

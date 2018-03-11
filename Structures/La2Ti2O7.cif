@@ -1,0 +1,58 @@
+data_global
+_amcsd_formula_title 'La2 O7 Ti2'
+loop_
+_publ_author_name
+'Gasperin M'
+_journal_name_full 'Acta Crystallographica, Section B'
+_journal_volume 31 
+_journal_year 1975
+_journal_page_first 2129
+_journal_page_last 2130
+_publ_section_title
+;
+ Dititanate de lanthane
+ _cod_database_code 1001022
+;
+_database_code_amcsd 0009540
+_chemical_formula_sum 'La2 Ti2 O7'
+_cell_length_a 7.800
+_cell_length_b 13.011
+_cell_length_c 5.546
+_cell_angle_alpha 90
+_cell_angle_beta 90
+_cell_angle_gamma 98.60
+_cell_volume 556.512
+_exptl_crystal_density_diffrn      5.795
+_symmetry_space_group_name_H-M 'P 1 1 21'
+loop_
+_space_group_symop_operation_xyz
+  'x,y,z'
+  '-x,-y,1/2+z'
+loop_
+_atom_site_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+La1   0.27890   0.11380   0.25000
+La2   0.77410   0.09930   0.25430
+La3   0.35020   0.39090   0.80260
+La4   0.85250   0.41640   0.84130
+Ti1   0.03200   0.11910   0.76300
+Ti2   0.52710   0.12000   0.75980
+Ti3   0.07800   0.32280   0.29460
+Ti4   0.58330   0.32630   0.29750
+O1   0.77600   0.10900   0.79900
+O2   0.27500   0.09000   0.69800
+O3   0.03000   0.01600   0.02400
+O4   0.47900   0.02000   0.02600
+O5   0.09800   0.22600   0.96900
+O6   0.51700   0.22900   0.96300
+O7   0.03300   0.18700   0.46000
+O8   0.55900   0.18900   0.45500
+O9   0.08900   0.40900   0.55400
+O10   0.61300   0.39800   0.56900
+O11   0.12100   0.43200   0.07800
+O12   0.59900   0.44000   0.08900
+O13   0.32700   0.31200   0.32300
+O14   0.82500   0.30000   0.22100
+

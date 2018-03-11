@@ -1,5 +1,5 @@
 """
-CrystalProgs Examples
+Dans_Diffraction Examples
 Build your very own crystal structure,
 using lattice parameters and atomic coordinates
 """

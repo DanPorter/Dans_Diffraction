@@ -184,7 +184,12 @@ E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'35.25&nbsp;(1)'&nbsp;=&nbsp;<a href="#-stfm">stfm</a>(35.25,0.01)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'110&nbsp;(5)'&nbsp;=&nbsp;<a href="#-stfm">stfm</a>(110.25,5)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'0.0015300&nbsp;(5)'&nbsp;=&nbsp;<a href="#-stfm">stfm</a>(0.00153,0.0000005)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'1.56(2)E+6'&nbsp;=&nbsp;<a href="#-stfm">stfm</a>(1.5632e6,1.53e4)</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'1.56(2)E+6'&nbsp;=&nbsp;<a href="#-stfm">stfm</a>(1.5632e6,1.53e4)<br>
+&nbsp;<br>
+Notes:<br>
+&nbsp;-&nbsp;Errors&nbsp;less&nbsp;than&nbsp;0.01%&nbsp;of&nbsp;values&nbsp;will&nbsp;be&nbsp;given&nbsp;as&nbsp;0<br>
+&nbsp;-&nbsp;The&nbsp;maximum&nbsp;length&nbsp;of&nbsp;string&nbsp;is&nbsp;13&nbsp;characters<br>
+&nbsp;-&nbsp;Errors&nbsp;greater&nbsp;then&nbsp;10x&nbsp;the&nbsp;value&nbsp;will&nbsp;cause&nbsp;the&nbsp;value&nbsp;to&nbsp;be&nbsp;rounded&nbsp;to&nbsp;zero</tt></dd></dl>
  <dl><dt><a name="-unique_vector"><strong>unique_vector</strong></a>(vecarray, tol<font color="#909090">=0.05</font>)</dt><dd><tt>Find&nbsp;unique&nbsp;vectors&nbsp;in&nbsp;an&nbsp;array&nbsp;within&nbsp;a&nbsp;certain&nbsp;tolerance<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 newarray,uniqueidx,matchidx&nbsp;=&nbsp;<a href="#-unique_vector">unique_vector</a>(vecarray,tol=0.05)<br>

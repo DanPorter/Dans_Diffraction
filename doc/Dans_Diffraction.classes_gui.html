@@ -10,7 +10,15 @@
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_gui</strong></big></big></font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/dgpor/dropbox/python/dans_diffraction/classes_gui.py">c:\users\dgpor\dropbox\python\dans_diffraction\classes_gui.py</a></font></td></tr></table>
-    <p><tt>DansCrystalGUI.py</tt></p>
+    <p><tt>DansCrystalGUI.py<br>
+&nbsp;&nbsp;Creates&nbsp;a&nbsp;graphical&nbsp;user&nbsp;interface&nbsp;for&nbsp;Dans_Diffraction&nbsp;software.&nbsp;<br>
+&nbsp;&nbsp;Based&nbsp;on&nbsp;tkinter.<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;Usage:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ipython&nbsp;-i&nbsp;-matplotlib&nbsp;tk&nbsp;DansCrystalGUI.py<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;Requires:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;numpy,&nbsp;matplotlib,&nbsp;tkinter</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -39,6 +47,7 @@
 </font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_gui.html#Crystalgui">Crystalgui</a>
 </font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_gui.html#Latpargui">Latpargui</a>
 </font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_gui.html#Scatteringgui">Scatteringgui</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_gui.html#String_Viewer">String_Viewer</a>
 </font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_gui.html#Symmetrygui">Symmetrygui</a>
 </font></dt></dl>
  <p>
@@ -119,7 +128,41 @@
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="Scatteringgui-__init__"><strong>__init__</strong></a>(self, xtl)</dt><dd><tt>Initialise</tt></dd></dl>
 
+<dl><dt><a name="Scatteringgui-fun_get"><strong>fun_get</strong></a>(self)</dt><dd><tt>Set&nbsp;crytal&nbsp;parameters&nbsp;from&nbsp;gui</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_hhi"><strong>fun_hhi</strong></a>(self)</dt><dd><tt>Plot&nbsp;hhl&nbsp;plane</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_hil"><strong>fun_hil</strong></a>(self)</dt><dd><tt>Plot&nbsp;hil&nbsp;plane</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_hki"><strong>fun_hki</strong></a>(self)</dt><dd><tt>Plot&nbsp;hki&nbsp;plane</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_hklcheck"><strong>fun_hklcheck</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>Show&nbsp;single&nbsp;hkl&nbsp;intensity</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_i16"><strong>fun_i16</strong></a>(self)</dt><dd><tt>Add&nbsp;I16&nbsp;parameters</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_ikl"><strong>fun_ikl</strong></a>(self)</dt><dd><tt>Plot&nbsp;ikl&nbsp;plane</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_intensities"><strong>fun_intensities</strong></a>(self)</dt><dd><tt>Display&nbsp;intensities</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_powder"><strong>fun_powder</strong></a>(self)</dt><dd><tt>Plot&nbsp;Powder</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_set"><strong>fun_set</strong></a>(self)</dt><dd><tt>Set&nbsp;gui&nbsp;parameters&nbsp;from&nbsp;crystal</tt></dd></dl>
+
 <dl><dt><a name="Scatteringgui-fun_simulate"><strong>fun_simulate</strong></a>(self)</dt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="String_Viewer">class <strong>String_Viewer</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Simple&nbsp;GUI&nbsp;that&nbsp;displays&nbsp;strings<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="String_Viewer-__init__"><strong>__init__</strong></a>(self, string, title<font color="#909090">=''</font>)</dt><dd><tt>Initialise</tt></dd></dl>
+
+<dl><dt><a name="String_Viewer-fun_close"><strong>fun_close</strong></a>(self)</dt><dd><tt>close&nbsp;window</tt></dd></dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">

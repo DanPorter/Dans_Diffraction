@@ -1,0 +1,97 @@
+
+#(C) 2016 by FIZ Karlsruhe - Leibniz Institute for Information Infrastructure.  All rights reserved.
+data_10252-ICSD
+_database_code_ICSD 10252
+_audit_creation_date 1980-01-01
+_chemical_name_systematic 'Strontium lanthanum copper(III) oxide'
+_chemical_formula_structural 'Sr La Cu O4'
+_chemical_formula_sum 'Cu1 La1 O4 Sr1'
+_chemical_name_structure_type K2MgF4
+_exptl_crystal_density_diffrn 6.25
+_publ_section_title
+'Sur une nouvelle phase oxygenee du cuivre +III: Sr La Cu O4'
+loop_
+_citation_id
+_citation_journal_full
+_citation_year
+_citation_journal_volume
+_citation_page_first
+_citation_page_last
+_citation_journal_id_ASTM
+primary 'Journal of Solid State Chemistry' 1973 8 325 330 JSSCBI
+loop_
+_publ_author_name
+'Goodenough, J.B.'
+'Demazeau, G.'
+'Pouchard, M.'
+'Hagenmuller, P.'
+_cell_length_a 3.765(2)
+_cell_length_b 3.765(2)
+_cell_length_c 13.27(2)
+_cell_angle_alpha 90.
+_cell_angle_beta 90.
+_cell_angle_gamma 90.
+_cell_volume 188.11
+_cell_formula_units_Z 2
+_symmetry_space_group_name_H-M 'I 4/m m m'
+_symmetry_Int_Tables_number 139
+_refine_ls_R_factor_all 0.08
+loop_
+_symmetry_equiv_pos_site_id
+_symmetry_equiv_pos_as_xyz
+1 'y, x, -z'
+2 '-y, -x, -z'
+3 '-y, x, -z'
+4 'y, -x, -z'
+5 '-x, y, -z'
+6 'x, -y, -z'
+7 'x, y, -z'
+8 '-x, -y, -z'
+9 '-y, -x, z'
+10 'y, x, z'
+11 'y, -x, z'
+12 '-y, x, z'
+13 'x, -y, z'
+14 '-x, y, z'
+15 '-x, -y, z'
+16 'x, y, z'
+17 'y+1/2, x+1/2, -z+1/2'
+18 '-y+1/2, -x+1/2, -z+1/2'
+19 '-y+1/2, x+1/2, -z+1/2'
+20 'y+1/2, -x+1/2, -z+1/2'
+21 '-x+1/2, y+1/2, -z+1/2'
+22 'x+1/2, -y+1/2, -z+1/2'
+23 'x+1/2, y+1/2, -z+1/2'
+24 '-x+1/2, -y+1/2, -z+1/2'
+25 '-y+1/2, -x+1/2, z+1/2'
+26 'y+1/2, x+1/2, z+1/2'
+27 'y+1/2, -x+1/2, z+1/2'
+28 '-y+1/2, x+1/2, z+1/2'
+29 'x+1/2, -y+1/2, z+1/2'
+30 '-x+1/2, y+1/2, z+1/2'
+31 '-x+1/2, -y+1/2, z+1/2'
+32 'x+1/2, y+1/2, z+1/2'
+loop_
+_atom_type_symbol
+_atom_type_oxidation_number
+Sr2+ 2
+La3+ 3
+Cu3+ 3
+O2- -2
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_B_iso_or_equiv
+_atom_site_occupancy
+_atom_site_attached_hydrogens
+Sr1 Sr2+ 4 e 0 0 0.360(1) 0.27 0.5 0
+La1 La3+ 4 e 0 0 0.360(1) 0.27 0.5 0
+Cu1 Cu3+ 2 a 0 0 0 0.7 1. 0
+O1 O2- 4 c 0 0.5 0 0.8 1. 0
+O2 O2- 4 e 0 0 0.169(5) 1.32 1. 0
+#End of TTdata_10252-ICSD

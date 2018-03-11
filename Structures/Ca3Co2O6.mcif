@@ -1,0 +1,148 @@
+# Created by the Bilbao Crystallographic Server
+# http://www.cryst.ehu.es
+# Date: 02/17/2016 21:44:58
+# Database entry: 1.60 Ca3Co2O6
+# Cif-like file for the case 1.60
+
+
+data_5yOhtAoR
+_audit_creation_date            2016-02-17
+_audit_creation_method          "Bilbao Crystallographic Server"
+
+_chemical_name_systematic
+;
+;
+_chemical_name_common                    ?
+_chemical_formula_moiety                 ?
+_chemical_formula_structural             ?
+_chemical_formula_analytical             ?
+_chemical_formula_iupac                  ?
+_chemical_formula_sum                    'Ca3 Co2 O6'
+_chemical_formula_weight                 ?
+_chemical_melting_point                  ?
+_chemical_compound_source                ?
+_chemical_absolute_configuration         .
+
+
+_citation_journal_abbrev        "PHYSICAL REVIEW LETTERS"
+_citation_journal_volume        106
+_citation_page_first            ?
+_citation_page_last             ?
+_citation_article_id            197204
+_citation_year                  2011
+_citation_DOI                   ?
+
+loop_
+_citation_author_name
+"Agrestini, S."
+
+_atomic_positions_source_database_code_ICSD   246282
+_atomic_positions_source_other               .
+
+_transition_temperature     12
+_experiment_temperature     10
+
+loop_
+_irrep_id
+_irrep_dimension
+_irrep_small_dimension
+_irrep_direction_type
+_irrep_action
+_irrep_modes_number
+_irrep_presence
+mF2+ 3 1 . primary . .
+
+_exptl_crystal_magnetic_properties_details
+;
+coexistence with an INC phase.
+Phase emerges in slow time scale
+only Co2 magnetic active
+arbitrary moment scale
+;
+
+_active_magnetic_irreps_details
+;
+1k magnetic structure
+k-maximal magnetic structure
+active 1-dim small irrep
+;
+
+_parent_space_group.name_H-M                        'R -3c'
+_parent_space_group.IT_number                       167
+_parent_space_group.transform_to_standard_Pp_abc    'a,b,c;0,0,0'
+
+loop_
+_magnetic_propagation_vector_seq_id
+_magnetic_propagation_vector_kxkykz
+k1 1/2,-1/2,1
+
+_magnetic_space_group.standard_setting              'no'
+_magnetic_space_group.transform_from_parent_Pp_abc  '2a,2b,c;0,0,0'
+_magnetic_space_group.transform_to_standard_Pp_abc  '1/6a-1/6b+2/3c,-1/2a-1/2b,1/6a-1/6b-1/3c;0,0,0'
+
+loop_
+_magnetic_atom_site_moment_symmetry_constraints_label
+_atom_site_magnetic_moment_symmetry_constraints_mxmymz
+Co1 mx,my,mz
+Co2 mx,-mx,mz
+
+_space_group.magn_number_BNS   14.84
+_space_group.magn_name_BNS     "P_C 2_1/c"
+_space_group.magn_point_group "2/m1'"
+_space_group.magn_point_group_number "5.2.13"
+_cell_length_a                 18.11340
+_cell_length_b                 18.11340
+_cell_length_c                 10.35890
+_cell_angle_alpha              90.00
+_cell_angle_beta               90.00
+_cell_angle_gamma              120.00
+
+loop_
+_space_group_symop.magn_id
+_space_group_symop.magn_operation_xyz
+_space_group_symop.magn_operation_mxmymz
+1 x,y,z,+1 mx,my,mz
+2 y+1/6,x+1/3,-z+1/6,+1 my,mx,-mz
+3 -x,-y,-z,+1 mx,my,mz
+4 -y+1/6,-x+1/3,z+1/6,+1 my,mx,-mz
+
+loop_
+_space_group_symop.magn_centering_id
+_space_group_symop.magn_centering_xyz
+_space_group_symop.magn_centering_mxmymz
+1 x,y,z,+1 mx,my,mz
+2 x+1/6,y+5/6,z+2/3,+1 mx,my,mz
+3 x+1/3,y+2/3,z+1/3,+1 mx,my,mz
+4 x+1/2,y+1/2,z,+1 mx,my,mz
+5 x+2/3,y+1/3,z+2/3,+1 mx,my,mz
+6 x+5/6,y+1/6,z+1/3,+1 mx,my,mz
+7 x+5/6,y+2/3,z+1/3,-1 -mx,-my,-mz
+8 x,y+1/2,z,-1 -mx,-my,-mz
+9 x+1/6,y+1/3,z+2/3,-1 -mx,-my,-mz
+10 x+1/3,y+1/6,z+1/3,-1 -mx,-my,-mz
+11 x+1/2,y,z,-1 -mx,-my,-mz
+12 x+2/3,y+5/6,z+2/3,-1 -mx,-my,-mz
+
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Ca1_1 Ca 0.18460 0.00000 0.25000 1
+Ca1_2 Ca 0.81540 0.81540 0.25000 1
+Co1 Co 0.00000 0.00000 0.00000 1
+Co2 Co 0.00000 0.00000 0.25000 1
+O1_1 O 0.08830 0.01220 0.11380 1
+O1_2 O 0.98780 0.07610 0.11380 1
+O1_3 O 0.92390 0.91170 0.11380 1
+
+loop_
+_atom_site_moment_label
+_atom_site_moment_crystalaxis_x
+_atom_site_moment_crystalaxis_y
+_atom_site_moment_crystalaxis_z
+Co1 0 0 0
+Co2 0.0 0.0 1.
+

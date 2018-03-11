@@ -1,5 +1,5 @@
 """
-CrystalProgs Examples
+Dans_Diffraction Examples
 Calculate list of reflections
 """
 
@@ -13,7 +13,7 @@ from Dans_Diffraction import Crystal
 cf=os.path.dirname(__file__)
 
 
-f = cf+'/Ca2RuO4_Pbca.cif'
+f = cf+'/../Structures/Ca2RuO4_Pbca.cif'
 
 xtl = Crystal(f)
 xtl.Atoms.changeatom(1,mxmymz=[0,3,0])
