@@ -9,5 +9,5 @@ from Dans_Diffraction import functions_crystallography as fc
 from Dans_Diffraction.classes_crystal import Crystal,Multi_Crystal
 
 if __name__ == '__main__':
-    
+
     xtl = Crystal()
