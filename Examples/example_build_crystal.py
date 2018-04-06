@@ -8,9 +8,9 @@ import sys,os
 import numpy as np
 import matplotlib.pyplot as plt # Plotting
 
-from Dans_Diffraction.classes_crystal import Crystal
+from Dans_Diffraction import Crystal
 
-cf=os.path.dirname(__file__)
+cf = os.path.dirname(__file__)
 
 xtl = Crystal()
 

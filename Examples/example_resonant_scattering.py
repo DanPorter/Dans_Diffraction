@@ -13,7 +13,7 @@ from Dans_Diffraction import Crystal
 cf=os.path.dirname(__file__)
 
 
-f = cf+'/../Structures/Ca2RuO4_Pbca.cif'
+f = cf+'/../Dans_Diffraction/Structures/Ca2RuO4.cif'
 
 xtl = Crystal(f)
 xtl.Atoms.changeatom(1,mxmymz=[1,3,0])

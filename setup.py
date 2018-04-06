@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 setup(
 	name = 'Dans_Diffraction',
 	packages = ['Dans_Diffraction'],
@@ -10,11 +10,11 @@ setup(
 	download_url = 'https://github.com/DanPorter/Dans_Diffraction/archive/0.1.tar.gz',
 	keywords = ['crystal','cif','diffraction','crystallography','science'],
 	classifiers = [
-		'Programming Language :: Python',
-		'Intended Audience :: Science/Research',
-		'License :: GNU GENERAL PUBLIC LICENSE v3',
 		'Programming Language :: Python :: 2.7',
+		'Intended Audience :: Science/Research',
+		'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
 		'Development Status :: 3 - Alpha', 
 		],
-	'install_requires'=['numpy','matplotlib','scipy']
+	install_requires=['numpy','matplotlib','scipy'],
+	package_data={'':['data/*.txt','data/*.dat','Structures/*.cif','Structures/*.mcif']}
 	)

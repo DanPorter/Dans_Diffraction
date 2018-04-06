@@ -24,14 +24,15 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.0
-Last updated: 13/02/18
+Version 2.2
+Last updated: 05/04/18
 
 Version History:
 27/07/17 1.0    Version History started.
 30/10/17 1.1    Many minor updates.
 06/01/18 2.0    Name change and other updates
 13/02/18 2.1    Move scattering commands to xtl.Scatter
+05/04/18 2.2    Magnetic symmetry automatically inverted for odd time
 
 @author: DGPorter
 """
@@ -43,7 +44,7 @@ from Dans_Diffraction import functions_general as fg
 from Dans_Diffraction import functions_crystallography as fc
 from Dans_Diffraction.classes_properties import Properties
 from Dans_Diffraction.classes_scattering import Scattering
-from Dans_Diffraction.classes_plotting import Plotting, Multi_Plotting, Plotting_Superstructure
+from Dans_Diffraction.classes_plotting import Plotting, MultiPlotting, Plotting_Superstructure
 
 
 class Crystal:
@@ -248,6 +249,7 @@ class Crystal:
         self.Structure.info()
         print('')
         #print "To see the full list of structure positions, type Crystal.Structure.info()"
+
 
 class Cell:
     """
@@ -502,7 +504,6 @@ class Cell:
         plane_coord = 2*q_max*box_coord[incell,:]
         return plane_coord[:,0],plane_coord[:,1],HKL[incell,:]
 
-# Atoms section
 
 class Atoms:
     """
@@ -823,6 +824,7 @@ class Atoms:
             for n in range(0,len(self.u)):
                 print(fmt % (n,self.type[n],self.u[n],self.v[n],self.w[n],self.occupancy[n],self.uiso[n]))
 
+
 class Symmetry:
     """
     Contains symmetry information about the crystal, including the symmetry operations.
@@ -879,6 +881,10 @@ class Symmetry:
                 symmag = cifvals['_space_group_symop_magn_operation_mxmymz'] # mx,my,mz
             else:
                 symmag = [fg.multi_replace(sp, ops, '') for sp in symops]
+                # invert magnetic symmetry when time odd
+                for n in range(len(symmag)):
+                    if symtim[n] < 0:
+                        symmag[n] = fc.invert_sym(symmag[n])
             
             # Centring vectors also given in this case
             symcen_tim = cifvals['_space_group_symop_magn_centering_xyz']
@@ -888,6 +894,10 @@ class Symmetry:
                 symcenmag = cifvals['_space_group_symop_magn_centering_mxmymz'] # mx,my,mz
             else:
                 symcenmag = [fg.multi_replace(sp, ops, '') for sp in symcen]
+                # invert magnetic symmetry when time odd
+                for n in range(len(symcenmag)):
+                    if symcentim[n] < 0:
+                        symcenmag[n] = fc.invert_sym(symcenmag[n])
             
             # add magnetic symmetries
             symops_mag = [op.replace('m','') for op in symmag]
@@ -947,7 +957,7 @@ class Symmetry:
         ID = np.asarray(idx).reshape(-1)
         for idx in ID:
             old_op = self.symmetry_operations_magnetic[idx]
-            new_op = old_op.replace('x','-x').replace('y','-y').replace('z','-z').replace('--','+').replace('+-','-')
+            new_op = fc.invert_sym(old_op)
             self.symmetry_operations_magnetic[idx] = new_op
     
     def addsym(self,operations,mag_operations=None):
@@ -1210,10 +1220,14 @@ class Symmetry:
                 S = symmag
             """
             
-            mag_uvw = fc.gen_symcen_pos(S,mx,my,mz)
+            #mag_uvw = fc.gen_symcen_pos(S,mx,my,mz)
+            pass
     
     def info(self):
-        "Prints the symmetry information"
+        """
+        Prints the symmetry information
+        :return: None
+        """
         
         print 'Spacegoup: %s (%g)' % (self.spacegroup,self.spacegroup_number)
         
@@ -1229,6 +1243,7 @@ class Symmetry:
         #    print '%2d %25s %25s' %(n,x1,x2)
         print '-----------------------------------------------------'
         print('')
+
 
 class Superstructure(Crystal):
     """
@@ -1261,7 +1276,7 @@ class Superstructure(Crystal):
     Parent = Crystal()
     P = [[1,0,0],[0,1,0],[0,0,1]]
     
-    def __init__(self,Parent,P):
+    def __init__(self, Parent, P):
         
         # Instatiate crystal attributes
         self.Cell = Cell()
@@ -1389,11 +1404,13 @@ class Superstructure(Crystal):
         Q = self.Parent.Cell.calculateQ(parent_HKL)
         return fc.indx(Q,self.superUVstar())
 
-class Multi_Crystal(Multi_Plotting):
+
+class MultiCrystal(MultiPlotting):
     """
     Multi_Crystal class for combining multiple phases
     """
     _scattering_type = 'xray'
+
     def __init__(self,crystal_list):
         """
         Multi-crystal class

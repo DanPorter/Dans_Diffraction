@@ -858,7 +858,7 @@ class String_Viewer:
         self.root.destroy()
 
 if __name__ == '__main__':
-    from Dans_Diffraction import Crystal,Multi_Crystal,Structures
+    from Dans_Diffraction import Crystal,MultiCrystal,Structures
     S = Structures()
     xtl = S.Diamond.build()
     Crystalgui(xtl)

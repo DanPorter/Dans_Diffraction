@@ -11,8 +11,8 @@ from Dans_Diffraction.classes_crystal import Crystal
 cf=os.path.dirname(__file__)
 
 
-f = cf+'/../Structures/Diamond.cif'
-f = cf+'/../Structures/Na0.8CoO2_P63mmc.cif'
+f = cf+'/../Dans_Diffraction/Structures/Diamond.cif'
+f = cf+'/../Dans_Diffraction/Structures/Na0.8CoO2_P63mmc.cif'
 
 xtl = Crystal(f)
 

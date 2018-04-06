@@ -24,7 +24,7 @@ Version History:
 @author: DGPorter
 """
 
-import sys,os,re
+import sys, os, re
 import numpy as np
 
 # File directory
@@ -38,7 +38,7 @@ c = 299792458       # m/s   Speed of light
 u0 = 4*pi*1e-7      # H m-1 Magnetic permeability of free space
 me = 9.109e-31      # kg Electron rest mass
 Na = 6.022e23       # Avagadro's No
-A = 1e-10;          # m Angstrom
+A = 1e-10           # m Angstrom
 Cu = 8.048          # Cu-Ka emission energy, keV
 Mo = 17.4808        # Mo-Ka emission energy, keV
 

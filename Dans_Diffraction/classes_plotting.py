@@ -853,7 +853,8 @@ class Plotting_Superstructure(Plotting):
         fp.labels(ttl,xlab,ylab)
         plt.show()
 
-class Multi_Plotting:
+
+class MultiPlotting:
     """
     Plotting functions for the Multi-Crystal Object
     """

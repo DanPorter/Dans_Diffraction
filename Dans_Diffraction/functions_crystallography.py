@@ -11,14 +11,15 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 2.1
-Last updated: 02/03/18
+Version 2.2
+Last updated: 05/04/18
 
 Version History:
 09/07/15 0.1    Version History started.
 30/10/17 1.0    Many updates
 06/01/18 2.0    Renamed functions_crystallography.py
 02/03/18 2.1    Removed call to tkinter
+05/04/18 2.2    Added invert_sym
 
 @author: DGPorter
 """
@@ -794,6 +795,21 @@ def gen_sym_mat(sym_ops):
                 mat[n,3] = eval(op)
         sym_mat += [mat]
     return sym_mat
+
+def invert_sym(sym_op):
+    """
+    Invert the sign of the given symmetry operation
+    Usage:
+      new_op = invert_sym(sym_op)
+      sym_op = str symmetry operation e.g. 'x,y,z'
+      new_op = inverted symmetry
+    E.G.
+      new_op = invert_sym('x,y,z')
+      >> new_op = '-x,-y,-z'
+    """
+    
+    new_op = sym_op.replace('x','-x').replace('y','-y').replace('z','-z').replace('--','+').replace('+-','-')
+    return new_op
 
 def orthogonal_axes(x_axis=[1,0,0],y_axis=[0,1,0]):
         """
