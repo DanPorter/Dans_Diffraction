@@ -16,6 +16,7 @@ Version History:
 30/10/17 1.0    Main functions finished.
 06/10/18 1.1    Program renamed
 05/03/18 1.2    Added plt.show() to functions
+17/04/18 1.3    Removed plt.show() from functions (allowing plot editing +stackig in non-interactive mode)
 
 @author: DGPorter
 """
@@ -117,7 +118,6 @@ class Plotting:
         plt.legend()
         
         plt.title(self.xtl.name,fontsize=20,fontweight='bold')
-        plt.show()
     
     def plot_layers(self,layer_axis=2,layer_width=0.05,show_labels=False):
         """
@@ -210,7 +210,6 @@ class Plotting:
             
             ttl = '%s\nLayer %2.0f = %5.3f' %(self.xtl.name,L,layer)
             plt.title(ttl,fontsize=20,fontweight='bold')
-            plt.show()
     
     def generate_powder(self,q_max=8,peak_width=0.01,background=0):
         """
@@ -359,7 +358,6 @@ class Plotting:
         ylab = u'Intensity'
         ttl = '%s\nE = %1.3f keV' % (self.xtl.name,energy_kev)
         fp.labels(ttl,xlab,ylab)
-        plt.show()
     
     def generate_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],
                                     q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
@@ -486,7 +484,6 @@ class Plotting:
         ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0],y_axis[1],y_axis[2])
         ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name,centre[0],centre[1],centre[2])
         fp.labels(ttl,xlab,ylab)
-        plt.show()
     
     def simulate_hk0(self,L=0,**kwargs):
         """
@@ -534,26 +531,17 @@ class Plotting:
         # not done yet
         
         # calclate max_q
+
         q_max = fc.calQmag(180, energy_kev)
-        
-        # calculate diffractometer angles
-        angles = np.arange(0,180,0.1)
-        Q1x,Q1y = fc.diffractometer_Q(angles,180,energy_kev) # delta=180
-        Q2x,Q2y = fc.diffractometer_Q(angles,angles,energy_kev) # eta=delta
-        Q3x,Q3y = fc.diffractometer_Q(0,angles,energy_kev) # eta=0
-        
+
         # Create intensity plot
         self.simulate_intensity_cut(sample_para, sample_normal,[0,0,0],q_max,**kwargs)
         
         # Add diffractometer angles
-        plt.plot(Q1x,Q1y,'k',lw=2,label='delta=180')
-        plt.plot(Q2x,Q2y,'k',lw=2,label='delta=eta')
-        plt.plot(Q3x,Q3y,'k',lw=2,label='eta=0')
-        plt.axis([-q_max,q_max,0,q_max])
+        fp.plot_ewald_coverage(energy_kev)
         
         ttl = '%s\nE = %1.3f keV' % (self.xtl.name,energy_kev)
         fp.labels(ttl)
-        plt.show()
     
     def plot_3Dlattice(self,q_max=4.0,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],cut_width=0.05):
         """
@@ -587,7 +575,6 @@ class Plotting:
         plt.plot(Q[inplot,0],Q[inplot,1],Q[inplot,2],'ro')
         
         fp.labels(self.xtl.name,'Qx','Qy','Qz')
-        plt.show()
     
     def quick_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0], q_max=4.0,cut_width=0.05):
         """
@@ -679,7 +666,6 @@ class Plotting:
         ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0],y_axis[1],y_axis[2])
         ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name,centre[0],centre[1],centre[2])
         fp.labels(ttl,xlab,ylab)
-        plt.show()
     
     def simulate_azimuth(self,hkl,energy_kev=None,polarisation='sp',F0=1,F1=1,F2=1,azim_zero=[1,0,0]):
         """
@@ -710,9 +696,9 @@ class Plotting:
         plt.xlim([-180,180])
         plt.ylim([0,1.1*np.max(IXR)])
         fp.labels(ttl,'psi [Deg]',pol)
-        plt.show()
 
-class Plotting_Superstructure(Plotting):
+
+class PlottingSuperstructure(Plotting):
     """
     Plotting functions for Superstructure class crystal object
     Copies the functions from Plotting, but changes several functions to apply additional actions
@@ -788,7 +774,6 @@ class Plotting_Superstructure(Plotting):
         if background:
             bkg = np.random.normal(background,np.sqrt(background), [pixels,pixels])
             mesh = mesh+bkg
-        
         return X,Y,mesh
     
     def simulate_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],
@@ -851,7 +836,6 @@ class Plotting_Superstructure(Plotting):
         ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0],y_axis[1],y_axis[2])
         ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name,centre[0],centre[1],centre[2])
         fp.labels(ttl,xlab,ylab)
-        plt.show()
 
 
 class MultiPlotting:
@@ -954,7 +938,6 @@ class MultiPlotting:
         ttl = 'E = %1.3f keV' % (energy_kev)
         plt.legend(loc=0,fontsize=18,frameon=False)
         fp.labels(ttl,xlab,ylab)
-        plt.show()
     
     def simulate_intensity_cut(self,x_axis_crystal=[[1,0,0]],y_axis_crystal=[[0,1,0]],centre=[0,0,0],
                                     q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
@@ -1084,7 +1067,6 @@ class MultiPlotting:
         ylab = u'Qy [$\AA^{-1}$]' 
         #ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.name,centre[0],centre[1],centre[2])
         fp.labels(None,xlab,ylab)
-        plt.show()
     
     def quick_intensity_cut(self,x_axis_crystal=[[1,0,0]],y_axis_crystal=[[0,1,0]],centre=[0,0,0], q_max=4.0,cut_width=0.05):
         """
@@ -1181,4 +1163,3 @@ class MultiPlotting:
         fp.labels(None,xlab,ylab)
         names = [xtl.name for xtl in self.crystal_list]
         plt.legend(legend_entries,names,frameon=True,fontsize=16)
-        plt.show()

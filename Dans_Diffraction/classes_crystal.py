@@ -44,7 +44,7 @@ from Dans_Diffraction import functions_general as fg
 from Dans_Diffraction import functions_crystallography as fc
 from Dans_Diffraction.classes_properties import Properties
 from Dans_Diffraction.classes_scattering import Scattering
-from Dans_Diffraction.classes_plotting import Plotting, MultiPlotting, Plotting_Superstructure
+from Dans_Diffraction.classes_plotting import Plotting, MultiPlotting, PlottingSuperstructure
 
 
 class Crystal:
@@ -1333,7 +1333,7 @@ class Superstructure(Crystal):
                        mxmymz=new_mxmymz)
         
         # Add exta functions
-        self.Plot = Plotting_Superstructure(self)
+        self.Plot = PlottingSuperstructure(self)
         self.Scatter = Scattering(self)
         self.Properties = Properties(self)
     

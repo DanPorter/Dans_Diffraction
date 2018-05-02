@@ -28,7 +28,7 @@ class Properties:
     """
     Properties functions for the Crystal Object
     """
-    def __init__(self,xtl):
+    def __init__(self, xtl):
         "initialise"
         self.xtl = xtl
 

@@ -11,15 +11,18 @@ Diamond
 Usage: 
     - Run this file in an interactive console
     OR
-    - from Dans_Diffraction import functions_general as fg
+    - from Dans_Diffraction import functions_plotting as fp
+
+All plots generated require plt.show() called unless using interactive mode
     
 
-Version 1.1
+Version 1.2
 Last updated: 05/03/18
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
 05/03/18 1.1    Removed plt.show from arrow functions
+17/04/18 1.2    Removed plt.show from other functions
 
 @author: DGPorter
 """
@@ -99,7 +102,7 @@ def newplot(*args,**kwargs):
     
     plt.figure(figsize=[12,12])
     plt.plot(*args,**kwargs)
-    plt.show()
+
 
 def newplot3(*args,**kwargs):
     """
@@ -133,7 +136,6 @@ def newplot3(*args,**kwargs):
             ax.plot(x[n],y[n],z[n],*args[3:],**kwargs)
     else:
         ax.plot(*args,**kwargs)
-    plt.show()
 
 def sliderplot(YY,X=None,slidervals=None,*args,**kwargs):
     """
@@ -184,7 +186,7 @@ def sliderplot(YY,X=None,slidervals=None,*args,**kwargs):
         plt.gcf().canvas.draw()
         #fig1.canvas.draw()
     sldr.on_changed(update)
-    plt.show()
+
 
 def sliderplot2D(ZZZ,XX=None,YY=None,slidervals=None,*args,**kwargs):
     """
@@ -246,7 +248,7 @@ def sliderplot2D(ZZZ,XX=None,YY=None,slidervals=None,*args,**kwargs):
         plt.gcf().canvas.draw()
         #fig1.canvas.draw()
     sldr.on_changed(update)
-    plt.show()
+
 
 def plot_cell(cell_centre=[0,0,0],CELL=np.eye(3)):
     """
@@ -302,7 +304,7 @@ class Arrow3D(FancyArrowPatch):
       ax.plot([0,0],[0,0],[0,1],'k-')
       v = Arrow3D([0,1],[0,1],[0,1], mutation_scale=20, lw=3, arrowstyle="-|>", color="r")
       ax.add_artist(v)
-      plt.show()
+
     """
     def __init__(self, xs, ys, zs, *args, **kwargs):
         if 'arrowstyle' not in kwargs.keys():
@@ -507,3 +509,26 @@ def plot_vector_arrows(vec_a,vec_b,vec_a_lab=None,vec_b_lab=None,arrow_size=40,c
     plt.text(vec_b[0,0],vec_b[0,1],vec_b_lab,fontname='Times',weight='bold',size=fontsize)
     
     ax.axis(axsize)
+
+def plot_ewald_coverage(energy_kev, color='k', linewidth=2):
+    """
+    Plot Ewald coverage of a single axis diffractometer on current plot in 2D
+    Includes boundaries for theta=0, twotheta=180 and theta=twotheta
+
+    :param energy_kev: float
+    :return: None
+    """
+
+    q_max = fc.calQmag(180, energy_kev)
+
+    # calculate diffractometer angles
+    angles = np.arange(0, 180, 0.1)
+    Q1x, Q1y = fc.diffractometer_Q(angles, 180, energy_kev)  # delta=180
+    Q2x, Q2y = fc.diffractometer_Q(angles, angles, energy_kev)  # eta=delta
+    Q3x, Q3y = fc.diffractometer_Q(0, angles, energy_kev)  # eta=0
+
+    # Add diffractometer angles
+    plt.plot(Q1x, Q1y, color, linewidth, label=r'2$\theta$=180')
+    plt.plot(Q2x, Q2y, color, linewidth, label=r'2$\theta$=$\theta$')
+    plt.plot(Q3x, Q3y, color, linewidth, label=r'$\theta$=0')
+    plt.axis([-q_max, q_max, 0, q_max])

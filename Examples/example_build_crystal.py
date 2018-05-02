@@ -8,11 +8,11 @@ import sys,os
 import numpy as np
 import matplotlib.pyplot as plt # Plotting
 
-from Dans_Diffraction import Crystal
+import Dans_Diffraction as dif
 
 cf = os.path.dirname(__file__)
 
-xtl = Crystal()
+xtl = dif.Crystal()
 
 xtl.name = 'Oh! What a Lovely Crystal'
 xtl.new_cell([2.8,2.8,6.0,90,90,90])
@@ -24,3 +24,4 @@ xtl.generate_structure() # apply symmetry to atomic positions.
 
 xtl.info()
 xtl.Plot.plot_crystal()
+plt.show()

@@ -22,6 +22,7 @@ xtl.Atoms.changeatom(1,mxmymz=[0,3,0])
 xtl.generate_structure()
 
 xtl.Plot.plot_crystal()
+plt.show()
 
 #xtl._scattering_type = 'xray magnetic' # neutron magnetic
 xtl.Scatter.setup_scatter(

@@ -8,17 +8,14 @@ import sys,os
 import numpy as np
 import matplotlib.pyplot as plt # Plotting
 
-from Dans_Diffraction import functions_general as fg
-from Dans_Diffraction import functions_crystallography as fc
-from Dans_Diffraction import Crystal
-from Dans_Diffraction import structure_list
+import Dans_Diffraction as dif
 
 cf=os.path.dirname(__file__)
 
 
-dia = structure_list.Diamond.build()
-f = structure_list.Sr3Ir2O7.filename
-xtl = Crystal(f)
+dia = dif.structure_list.Diamond.build()
+f = dif.structure_list.Sr3Ir2O7.filename
+xtl = dif.Crystal(f)
 
 en = 12
 
@@ -55,12 +52,14 @@ xtl.hkl(hkl1,en)
 """
 xtl.Scatter.print_ref_reflections(en, min_intensity=None, max_intensity=None)
 
-
+plt.ion()
 xtl.Plot.simulate_ewald_coverage(en, [0,0,1], [1,0,0])
 angles = np.arange(min_eta,max_eta,0.1)
-Q1x,Q1y=fc.diffractometer_Q(angles,max_delta,en)
-Q2x,Q2y=fc.diffractometer_Q(angles,angles+min_eta,en)
-Q3x,Q3y=fc.diffractometer_Q(min_eta,angles+min_eta,en)
+Q1x,Q1y=dif.fc.diffractometer_Q(angles, max_delta, en)
+Q2x,Q2y=dif.fc.diffractometer_Q(angles, angles + min_eta, en)
+Q3x,Q3y=dif.fc.diffractometer_Q(min_eta, angles + min_eta, en)
 plt.plot(Q1x,Q1y,'r',lw=2)
 plt.plot(Q2x,Q2y,'r',lw=2)
 plt.plot(Q3x,Q3y,'r',lw=2)
+plt.ioff()
+plt.show()

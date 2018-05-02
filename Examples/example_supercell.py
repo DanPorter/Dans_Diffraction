@@ -6,14 +6,14 @@ Calculate list of reflections
 import sys,os
 import numpy as np
 import matplotlib.pyplot as plt # Plotting
-from Dans_Diffraction.classes_crystal import Crystal
+import Dans_Diffraction as dif
 
 cf=os.path.dirname(__file__)
 
 
 f = cf+'/../Dans_Diffraction/Structures/Na0.8CoO2_P63mmc.cif'
 
-xtl = Crystal(f)
+xtl = dif.Crystal(f)
 
 #P = [[2,-1,0],[1,3,0],[0,0,1]] # 1/7th Supercell
 #P = [[-1,3,0],[4,3,0],[0,0,1]] # Square Supercell
@@ -42,6 +42,7 @@ plt.ion()
 sup.Plot.simulate_hk0()
 plt.clim([0,10])
 plt.ioff()
+plt.show()
 
 # Plot the structure in 2D layers
 #sup.Plot.plot_layers(show_labels=True)

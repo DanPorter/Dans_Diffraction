@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 2.2
-Last updated: 05/04/18
+Version 2.3
+Last updated: 02/05/18
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -20,6 +20,7 @@ Version History:
 06/01/18 2.0    Renamed functions_crystallography.py
 02/03/18 2.1    Removed call to tkinter
 05/04/18 2.2    Added invert_sym
+02/05/18 2.3    Added comparison of lower case elements and symmetry values
 
 @author: DGPorter
 """
@@ -378,8 +379,7 @@ def atom_properties(elements=None,fields=None):
     """
     
     # elements must be a list e.g. ['Co','O']
-    if type(elements) == str:
-        elements = [elements]
+    elements = np.char.lower(np.asarray(elements).reshape(-1))
     
     atomfile = os.path.join(datadir,'Dans Element Properties.txt')
     file = open(atomfile)
@@ -390,9 +390,9 @@ def atom_properties(elements=None,fields=None):
         indx = [None]*len(elements)
         for n in range(len(data)):
             d = data[n]
-            if d['Element'] in elements:
+            if d['Element'].lower() in elements:
                 for m in range(len(elements)):
-                    if d['Element'] == elements[m]:
+                    if d['Element'].lower() == elements[m]:
                         indx[m] = n
         data = data[indx]
     
@@ -659,6 +659,7 @@ def gen_sym_pos(sym_ops,x,y,z):
     uvw = np.zeros([len(sym_ops),3])
     for n in range(len(sym_ops)):
         sym = sym_ops[n]
+        sym = sym.lower()
         # Evaluate string symmetry operation in terms of x,y,z
         sym = sym.replace('/','./')
         sym = sym.strip('\"\'')
@@ -712,12 +713,14 @@ def gen_symcen_ops(sym_ops,cen_ops):
     
     ops = []
     for sym in sym_ops:
+        sym = sym.lower()
         sym = sym.strip('\"\'')
         x,y,z = sym.split(',')
         x = x.strip()
         y = y.strip()
         z = z.strip()
         for cen in cen_ops:
+            cen = cen.lower()
             cen = cen.strip('\"\'')
             op = cen.replace('x','a').replace('y','b').replace('z','c') # avoid replacing x/y twice
             op = op.replace('a',x).replace('b',y).replace('c',z)
@@ -771,6 +774,7 @@ def gen_sym_mat(sym_ops):
     """
     sym_mat = []
     for sym in sym_ops:
+        sym = sym.lower()
         ops = sym.split(',')
         mat = np.zeros([3,4])
         
@@ -807,7 +811,7 @@ def invert_sym(sym_op):
       new_op = invert_sym('x,y,z')
       >> new_op = '-x,-y,-z'
     """
-    
+    sym_op = sym_op.lower()
     new_op = sym_op.replace('x','-x').replace('y','-y').replace('z','-z').replace('--','+').replace('+-','-')
     return new_op
 
@@ -1008,6 +1012,16 @@ def symmetry_ops2magnetic(operations):
     rem = ['+1/2','+1/3','+2/3','+1/6','+5/6']
     return [fg.multi_replace(sp, rem, '') for sp in operations]
 
+def hkl2str(hkl):
+    """
+    Convert hkl to string (h,k,l)
+    :param hkl:
+    :return: str '(h,k,l)'
+    """
+
+    out = '(%1.0f,%1.0f,%1.0f)'
+    hkl = np.asarray(hkl, dtype=np.float).reshape([-1, 3])
+    return '\n'.join([out % (x[0], x[1], x[2]) for x in hkl])
 
 '--------------------------Misc Crystal Programs------------------------'
 
