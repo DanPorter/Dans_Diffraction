@@ -205,7 +205,9 @@ class Plotting:
             # Supercell grid
             if hasattr(self.xtl,'Parent'):
                 parentUV = self.xtl.parentUV()
-                fp.plot_vector_lines(parentUV[layer_axis_x,:], parentUV[layer_axis_y,:], linewidth=0.5, shade=0.5, color='k')
+                sclatt = fp.axis_lattice_points(parentUV[layer_axis_x,:], parentUV[layer_axis_y,:], plt.axis())
+                fp.plot_lattice_lines(sclatt, parentUV[layer_axis_x,:], parentUV[layer_axis_y,:],
+                                      linewidth=0.5, shade=0.5, color='k')
             #plt.legend()
             
             ttl = '%s\nLayer %2.0f = %5.3f' %(self.xtl.name,L,layer)
@@ -473,7 +475,7 @@ class Plotting:
         vec_a_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_a[0]+centre[0],vec_a[1]+centre[1],vec_a[2]+centre[2])
         vec_b_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_b[0]+centre[0],vec_b[1]+centre[1],vec_b[2]+centre[2])
         
-        fp.plot_vector_lines(mesh_vec_a, mesh_vec_b)
+        fp.plot_lattice_lines(mesh_vec_a, mesh_vec_b)
         fp.plot_vector_arrows(mesh_vec_a, mesh_vec_b, vec_a_lab, vec_b_lab)
         #fp.plot_vector_lines(Q_vec_a, Q_vec_b)
         #fp.plot_vector_arrows(Q_vec_a, Q_vec_b, vec_a_lab, vec_b_lab)
@@ -826,8 +828,9 @@ class PlottingSuperstructure(Plotting):
         cen_lab = '(%1.3g,%1.3g,%1.3g)' % (centre[0],centre[1],centre[2])
         vec_a_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_a[0]+centre[0],vec_a[1]+centre[1],vec_a[2]+centre[2])
         vec_b_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_b[0]+centre[0],vec_b[1]+centre[1],vec_b[2]+centre[2])
-        
-        fp.plot_vector_lines(Q_vec_a, Q_vec_b)
+
+        lattQ = fp.axis_lattice_points(Q_vec_a, Q_vec_b, plt.axis())
+        fp.plot_lattice_lines(lattQ, Q_vec_a, Q_vec_b)
         fp.plot_vector_arrows(Q_vec_a, Q_vec_b, vec_a_lab, vec_b_lab)
         plt.text(0-(0.2*q_max),0-(0.1*q_max),cen_lab,fontname='Times',weight='bold',size=18)
         
