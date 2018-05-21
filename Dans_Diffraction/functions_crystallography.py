@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 2.3
-Last updated: 02/05/18
+Version 2.4
+Last updated: 21/05/18
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -21,6 +21,7 @@ Version History:
 02/03/18 2.1    Removed call to tkinter
 05/04/18 2.2    Added invert_sym
 02/05/18 2.3    Added comparison of lower case elements and symmetry values
+21/05/18 2.4    Added new checks to readcif
 
 @author: DGPorter
 """
@@ -39,12 +40,15 @@ def getenergy():
 
 '--------------Functions to Load crystal Structures----------------------'
 
-def readcif(filename=None):
+def readcif(filename=None, debug=False):
     """
     Read a cif file in as a structure 
       crys=readcif(file)
       crys[key] = value
     keys are give by crys.keys()
+
+    To debug the file, use:
+      cif = readcif(file, debug=True)
     """
     
     # Get file name
@@ -53,8 +57,13 @@ def readcif(filename=None):
 
     # Open file    
     file = open(filename)
-    lines = file.readlines()
+    text = file.read()
     file.close()
+
+    # Remove blank lines
+    while "\n\n" in text:
+        text = text.replace("\n\n", "\n")
+    lines = text.splitlines()
     
     cifvals = {}
     cifvals['Filename'] = filename
@@ -73,12 +82,23 @@ def readcif(filename=None):
             continue
         
         # Search for stored value lines
-        if vals[0][0] == '_' and len(vals) > 1:
-            if len(vals) > 2 and ('\'' in vals[1] or '"' in vals[1]): # catch strings with spaces
+        if vals[0][0] == '_':
+            if len(vals) > 2 and ('\'' in vals[1] or '"' in vals[1]):
+                # catch strings with spaces
                  cifvals[vals[0]] = ' '.join(vals[1:]).strip('\'"')
-            else: 
+            elif len(vals) == 1 and ';' in lines[n+1]:
+                # Catch multi-line arguments
+                n += 1
+                cifvals[vals[0]] = lines[n]
+                while lines[n].strip() != ';':
+                    cifvals[vals[0]] += [lines[n]]
+                    n += 1
+            elif len(vals) > 1:
                 cifvals[vals[0]] = vals[1]
             n += 1
+
+            if debug:
+                print('%5d %s = %s'%(n, vals[0], cifvals[vals[0]]))
             continue
             
         # Search for loops
@@ -86,16 +106,20 @@ def readcif(filename=None):
             n +=1
             loopvals = []
             # Step 1: Assign loop columns
-            while lines[n].split()[0][0] == '_':
+            # looped columns are given by "_column_name"
+            while n < len(lines) and len(lines[n].strip()) > 0 and lines[n].strip()[0] == '_': # 21/5/18 split()[0][0] == '_':
                 loopvals += [lines[n].split()[0]]
                 cifvals[loopvals[-1]] = []
                 n += 1
-            
+
+            # Skip blank line after column names, e.g. 1000175.cif 21/5/18
+            #if len(lines[n].strip()) == 0: n += 1
+
             # Step 2: Assign data to columns
+            # loops until line has less segments than columns
             while n < len(lines) and len(lines[n].split()) >= len(loopvals):
                 cols = lines[n].split()
                 cols = cols[:len(loopvals)-1]+[''.join(cols[len(loopvals)-1:])] # fixes error on symmetry arguments having spaces
-                #print len(loopvals),lines[n],cols
                 if cols[0][0] == '_' or cols[0] == 'loop_': break # catches error if loop is only 1 iteration
                 if len(loopvals) == 1:
                     cifvals[loopvals[0]] += [lines[n].strip()]
@@ -103,6 +127,10 @@ def readcif(filename=None):
                     for c,ll in enumerate(loopvals):
                         cifvals[ll] += [cols[c]]
                 n += 1
+
+            if debug:
+                for ll in loopvals:
+                    print('%5d %s = %s' % (n, ll, str(cifvals[ll])))
             continue
         
         else:

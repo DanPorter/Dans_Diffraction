@@ -32,6 +32,7 @@ def cif_list():
     cif_files = np.sort(cif_files)
     return cif_files
 
+
 class Structures:
     """
     Provides a database of cif files
