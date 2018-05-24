@@ -15,12 +15,13 @@ Usage:
     - from Dans_Diffraction import functions_general as fg
 
 
-Version 1.0
-Last updated: 06/01/18
+Version 1.2
+Last updated: 24/05/18
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
 02/05/18 1.1    Added find_vector
+24/05/18 1.2    Corrected 'quad' for the case (1,-2,1)=1
 
 @author: DGPorter
 """
@@ -97,9 +98,11 @@ def quad(A):
 
     A = np.asarray(A, dtype=np.float).reshape((-1, 3))
     if A.size == 1:
-        return (np.sum(A, axis=1) > 0)[0] * 2 - 1
+        # return (np.sum(A,axis=1)>0)[0]*2 - 1
+        return (np.sum(A >= 0, axis=1) > 1)[0] * 2 - 1
     else:
-        return (np.sum(A, axis=1) > 0) * 2 - 1
+        # return (np.sum(A,axis=1)>0)*2 - 1
+        return (np.sum(A >= 0, axis=1) > 1) * 2 - 1
 
 
 def quadmag(A):

@@ -689,6 +689,8 @@ class Scattering:
         HKL = self.xtl.Cell.all_hkl(energy_kev, self._scattering_max_twotheta)
         HKL = self.xtl.Cell.sort_hkl(HKL)
         tth = self.xtl.Cell.tth(HKL,energy_kev)
+        HKL = HKL[tth>self._scattering_min_twotheta,:]
+        tth = tth[tth>self._scattering_min_twotheta]
         #inten = np.sqrt(self.intensity(HKL)) # structure factor
         inten = self.intensity(HKL)
         
@@ -703,7 +705,7 @@ class Scattering:
         for n in range(1,len(tth)):
             if inten[n] < min_intensity: continue
             if inten[n] > max_intensity: continue
-            if not print_symmetric and np.abs(tth[n]-tth[n-1]) < 0.01: continue # only works if sorted
+            if not print_symmetric and np.abs(tth[n]-tth[n-1]) < 0.01 and count>0: continue # only works if sorted
             count += 1
             outstr+= fmt % (HKL[n,0],HKL[n,1],HKL[n,2],tth[n],inten[n])
         outstr+= 'Reflections: %1.0f\n'%count
@@ -740,6 +742,8 @@ class Scattering:
         HKL = self.xtl.Cell.all_hkl(energy_kev, self._scattering_max_twotheta)
         HKL = self.xtl.Cell.sort_hkl(HKL)
         tth = self.xtl.Cell.tth(HKL,energy_kev)
+        HKL = HKL[tth>self._scattering_min_twotheta,:]
+        tth = tth[tth>self._scattering_min_twotheta]
         theta = self.xtl.Cell.theta_reflection(HKL, energy_kev, self._scattering_specular_direction,self._scattering_theta_offset)
         #inten = np.sqrt(self.intensity(HKL)) # structure factor
         inten = self.intensity(HKL)
@@ -795,6 +799,8 @@ class Scattering:
         HKL = self.xtl.Cell.all_hkl(energy_kev, self._scattering_max_twotheta)
         HKL = self.xtl.Cell.sort_hkl(HKL)
         tth = self.xtl.Cell.tth(HKL,energy_kev)
+        HKL = HKL[tth>self._scattering_min_twotheta,:]
+        tth = tth[tth>self._scattering_min_twotheta]
         theta = self.xtl.Cell.theta_transmission(HKL, energy_kev, self._scattering_parallel_direction)
         #inten = np.sqrt(self.intensity(HKL)) # structure factor
         inten = self.intensity(HKL)

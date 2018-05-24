@@ -1,9 +1,14 @@
 from setuptools import setup
+
+def readme():
+    with open('README.md') as f:
+        return f.read()
 setup(
 	name = 'Dans_Diffraction',
 	packages = ['Dans_Diffraction'],
-	version = '1.0.0',
+	version = '1.0.1',
 	description = 'Generate diffracted intensities from crystals',
+	long_description = readme(),
 	author = 'Dan Porter',
 	author_email = 'd.g.porter@outlook.com',
 	url = 'https://github.com/DanPorter/Dans_Diffraction',

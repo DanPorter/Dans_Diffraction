@@ -89,10 +89,12 @@ def readcif(filename=None, debug=False):
             elif len(vals) == 1 and ';' in lines[n+1]:
                 # Catch multi-line arguments
                 n += 1
-                cifvals[vals[0]] = lines[n]
-                while lines[n].strip() != ';':
-                    cifvals[vals[0]] += [lines[n]]
+                cifvals[vals[0]] = [lines[n].strip().replace(';','')]
+                n += 1
+                while ';' not in lines[n]:
+                    cifvals[vals[0]] += [lines[n].strip()]
                     n += 1
+                cifvals[vals[0]] = ' '.join(cifvals[vals[0]])
             elif len(vals) > 1:
                 cifvals[vals[0]] = vals[1]
             n += 1
