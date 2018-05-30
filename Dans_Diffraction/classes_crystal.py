@@ -17,15 +17,15 @@ E.G.
     
     Additional calculations can be made within additional classes:
         xtl.Properties >> Calculate and display useful properties
-        xtl.Plotting   >> Plot Crystal structures and simulate diffraction patterns
-        xtl.Scattering >> Simulate diffraction intensities of different types
+        xtl.Plot       >> Plot Crystal structures and simulate diffraction patterns
+        xtl.Scatter    >> Simulate diffraction intensities of different types
 
 By Dan Porter, PhD
 Diamond
 2017
 
 Version 2.2
-Last updated: 05/04/18
+Last updated: 29/05/18
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -116,6 +116,7 @@ class Crystal:
         self.Plot = Plotting(self)
         self.Scatter = Scattering(self)
         self.Properties = Properties(self)
+        #self.Fdmnes = Fdmnes(self)
     
     def generate_structure(self):
         "Combines the atomic positions with symmetry operations, returning the full structure as an Atoms class"

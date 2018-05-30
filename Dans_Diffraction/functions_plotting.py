@@ -16,14 +16,15 @@ Usage:
 All plots generated require plt.show() call, unless using interactive mode
 
 
-Version 1.3
-Last updated: 03/05/18
+Version 1.4
+Last updated: 30/05/18
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
 05/03/18 1.1    Removed plt.show from arrow functions
 17/04/18 1.2    Removed plt.show from other functions
 03/05/18 1.3    Removed plot_vector_lines(vec_a,vec_b), replaced with plot_lattice_lines(Q, vec_a, vec_b)
+30/05/18 1.4    Added multiplot
 
 @author: DGPorter
 """
@@ -127,6 +128,53 @@ def newplot(*args, **kwargs):
 
     plt.figure(figsize=[12, 12])
     plt.plot(*args, **kwargs)
+
+    plt.setp(plt.gca().spines.values(), linewidth=2)
+    plt.xticks(fontsize=25, fontname='Times New Roman')
+    plt.yticks(fontsize=25, fontname='Times New Roman')
+    plt.ticklabel_format(useOffset=False)
+    plt.ticklabel_format(style='sci', scilimits=(-3, 3))
+
+
+def multiplot(xvals,yvals=None,datarange=None,cmap='jet'):
+    """
+    Shortcut to creating a simple multiplot
+    """
+
+    if yvals is None:
+        yvals = xvals
+        xvals = []
+    yvals = np.asarray(yvals)
+    xvals = np.asarray(xvals)
+
+    if datarange is None:
+        datarange = range(len(yvals))
+    datarange = np.asarray(datarange,dtype=np.float)
+
+    cm = plt.get_cmap(cmap)
+    colrange = (datarange - datarange.min()) / (datarange.max() - datarange.min())
+
+    plt.figure(figsize=[12, 12])
+    for n in range(len(datarange)):
+        col = cm(colrange[n])
+        if len(xvals) == 0:
+            plt.plot(yvals[n], '-', lw=2, color=col)
+        elif len(xvals.shape) == 1:
+            plt.plot(xvals, yvals[n], '-', lw=2, color=col)
+        else:
+            plt.plot(xvals[n], yvals[n], '-', lw=2, color=col)
+
+    plt.setp(plt.gca().spines.values(), linewidth=2)
+    plt.xticks(fontsize=25, fontname='Times New Roman')
+    plt.yticks(fontsize=25, fontname='Times New Roman')
+    plt.ticklabel_format(useOffset=False)
+    plt.ticklabel_format(style='sci', scilimits=(-3, 3))
+
+    # Colorbar
+    sm = plt.cm.ScalarMappable(cmap=cm)
+    sm.set_array(datarange)
+    cbar = plt.colorbar(sm)
+    #cbar.set_label('variation [unit]', fontsize=24, fontweight='bold', fontname='Times New Roman')
 
 
 def newplot3(*args, **kwargs):

@@ -499,8 +499,10 @@ def saveable(string):
     for char in '#%{}\/<>@|':
         string = string.replace(char, '_')
         # Replace other characters with nothing
-    for char in '*$�!':
+    for char in '*$&^?!':
         string = string.replace(char, '')
+    # Remove non-ascii characters
+    string = string.decode('unicode_escape').encode('ascii','ignore')
     return string
 
 
