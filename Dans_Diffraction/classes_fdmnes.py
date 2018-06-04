@@ -7,11 +7,12 @@ By Dan Porter, PhD
 Diamond
 2018
 
-Version 0.9
-Last updated: 17/04/18
+Version 1.0
+Last updated: 04/06/18
 
 Version History:
 17/04/18 0.9    Program created
+04/06/18 1.0    Program completed and tested
 
 @author: DGPorter
 """
@@ -730,7 +731,7 @@ def azi_cut(storeeng, intensities, cutenergy=None):
 
     enpos = np.argmin(abs(storeeng - cutenergy))
     if np.abs(storeeng[enpos] - cutenergy) > 5:
-        print "You havent choosen the right cutenergy. enpos = {}".format(enpos, storeeng[enpos])
+        print("You havent choosen the right cutenergy. enpos = {}".format(enpos, storeeng[enpos]))
 
     return intensities[enpos, :]
 
@@ -757,6 +758,6 @@ def eng_cut(storeang, intensities, cutangle=None):
 
     angpos = np.argmin(abs(storeang - cutangle))
     if np.abs(storeang[angpos] - cutangle) > 5:
-        print "You havent choosen the right cutangle. angpos = {} [{}]".format(enpos, storeang[angpos])
+        print("You havent choosen the right cutangle. angpos = {} [{}]".format(angpos, storeang[angpos]))
     return intensities[:, angpos]
 

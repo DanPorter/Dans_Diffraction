@@ -12,7 +12,7 @@ Usage:
     - from Dans_Diffraction import functions_crystallography as fc
 
 Version 2.4
-Last updated: 21/05/18
+Last updated: 04/06/18
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -21,7 +21,7 @@ Version History:
 02/03/18 2.1    Removed call to tkinter
 05/04/18 2.2    Added invert_sym
 02/05/18 2.3    Added comparison of lower case elements and symmetry values
-21/05/18 2.4    Added new checks to readcif
+04/06/18 2.4    Added new checks to readcif, corrected atomic_properties for python3/numpy1.14
 
 @author: DGPorter
 """
@@ -141,7 +141,8 @@ def readcif(filename=None, debug=False):
     
     # Replace '.' in keys - fix bug from isodistort cif files
     # e.g. '_space_group_symop_magn_operation.xyz'
-    for key in cifvals.keys():
+    current_keys = list(cifvals.keys())
+    for key in current_keys:
         if '.' in key:
             newkey=key.replace('.','_')
             cifvals[newkey]=cifvals[key]
@@ -413,6 +414,8 @@ def atom_properties(elements=None,fields=None):
     
     atomfile = os.path.join(datadir,'Dans Element Properties.txt')
     file = open(atomfile)
+    # Note: in Python3, genfromtxt enodes strings in the bytes format, which
+    # cannot be compared == with ascii strings (elements)
     data = np.genfromtxt(file,skip_header=5,dtype=None,names=True)
     file.close()
     
@@ -420,9 +423,10 @@ def atom_properties(elements=None,fields=None):
         indx = [None]*len(elements)
         for n in range(len(data)):
             d = data[n]
-            if d['Element'].lower() in elements:
+            fileelement = d['Element'].lower().decode('ascii')
+            if fileelement in elements:
                 for m in range(len(elements)):
-                    if d['Element'].lower() == elements[m]:
+                    if fileelement == elements[m]:
                         indx[m] = n
         data = data[indx]
     

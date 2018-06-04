@@ -24,8 +24,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.2
-Last updated: 29/05/18
+Version 2.3
+Last updated: 04/06/18
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -33,6 +33,7 @@ Version History:
 06/01/18 2.0    Name change and other updates
 13/02/18 2.1    Move scattering commands to xtl.Scatter
 05/04/18 2.2    Magnetic symmetry automatically inverted for odd time
+04/06/18 2.3    removeatom added to Atom class
 
 @author: DGPorter
 """
@@ -515,6 +516,7 @@ class Atoms:
         label >> Name of atomic position, e.g. 'Fe1'
         occupancy >> Occupancy of this atom at this atomic position
         uiso >> atomic displacement factor (ADP) <u^2>
+        mxmymz >> magnetic moment direction [x,y,z]
     """
     
     _default_atom = 'Fe'
@@ -695,6 +697,24 @@ class Atoms:
             self.mx = np.append(self.mx,mxmymz[0])
             self.my = np.append(self.my,mxmymz[1])
             self.mz = np.append(self.mz,mxmymz[2])
+
+    def removeatom(self,idx):
+        """
+        Removes atom number idx from the list
+        :param idx: int, atom index
+        :return: None
+        """
+
+        self.u = np.delete(self.u, idx)
+        self.v = np.delete(self.v, idx)
+        self.w = np.delete(self.w, idx)
+        self.type = np.delete(self.type, idx)
+        self.label = np.delete(self.label, idx)
+        self.occupancy = np.delete(self.occupancy, idx)
+        self.uiso = np.delete(self.uiso, idx)
+        self.mx = np.delete(self.mx, idx)
+        self.my = np.delete(self.my, idx)
+        self.mz = np.delete(self.mz, idx)
     
     def check(self):
         "Checks the validity of the contained attributes"
@@ -811,18 +831,30 @@ class Atoms:
         
         return weights/total_weight
     
-    def info(self):
-        "Prints properties of all atoms"
+    def info(self,idx=None, type=None):
+        """
+        Prints properties of all atoms
+        :param idx: None or array of atoms to display
+        :param type: None or str type of atom to dispaly
+        :return: None
+        """
+
+        if idx is not None:
+            disprange = np.asarray(idx)
+        elif type is not None:
+            disprange =  np.where(self.type==type)[0]
+        else:
+            disprange = range(0,len(self.u))
         
         if np.any(fg.mag(self.mxmymz())>0):
             print('  n Atom  u       v       w        Occ  Uiso      mx      my      mz      ')
             fmt = '%3.0f %4s %7.4f %7.4f %7.4f   %4.2f %6.4f   %7.4f %7.4f %7.4f'
-            for n in range(0,len(self.u)):
+            for n in disprange:
                 print(fmt % (n,self.type[n],self.u[n],self.v[n],self.w[n],self.occupancy[n],self.uiso[n],self.mx[n],self.my[n],self.mz[n]))
         else:
             print('  n Atom  u       v       w        Occ  Uiso')
             fmt = '%3.0f %4s %7.4f %7.4f %7.4f   %4.2f %6.4f'
-            for n in range(0,len(self.u)):
+            for n in disprange:
                 print(fmt % (n,self.type[n],self.u[n],self.v[n],self.w[n],self.occupancy[n],self.uiso[n]))
 
 
@@ -1230,9 +1262,9 @@ class Symmetry:
         :return: None
         """
         
-        print 'Spacegoup: %s (%g)' % (self.spacegroup,self.spacegroup_number)
+        print('Spacegoup: %s (%g)' % (self.spacegroup,self.spacegroup_number))
         
-        print 'Symmetry operations:'
+        print('Symmetry operations:')
         for n in range(len(self.symmetry_operations)):
             x1 = self.symmetry_operations[n].strip('\"\'')
             x2 = self.symmetry_operations_magnetic[n].strip('\"\'').replace('x','mx').replace('y','my').replace('z','mz')
@@ -1242,7 +1274,7 @@ class Symmetry:
         #    x1 = self.centring_operations[n].strip('\"\'')
         #    x2 = self.centring_operations_magnetic[n].strip('\"\'').replace('x','mx').replace('y','my').replace('z','mz')
         #    print '%2d %25s %25s' %(n,x1,x2)
-        print '-----------------------------------------------------'
+        print('-----------------------------------------------------')
         print('')
 
 
@@ -1451,7 +1483,7 @@ class MultiCrystal(MultiPlotting):
         
         print('Energy = %6.3f keV' % energy_kev)
         print('( h, k, l) TwoTheta  Intensity Crystal')
-        #print fmt % (HKL[0,0],HKL[0,1],HKL[0,2],tth[0],inten[0],) # hkl(0,0,0)
+        #print(fmt % (HKL[0,0],HKL[0,1],HKL[0,2],tth[0],inten[0],)) # hkl(0,0,0)
         for n in range(1,len(TTH_list)):
             if I_list[n] < 0.01: continue
             if not print_symmetric and np.abs(TTH_list[n]-TTH_list[n-1]) < 0.01 and NAMES_list[n] == NAMES_list[n-1]: continue # only works if sorted
@@ -1505,7 +1537,7 @@ class MultiCrystal(MultiPlotting):
         
         print('Energy = %6.3f keV' % energy_kev())
         print('%s Reflection: (%3.0f,%3.0f,%3.0f)' % (self.crystal_list[0].name,HKL[0],HKL[1],HKL[2]))
-        print ('( h, k, l) TwoTheta Angle    Intensity Crystal')
+        print('( h, k, l) TwoTheta Angle    Intensity Crystal')
         for n in range(0,len(TTH_list)):
             print(fmt % (HKL_list[n,0],HKL_list[n,1],HKL_list[n,2],TTH_list[n],ANGLE_list[n],I_list[n],NAMES_list[n]))
     
