@@ -22,8 +22,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # 3D plotting
 
-from Dans_Diffraction import functions_general as fg
-from Dans_Diffraction import functions_crystallography as fc
+from . import functions_general as fg
+from . import functions_crystallography as fc
+
+__version__ = '1.0'
 
 
 class Fdmnes:
@@ -207,7 +209,7 @@ class Fdmnes:
         param_string += '! By Dan Porter, PhD\n'
         param_string += '\n'
         param_string += ' Filout\n'
-        param_string += '   {}\n\n'.format(self.generate_input_path())
+        param_string += '   {}\n\n'.format(os.path.join(self.output_path,self.output_name))
         param_string += '  Range                        ! Energy range of calculation (eV). Energy of photoelectron relative to Fermi level.\n'
         param_string += ' -19. 0.1 31. \n\n'
         param_string += ' Radius                       ! Radius of the cluster where final state calculation is performed\n'
@@ -373,7 +375,7 @@ class Fdmnes:
         analysis_path = self.output_path
 
         if folder_name is not None:
-            analysis_path = self.generate_output_path(folder_name, overwrite=False)
+            analysis_path = self.generate_output_path(folder_name, overwrite=True)
 
         return FdmnesAnalysis(analysis_path, self.output_name)
 
@@ -435,6 +437,7 @@ class FdmnesAnalysis:
                 sphobj = Spherical(data, ref, calc_name)
                 setattr(self, sphrefname, sphobj)
 
+
 class Reflection():
     def __init__(self, energy, angle, intensity, refname, calc_name):
         self.energy = energy
@@ -483,6 +486,7 @@ class Reflection():
         plt.xlabel('Energy (eV)', fontsize=18)
         plt.ylabel('Intensity', fontsize=18)
         plt.title('{}\n{} {} Deg'.format(self.calc_name, self.refname, cutangle), fontsize=21, fontweight='bold')
+
 
 class Xanes():
     def __init__(self, energy, intensity, calc_name):
@@ -678,7 +682,7 @@ def read_scan_conv(filename='out_scan_conv.txt'):
 
     refs = np.unique(reftext)  # remove duplicates
     Npeak = len(refs)
-    Nenergy = len(reftext) / Npeak
+    Nenergy = len(reftext) // Npeak
     Nangle = 180
 
     file.seek(0)  # return to start of file

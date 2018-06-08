@@ -29,6 +29,8 @@ Version History:
 import sys, os, re
 import numpy as np
 
+__version__ = '1.2'
+
 # File directory
 directory = os.path.abspath(os.path.dirname(__file__))
 
@@ -502,7 +504,8 @@ def saveable(string):
     for char in '*$&^?!':
         string = string.replace(char, '')
     # Remove non-ascii characters
-    string = string.decode('unicode_escape').encode('ascii','ignore')
+    string = ''.join(i for i in string if ord(i)<128)
+    #string = string.decode('unicode_escape').encode('ascii','ignore')
     return string
 
 

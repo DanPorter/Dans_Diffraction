@@ -23,9 +23,11 @@ else:
     from tkinter import messagebox
 
 # Internal functions
-from Dans_Diffraction import functions_general as fg
-from Dans_Diffraction import functions_plotting as fp
-from Dans_Diffraction import functions_crystallography as fc
+from . import functions_general as fg
+from . import functions_plotting as fp
+from . import functions_crystallography as fc
+
+__version__ = '0.1'
 
 # Fonts
 TF= ["Times", 10]
@@ -33,6 +35,7 @@ BF= ["Times", 14]
 SF= ["Times New Roman", 14]
 LF= ["Times", 14]
 HF= ['Courier',12]
+
 
 class Crystalgui:
     """

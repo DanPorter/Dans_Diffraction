@@ -7,9 +7,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_plotting</strong></big></big></font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_plotting</strong></big></big> (version 1.4)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/dgpor/dropbox/python/dans_diffraction/functions_plotting.py">c:\users\dgpor\dropbox\python\dans_diffraction\functions_plotting.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/grp66007/dropbox/python/dans_diffraction/dans_diffraction/functions_plotting.py">c:\users\grp66007\dropbox\python\dans_diffraction\dans_diffraction\functions_plotting.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;Handy&nbsp;plotting&nbsp;functions&nbsp;"functions_plotting.py"<br>
 &nbsp;<br>
 Contains&nbsp;various&nbsp;plotting&nbsp;shortcuts&nbsp;using&nbsp;matplotlib.pyplot<br>
@@ -21,14 +21,20 @@ Diamond<br>
 Usage:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Run&nbsp;this&nbsp;file&nbsp;in&nbsp;an&nbsp;interactive&nbsp;console<br>
 &nbsp;&nbsp;&nbsp;&nbsp;OR<br>
-&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;from&nbsp;Dans_Diffraction&nbsp;import&nbsp;functions_general&nbsp;as&nbsp;fg<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;from&nbsp;Dans_Diffraction&nbsp;import&nbsp;functions_plotting&nbsp;as&nbsp;fp<br>
 &nbsp;<br>
-Version&nbsp;1.0<br>
-Last&nbsp;updated:&nbsp;06/01/18<br>
+All&nbsp;plots&nbsp;generated&nbsp;require&nbsp;plt.show()&nbsp;call,&nbsp;unless&nbsp;using&nbsp;interactive&nbsp;mode<br>
+&nbsp;<br>
+&nbsp;<br>
+Version&nbsp;1.4<br>
+Last&nbsp;updated:&nbsp;30/05/18<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 06/01/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created&nbsp;from&nbsp;DansGeneralProgs.py&nbsp;V2.3<br>
+05/03/18&nbsp;1.1&nbsp;&nbsp;&nbsp;&nbsp;Removed&nbsp;plt.show&nbsp;from&nbsp;arrow&nbsp;functions<br>
+17/04/18&nbsp;1.2&nbsp;&nbsp;&nbsp;&nbsp;Removed&nbsp;plt.show&nbsp;from&nbsp;other&nbsp;functions<br>
+03/05/18&nbsp;1.3&nbsp;&nbsp;&nbsp;&nbsp;Removed&nbsp;plot_vector_lines(vec_a,vec_b),&nbsp;replaced&nbsp;with&nbsp;<a href="#-plot_lattice_lines">plot_lattice_lines</a>(Q,&nbsp;vec_a,&nbsp;vec_b)<br>
+30/05/18&nbsp;1.4&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;multiplot<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -69,15 +75,14 @@ Version&nbsp;History:<br>
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt>FancyArrow3D&nbsp;patch&nbsp;for&nbsp;3D&nbsp;arrows,&nbsp;by&nbsp;CT&nbsp;Zhu<br>
 &nbsp;<a href="http://stackoverflow.com/questions/22867620/putting-arrowheads-on-vectors-in-matplotlibs-3d-plot">http://stackoverflow.com/questions/22867620/putting-arrowheads-on-vectors-in-matplotlibs-3d-plot</a><br>
-Useage:&nbsp;<br>
+Useage:<br>
 &nbsp;&nbsp;fig&nbsp;=&nbsp;plt.figure()<br>
 &nbsp;&nbsp;ax&nbsp;=&nbsp;fig.add_subplot(111,&nbsp;projection='3d')<br>
 &nbsp;&nbsp;ax.plot([0,1],[0,0],[0,0],'k-')<br>
 &nbsp;&nbsp;ax.plot([0,0],[0,1],[0,0],'k-')<br>
 &nbsp;&nbsp;ax.plot([0,0],[0,0],[0,1],'k-')<br>
 &nbsp;&nbsp;v&nbsp;=&nbsp;<a href="#Arrow3D">Arrow3D</a>([0,1],[0,1],[0,1],&nbsp;mutation_scale=20,&nbsp;lw=3,&nbsp;arrowstyle="-|&gt;",&nbsp;color="r")<br>
-&nbsp;&nbsp;ax.add_artist(v)<br>
-&nbsp;&nbsp;plt.show()<br>&nbsp;</tt></td></tr>
+&nbsp;&nbsp;ax.add_artist(v)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="Dans_Diffraction.functions_plotting.html#Arrow3D">Arrow3D</a></dd>
@@ -648,12 +653,29 @@ Data and other attributes inherited from <a href="matplotlib.artist.html#Artist"
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl><dt><a name="-UV_arrows"><strong>UV_arrows</strong></a>(UV)</dt><dd><tt>Plot&nbsp;arrows&nbsp;with&nbsp;a*,b*&nbsp;on&nbsp;current&nbsp;figure</tt></dd></dl>
- <dl><dt><a name="-axis_lattice_points"><strong>axis_lattice_points</strong></a>(vec_a<font color="#909090">=[1, 0, 0]</font>, vec_b<font color="#909090">=[0, 1, 0]</font>, axis<font color="#909090">=[-4, 4, -4, 4]</font>)</dt><dd><tt>Generate&nbsp;a&nbsp;2D&nbsp;lattice&nbsp;of&nbsp;points&nbsp;generated&nbsp;by&nbsp;2&nbsp;vectors&nbsp;within&nbsp;a&nbsp;2D&nbsp;axis</tt></dd></dl>
- <dl><dt><a name="-labels"><strong>labels</strong></a>(ttl<font color="#909090">=None</font>, xvar<font color="#909090">=None</font>, yvar<font color="#909090">=None</font>, zvar<font color="#909090">=None</font>, size<font color="#909090">='Normal'</font>)</dt><dd><tt>Add&nbsp;good&nbsp;labels&nbsp;to&nbsp;current&nbsp;plot&nbsp;<br>
-&nbsp;<a href="#-labels">labels</a>(title,xlabel,ylabel,zlabel,size)<br>
-&nbsp;<br>
-&nbsp;size&nbsp;=&nbsp;'normal',&nbsp;'big'</tt></dd></dl>
- <dl><dt><a name="-newplot"><strong>newplot</strong></a>(*args, **kwargs)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;a&nbsp;simple&nbsp;plot</tt></dd></dl>
+ <dl><dt><a name="-axis_lattice_points"><strong>axis_lattice_points</strong></a>(vec_a<font color="#909090">=[1, 0, 0]</font>, vec_b<font color="#909090">=[0, 1, 0]</font>, axis<font color="#909090">=[-4, 4, -4, 4]</font>)</dt><dd><tt>Generate&nbsp;a&nbsp;2D&nbsp;lattice&nbsp;of&nbsp;points&nbsp;generated&nbsp;by&nbsp;2&nbsp;vectors&nbsp;within&nbsp;a&nbsp;2D&nbsp;axis<br>
+:param&nbsp;vec_a:&nbsp;[1x3]&nbsp;array&nbsp;:&nbsp;a*&nbsp;vector<br>
+:param&nbsp;vec_b:&nbsp;[1x3]&nbsp;array&nbsp;:&nbsp;b*&nbsp;vector<br>
+:param&nbsp;axis:&nbsp;[1x4]&nbsp;axis&nbsp;array,&nbsp;plt.axis()<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-labels"><strong>labels</strong></a>(ttl<font color="#909090">=None</font>, xvar<font color="#909090">=None</font>, yvar<font color="#909090">=None</font>, zvar<font color="#909090">=None</font>, size<font color="#909090">='Normal'</font>)</dt><dd><tt>Add&nbsp;formatted&nbsp;labels&nbsp;to&nbsp;current&nbsp;plot,&nbsp;also&nbsp;increases&nbsp;the&nbsp;tick&nbsp;size<br>
+:param&nbsp;ttl:&nbsp;title<br>
+:param&nbsp;xvar:&nbsp;x&nbsp;label<br>
+:param&nbsp;yvar:&nbsp;y&nbsp;label<br>
+:param&nbsp;zvar:&nbsp;z&nbsp;label&nbsp;(3D&nbsp;plots&nbsp;only)<br>
+:param&nbsp;size:&nbsp;'Normal'&nbsp;or&nbsp;'Big'<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-multiplot"><strong>multiplot</strong></a>(xvals, yvals<font color="#909090">=None</font>, datarange<font color="#909090">=None</font>, cmap<font color="#909090">='jet'</font>)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;a&nbsp;simple&nbsp;multiplot<br>
+E.G.<br>
+&nbsp;&nbsp;x&nbsp;=&nbsp;np.arange(-5,5,0.1)<br>
+&nbsp;&nbsp;ys&nbsp;=&nbsp;[x**2,&nbsp;1+x**2,&nbsp;2+x**2,&nbsp;3+x**2,&nbsp;4+x**2]<br>
+&nbsp;&nbsp;datarange&nbsp;=&nbsp;[0,1,2,3,4]<br>
+&nbsp;&nbsp;<a href="#-multiplot">multiplot</a>(x,ys,datarange,cmap='winter')</tt></dd></dl>
+ <dl><dt><a name="-newplot"><strong>newplot</strong></a>(*args, **kwargs)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;a&nbsp;simple&nbsp;plot<br>
+E.G.<br>
+&nbsp;&nbsp;x&nbsp;=&nbsp;np.arange(-5,5,0.1)<br>
+&nbsp;&nbsp;y&nbsp;=&nbsp;x**2<br>
+&nbsp;&nbsp;<a href="#-newplot">newplot</a>(x,y,'r-',lw=2,label='Line')</tt></dd></dl>
  <dl><dt><a name="-newplot3"><strong>newplot3</strong></a>(*args, **kwargs)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;a&nbsp;simple&nbsp;3D&nbsp;plot<br>
 Automatically&nbsp;tiles&nbsp;1&nbsp;dimensional&nbsp;x&nbsp;and&nbsp;y&nbsp;arrays&nbsp;to&nbsp;match&nbsp;2D&nbsp;z&nbsp;array,<br>
 assuming&nbsp;z.shape&nbsp;=&nbsp;(len(x),len(y))<br>
@@ -672,15 +694,51 @@ Options:<br>
 &nbsp;&nbsp;col&nbsp;=&nbsp;arrow&nbsp;color&nbsp;(Deg.&nbsp;=&nbsp;red)</tt></dd></dl>
  <dl><dt><a name="-plot_cell"><strong>plot_cell</strong></a>(cell_centre<font color="#909090">=[0, 0, 0]</font>, CELL<font color="#909090">=array([[ 1.,  0.,  0.],
        [ 0.,  1.,  0.],
-       [ 0.,  0.,  1.]])</font>)</dt><dd><tt>Plot&nbsp;a&nbsp;box&nbsp;defined&nbsp;by&nbsp;a&nbsp;unit&nbsp;cell&nbsp;on&nbsp;the&nbsp;current&nbsp;plot</tt></dd></dl>
- <dl><dt><a name="-plot_lattice_lines"><strong>plot_lattice_lines</strong></a>(Q, vec_a<font color="#909090">=[1, 0, 0]</font>, vec_b<font color="#909090">=[0, 1, 0]</font>, linewidth<font color="#909090">=0.5</font>, shade<font color="#909090">=1.0</font>, color<font color="#909090">='k'</font>)</dt><dd><tt>Add&nbsp;lines&nbsp;defining&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;to&nbsp;the&nbsp;current&nbsp;plot</tt></dd></dl>
- <dl><dt><a name="-plot_lattice_points2D"><strong>plot_lattice_points2D</strong></a>(Q, markersize<font color="#909090">=12</font>, color<font color="#909090">='b'</font>, marker<font color="#909090">='o'</font>)</dt><dd><tt>Add&nbsp;lines&nbsp;defining&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;to&nbsp;the&nbsp;current&nbsp;plot</tt></dd></dl>
- <dl><dt><a name="-plot_vector_arrows"><strong>plot_vector_arrows</strong></a>(vec_a, vec_b, vec_a_lab<font color="#909090">=None</font>, vec_b_lab<font color="#909090">=None</font>, arrow_size<font color="#909090">=40</font>, color<font color="#909090">='b'</font>, fontsize<font color="#909090">=18</font>)</dt><dd><tt>Plot&nbsp;vector&nbsp;arrows&nbsp;for&nbsp;Cell&nbsp;on&nbsp;current&nbsp;axis</tt></dd></dl>
- <dl><dt><a name="-plot_vector_lines"><strong>plot_vector_lines</strong></a>(vec_a<font color="#909090">=[1, 0, 0]</font>, vec_b<font color="#909090">=[0, 1, 0]</font>, linewidth<font color="#909090">=0.5</font>, shade<font color="#909090">=1.0</font>, color<font color="#909090">='k'</font>)</dt><dd><tt>Add&nbsp;lines&nbsp;defining&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;to&nbsp;the&nbsp;current&nbsp;plot</tt></dd></dl>
- <dl><dt><a name="-saveplot"><strong>saveplot</strong></a>(name, dpi<font color="#909090">=None</font>)</dt><dd><tt>Saves&nbsp;current&nbsp;figure&nbsp;as&nbsp;a&nbsp;png&nbsp;in&nbsp;the&nbsp;home&nbsp;directory<br>
+       [ 0.,  0.,  1.]])</font>)</dt><dd><tt>Plot&nbsp;a&nbsp;box&nbsp;defined&nbsp;by&nbsp;a&nbsp;unit&nbsp;cell&nbsp;on&nbsp;the&nbsp;current&nbsp;plot<br>
+:param&nbsp;cell_centre:&nbsp;[1x3]&nbsp;array&nbsp;:&nbsp;centre&nbsp;of&nbsp;cell,&nbsp;default&nbsp;[0,0,0]<br>
+:param&nbsp;CELL:&nbsp;[3x3]&nbsp;array&nbsp;:&nbsp;unit&nbsp;cell&nbsp;vectors&nbsp;[A,B,C]<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-plot_ewald_coverage"><strong>plot_ewald_coverage</strong></a>(energy_kev, color<font color="#909090">='k'</font>, linewidth<font color="#909090">=2</font>)</dt><dd><tt>Plot&nbsp;Ewald&nbsp;coverage&nbsp;of&nbsp;a&nbsp;single&nbsp;axis&nbsp;diffractometer&nbsp;on&nbsp;current&nbsp;plot&nbsp;in&nbsp;2D<br>
+Includes&nbsp;boundaries&nbsp;for&nbsp;theta=0,&nbsp;twotheta=180&nbsp;and&nbsp;theta=twotheta<br>
+&nbsp;<br>
+:param&nbsp;energy_kev:&nbsp;float<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-plot_lattice_lines"><strong>plot_lattice_lines</strong></a>(Q, vec_a<font color="#909090">=[1, 0, 0]</font>, vec_b<font color="#909090">=[0, 1, 0]</font>, linewidth<font color="#909090">=0.5</font>, shade<font color="#909090">=1.0</font>, color<font color="#909090">='k'</font>)</dt><dd><tt>Add&nbsp;lines&nbsp;defining&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;to&nbsp;the&nbsp;current&nbsp;plot<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Generates&nbsp;square&nbsp;or&nbsp;hexagonal&nbsp;lines&nbsp;where&nbsp;vertices&nbsp;are&nbsp;the&nbsp;lattice&nbsp;points&nbsp;within&nbsp;the&nbsp;image.<br>
+:param&nbsp;Q:&nbsp;[nx2/3]&nbsp;array&nbsp;:&nbsp;points&nbsp;at&nbsp;which&nbsp;to&nbsp;generate&nbsp;lattice<br>
+:param&nbsp;vec_a:&nbsp;[1x2/3]&nbsp;array&nbsp;:&nbsp;a*&nbsp;vector<br>
+:param&nbsp;vec_b:&nbsp;[1x2/3]&nbsp;array&nbsp;:&nbsp;b*&nbsp;vector<br>
+:param&nbsp;linewidth:&nbsp;width&nbsp;of&nbsp;the&nbsp;lines,&nbsp;default=0.5<br>
+:param&nbsp;shade:&nbsp;line&nbsp;shading&nbsp;(0=light,&nbsp;1=dark),&nbsp;default=1.0<br>
+:param&nbsp;color:&nbsp;line&nbsp;colour,&nbsp;default='k'<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-plot_lattice_points2D"><strong>plot_lattice_points2D</strong></a>(Q, markersize<font color="#909090">=12</font>, color<font color="#909090">='b'</font>, marker<font color="#909090">='o'</font>)</dt><dd><tt>Add&nbsp;points&nbsp;to&nbsp;the&nbsp;current&nbsp;axis<br>
+:param&nbsp;Q:&nbsp;[nx2/3]&nbsp;array&nbsp;:&nbsp;lattice&nbsp;points&nbsp;to&nbsp;plot<br>
+:param&nbsp;markersize:&nbsp;default&nbsp;12<br>
+:param&nbsp;color:&nbsp;default&nbsp;'b'<br>
+:param&nbsp;marker:&nbsp;default&nbsp;'o'<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-plot_vector_arrows"><strong>plot_vector_arrows</strong></a>(vec_a<font color="#909090">=[1, 0, 0]</font>, vec_b<font color="#909090">=[1, 0, 0]</font>, vec_a_lab<font color="#909090">=None</font>, vec_b_lab<font color="#909090">=None</font>, arrow_size<font color="#909090">=40</font>, color<font color="#909090">='b'</font>, fontsize<font color="#909090">=18</font>)</dt><dd><tt>Plot&nbsp;vector&nbsp;arrows&nbsp;for&nbsp;Cell&nbsp;on&nbsp;current&nbsp;axis<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Will&nbsp;generate&nbsp;two&nbsp;arrows&nbsp;on&nbsp;the&nbsp;current&nbsp;axis,&nbsp;pointing&nbsp;from&nbsp;the&nbsp;origin&nbsp;to&nbsp;vec_a&nbsp;and&nbsp;vec_b,&nbsp;respectivley.<br>
+:param&nbsp;vec_a:&nbsp;[1x2/3]&nbsp;array&nbsp;:&nbsp;a*&nbsp;vector<br>
+:param&nbsp;vec_b:&nbsp;[1x2/3]&nbsp;array&nbsp;:&nbsp;b*&nbsp;vector<br>
+:param&nbsp;vec_a_lab:&nbsp;str&nbsp;:&nbsp;e.g.&nbsp;'a*'<br>
+:param&nbsp;vec_b_lab:&nbsp;str&nbsp;:&nbsp;e.g.&nbsp;'b*'<br>
+:param&nbsp;arrow_size:&nbsp;size&nbsp;of&nbsp;arrow,&nbsp;default&nbsp;40<br>
+:param&nbsp;color:&nbsp;&nbsp;arror&nbsp;colour,&nbsp;default&nbsp;'b'<br>
+:param&nbsp;fontsize:&nbsp;text&nbsp;size,&nbsp;default&nbsp;18<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-saveplot"><strong>saveplot</strong></a>(name, dpi<font color="#909090">=None</font>, figure<font color="#909090">=None</font>)</dt><dd><tt>Saves&nbsp;current&nbsp;figure&nbsp;as&nbsp;a&nbsp;png&nbsp;in&nbsp;the&nbsp;home&nbsp;directory<br>
+:param&nbsp;name:&nbsp;filename,&nbsp;including&nbsp;or&nbsp;expluding&nbsp;directory&nbsp;and&nbsp;or&nbsp;extension<br>
+:param&nbsp;dpi:&nbsp;image&nbsp;resolution,&nbsp;higher&nbsp;means&nbsp;larger&nbsp;image&nbsp;size,&nbsp;default=matplotlib&nbsp;default<br>
+:param&nbsp;figure:&nbsp;figure&nbsp;number,&nbsp;default&nbsp;=&nbsp;plt.gcf()<br>
+:return:&nbsp;None<br>
+&nbsp;<br>
 E.G.<br>
 ---select&nbsp;figure&nbsp;to&nbsp;save&nbsp;by&nbsp;clicking&nbsp;on&nbsp;it---<br>
-<a href="#-saveplot">saveplot</a>('test')</tt></dd></dl>
+<a href="#-saveplot">saveplot</a>('test')<br>
+E.G.<br>
+<a href="#-saveplot">saveplot</a>('c:\somedirpicture.jpg',&nbsp;dpi=600,&nbsp;figure=3)</tt></dd></dl>
  <dl><dt><a name="-sliderplot"><strong>sliderplot</strong></a>(YY, X<font color="#909090">=None</font>, slidervals<font color="#909090">=None</font>, *args, **kwargs)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;a&nbsp;simple&nbsp;2D&nbsp;plot&nbsp;with&nbsp;a&nbsp;slider&nbsp;to&nbsp;go&nbsp;through&nbsp;a&nbsp;third&nbsp;dimension<br>
 YY&nbsp;=&nbsp;[nxm]:&nbsp;y&nbsp;axis&nbsp;data&nbsp;(initially&nbsp;plots&nbsp;Y[0,:])<br>
 &nbsp;X&nbsp;=&nbsp;[n]&nbsp;or&nbsp;[nxm]:&nbsp;&nbsp;x&nbsp;axis&nbsp;data&nbsp;(can&nbsp;be&nbsp;1D&nbsp;or&nbsp;2D,&nbsp;either&nbsp;same&nbsp;length&nbsp;or&nbsp;shape&nbsp;as&nbsp;Y)<br>
@@ -691,13 +749,20 @@ E.G.<br>
  <dl><dt><a name="-sliderplot2D"><strong>sliderplot2D</strong></a>(ZZZ, XX<font color="#909090">=None</font>, YY<font color="#909090">=None</font>, slidervals<font color="#909090">=None</font>, *args, **kwargs)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;an&nbsp;image&nbsp;plot&nbsp;with&nbsp;a&nbsp;slider&nbsp;to&nbsp;go&nbsp;through&nbsp;a&nbsp;third&nbsp;dimension<br>
 ZZZ&nbsp;=&nbsp;[nxmxo]:&nbsp;z&nbsp;axis&nbsp;data<br>
 &nbsp;XX&nbsp;=&nbsp;[nxm]&nbsp;or&nbsp;[n]:&nbsp;&nbsp;x&nbsp;axis&nbsp;data<br>
-&nbsp;YY&nbsp;=&nbsp;[nxm]&nbsp;or&nbsp;[m]:&nbsp;y&nbsp;axis&nbsp;data&nbsp;<br>
+&nbsp;YY&nbsp;=&nbsp;[nxm]&nbsp;or&nbsp;[m]:&nbsp;y&nbsp;axis&nbsp;data<br>
 &nbsp;slidervals&nbsp;=&nbsp;None&nbsp;or&nbsp;[o]:&nbsp;Values&nbsp;to&nbsp;give&nbsp;in&nbsp;the&nbsp;slider<br>
 &nbsp;<br>
-if&nbsp;XX&nbsp;and/or&nbsp;YY&nbsp;have&nbsp;a&nbsp;single&nbsp;dimension,&nbsp;the&nbsp;2D&nbsp;values&nbsp;are&nbsp;generated&nbsp;via&nbsp;meshgrid&nbsp;<br>
+if&nbsp;XX&nbsp;and/or&nbsp;YY&nbsp;have&nbsp;a&nbsp;single&nbsp;dimension,&nbsp;the&nbsp;2D&nbsp;values&nbsp;are&nbsp;generated&nbsp;via&nbsp;meshgrid<br>
 &nbsp;<br>
 E.G.<br>
 &nbsp;&nbsp;<a href="#-sliderplot">sliderplot</a>([1,2,3],[[2,4,6],[8,10,12],[14,16,18],[20,22,24]],slidervals=[3,6,9,12])</tt></dd></dl>
  <dl><dt><a name="-vecplot"><strong>vecplot</strong></a>(UV, mode<font color="#909090">='hk0'</font>, linewidth<font color="#909090">=1</font>, alpha<font color="#909090">=0.2</font>, color<font color="#909090">='k'</font>)</dt><dd><tt>Plot&nbsp;grid&nbsp;of&nbsp;a,b&nbsp;vectors</tt></dd></dl>
-</td></tr></table>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__version__</strong> = '1.4'</td></tr></table>
 </body></html>

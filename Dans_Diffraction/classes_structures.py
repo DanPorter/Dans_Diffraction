@@ -22,7 +22,10 @@ Version History:
 
 import sys,os,glob
 import numpy as np
-from Dans_Diffraction import Crystal
+from . import Crystal
+
+__version__ = '1.0'
+
 
 def cif_list():
     "Returns a list of cif files in the current directory"

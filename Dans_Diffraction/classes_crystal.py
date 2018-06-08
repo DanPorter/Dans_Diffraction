@@ -41,11 +41,13 @@ Version History:
 import numpy as np
 
 # Internal functions
-from Dans_Diffraction import functions_general as fg
-from Dans_Diffraction import functions_crystallography as fc
-from Dans_Diffraction.classes_properties import Properties
-from Dans_Diffraction.classes_scattering import Scattering
-from Dans_Diffraction.classes_plotting import Plotting, MultiPlotting, PlottingSuperstructure
+from . import functions_general as fg
+from . import functions_crystallography as fc
+from .classes_properties import Properties
+from .classes_scattering import Scattering
+from .classes_plotting import Plotting, MultiPlotting, PlottingSuperstructure
+
+__version__ = '2.3'
 
 
 class Crystal:

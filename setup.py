@@ -6,7 +6,7 @@ def readme():
 setup(
 	name = 'Dans_Diffraction',
 	packages = ['Dans_Diffraction'],
-	version = '1.0.1',
+	version = '1.2.0',
 	description = 'Generate diffracted intensities from crystals',
 	long_description = readme(),
 	author = 'Dan Porter',
@@ -16,6 +16,7 @@ setup(
 	keywords = ['crystal','cif','diffraction','crystallography','science'],
 	classifiers = [
 		'Programming Language :: Python :: 2.7',
+		'Programming Language :: Python :: 3.4',
 		'Intended Audience :: Science/Research',
 		'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
 		'Development Status :: 3 - Alpha', 

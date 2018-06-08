@@ -36,8 +36,10 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.patches import FancyArrowPatch
 from mpl_toolkits.mplot3d import proj3d
 
-from Dans_Diffraction import functions_general as fg
-from Dans_Diffraction import functions_crystallography as fc
+from . import functions_general as fg
+from . import functions_crystallography as fc
+
+__version__ = '1.4'
 
 '----------------------------Plot manipulation--------------------------'
 
@@ -108,7 +110,7 @@ def saveplot(name, dpi=None, figure=None):
     file, ext = os.path.basename(name)
 
     if len(dir) == 0:
-        dir = def_directory
+        dir = os.path.expanduser('~')
 
     if len(ext) == 0:
         ext = '.png'
@@ -121,6 +123,10 @@ def saveplot(name, dpi=None, figure=None):
 def newplot(*args, **kwargs):
     """
     Shortcut to creating a simple plot
+    E.G.
+      x = np.arange(-5,5,0.1)
+      y = x**2
+      newplot(x,y,'r-',lw=2,label='Line')
     """
 
     if 'linewidth' and 'lw' not in kwargs.keys():
@@ -139,6 +145,11 @@ def newplot(*args, **kwargs):
 def multiplot(xvals,yvals=None,datarange=None,cmap='jet'):
     """
     Shortcut to creating a simple multiplot
+    E.G.
+      x = np.arange(-5,5,0.1)
+      ys = [x**2, 1+x**2, 2+x**2, 3+x**2, 4+x**2]
+      datarange = [0,1,2,3,4]
+      multiplot(x,ys,datarange,cmap='winter')
     """
 
     if yvals is None:

@@ -20,8 +20,10 @@ Version History:
 
 import numpy as np
 
-from Dans_Diffraction import functions_general as fg
-from Dans_Diffraction import functions_crystallography as fc
+from . import functions_general as fg
+from . import functions_crystallography as fc
+
+__version__ = '1.1'
 
 
 class Properties:

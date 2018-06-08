@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.2
-Last updated: 05/03/18
+Version 1.4
+Last updated: 08/06/18
 
 Version History:
 18/08/17 0.1    Program created
@@ -17,6 +17,7 @@ Version History:
 06/10/18 1.1    Program renamed
 05/03/18 1.2    Added plt.show() to functions
 17/04/18 1.3    Removed plt.show() from functions (allowing plot editing +stackig in non-interactive mode)
+08/06/18 1.4    Corrected call to simulate_lattice_lines in simulate_reciprocal_plane
 
 @author: DGPorter
 """
@@ -26,9 +27,11 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.signal import convolve2d
 
-from Dans_Diffraction import functions_general as fg
-from Dans_Diffraction import functions_plotting as fp
-from Dans_Diffraction import functions_crystallography as fc
+from . import functions_general as fg
+from . import functions_plotting as fp
+from . import functions_crystallography as fc
+
+__version__ = '1.4'
 
 
 class Plotting:
@@ -474,8 +477,9 @@ class Plotting:
         cen_lab = '(%1.3g,%1.3g,%1.3g)' % (centre[0],centre[1],centre[2])
         vec_a_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_a[0]+centre[0],vec_a[1]+centre[1],vec_a[2]+centre[2])
         vec_b_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_b[0]+centre[0],vec_b[1]+centre[1],vec_b[2]+centre[2])
-        
-        fp.plot_lattice_lines(mesh_vec_a, mesh_vec_b)
+
+        lattQ = fp.axis_lattice_points(mesh_vec_a, mesh_vec_b, plt.axis())
+        fp.plot_lattice_lines(lattQ, mesh_vec_a, mesh_vec_b)
         fp.plot_vector_arrows(mesh_vec_a, mesh_vec_b, vec_a_lab, vec_b_lab)
         #fp.plot_vector_lines(Q_vec_a, Q_vec_b)
         #fp.plot_vector_arrows(Q_vec_a, Q_vec_b, vec_a_lab, vec_b_lab)
@@ -677,6 +681,9 @@ class Plotting:
             F0/1/2 = Resonance factor Flm
             azim_zero = [h,k,l] vector parallel to the origin of the azimuth
         """
+
+        if energy_kev is None:
+            energy_kev = self.xtl.Scatter._energy_kev
         
         psi = np.arange(-180,180,0.2)
         IXR=self.xtl.Scatter.xray_resonant(hkl, energy_kev, polarisation,F0=F0,F1=F1,F2=F2,azim_zero=azim_zero,PSI=psi)
@@ -869,7 +876,7 @@ class MultiPlotting:
             pixels = 2000*q_max # reduce this to make convolution faster
             pixel_size = q_max/pixels
             peak_width_pixels = peak_width/pixel_size
-            mesh = np.zeros([pixels])
+            mesh = np.zeros([int(pixels)])
             mesh_q = np.linspace(0,q_max,pixels)
             mesh_tth = fc.cal2theta(mesh_q, energy_kev)
             #mesh_d = fc.caldspace(mesh_q)
