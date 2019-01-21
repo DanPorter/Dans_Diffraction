@@ -38,10 +38,10 @@ sup.Structure.occupancy[[6 ,16,26,77,87,107]] = 1 # Na1
 sup.Structure.occupancy[[8 ,18,38,28,48,58, 139, 119, 149, 109, 89,79]] = 0 # Na2
 
 # Generate hk0 plane, with overlapping hexagonal superlattice domains
-plt.ion()
+#plt.ion()
 sup.Plot.simulate_hk0()
 plt.clim([0,10])
-plt.ioff()
+#plt.ioff()
 plt.show()
 
 # Plot the structure in 2D layers

@@ -15,13 +15,14 @@ Usage:
     - from Dans_Diffraction import functions_general as fg
 
 
-Version 1.2
-Last updated: 24/05/18
+Version 1.3
+Last updated: 31/10/18
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
 02/05/18 1.1    Added find_vector
 24/05/18 1.2    Corrected 'quad' for the case (1,-2,1)=1
+31/10/18 1.3    Added complex2str
 
 @author: DGPorter
 """
@@ -390,6 +391,41 @@ def isincell(A, cell_centre=[0, 0, 0], CELL=cell()):
     return np.all(np.abs(idx) <= 0.5, axis=1)
 
 
+def sphere_array(A, max_angle1=90, max_angle2=90, step1=1, step2=1):
+    """
+    Rotate points in array A by multiple angles
+     B = sphere_array(A, max_angle1, max_angle2, step1, step2)
+    
+      A = [nx3] array of 3D coordinates
+      max_angle1 = max rotation angle
+      max_angle1 = max rotation angle
+      step1 = angular step size
+      step2 = angular step size
+      
+    Each coordinate in A will be rotated by angles:
+        angles = np.arange(0, max_angle+step, step)
+    The output B will have size:
+        [len(A) * len(angles1) * len(angles2), 3]
+    """
+    
+    A = np.asarray(A, dtype=np.float).reshape((-1, 3))
+    
+    angles1 = np.arange(0,max_angle1+step1,step1)
+    angles2 = np.arange(0,max_angle2+step2,step2)
+    len1 = len(angles1)
+    len2 = len(angles2)
+    len3 = len(A)
+    tot_size = len1*len2*len3
+    OUT = np.zeros([tot_size,3])
+    for n in range(len(angles1)):
+        for m in range(len(angles2)):
+            B = rot3D(A, 0, angles1[n], angles2[m])
+            st = n*len2+m*len3
+            nd = n*len2+(m+1)*len3
+            OUT[st:nd,:] = B
+    return OUT
+
+
 '---------------------------String manipulation-------------------------'
 
 
@@ -561,6 +597,21 @@ def numbers2string(scannos, sep=':'):
     strc = [i[-(n + 1):] for i in scannos]
     liststr = findranges(strc, sep=sep)
     return '{}[{}]'.format(inistr, liststr)
+
+
+def complex2str(val, fmt='6.1f'):
+    """
+    Convert complex number to string
+    """
+
+    rl = np.real(val)
+    im = np.imag(val)
+    fmt1 = '%'+fmt
+    fmt2 = '%-'+fmt
+    if im >= 0:
+        return (fmt1+' + i'+fmt2)%(rl,im)
+    elif im < 0:
+        return (fmt1+' - i'+fmt2)%(rl,np.abs(im))
 
 
 def multi_replace(string, old=[], new=[]):
