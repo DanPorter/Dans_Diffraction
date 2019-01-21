@@ -1,6 +1,6 @@
 """
 Dans_Diffraction
-Python package for loading crystal structures from cif files and calculating diffraction
+Python package for loading crystal structures from cif files and calculating diffraction information
 
 Usage:
     ***In Python***
@@ -17,13 +17,13 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.1
-Last updated: 30/05/18
+Version 1.2
+Last updated: 08/06/18
 
 Version History:
 02/03/18 1.0    Version History started.
 30/05/18 1.1    Fdmnes added
-08/06/18 1.2
+08/06/18 1.2    Python3 now fully supported
 """
 
 from . import functions_general as fg
@@ -33,7 +33,7 @@ from .classes_crystal import Crystal, MultiCrystal
 from .classes_structures import Structures
 from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
-__version__ = '1.1'
+__version__ = '1.2'
 
 # Build 
 structure_list = Structures()

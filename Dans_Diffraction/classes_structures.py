@@ -66,6 +66,7 @@ class Structures:
         for s in self.list:
             print(s)
 
+
 class Build_Crystal:
     """
     Storage Class for filename and build command

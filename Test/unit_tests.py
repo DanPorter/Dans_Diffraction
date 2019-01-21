@@ -35,7 +35,7 @@ except ImportError:
         sys.path.insert(0,ddf)
     import Dans_Diffraction as dif
 except AttributeError:
-    print('Import Dans_Diffraction was not incorrect, adding path...')
+    print('Import Dans_Diffraction was incorrect, retrying...')
     from Dans_Diffraction import Dans_Diffraction as dif
 print('Dans_Diffraction version: %s'%dif.__version__)
 print('  classes_crystal: %s'%dif.classes_crystal.__version__)
@@ -138,6 +138,7 @@ plt.show()
 
 
 # 12) FDMNES
+stop
 print('\nTest FDMNES code')
 fdm = dif.Fdmnes(xtl2) # this might take a while the first time as the fdmnes_win64.exe file is found
 fdm.setup(

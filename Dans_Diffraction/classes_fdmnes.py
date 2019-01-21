@@ -7,12 +7,13 @@ By Dan Porter, PhD
 Diamond
 2018
 
-Version 1.0
-Last updated: 04/06/18
+Version 1.1
+Last updated: 11/06/18
 
 Version History:
 17/04/18 0.9    Program created
 04/06/18 1.0    Program completed and tested
+11/06/18 1.1    Analysis updated to find density with _sd1 and _sd0
 
 @author: DGPorter
 """
@@ -25,7 +26,7 @@ from mpl_toolkits.mplot3d import Axes3D  # 3D plotting
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 
 class Fdmnes:
@@ -278,7 +279,7 @@ class Fdmnes:
          If overwrite is False and the directory already exists, a number will be appended to the name
         :param folder_name: str or None, if None xtl.name will be used
         :param overwrite: True/False
-        :return: str
+        :return: str directory E.G. 'c:\FDMNES\sim\Fe2O3'
         """
 
         if folder_name is None:
@@ -296,6 +297,11 @@ class Fdmnes:
         return newpath
 
     def generate_input_path(self):
+        """
+        Returns the input file pathname
+         E.G. 'c:\FDMNES\sim\Fe2O3\FDMNES_Fe2O3.txt'
+        :return: filepath
+        """
         return os.path.join(self.output_path, self.input_name)
 
     def create_directory(self):
@@ -385,7 +391,7 @@ class FdmnesAnalysis:
     Create fdmnes object from *_scan_conv.txt file
 
     Usage:
-        fdm = fdmnes(output_path, output_name)
+        fdm = FdmnesAnalysis(output_path, output_name)
 
         fdm contains all calculated reflections and xanes spectra, as well as spherical tensors
         Automated plotting of azimuths, spectra and density of states.
@@ -397,11 +403,21 @@ class FdmnesAnalysis:
     """
 
     def __init__(self, output_path, output_name='out'):
+        """
+        Loads data from an FDMNES calculation, allowing plotting and data cuts
+         E.G.
+         fdm = FdmnesAnalysis('c:\FDMNES\Fe2O3','out')
+         fdm.xanes.plot()
+         plt.show()
+
+        :param output_path: directory of the calculation to be loaded
+        :param output_name: base output name for the calculation (default='out')
+        """
         output_path = output_path.replace('\\', '/')  # convert windows directories
         calc_name = output_path.split('/')[-1]  # calculation name
         scan_conv_name = os.path.join(output_path,output_name+'_scan_conv.txt')
         convname = os.path.join(output_path,output_name+'_conv.txt')
-        densityname = os.path.join(output_path, output_name + '_sd1.txt')
+        densityname = os.path.join(output_path, output_name + '_sd%d.txt')
         spherename = os.path.join(output_path, output_name + '_sph_signal_rxs%d.txt')
 
         self.output_name = output_name
@@ -416,8 +432,11 @@ class FdmnesAnalysis:
         energy, angle, intensity = read_scan_conv(scan_conv_name)
 
         # Read density of states file
-        if os.path.isfile(densityname):
-            self.density = Density(densityname)
+        # sometimes this is _sd0.txt and sometimes _sd1.txt
+        if os.path.isfile(densityname%0):
+            self.density = Density(densityname%0)
+        elif os.path.isfile(densityname%1):
+            self.density = Density(densityname%1)
 
         self.energy = energy
         self.angle = angle
@@ -440,6 +459,14 @@ class FdmnesAnalysis:
 
 class Reflection():
     def __init__(self, energy, angle, intensity, refname, calc_name):
+        """
+        Container for FDMNES RXS calculations for each reflection
+        :param energy: array of energy values [1xm]
+        :param angle: array of angle values [1xn]
+        :param intensity: array of intensity values [mxn]
+        :param refname: reflection name, for plot title
+        :param calc_name: calculation name, for plot title
+        """
         self.energy = energy
         self.angle = angle
         self.intensity = intensity
@@ -447,14 +474,28 @@ class Reflection():
         self.calc_name = calc_name
 
     def azi_cut(self, cutenergy=None):
+        """
+        Returns the array of intensitiy values at a particular energy
+        :param cutenergy: energy of cut (eV)
+        :return: array of intensities
+        """
         cutintensity = azi_cut(self.energy, self.intensity, cutenergy)
         return cutintensity
 
     def eng_cut(self, cutangle=None):
+        """
+        Returns the array of intensitiy values at a particular angle
+        :param cutangle: angle of cut (deg)
+        :return: array of intensities
+        """
         cutintensity = eng_cut(self.angle, self.intensity, cutangle)
         return cutintensity
 
     def plot3D(self):
+        """
+        Generate a 3D figure of energy vs angle vs intensity
+        :return: None
+        """
         # 3D figure
         fig = plt.figure(figsize=[12, 10])
         ax = fig.add_subplot(111, projection='3d')
@@ -470,19 +511,29 @@ class Reflection():
         plt.suptitle('{}\n{}'.format(self.calc_name, self.refname), fontsize=21, fontweight='bold')
 
     def plot_azi(self, cutenergy='max'):
+        """
+        Generate a plot of azimuthal dependence at a particular energy
+        :param cutenergy: 'max' to use the maximum height energy, or an energy in eV
+        :return: None
+        """
         cutintensity = azi_cut(self.energy, self.intensity, cutenergy)
 
         plt.figure(figsize=[12, 10])
-        plt.plot(self.angle, cutintensity)
+        plt.plot(self.angle, cutintensity, lw=3)
         plt.xlabel('Angle (DEG)', fontsize=18)
         plt.ylabel('Intensity', fontsize=18)
         plt.title('{}\n{} {} eV'.format(self.calc_name, self.refname, cutenergy), fontsize=21, fontweight='bold')
 
     def plot_eng(self, cutangle='max'):
+        """
+        Generate a plot of energy dependence at a particular azimuth
+        :param cutangle: 'max' to ut eh emaximum height angle, or an angle in deg
+        :return: None
+        """
         cutintensity = eng_cut(self.angle, self.intensity, cutangle)
 
         plt.figure(figsize=[12, 10])
-        plt.plot(self.energy, cutintensity)
+        plt.plot(self.energy, cutintensity, lw=3)
         plt.xlabel('Energy (eV)', fontsize=18)
         plt.ylabel('Intensity', fontsize=18)
         plt.title('{}\n{} {} Deg'.format(self.calc_name, self.refname, cutangle), fontsize=21, fontweight='bold')
@@ -490,11 +541,21 @@ class Reflection():
 
 class Xanes():
     def __init__(self, energy, intensity, calc_name):
+        """
+        Container for XANES spectra from FDMNES
+        :param energy: array of energy values
+        :param intensity: array of intensity values
+        :param calc_name: calculation name for plot title
+        """
         self.energy = energy
         self.intensity = intensity
         self.calc_name = calc_name
 
     def plot(self):
+        """
+        Plot the Xanes spectra
+        :return: None
+        """
         plt.figure(figsize=[12, 10])
         plt.plot(self.energy, self.intensity, lw=3)
         plt.title(self.calc_name, fontsize=26, fontweight='bold', fontname='Times New Roman')
@@ -506,7 +567,10 @@ class Xanes():
 
 class Density():
     def __init__(self, file):
-        "Load Density of states"
+        """
+        Load Density of states file from FDMNES calculations '..._sd0.txt'
+        :param file: filename
+        """
 
         dirname, filetitle = os.path.split(file)  # calculation directory
         self.calc_name = dirname.split('/')[-1]  # calculation name
@@ -516,21 +580,25 @@ class Density():
 
         # Calculate real harmonics
         self.s = self.data['n00']
-        self.px = self.data['n11_1']
-        self.py = self.data['n11']
-        self.pz = self.data['n10']
-        self.dxy = self.data['n22_1']
-        self.dxz = self.data['n21_1']
-        self.dyz = self.data['n21']
-        self.dx2y2 = self.data['n22']
-        self.dz2r2 = self.data['n20']
-
         self.s_total = self.data['n_l0']
-        self.p_total = self.data['n_l1']
-        self.d_total = self.data['n_l2']
+        if 'n11' in self.data.dtype.fields.keys():
+            self.px = self.data['n11_1']
+            self.py = self.data['n11']
+            self.pz = self.data['n10']
+            self.p_total = self.data['n_l1']
+        if 'n22' in self.data.dtype.fields.keys():
+            self.dxy = self.data['n22_1']
+            self.dxz = self.data['n21_1']
+            self.dyz = self.data['n21']
+            self.dx2y2 = self.data['n22']
+            self.dz2r2 = self.data['n20']
+            self.d_total = self.data['n_l2']
 
     def plot(self):
-        "Plot the density of states"
+        """
+        Creates a plot of the DOS spectra, with all d states in one plot
+        :return: None
+        """
 
         plt.figure(figsize=[12, 10])
         plt.plot(self.energy, self.d_total, 'k:', lw=3, label='Total')
@@ -552,7 +620,12 @@ class Density():
 
 class Spherical():
     def __init__(self, data, refname, calc_name):
-        "Load contribution from spherical harmonics from out_sph_signal_rxs1.txt"
+        """
+        Load contribution from spherical harmonics from out_sph_signal_rxs1.txt
+        :param data: data array from genfromtext
+        :param refname: reflection name for plot title
+        :param calc_name: calculation name for plot title
+        """
 
         self.data = data
         self.calc_name = calc_name
@@ -576,7 +649,10 @@ class Spherical():
         self.dz2r2 = np.real(self.dz2r2 * np.conj(self.dz2r2))
 
     def plot(self):
-        "Plot the spherical components"
+        """
+        Plot the spherical components
+        :return: None
+        """
 
         plt.figure(figsize=[12, 10])
         plt.plot(self.energy, self.d_total, 'k:', lw=3, label='Total')

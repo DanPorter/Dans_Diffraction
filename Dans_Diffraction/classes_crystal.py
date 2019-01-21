@@ -25,7 +25,7 @@ Diamond
 2017
 
 Version 2.3
-Last updated: 04/06/18
+Last updated: 31/10/18
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -34,6 +34,7 @@ Version History:
 13/02/18 2.1    Move scattering commands to xtl.Scatter
 05/04/18 2.2    Magnetic symmetry automatically inverted for odd time
 04/06/18 2.3    removeatom added to Atom class
+31/10/18 2.3    Update Symmetry.symmetric_coordinates funcitons, add ability to view all or only non-identical
 
 @author: DGPorter
 """
@@ -122,7 +123,10 @@ class Crystal:
         #self.Fdmnes = Fdmnes(self)
     
     def generate_structure(self):
-        "Combines the atomic positions with symmetry operations, returning the full structure as an Atoms class"
+        """
+        Combines the atomic positions with symmetry operations, returning the full structure as an Atoms class
+        :return: None
+        """
         
         uvw,type,label,occ,uiso,mxmymz = self.Atoms.get()
         
@@ -157,13 +161,27 @@ class Crystal:
         self.Structure = Atoms(u,v,w,new_type,new_label,new_occupancy,new_uiso,new_mxmymz)
     
     def new_cell(self,latt=[1.0]):
-        "Replace the lattice parameters"
-        
+        """
+        Replace the lattice parameters
+        :param latt: [a,b,c,alpha,beta,gamma]
+        :return: None
+        """
         self.Cell.latt(latt)
     
     def new_atoms(self,u=[0],v=[0],w=[0],type=None,
                  label=None,occupancy=None,uiso=None,mxmymz=None):
-        "Replace current atomic positions with new ones and regenerate structure"
+        """
+        Replace current atomic positions with new ones and regenerate structure
+        :param u: array : atomic positions u
+        :param v: array : atomic positions v
+        :param w:  array : atomic positions w
+        :param type:  array : atomic types
+        :param label: array : atomic labels
+        :param occupancy: array : atomic occupation
+        :param uiso: array : atomic isotropic thermal parameters
+        :param mxmymz: array : atomic magnetic vectors [mu,mv,mw]
+        :return: None
+        """
         
         self.Atoms = Atoms(u,v,w,type,label,occupancy,uiso,mxmymz)
         self.generate_structure()
@@ -210,24 +228,26 @@ class Crystal:
         superstructure Crystal class
         """
         
-        super = Superstructure(self,P)
+        super = Superstructure(self, P)
         return super
     
-    def add_parent(self,parent,P):
+    def add_parent(self, parent, P):
         """
         Add parent structure, returning Crystal as superstructure
-        
+            parent = Crystal(cif_parent)
+            xtl = Crystal(cif_superstructure)
+            su = xtl.add_parent(parent, [[1,1,0],[0,2,0],[0,0,1]])
         """
-        
-        uvw,type,label,occupancy,uiso,mxmymz = self.Structure.get()
+
+        uvw, type, label, occupancy, uiso, mxmymz = self.Structure.get()
         latt = self.Cell.lp()
-        
-        super = Superstructure(parent,P)
-        super.name = self.name 
-        
+
+        super = Superstructure(parent, P)
+        super.name = self.name
+
         super.new_cell(latt)
-        super.new_atoms(uvw[:,0],uvw[:,1],uvw[:,2],type,label,occupancy,uiso,mxmymz)
-        
+        super.new_atoms(uvw[:, 0], uvw[:, 1], uvw[:, 2], type, label, occupancy, uiso, mxmymz)
+
         return super
     
     def start_gui(self):
@@ -300,7 +320,11 @@ class Cell:
             self.gamma = float(lattice_parameters[5])
     
     def fromcif(self,cifvals):
-        "Import lattice parameters from a cif dictionary"
+        """
+        Import lattice parameters from a cif dictionary"
+        :param cifvals: dict from readcif
+        :return: None
+        """
         
         a,da = fg.readstfm(cifvals['_cell_length_a'])
         b,db = fg.readstfm(cifvals['_cell_length_b'])
@@ -312,7 +336,10 @@ class Cell:
         self.latt([a,b,c,alpha,beta,gamma])
     
     def lp(self):
-        " Returns the lattice parameters"
+        """
+        Returns the lattice parameters
+        :return: a,b,c,alpha,beta,gamma
+        """
         return self.a,self.b,self.c,self.alpha,self.beta,self.gamma
     
     def UV(self):
@@ -323,11 +350,17 @@ class Cell:
         return fc.latpar2UV_rot(*self.lp())
     
     def UVstar(self):
-        " Returns the reciprocal unit cell as a [3x3] array, [A*,B*,C*]"
+        """
+        Returns the reciprocal unit cell as a [3x3] array, [A*,B*,C*]
+        :return: [a*;b*;c*]
+        """
         return fc.RcSp(self.UV())
     
     def volume(self):
-        " Returns the volume of the unit cell, in A^3"
+        """
+        Returns the volume of the unit cell, in A^3
+        :return: volume
+        """
         return fc.calc_vol(self.UV())
     
     def Bmatrix(self):
@@ -337,7 +370,10 @@ class Cell:
         return fc.Bmatrix(self.UV())
     
     def info(self):
-        " Prints the lattice parameters and cell volume"
+        """
+         Prints the lattice parameters and cell volume"
+        :return: None
+        """
         print('a = %6.3f A,  b = %6.3f A,  c = %6.3f A\nA = %8.2f,  B = %8.2f,  G = %8.2f' % self.lp())
         print('Volume: %6.2f A^3' % self.volume())
     
@@ -345,7 +381,6 @@ class Cell:
         """
          Returns the lattice parameters of a larger lattice
         """
-        
         return U*self.a,V*self.b,W*self.c,self.alpha,self.beta,self.gamma
     
     def calculateQ(self,HKL):
@@ -356,7 +391,7 @@ class Cell:
         
         E.G.
             Q = Cell.calculateQ([1,0,0]) # for a hexagonal system, a = 2.85
-            >>> Q = array([[2.2046264, 1.2728417, 0.0000000]])
+            > Q = array([[2.2046264, 1.2728417, 0.0000000]])
         """
         HKL = np.reshape( np.asarray(HKL,dtype=np.float) ,[-1,3])
         return np.dot(HKL,self.UVstar())
@@ -369,7 +404,7 @@ class Cell:
         
         E.G.
             HKL = indexQ([2.2046264, 1.2728417, 0.0000000]) # for a hexagonal system, a = 2.85
-            >>> HKL = [1,0,0]
+            > HKL = [1,0,0]
         """
         Q = np.reshape( np.asarray(Q,dtype=np.float) ,[-1,3])
         return fc.indx(Q,self.UVstar())
@@ -382,7 +417,7 @@ class Cell:
         
         E.G.
             R = Cell.calculateR([0.1,0,0]) # for a hexagonal system, a = 2.85
-            >>> R = array([[0.285, 0, 0]])
+            > R = array([[0.285, 0, 0]])
         """
         UVW = np.reshape( np.asarray(UVW,dtype=np.float) ,[-1,3])
         return np.dot(UVW,self.UV())
@@ -395,18 +430,27 @@ class Cell:
         
         E.G.
             UVW = indexR([0.285, 0, 0]) # for a hexagonal system, a = 2.85
-            >>> UVW = [0.1,0,0]
+            > UVW = [0.1,0,0]
         """
         R = np.reshape( np.asarray(R,dtype=np.float) ,[-1,3])
         return fc.indx(R,self.UV())
     
     def Qmag(self,HKL):
-        "Returns the magnitude of wave-vector transfer of [h,k,l], in A-1"
+        """
+        Returns the magnitude of wave-vector transfer of [h,k,l], in A-1
+        :param HKL: list of hkl reflections
+        :return: list of Q values
+        """
         Q = self.calculateQ(HKL)
         return fg.mag(Q)
     
     def tth(self,HKL,energy_kev=8.048):
-        "Returns the two-theta angle, in deg, of [h,k,l] at specified energy in keV"
+        """
+        Returns the two-theta angle, in deg, of [h,k,l] at specified energy in keV
+        :param HKL: list of hkl reflections
+        :param energy_kev: energy in keV
+        :return: two-theta angles
+        """
         Qmag = self.Qmag(HKL)
         return fc.cal2theta(Qmag,energy_kev)
     
@@ -435,11 +479,21 @@ class Cell:
         return (tth/2)+angle
     
     def dspace(self,HKL):
+        """
+        Calculate the d-spacing in A
+        :param HKL: array : list of reflections
+        :return: d-spacing
+        """
         Qmag = self.Qmag(HKL)
         return fc.caldspace(Qmag)
     
     def max_hkl(self,energy_kev=8.048,max_angle=180.0):
-        "Returns the maximum index of h, k and l for a given energy"
+        """
+        Returns the maximum index of h, k and l for a given energy
+        :param energy_kev: energy in keV
+        :param max_angle: maximum two-theta at this energy
+        :return: maxh, maxk, maxl
+        """
         
         Qmax = fc.calQmag(max_angle,energy_kev)
         Qpos = [[Qmax,Qmax,Qmax],
@@ -454,7 +508,12 @@ class Cell:
         return np.ceil(np.abs(hkl).max(axis=0)).astype(int)
     
     def all_hkl(self,energy_kev=8.048,max_angle=180.0):
-        "Returns an array of all (h,k,l) reflection at this energy"
+        """
+        Returns an array of all (h,k,l) reflections at this energy
+        :param energy_kev: energy in keV
+        :param max_angle: max two-theta angle
+        :return: array hkl[:,3]
+        """
         
         Qmax = fc.calQmag(max_angle,energy_kev)
         
@@ -467,7 +526,12 @@ class Cell:
         return HKL[Qm<=Qmax,:]
     
     def sort_hkl(self,HKL,ascend=True):
-        "Returns array of (h,k,l) sorted by two-theta"
+        """
+        Returns array of (h,k,l) sorted by two-theta
+        :param HKL: array : list of [h,k,l] values
+        :param ascend: True*/False : if False, lowest two-theta
+        :return: HKL[sorted,:]
+        """
         
         HKL = np.reshape( np.asarray(HKL,dtype=np.float) ,[-1,3])
         Qm = self.Qmag(HKL)
@@ -880,7 +944,11 @@ class Symmetry:
         self.generate_matrices()
     
     def fromcif(self,cifvals):
-        "Import symmetry information from a cif dictionary"
+        """
+        Import symmetry information from a cif dictionary
+        :param cifvals: dict of values from cif
+        :return:
+        """
         
         keys = cifvals.keys()
         
@@ -981,13 +1049,21 @@ class Symmetry:
         self.generate_matrices()
     
     def changesym(self,idx,operation):
-        "Change a symmetry operation"
+        """
+        Change a symmetry operation
+        :param idx: symmetry index
+        :param operation: str e.g. 'x,-y,z'
+        """
         
         self.symmetry_operations[idx] = operation
         self.generate_matrices()
     
     def invert_magsym(self,idx):
-        "Invert the time symmetry of a magnetic symmetry"
+        """
+        Invert the time symmetry of a magnetic symmetry
+        :param idx: symmetry index, 0:Nsym
+        :return:
+        """
         
         ID = np.asarray(idx).reshape(-1)
         for idx in ID:
@@ -1031,21 +1107,24 @@ class Symmetry:
         self.generate_matrices()
     
     def generate_matrices(self):
-        "Generates the symmetry matrices from string symmetry operations"
+        """
+        Generates the symmetry matrices from string symmetry operations
+        """
         
         self.symmetry_matrices = fc.gen_sym_mat(self.symmetry_operations)
     
-    def symmetric_coordinates(self,UVW,MXMYMZ=None):
+    def symmetric_coordinates(self, UVW, MXMYMZ=None, remove_identical=True):
         """
         Returns array of symmetric coordinates
-        Uses DansCrystalProgs.gen_sym_pos
+        Uses fc.gen_sym_pos
         Returns coordinates wrapped within the unit cell, with identical positions removed.
+        All positions returned if remove_identical=False
         E.G.
             Symmetry.symmetry_operations = ['x,y,z','-x,-y,-z','y,x,z']
             Symmetry.symmetric_coordinates([0.1,0,0])
-            >>>  array([[0.1, 0.0, 0.0],
-                        [0.9, 0.0, 0.0],
-                        [0.0, 0.1, 0.0]])
+            >  array([[0.1, 0.0, 0.0],
+                      [0.9, 0.0, 0.0],
+                      [0.0, 0.1, 0.0]])
         """
         
         # Apply symmetry operations to atomic positions
@@ -1054,28 +1133,31 @@ class Symmetry:
         sym_uvw = fc.fitincell(sym_uvw)
         
         # Remove identical positions
-        unique_uvw,uniqueidx,matchidx = fg.unique_vector(sym_uvw,tol=0.01)
-        
+        if remove_identical:
+            unique_uvw,uniqueidx,matchidx = fg.unique_vector(sym_uvw,tol=0.01)
+            sym_uvw = unique_uvw
+
         if MXMYMZ is None:
-            return unique_uvw
+            return sym_uvw
         
         # Apply magnetic symmetry operations to magnetic vectors
         mx,my,mz = MXMYMZ
-        sym_xyz = fc.gen_sym_pos(self.symmetry_operations_magnetic,mx,my,mz)
+        sym_xyz = fc.gen_sym_pos(self.symmetry_operations_magnetic, mx, my, mz)
         
         # Remove positions that were identical
-        unique_xyz = sym_xyz[uniqueidx]
-        return unique_uvw,unique_xyz
+        if remove_identical:
+            sym_xyz = sym_xyz[uniqueidx]
+        return sym_uvw, sym_xyz
     
-    def symmetric_coordinate_operations(self,UVW,MXMYMZ=None):
+    def symmetric_coordinate_operations(self, UVW, MXMYMZ=None):
         """
         Returns array of symmetric operations for given position
-        Uses DansCrystalProgs.gen_sym_pos
-        Returns list of identical symmetry operations
+        Uses fc.gen_sym_pos
+        Returns list of identical symmetry operations, with identical positions removed.
         E.G.
             Symmetry.symmetry_operations = ['x,y,z','-x,-y,-z','y,x,z']
             Symmetry.symmetric_coordinate_operations([0.1,0,0])
-            >>>  []
+            >  array(['x,y,z', '-x,-y,-z', 'y,x,z'])
         """
         
         # Apply symmetry operations to atomic positions
@@ -1091,38 +1173,50 @@ class Symmetry:
         
         return np.array(self.symmetry_operations)[uniqueidx], np.array(self.symmetry_operations_magnetic)[uniqueidx]
     
-    def print_symmetric_coordinate_operations(self,UVW):
+    def print_symmetric_coordinate_operations(self, UVW, remove_identical=True):
         """
         Returns array of symmetric operations for given position
-        Uses DansCrystalProgs.gen_sym_pos
-        Returns list of identical symmetry operations
+        Uses fc.gen_sym_pos
+        Returns list of identical symmetry operations, with identical positions removed
+        All positions returned if remove_identical=False
         E.G.
             Symmetry.symmetry_operations = ['x,y,z','-x,-y,-z','y,x,z']
-            Symmetry.symmetric_coordinate_operations([0.1,0,0])
-            >>>  []
+            Symmetry.print_symmetric_coordinate_operations([0.1,0,0])
+            > n  u       v       w                   Symmetry    Magnetic Symmetry
+              0   0.1000  0.0000  0.0000                x,y,z                x,y,z
+              1   0.9000  0.0000  0.0000             -x,-y,-z             -x,-y,-z
+              2   0.0000  0.1000  0.0000                y,x,z                y,x,z
         """
         
-        # Apply symmetry operations to atomic positions
-        u,v,w = UVW
-        sym_uvw = fc.gen_sym_pos(self.symmetry_operations,u,v,w)
-        sym_uvw = fc.fitincell(sym_uvw)
-        
-        # Remove identical positions
-        unique_uvw,uniqueidx,matchidx = fg.unique_vector(sym_uvw,tol=0.01)
-        
-        print(' u       v       w                   Symmetry    Magnetic Symmetry')
-        for n in range(len(sym_uvw)):
-            print(' %7.4f %7.4f %7.4f %20s %20s' % (sym_uvw[n,0],sym_uvw[n,1],sym_uvw[n,2],self.symmetry_operations[n],self.symmetry_operations_magnetic[n]))
+        UVW = np.asarray(UVW,dtype=np.float).reshape([-1,3])
+
+        for u,v,w in UVW:
+            # Apply symmetry operations to atomic positions
+            sym_uvw = fc.gen_sym_pos(self.symmetry_operations,u,v,w)
+            sym_uvw = fc.fitincell(sym_uvw)
+            
+            # Remove identical positions
+            unique_uvw,uniqueidx,matchidx = fg.unique_vector(sym_uvw,tol=0.01)
+            
+            print(' (%1.3g, %1.3g, %1.3g)'%(u,v,w))
+            print('  n       u       v       w             Symmetry    Magnetic Symmetry')
+            if remove_identical:
+                # Only display distict positions
+                for n in range(len(unique_uvw)):
+                    print('%3d %7.4f %7.4f %7.4f %20s %20s' % (uniqueidx[n], unique_uvw[n,0], unique_uvw[n,1], unique_uvw[n,2], self.symmetry_operations[uniqueidx[n]], self.symmetry_operations_magnetic[uniqueidx[n]]))
+            else:
+                for n in range(len(sym_uvw)):
+                    print('%3d %7.4f %7.4f %7.4f %20s %20s' % (n, sym_uvw[n,0], sym_uvw[n,1], sym_uvw[n,2], self.symmetry_operations[n], self.symmetry_operations_magnetic[n]))
     
     def symmetric_reflections(self,HKL):
         """
         Returns array of symmetric reflection indices
-        Uses DansCrystalProgs.gen_sym_mat
+        Uses fc.gen_sym_mat
         E.G.
             Symmetry.symmetry_operations = ['x,y,z','-x,-y,-z','y,x,z']
             Symmetry.generate_matrixes()
             Symmetry.symmetric_reflections([1,0,0])
-            >>>  array([[1,  0, 0],
+            >  array([[1,  0, 0],
                         [-1, 0, 0],
                         [0, -1, 0]])
         """
@@ -1143,12 +1237,12 @@ class Symmetry:
     def symmetric_reflections_unique(self,HKL):
         """
         Returns array of symmetric reflection indices, with identical reflections removed
-        Uses DansCrystalProgs.gen_sym_mat
+        Uses fc.gen_sym_mat
         E.G.
             Symmetry.symmetry_operations = ['x,y,z','-x,-y,-z','y,x,z']
             Symmetry.generate_matrixes()
             Symmetry.symmetric_reflections([1,1,0])
-            >>>  array([[1,  1, 0],
+            >  array([[1,  1, 0],
                         [-1,-1, 0]])
         """
         
@@ -1161,14 +1255,14 @@ class Symmetry:
     def symmetric_reflections_count(self,HKL):
         """
         Returns array of symmetric reflection indices, with identical reflections removed plus the counted sum of each reflection
-        Uses DansCrystalProgs.gen_sym_mat
+        Uses fc.gen_sym_mat
         E.G.
             Symmetry.symmetry_operations = ['x,y,z','-x,-y,-z','y,x,z']
             Symmetry.generate_matrixes()
             HKL, count = Symmetry.symmetric_reflections([1,1,0])
-            >>>  HKL = array([[1,  1, 0],
+            >  HKL = array([[1,  1, 0],
                               [-1,-1, 0]])
-            >>> count = array([2,1])
+            > count = array([2,1])
                         
         """
         
@@ -1186,20 +1280,20 @@ class Symmetry:
     def symmetric_intensity(self,HKL,I,dI=None):
         """
         Returns symmetric reflections with summed intensities of repeated reflections
-        Uses DansCrystalProgs.gen_sym_mat
+        Uses fc.gen_sym_mat
         E.G.
             Symmetry.symmetry_operations = ['x,y,z','-x,-y,-z','y,x,z']
             Symmetry.generate_matrixes()
             HKL, I = Symmetry.symmetric_intensity([1,1,0],10)
-            >>>  HKL = array([[1,  1, 0],
+            >  HKL = array([[1,  1, 0],
                               [-1,-1, 0]])
-            >>> I = array([20,10])
+            > I = array([20,10])
             OR
             HKL, I, dI = Symmetry.symmetric_intensity([1,1,0],10,1)
-            >>>  HKL = array([[1,  1, 0],
+            >  HKL = array([[1,  1, 0],
                               [-1,-1, 0]])
-            >>> I = array([20,10])
-            >>> dI = array([2,1])
+            > I = array([20,10])
+            > dI = array([2,1])
         """
         
         HKL = np.asarray(HKL,dtype=np.float).reshape((-1,3))

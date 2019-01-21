@@ -18,6 +18,7 @@ Version History:
 05/03/18 1.2    Added plt.show() to functions
 17/04/18 1.3    Removed plt.show() from functions (allowing plot editing +stackig in non-interactive mode)
 08/06/18 1.4    Corrected call to simulate_lattice_lines in simulate_reciprocal_plane
+21/01/19 1.5    Added simulate_polarisation_resonant and _nonresonant
 
 @author: DGPorter
 """
@@ -31,7 +32,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.4'
+__version__ = '1.5'
 
 
 class Plotting:
@@ -189,7 +190,7 @@ class Plotting:
                 R_st = self.xtl.Cell.calculateR(uvw_st[idx_st,:])
                 lab_st = label_st[idx_st]
                 for n in range(len(R_st)):
-                    plt.text(R_st[n,layer_axis_x],R_st[n,layer_axis_y],'%2d: %s' %(idx_p[n],lab_st[n]),fontsize=10)
+                    plt.text(R_st[n,layer_axis_x],R_st[n,layer_axis_y],'%2d: %s' %(idx_p[n],lab_st[n]),fontsize=12, fontweight='bold')
             
             # Create cell box
             box = np.zeros([5,3])
@@ -234,7 +235,8 @@ class Plotting:
         HKL = self.xtl.Cell.sort_hkl(HKL) # required for labels
         Qmag = self.xtl.Cell.Qmag(HKL)
         HKL = HKL[Qmag<q_max,:]
-        Qmag = Qmag[Qmag<q_max]
+        Qmag = self.xtl.Cell.Qmag(HKL)
+        #Qmag = Qmag[Qmag<q_max]
         
         # Calculate intensities
         I = self.xtl.Scatter.intensity(HKL)
@@ -248,7 +250,7 @@ class Plotting:
         
         # add reflections to background
         pixel_coord = Qmag/(1.0*q_max)
-        pixel_coord = (pixel_coord*pixels).astype(int)
+        pixel_coord = (pixel_coord*(pixels-1)).astype(int)
         
         for n in range(1,len(I)):
             mesh[pixel_coord[n]] = mesh[pixel_coord[n]] + I[n]
@@ -294,7 +296,7 @@ class Plotting:
         # add reflections to background
         # scipy.interpolate.griddata?
         pixel_coord = Qmag/q_max
-        pixel_coord = (pixel_coord*pixels).astype(int)
+        pixel_coord = (pixel_coord*(pixels-1)).astype(int)
         
         ref_tth = [0]
         ref_int = [0]
@@ -706,6 +708,114 @@ class Plotting:
         plt.ylim([0,1.1*np.max(IXR)])
         fp.labels(ttl,'psi [Deg]',pol)
 
+    def simulate_polarisation_resonant(self, hkl, energy_kev=None, F0=1, F1=1, F2=1, azim_zero=[1, 0, 0], psi=0):
+        """
+        Simulate azimuthal scan of resonant x-ray scattering
+            energy_kev = x-ray energy in keV
+            polarisation = x-ray polarisation: 'ss',{'sp'},'ps','pp'
+            F0/1/2 = Resonance factor Flm
+            azim_zero = [h,k,l] vector parallel to the origin of the azimuth
+        """
+
+        if energy_kev is None:
+            energy_kev = self.xtl.Scatter._energy_kev
+
+        pol = np.arange(0, 360, 0.2)
+        I = np.zeros(len(pol))
+        for n in range(len(pol)):
+            I[n] = self.xtl.Scatter.xray_resonant_magnetic(
+                hkl,
+                energy_kev,
+                azim_zero,
+                psi,
+                polarisation=pol[n],
+                F0=F0, F1=F1, F2=F2)
+
+        ttl = '%s %5.3f keV\n(%1.0f,%1.0f,%1.0f) aziref=(%1.0f,%1.0f,%1.0f) psi = %1.3g'
+        ttl = ttl % (self.xtl.name, energy_kev, hkl[0], hkl[1], hkl[2], azim_zero[0], azim_zero[1], azim_zero[2], psi)
+
+        plt.figure(figsize=[12, 10])
+        plt.plot(pol, I, '-', lw=2)
+        plt.xlim([0, 360])
+        plt.ylim([0, 1.1 * np.max(I)])
+        fp.labels(ttl, 'pol [Deg]', 'Resonant Magnetic Intensity')
+
+    def simulate_polarisation_nonresonant(self, hkl, energy_kev=None, azim_zero=[1, 0, 0], psi=0):
+        """
+        Simulate azimuthal scan of resonant x-ray scattering
+            energy_kev = x-ray energy in keV
+            polarisation = x-ray polarisation: 'ss',{'sp'},'ps','pp'
+            F0/1/2 = Resonance factor Flm
+            azim_zero = [h,k,l] vector parallel to the origin of the azimuth
+        """
+
+        if energy_kev is None:
+            energy_kev = self.xtl.Scatter._energy_kev
+
+        pol = np.arange(0, 360, 0.2)
+        I = np.zeros(len(pol))
+        for n in range(len(pol)):
+            I[n] = self.xtl.Scatter.xray_nonresonant_magnetic(
+                hkl,
+                energy_kev,
+                azim_zero,
+                psi,
+                polarisation=pol[n])
+
+        ttl = '%s %5.3f keV\n(%1.0f,%1.0f,%1.0f) aziref=(%1.0f,%1.0f,%1.0f) psi = %1.3g'
+        ttl = ttl % (self.xtl.name, energy_kev, hkl[0], hkl[1], hkl[2], azim_zero[0], azim_zero[1], azim_zero[2], psi)
+
+        plt.figure(figsize=[12, 10])
+        plt.plot(pol, I, '-', lw=2)
+        plt.xlim([0, 360])
+        plt.ylim([0, 1.1 * np.max(I)])
+        fp.labels(ttl, 'pol [Deg]', 'Non-Resonant Magnetic Intensity')
+
+    def plot_3Dpolarisation(self, hkl, energy_kev=None, polarisation='sp', azim_zero=[1,0,0], psi=0):
+        """
+        Plots the scattering vectors for a particular azimuth
+        :param hkl:
+        :param energy_kev:
+        :param polarisation:
+        :param azim_zero:
+        :param psi:
+        :return: None
+        """
+
+        U1, U2, U3 = xtl.Scatter.scatteringbasis(hkl, azim_zero, psi)
+        kin, kout, ein, eout = xtl.Scatter.scatteringvectors(hkl, energy_kev, azim_zero, psi, polarisation)
+
+        fig = plt.figure(figsize=[12, 12])
+        ax = fig.add_subplot(111, projection='3d')
+        ax.set_xlim([-1,1])
+        ax.set_ylim([-1,1])
+        ax.set_zlim([-1,1])
+        ax.set_xlabel('x', fontsize=18)
+        ax.set_ylabel('y', fontsize=18)
+        ax.set_zlabel('z', fontsize=18)
+        plt.title('(%1.0f,%1.0f,%1.0f) psi=%3.0f'%(hkl[0],hkl[1],hkl[2],psi), fontsize=28)
+
+        ax.plot([0, U1[0]], [0, U1[1]], [0, U1[2]], '-k', lw=2)  # U1
+        ax.plot([0, U2[0]], [0, U2[1]], [0, U2[2]], '-k', lw=2)  # U2
+        ax.plot([0, U3[0]], [0, U3[1]], [0, U3[2]], '-k', lw=3)  # U3
+
+        ax.plot([-kin[0, 0], 0], [-kin[0, 1], 0], [-kin[0, 2], 0], '-b')  # Kin
+        ax.plot([0, kout[0, 0]], [0, kout[0, 1]], [0, kout[0, 2]], '-b')  # Kout
+
+        ax.plot([-kin[0, 0], -kin[0, 0] + ein[0, 0]],
+                [-kin[0, 1], -kin[0, 1] + ein[0, 1]],
+                [-kin[0, 2], -kin[0, 2] + ein[0, 2]], '-g')  # ein
+        ax.plot([kout[0, 0], kout[0, 0] + eout[0, 0]],
+                [kout[0, 1], kout[0, 1] + eout[0, 1]],
+                [kout[0, 2], kout[0, 2] + eout[0, 2]], '-g')  # eout
+
+        ax.plot([0, a[0]], [0, a[1]], [0, a[2]], '-m')  # a
+        ax.plot([0, b[0]], [0, b[1]], [0, b[2]], '-m')  # b
+        ax.plot([0, c[0]], [0, c[1]], [0, c[2]], '-m')  # c
+
+        # Add moment manually after
+        #ax.plot([0, moment[0, 0]], [0, moment[0, 1]], [0, moment[0, 2]], '-r', lw=2)  # moment
+
 
 class PlottingSuperstructure(Plotting):
     """
@@ -724,9 +834,9 @@ class PlottingSuperstructure(Plotting):
         """
         Generate a cut through reciprocal space, returns an array with centred reflections
         Inputs:
-          x_axis = direction along x, in units of the reciprocal lattice (hkl)
-          y_axis = direction along y, in units of the reciprocal lattice (hkl)
-          centre = centre of the plot, in units of the reciprocal lattice (hkl)
+          x_axis = direction along x, in units of the supercell reciprocal lattice (hkl)
+          y_axis = direction along y, in units of the supercell reciprocal lattice (hkl)
+          centre = centre of the plot, in units of the supercell reciprocal lattice (hkl)
           q_max = maximum distance to plot to - in A-1
           cut_width = width in height that will be included, in A-1
           background = average background value
@@ -741,17 +851,28 @@ class PlottingSuperstructure(Plotting):
             plt.pcolormesh(Qx,Qy,plane)
             plt.axis('image')
         """
-        
-        Qx,Qy,HKL = self.xtl.Cell.reciprocal_space_plane(x_axis,y_axis,centre,q_max,cut_width)
+
+        Qx, Qy, HKL = self.xtl.Cell.reciprocal_space_plane(x_axis, y_axis, centre, q_max, cut_width)
         I = self.xtl.Scatter.intensity(HKL)
         
         # Apply Parent symmetry
         pHKL = self.xtl.superhkl2parent(HKL)
-        #for n in range(len(pHKL)):
-        #    print HKL[n],pHKL[n],I[n]
-        HKL,I = self.xtl.Parent.Symmetry.symmetric_intensity(pHKL,I)
-        Q=self.xtl.Parent.Cell.calculateQ(HKL)
-        Qx,Qy,Qz = Q.T
+        pHKL,I = self.xtl.Parent.Symmetry.symmetric_intensity(pHKL, I)
+        HKL = self.xtl.parenthkl2super(pHKL)
+        Q = self.xtl.calculateQ_parent(HKL)
+
+        # Determine location of new symmetrised HKL on mesh grid
+        x_cart = self.xtl.calculateQ_parent(x_axis)
+        y_cart = self.xtl.calculateQ_parent(y_axis)
+        x_cart, y_cart, z_cart = fc.orthogonal_axes(x_cart, y_cart)
+        c_cart =self.xtl.calculateQ_parent(centre)
+        CELL = np.array([2 * q_max * x_cart, -2 * q_max * y_cart, cut_width * z_cart])
+        box_coord = fg.index_coordinates(Q - c_cart, CELL)
+        incell = np.all(np.abs(box_coord) <= 0.5, axis=1)
+        plane_coord = 2 * q_max * box_coord[incell, :]
+        I = I[incell]
+        Qx = plane_coord[:, 0]
+        Qy = plane_coord[:, 1]
         
         # create plotting mesh
         pixels = 1000 # reduce this to make convolution faster
@@ -765,7 +886,7 @@ class PlottingSuperstructure(Plotting):
         pixel_j = ((Qy/(2*q_max) + 0.5)*pixels).astype(int)
         
         # Only take values within the mesh
-        in_mesh = np.all([pixel_i>=0, pixel_i<pixels,pixel_j>=0, pixel_j<pixels],axis=0)
+        in_mesh = np.all([pixel_i >= 0, pixel_i < pixels, pixel_j >= 0, pixel_j < pixels], axis=0)
         pixel_i = pixel_i[in_mesh]
         pixel_j = pixel_j[in_mesh]
         I = I[in_mesh]
@@ -789,9 +910,9 @@ class PlottingSuperstructure(Plotting):
                                     q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
         """
         Plot a cut through reciprocal space, visualising the intensity
-          x_axis = direction along x, in units of the reciprocal lattice (hkl)
-          y_axis = direction along y, in units of the reciprocal lattice (hkl)
-          centre = centre of the plot, in units of the reciprocal lattice (hkl)
+          x_axis = direction along x, in units of the parent reciprocal lattice (hkl)
+          y_axis = direction along y, in units of the parent reciprocal lattice (hkl)
+          centre = centre of the plot, in units of the parent reciprocal lattice (hkl)
           q_max = maximum distance to plot to - in A-1
           cut_width = width in height that will be included, in A-1
           background = average background value
@@ -806,18 +927,22 @@ class PlottingSuperstructure(Plotting):
         # Determine the directions in cartesian space
         x_cart,y_cart,z_cart = fc.orthogonal_axes(x_axis, y_axis)
         c_cart = self.xtl.Parent.Cell.calculateQ(centre)
-        
+
         # Correct y-axis for label - original may not have been perp. to x_axis (e.g. hexagonal)
         y_axis = fg.norm(self.xtl.Parent.Cell.indexQ(y_cart))
         y_axis = -y_axis/np.min(np.abs(y_axis[np.abs(y_axis)>0])) + 0.0 # +0.0 to remove -0
-        
+
         # Determine orthogonal lattice vectors for plotting lines and labels
         vec_a = x_axis
         vec_c = np.cross(x_axis,y_axis)
         vec_b = fg.norm(np.cross(vec_c,vec_a))
+
+        # Determine the supercell axes
+        super_x_axis = self.xtl.parenthkl2super(x_axis)
+        super_y_axis = self.xtl.parenthkl2super(y_axis)
         
         # Generate intensity cut
-        X,Y,mesh = self.generate_intensity_cut(x_axis, y_axis, centre, q_max, cut_width, background, peak_width)
+        X, Y, mesh = self.generate_intensity_cut(super_x_axis, super_y_axis, centre, q_max, cut_width, background, peak_width)
         
         # create figure
         plt.figure(figsize=[12,10])
@@ -830,15 +955,20 @@ class PlottingSuperstructure(Plotting):
         # Lattice points and vectors within the plot
         Q_vec_a = self.xtl.Parent.Cell.calculateQ(vec_a)
         Q_vec_b = self.xtl.Parent.Cell.calculateQ(vec_b)
-        
+
+        CELL = np.array([2 * q_max * x_cart, -2 * q_max * y_cart, cut_width * z_cart])  # Plot/mesh unit cell
+
+        mesh_vec_a = fg.index_coordinates(Q_vec_a, CELL) * 2 * q_max  # coordinates wrt plot axes
+        mesh_vec_b = fg.index_coordinates(Q_vec_b, CELL) * 2 * q_max
+
         # Vector arrows and lattice point labels
         cen_lab = '(%1.3g,%1.3g,%1.3g)' % (centre[0],centre[1],centre[2])
         vec_a_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_a[0]+centre[0],vec_a[1]+centre[1],vec_a[2]+centre[2])
         vec_b_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_b[0]+centre[0],vec_b[1]+centre[1],vec_b[2]+centre[2])
 
-        lattQ = fp.axis_lattice_points(Q_vec_a, Q_vec_b, plt.axis())
-        fp.plot_lattice_lines(lattQ, Q_vec_a, Q_vec_b)
-        fp.plot_vector_arrows(Q_vec_a, Q_vec_b, vec_a_lab, vec_b_lab)
+        lattQ = fp.axis_lattice_points(mesh_vec_a, mesh_vec_b, plt.axis())
+        fp.plot_lattice_lines(lattQ, mesh_vec_a, mesh_vec_b)
+        fp.plot_vector_arrows(mesh_vec_a, mesh_vec_b, vec_a_lab, vec_b_lab)
         plt.text(0-(0.2*q_max),0-(0.1*q_max),cen_lab,fontname='Times',weight='bold',size=18)
         
         # Plot labels
@@ -884,8 +1014,8 @@ class MultiPlotting:
             # add reflections to background
             # scipy.interpolate.griddata?
             pixel_coord = Qmag/q_max
-            pixel_coord = (pixel_coord*pixels).astype(int)
-            
+            pixel_coord = (pixel_coord*(pixels-1)).astype(int)
+
             ref_tth = [0]
             ref_int = [0]
             ref_txt = ['']

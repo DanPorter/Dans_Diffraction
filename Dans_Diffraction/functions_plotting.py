@@ -44,7 +44,7 @@ __version__ = '1.4'
 '----------------------------Plot manipulation--------------------------'
 
 
-def labels(ttl=None, xvar=None, yvar=None, zvar=None, size='Normal'):
+def labels(ttl=None, xvar=None, yvar=None, zvar=None, size='Normal', font='Times New Roman'):
     """
     Add formatted labels to current plot, also increases the tick size
     :param ttl: title
@@ -52,6 +52,7 @@ def labels(ttl=None, xvar=None, yvar=None, zvar=None, size='Normal'):
     :param yvar: y label
     :param zvar: z label (3D plots only)
     :param size: 'Normal' or 'Big'
+    :param font: str font name, 'Times New Roman'
     :return: None
     """
 
@@ -65,22 +66,24 @@ def labels(ttl=None, xvar=None, yvar=None, zvar=None, size='Normal'):
         tit = 20
         lab = 22
 
-    plt.xticks(fontsize=tik)
-    plt.yticks(fontsize=tik)
+    plt.xticks(fontsize=tik, fontname=font)
+    plt.yticks(fontsize=tik, fontname=font)
+    plt.setp(plt.gca().spines.values(), linewidth=2)
+    plt.ticklabel_format(useOffset=False)
+    plt.ticklabel_format(style='sci',scilimits=(-3,3))
 
     if ttl is not None:
-        plt.gca().set_title(ttl, fontsize=tit, fontweight='bold')
+        plt.gca().set_title(ttl, fontsize=tit, fontweight='bold', fontname=font)
 
     if xvar is not None:
-        plt.gca().set_xlabel(xvar, fontsize=lab)
+        plt.gca().set_xlabel(xvar, fontsize=lab, fontname=font)
 
     if yvar is not None:
-        plt.gca().set_ylabel(yvar, fontsize=lab)
+        plt.gca().set_ylabel(yvar, fontsize=lab, fontname=font)
 
     if zvar is not None:
         # Don't think this works, use ax.set_zaxis
-        plt.gca().set_zlabel(zvar, fontsize=lab)
-    return
+        plt.gca().set_zlabel(zvar, fontsize=lab, fontname=font)
 
 
 def saveplot(name, dpi=None, figure=None):
@@ -142,14 +145,19 @@ def newplot(*args, **kwargs):
     plt.ticklabel_format(style='sci', scilimits=(-3, 3))
 
 
-def multiplot(xvals,yvals=None,datarange=None,cmap='jet'):
+def multiplot(xvals,yvals=None,datarange=None,cmap='jet',labels=None,marker=None):
     """
-    Shortcut to creating a simple multiplot
+    Shortcut to creating a simple multiplot with either colorbar or legend
     E.G.
       x = np.arange(-5,5,0.1)
       ys = [x**2, 1+x**2, 2+x**2, 3+x**2, 4+x**2]
       datarange = [0,1,2,3,4]
-      multiplot(x,ys,datarange,cmap='winter')
+      multiplot(x, ys, datarange, cmap='winter')
+    OR:
+      x = np.arange(-5,5,0.1)
+      ys = [x**2, 1+x**2, 2+x**2, 3+x**2, 4+x**2]
+      labels = ['x*x','2+x*x','3+x*x','4+x*x']
+      multiplot(x, ys, labels=labels)
     """
 
     if yvals is None:
@@ -164,16 +172,20 @@ def multiplot(xvals,yvals=None,datarange=None,cmap='jet'):
 
     cm = plt.get_cmap(cmap)
     colrange = (datarange - datarange.min()) / (datarange.max() - datarange.min())
+    
+    if marker is None:
+        marker = ''
+    linearg = '-' + marker
 
     plt.figure(figsize=[12, 12])
     for n in range(len(datarange)):
         col = cm(colrange[n])
         if len(xvals) == 0:
-            plt.plot(yvals[n], '-', lw=2, color=col)
+            plt.plot(yvals[n], linearg, lw=2, color=col)
         elif len(xvals.shape) == 1:
-            plt.plot(xvals, yvals[n], '-', lw=2, color=col)
+            plt.plot(xvals, yvals[n], linearg, lw=2, color=col)
         else:
-            plt.plot(xvals[n], yvals[n], '-', lw=2, color=col)
+            plt.plot(xvals[n], yvals[n], linearg, lw=2, color=col)
 
     plt.setp(plt.gca().spines.values(), linewidth=2)
     plt.xticks(fontsize=25, fontname='Times New Roman')
@@ -181,11 +193,15 @@ def multiplot(xvals,yvals=None,datarange=None,cmap='jet'):
     plt.ticklabel_format(useOffset=False)
     plt.ticklabel_format(style='sci', scilimits=(-3, 3))
 
-    # Colorbar
-    sm = plt.cm.ScalarMappable(cmap=cm)
-    sm.set_array(datarange)
-    cbar = plt.colorbar(sm)
-    #cbar.set_label('variation [unit]', fontsize=24, fontweight='bold', fontname='Times New Roman')
+    if labels is None:
+        # Add Colorbar
+        sm = plt.cm.ScalarMappable(cmap=cm)
+        sm.set_array(datarange)
+        cbar = plt.colorbar(sm)
+        #cbar.set_label('variation [unit]', fontsize=24, fontweight='bold', fontname='Times New Roman')
+    else:
+        # Add legend
+        plt.legend(labels, loc=0, frameon=False, prop={'size':20,'family':'serif'})
 
 
 def newplot3(*args, **kwargs):
