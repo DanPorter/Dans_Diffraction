@@ -32,7 +32,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '0.1'
+__version__ = '0.2'
 
 # Fonts
 TF= ["Times", 10]
