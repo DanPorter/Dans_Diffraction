@@ -11,7 +11,8 @@ DansCrystalGUI.py
 """
 
 # Built-ins
-import sys,os
+import sys, os
+
 import numpy as np
 if sys.version_info[0] < 3:
     import Tkinter as tk
@@ -21,8 +22,12 @@ else:
     import tkinter as tk
     import filedialog
     from tkinter import messagebox
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt # Plotting
 
 # Internal functions
+from .classes_crystal import Crystal
 from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
@@ -99,6 +104,13 @@ class Crystalgui:
         var.pack(side=tk.LEFT)
         var = tk.Button(f_but, text='Simulate\nStructure Factors', font=BF, command=self.fun_simulate)
         var.pack(side=tk.LEFT)
+
+        # start mainloop
+        # In interactive mode, this freezes the terminal
+        # To stop this, need a way of checking if interactive or not ('-i' in sys.argv)
+        # However sys in this file is not the same as sys in the operating script
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.root.mainloop()
     
     ###################################################################################
     ############################## FUNCTIONS ##########################################
@@ -112,8 +124,11 @@ class Crystalgui:
     
     def fun_loadcif(self):
         #root = Tk().withdraw() # from Tkinter
-        filename = filedialog.askopenfilename(initialdir=os.path.expanduser('~'),\
-        filetypes=[('cif file','.cif'),('magnetic cif','.mcif'),('All files','.*')]) # from tkFileDialog
+        defdir = os.path.join(os.path.dirname(__file__),'Structures')
+        #defdir = os.path.expanduser('~')
+        filename = filedialog.askopenfilename(initialdir=defdir,
+                                              filetypes=[('cif file', '.cif'), ('magnetic cif', '.mcif'),
+                                                         ('All files', '.*')])  # from tkFileDialog
         if filename:
             self.xtl = Crystal(filename)
             self.fun_set()
@@ -147,10 +162,16 @@ class Crystalgui:
     def fun_plotxtl(self):
         self.fun_set()
         self.xtl.Plot.plot_crystal()
+        plt.show()
     
     def fun_simulate(self):
         self.fun_set()
         Scatteringgui(self.xtl)
+
+    def on_closing(self):
+        "End mainloop on close window"
+        self.root.destroy()
+
 
 class Latpargui:
     """
@@ -236,12 +257,13 @@ class Latpargui:
         # Close window
         self.root.destroy()
 
+
 class Atomsgui:
     """
     View and edit the atomic positions
     """
     def __init__(self,xtl,symmetric_only=True,magnetic_moments=False):
-        "Initialise"
+        """Initialise"""
         self.xtl = xtl
         self.symmetric_only = symmetric_only
         self.magnetic_moments = magnetic_moments
@@ -303,8 +325,7 @@ class Atomsgui:
         self.text.config(xscrollcommand=scanx.set,yscrollcommand=scany.set)
         scanx.config(command=self.text.xview)
         scany.config(command=self.text.yview)
-        
-    
+
     def fun_set(self):
         "Get positions from crystal object, fill text boxes"
         # Build string
@@ -327,7 +348,7 @@ class Atomsgui:
         self.text.insert(tk.END,str)
     
     def fun_magnets(self):
-        "ReOpen window with magnetic moments"
+        """"ReOpen window with magnetic moments"""
         
         # Close window
         self.root.destroy()
@@ -401,6 +422,7 @@ class Atomsgui:
         
         # Close window
         self.root.destroy()
+
 
 class Symmetrygui:
     """
@@ -533,6 +555,7 @@ class Symmetrygui:
         # Close window
         self.root.destroy()
 
+
 class Scatteringgui:
     """
     Simulate scattering of various forms
@@ -561,11 +584,20 @@ class Scatteringgui:
         self.theta_max = tk.DoubleVar(frame,180.0)
         self.twotheta_min = tk.DoubleVar(frame,-180.0)
         self.twotheta_max = tk.DoubleVar(frame,180.0)
+        self.powder_units = tk.StringVar(frame, 'Two-Theta')
         self.hkl_check = tk.StringVar(frame,'0 0 1')
         self.hkl_result = tk.StringVar(frame,'I:%8.0f TTH:%6.2f'%(0,0))
         self.val_i = tk.IntVar(frame,0)
-        
-        
+        self.hkl_magnetic = tk.StringVar(frame,'0 0 1')
+        self.azim_zero = tk.StringVar(frame,'1 0 0')
+        self.isres = tk.BooleanVar(frame,True)
+        self.psival = tk.DoubleVar(frame,0.0)
+        self.polval = tk.StringVar(frame,u'\u03c3-\u03c0')
+        self.resF0 = tk.DoubleVar(frame,0.0)
+        self.resF1 = tk.DoubleVar(frame, 1.0)
+        self.resF2 = tk.DoubleVar(frame, 0.0)
+        self.magresult = tk.StringVar(frame, 'I = --')
+
         #---Line 1---
         line1 = tk.Frame(frame)
         line1.pack(side=tk.TOP,fill=tk.X,pady=5)
@@ -653,21 +685,31 @@ class Scatteringgui:
         
         var = tk.Button(line4, text='Plot Powder', font=BF, command=self.fun_powder)
         var.pack(side=tk.LEFT)
+
+        xaxistypes = ['two-theta', 'd-spacing', 'Q']
+        var = tk.Label(line4, text='Units:', font=SF)
+        var.pack(side=tk.LEFT)
+        var = tk.OptionMenu(line4, self.powder_units, *xaxistypes)
+        var.config(font=SF, width=10)
+        var.pack(side=tk.LEFT)
         
         # hkl check
-        var = tk.Button(line4, text='Check HKL', font=BF, command=self.fun_hklcheck)
-        var.pack(side=tk.RIGHT)
-        var = tk.Label(line4, textvariable=self.hkl_result,font=TF, width=22)
-        var.pack(side=tk.RIGHT)
-        var = tk.Entry(line4, textvariable=self.hkl_check, font=TF, width=8)
-        var.pack(side=tk.RIGHT)
+        hklbox = tk.LabelFrame(line4, text='Quick Check')
+        hklbox.pack(side=tk.RIGHT)
+        var = tk.Entry(hklbox, textvariable=self.hkl_check, font=TF, width=6)
+        var.pack(side=tk.LEFT)
         var.bind('<Return>',self.fun_hklcheck)
         var.bind('<KP_Enter>',self.fun_hklcheck)
+        var = tk.Label(hklbox, textvariable=self.hkl_result,font=TF, width=22)
+        var.pack(side=tk.LEFT)
+        var = tk.Button(hklbox, text='Check HKL', font=BF, command=self.fun_hklcheck)
+        var.pack(side=tk.LEFT, pady=2)
         
         #--- Line 5 ---
         line5 = tk.Frame(frame)
         line5.pack(side=tk.TOP,pady=5)
-        
+
+        #---HKL Planes---
         # i value
         var = tk.Label(line5, text='i:',font=SF)
         var.pack(side=tk.LEFT)
@@ -675,20 +717,113 @@ class Scatteringgui:
         var.pack(side=tk.LEFT)
         
         # directions
-        vframe1 = tk.Frame(line5)
-        vframe1.pack(side=tk.LEFT,fill=tk.Y,padx=3)
-        var = tk.Button(vframe1, text='HKi', font=BF, command=self.fun_hki,width=5)
+        vframe = tk.Frame(line5)
+        vframe.pack(side=tk.LEFT, padx=3)
+        var = tk.Button(vframe, text='HKi', font=BF, command=self.fun_hki,width=5)
         var.pack()
-        var = tk.Button(vframe1, text='HiL', font=BF, command=self.fun_hil,width=5)
+        var = tk.Button(vframe, text='HiL', font=BF, command=self.fun_hil,width=5)
         var.pack()
         
-        vframe2 = tk.Frame(line5)
-        vframe2.pack(side=tk.LEFT,fill=tk.Y)
-        var = tk.Button(vframe2, text='iKL', font=BF, command=self.fun_ikl,width=5)
+        vframe = tk.Frame(line5)
+        vframe.pack(side=tk.LEFT)
+        var = tk.Button(vframe, text='iKL', font=BF, command=self.fun_ikl,width=5)
         var.pack()
-        var = tk.Button(vframe2, text='HHi', font=BF, command=self.fun_hhi,width=5)
+        var = tk.Button(vframe, text='HHi', font=BF, command=self.fun_hhi,width=5)
         var.pack()
-    
+
+
+        #---X-ray Magnetic scattering----
+        if np.any(self.xtl.Structure.mxmymz()):
+            resbox = tk.LabelFrame(line5, text='X-Ray Magnetic Scattering')
+            resbox.pack(side=tk.LEFT, fill=tk.Y, padx=3)
+
+            # Resonant HKL, azimuthal reference
+            vframe = tk.Frame(resbox)
+            vframe.pack(side=tk.LEFT, fill=tk.Y, padx=3)
+
+            hframe = tk.Frame(vframe)
+            hframe.pack()
+            var = tk.Label(hframe, text='       HKL:', font=SF, width=11)
+            var.pack(side=tk.LEFT)
+            var = tk.Entry(hframe, textvariable=self.hkl_magnetic, font=TF, width=6)
+            var.pack(side=tk.LEFT)
+            var.bind('<Return>',self.fun_hklmag)
+            var.bind('<KP_Enter>',self.fun_hklmag)
+
+            hframe = tk.Frame(vframe)
+            hframe.pack()
+            var = tk.Label(vframe, text='Azim. Ref.:', font=SF, width=11)
+            var.pack(side=tk.LEFT)
+            var = tk.Entry(vframe, textvariable=self.azim_zero, font=TF, width=6)
+            var.pack(side=tk.LEFT)
+
+            # Resonant value
+            vframe = tk.Frame(resbox)
+            vframe.pack(side=tk.LEFT, fill=tk.Y, padx=3)
+
+            hframe = tk.Frame(vframe)
+            hframe.pack()
+            var = tk.Label(hframe, text='F0:', font=SF)
+            var.pack(side=tk.LEFT)
+            var = tk.Entry(hframe, textvariable=self.resF0, font=TF, width=3)
+            var.pack(side=tk.LEFT)
+
+            hframe = tk.Frame(vframe)
+            hframe.pack()
+            var = tk.Label(hframe, text='F1:', font=SF)
+            var.pack(side=tk.LEFT)
+            var = tk.Entry(hframe, textvariable=self.resF1, font=TF, width=3)
+            var.pack(side=tk.LEFT)
+
+            hframe = tk.Frame(vframe)
+            hframe.pack()
+            var = tk.Label(hframe, text='F2:', font=SF)
+            var.pack(side=tk.LEFT)
+            var = tk.Entry(hframe, textvariable=self.resF2, font=TF, width=3)
+            var.pack(side=tk.LEFT)
+
+            vframe = tk.Frame(resbox)
+            vframe.pack(side=tk.LEFT, fill=tk.Y, padx=3)
+
+            # Polarisation
+            poltypes = [u'\u03c3-\u03c3', u'\u03c3-\u03c0', u'\u03c0-\u03c3', u'\u03c0-\u03c0']
+            hframe = tk.Frame(vframe)
+            hframe.pack()
+            var = tk.Label(hframe, text='Polarisation:', font=SF)
+            var.pack(side=tk.LEFT)
+            var = tk.OptionMenu(hframe, self.polval, *poltypes)
+            var.config(font=SF, width=5)
+            var.pack(side=tk.LEFT)
+
+            hframe = tk.Frame(vframe)
+            hframe.pack()
+
+            # Resonant tickbox
+            var = tk.Checkbutton(hframe, text='Resonant', variable=self.isres, font=SF)
+            var.pack(side=tk.LEFT, padx=6)
+            # psi
+            var = tk.Label(hframe, text='psi:', font=SF, width=4)
+            var.pack(side=tk.LEFT)
+            var = tk.Entry(hframe, textvariable=self.psival, font=TF, width=4)
+            var.pack(side=tk.LEFT)
+            var.bind('<Return>',self.fun_hklmag)
+            var.bind('<KP_Enter>',self.fun_hklmag)
+
+            vframe = tk.Frame(resbox)
+            vframe.pack(side=tk.LEFT, fill=tk.Y, padx=3)
+
+            # Azimuth Button
+            var = tk.Button(vframe, text='Calc. Mag. Inten.', font=BF, command=self.fun_hklmag)
+            var.pack()
+            # Magnetic Result
+            var = tk.Label(vframe, textvariable=self.magresult, font=SF, width=12)
+            var.pack(fill=tk.Y)
+
+            # Azimuth Button
+            var = tk.Button(resbox, text='Simulate\n Azimuth', font=BF, command=self.fun_azimuth, width=7)
+            var.pack(side=tk.LEFT)
+
+
     def fun_set(self):
         "Set gui parameters from crystal"
         
@@ -720,6 +855,7 @@ class Scatteringgui:
         scat._scattering_max_theta = self.theta_max.get()
         scat._scattering_min_two_theta = self.twotheta_min.get()
         scat._scattering_max_two_theta = self.twotheta_max.get()
+        scat._powder_units = self.powder_units.get()
         
         if self.orientation.get() == 'Reflection':
             scat._scattering_specular_direction[0] = self.direction_h.get()
@@ -734,14 +870,14 @@ class Scatteringgui:
         "Add I16 parameters"
         
         self.type.set('X-Ray')
-        self.energy_kev.set(8)
+        self.energy_kev.set(8.0)
         self.theta_offset.set(0)
         self.theta_min.set(-20)
         self.theta_max.set(150)
         self.twotheta_min.set(0)
         self.twotheta_max.set(130)
     
-    def fun_hklcheck(self,event=None):
+    def fun_hklcheck(self, event=None):
         "Show single hkl intensity"
         
         self.fun_get()
@@ -750,8 +886,8 @@ class Scatteringgui:
         hkl = hkl.replace('(','').replace(')','') # remove brackets
         hkl = hkl.replace('[','').replace(']','') # remove brackets
         hkl = np.fromstring(hkl,sep=' ')
-        I = xtl.Scatter.intensity(hkl)
-        tth = xtl.Cell.tth(hkl)
+        I = self.xtl.Scatter.intensity(hkl)
+        tth = self.xtl.Cell.tth(hkl)
         self.hkl_result.set('I:%8.0f TTH:%6.2f'%(I,tth))
     
     def fun_intensities(self):
@@ -764,48 +900,166 @@ class Scatteringgui:
             string = self.xtl.Scatter.print_tran_reflections(min_intensity=-1, max_intensity=None)
         else:
             string = self.xtl.Scatter.print_all_reflections(min_intensity=-1, max_intensity=None)
-        String_Viewer(string,'Intensities %s'%(self.xtl.name))
+        String_Viewer(string, 'Intensities %s' % self.xtl.name)
     
     def fun_powder(self):
-        "Plot Powder"
+        """Plot Powder"""
         self.fun_get()
         energy = self.energy_kev.get()
-        min_tth = self.twotheta_min.get()
-        max_tth = self.twotheta_max.get()
-        if min_tth < 0: min_tth=0.0
-        
-        xtl.Plot.simulate_powder(energy)
-        plt.xlim(min_tth,max_tth)
+        min_q = fc.calQmag(self.twotheta_min.get(), energy)
+        max_q = fc.calQmag(self.twotheta_max.get(), energy)
+        if min_q < 0: min_q=0.0
+
+        if self.xtl.Scatter._powder_units.lower() in ['tth', 'angle', 'twotheta', 'theta']:
+            minx = fc.cal2theta(min_q, energy)
+            maxx = fc.cal2theta(max_q, energy)
+        elif self.xtl.Scatter._powder_units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
+            if min_q < 0.01: min_q = 0.01
+            minx = fc.caldspace(min_q)
+            maxx = fc.caldspace(max_q)
+        else:
+            minx = min_q
+            maxx = max_q
+
+        self.xtl.Plot.simulate_powder(energy)
+        plt.xlim(minx, maxx)
+        plt.show()
     
     def fun_hki(self):
-        "Plot hki plane"
+        """Plot hki plane"""
         self.fun_get()
         i = self.val_i.get()
         self.xtl.Plot.simulate_hk0(i)
+        plt.show()
     
     def fun_hil(self):
-        "Plot hil plane"
+        """Plot hil plane"""
         self.fun_get()
         i = self.val_i.get()
         self.xtl.Plot.simulate_h0l(i)
+        plt.show()
     
     def fun_ikl(self):
-        "Plot ikl plane"
+        """Plot ikl plane"""
         self.fun_get()
         i = self.val_i.get()
         self.xtl.Plot.simulate_0kl(i)
+        plt.show()
     
     def fun_hhi(self):
-        "Plot hhl plane"
+        """Plot hhl plane"""
         self.fun_get()
         i = self.val_i.get()
         self.xtl.Plot.simulate_hhl(i)
+        plt.show()
     
     def fun_simulate(self):
-        
+        """Unknown"""
         self.xtl.Scatter._energy_kev
         self.xtl.Scatter._polarised
-        self.xtl.Scatter._polarisation_vector_incident 
+        self.xtl.Scatter._polarisation_vector_incident
+
+    def fun_hklmag(self, event=None):
+        """"Magnetic scattering"""
+
+        energy_kev = self.energy_kev.get()
+        hkl = self.hkl_magnetic.get()
+        hkl = hkl.replace(',', ' ')  # remove commas
+        hkl = hkl.replace('(', '').replace(')', '')  # remove brackets
+        hkl = hkl.replace('[', '').replace(']', '')  # remove brackets
+        hkl = np.fromstring(hkl, sep=' ')
+
+        azi = self.azim_zero.get()
+        azi = azi.replace(',', ' ')  # remove commas
+        azi = azi.replace('(', '').replace(')', '')  # remove brackets
+        azi = azi.replace('[', '').replace(']', '')  # remove brackets
+        azi = np.fromstring(azi, sep=' ')
+
+        psi = self.psival.get()
+        pol = self.polval.get()
+        if pol == u'\u03c3-\u03c3':
+            pol = 's-s'
+        elif pol == u'\u03c3-\u03c0':
+            pol = 's-p'
+        elif pol == u'\u03c0-\u03c3':
+            pol = 'p-s'
+        else:
+            pol = 'p-p'
+
+        F0 = self.resF0.get()
+        F1 = self.resF1.get()
+        F2 = self.resF2.get()
+
+        isres = self.isres.get()
+        if isres:
+            # Resonant scattering
+            maginten = self.xtl.Scatter.xray_resonant_magnetic(
+                hkl,
+                energy_kev=energy_kev,
+                azim_zero=azi, psi=psi,
+                polarisation=pol,
+                F0=F0, F1=F1, F2=F2)
+        else:
+            # Non-Resonant scattering
+            maginten = self.xtl.Scatter.xray_nonresonant_magnetic(
+                hkl,
+                energy_kev=energy_kev,
+                azim_zero=azi, psi=psi,
+                polarisation=pol)
+
+        self.magresult.set('I = %9.4g'%maginten)
+
+    def fun_azimuth(self):
+        """Simulate azimuthal magnetic scattering"""
+
+        energy_kev = self.energy_kev.get()
+        hkl = self.hkl_magnetic.get()
+        hkl = hkl.replace(',', ' ')  # remove commas
+        hkl = hkl.replace('(', '').replace(')', '')  # remove brackets
+        hkl = hkl.replace('[', '').replace(']', '')  # remove brackets
+        hkl = np.fromstring(hkl, sep=' ')
+
+        azi = self.azim_zero.get()
+        azi = azi.replace(',', ' ')  # remove commas
+        azi = azi.replace('(', '').replace(')', '')  # remove brackets
+        azi = azi.replace('[', '').replace(']', '')  # remove brackets
+        azi = np.fromstring(azi, sep=' ')
+
+        pol = self.polval.get()
+        if pol == u'\u03c3-\u03c3':
+            pol = 's-s'
+        elif pol == u'\u03c3-\u03c0':
+            pol = 's-p'
+        elif pol == u'\u03c0-\u03c3':
+            pol = 'p-s'
+        else:
+            pol = 'p-p'
+
+        F0 = self.resF0.get()
+        F1 = self.resF1.get()
+        F2 = self.resF2.get()
+
+        isres = self.isres.get()
+        if isres:
+            # Resonant scattering
+            self.xtl.Plot.simulate_azimuth_resonant(
+                hkl,
+                energy_kev=energy_kev,
+                azim_zero=azi,
+                polarisation=pol,
+                F0=F0, F1=F1, F2=F2)
+            plt.show()
+        else:
+            # Non-Resonant scattering
+            self.xtl.Plot.simulate_azimuth_nonresonant(
+                hkl,
+                energy_kev=energy_kev,
+                azim_zero=azi,
+                polarisation=pol)
+            plt.show()
+
+
+
 
 class String_Viewer:
     """

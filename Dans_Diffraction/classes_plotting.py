@@ -267,10 +267,13 @@ class Plotting:
             mesh = mesh+bkg
         return mesh_q,mesh
     
-    def simulate_powder(self,energy_kev=8.0,peak_width=0.01,background=0):
+    def simulate_powder(self, energy_kev=None, peak_width=0.01, background=0):
         """
         Generates a powder pattern, plots in a new figure with labels
         """
+
+        if energy_kev is None:
+            energy_kev = self.xtl.Scatter._energy_kev
         
         # Get reflections
         angle_max = 180
@@ -278,8 +281,6 @@ class Plotting:
         HKL = self.xtl.Cell.all_hkl(energy_kev, angle_max)
         HKL = self.xtl.Cell.sort_hkl(HKL) # required for labels
         Qmag = self.xtl.Cell.Qmag(HKL)
-        tth = self.xtl.Cell.tth(HKL,energy_kev)
-        #d = self.xtl.Cell.dspace(HKL)
         
         # Calculate intensities
         I = self.xtl.Scatter.intensity(HKL)
@@ -289,43 +290,56 @@ class Plotting:
         pixel_size = q_max/(1.0*pixels)
         peak_width_pixels = peak_width/(1.0*pixel_size)
         mesh = np.zeros([int(pixels)])
-        mesh_q = np.linspace(0,q_max,pixels)
-        mesh_tth = fc.cal2theta(mesh_q, energy_kev)
-        #mesh_d = fc.caldspace(mesh_q)
+
+        if self.xtl.Scatter._powder_units.lower() in ['tth', 'angle', 'two-theta', 'twotheta', 'theta']:
+            xx = self.xtl.Cell.tth(HKL, energy_kev)
+            max_x = angle_max
+            xlab = u'Two-Theta [Deg]'
+        elif self.xtl.Scatter._powder_units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
+            xx = self.xtl.Cell.dspace(HKL)
+            max_x = 10.0
+            xlab = u'd-spacing [$\AA$]'
+        else:
+            xx = Qmag
+            max_x = q_max
+            xlab = u'Q [$\AA^{-1}]$'
         
         # add reflections to background
         # scipy.interpolate.griddata?
-        pixel_coord = Qmag/q_max
+        mesh_x = np.linspace(0, max_x, pixels)
+        pixel_coord = xx/ max_x
         pixel_coord = (pixel_coord*(pixels-1)).astype(int)
         
-        ref_tth = [0]
+        ref_x =  [0]
         ref_int = [0]
         ref_txt = ['']
-        ext_tth = []
+        ext_x = []
         ext_int = []
         ext_txt = []
         for n in range(1,len(I)):
+            if xx[n] > max_x:
+                continue
             mesh[pixel_coord[n]] = mesh[pixel_coord[n]] + I[n]
             
             if np.abs(pixel_coord[n]-pixel_coord[n-1]) > peak_width_pixels/2:
                 # generate label if not too close to another reflection
                 # Note taht at high angle with many close reflections, it may end in 
                 # a situation where new peaks are never added
-                #print 'A: ',HKL[n,:],tth[n],pixel_coord[n],pixel_coord[n-1],I[n]
+                #print 'A: ',HKL[n,:],x[n],pixel_coord[n],pixel_coord[n-1],I[n]
                 if I[n] > 0.1:
-                    ref_tth += [tth[n]]
+                    ref_x += [xx[n]]
                     ref_int += [I[n]]
                     ref_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])]
                 else:
-                    ext_tth += [tth[n]]
+                    ext_x += [xx[n]]
                     ext_int += [I[n]]
                     ext_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])]
             elif mesh[pixel_coord[n]] > I[n-1] and mesh[pixel_coord[n]] > 0.1:
                 # Replace the label if next reflection is larger
                 # Note for multiple equivalent reflections, mesh[pixel_coord[n]] will get larger 
                 # each time as more intensity is added, so this will always take the last reflection
-                #print 'B: ',HKL[n,:],tth[n],pixel_coord[n],pixel_coord[n-1],I[n],mesh[pixel_coord[n]]
-                ref_tth[-1] = tth[n]
+                #print 'B: ',HKL[n,:],xx[n],pixel_coord[n],pixel_coord[n-1],I[n],mesh[pixel_coord[n]]
+                ref_x[-1] = xx[n]
                 ref_int[-1] = mesh[pixel_coord[n]]
                 ref_txt[-1] = '(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])
         
@@ -342,29 +356,28 @@ class Plotting:
         
         # create figure
         plt.figure(figsize=[16,8])
-        plt.plot(mesh_tth,mesh,'k-',lw=2)
+        plt.plot(mesh_x,mesh,'k-',lw=2)
         
         # Reflection labels
         #print 'Refelctions'
-        for n in range(len(ref_tth)):
-            #print ref_tth[n],ref_int[n],ref_txt[n]
-            plt.text(ref_tth[n],1.01*ref_int[n],ref_txt[n],
-                     fontname='Times',fontsize=8,color='b',
-                     rotation='vertical',ha='center',va='bottom')
+        for n in range(len(ref_x)):
+            #print ref_x[n],ref_int[n],ref_txt[n]
+            plt.text(ref_x[n], 1.01 * ref_int[n], ref_txt[n],
+                     fontname='Times', fontsize=8, color='b',
+                     rotation='vertical', ha='center', va='bottom')
         # Extinction labels
         #print 'Extinctions'
         ymax=plt.ylim()[1]
-        for n in range(len(ext_tth)):
-            #print ext_tth[n],ext_int[n],ext_txt[n]
-            plt.text(ext_tth[n],0.01*ymax,ext_txt[n],
-                     fontname='Times',fontsize=8,color='r',
-                     rotation='vertical',ha='center',va='bottom')
+        for n in range(len(ext_x)):
+            #print ext_x[n],ext_int[n],ext_txt[n]
+            plt.text(ext_x[n], 0.01 * ymax, ext_txt[n],
+                     fontname='Times', fontsize=8, color='r',
+                     rotation='vertical', ha='center', va='bottom')
         
         # Plot labels
-        xlab = u'2-Theta [Deg]'
         ylab = u'Intensity'
-        ttl = '%s\nE = %1.3f keV' % (self.xtl.name,energy_kev)
-        fp.labels(ttl,xlab,ylab)
+        ttl = '%s\nE = %1.3f keV' % (self.xtl.name, energy_kev)
+        fp.labels(ttl, xlab, ylab)
     
     def generate_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],
                                     q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
@@ -388,8 +401,8 @@ class Plotting:
             plt.pcolormesh(Qx,Qy,plane)
             plt.axis('image')
         """
-        
-        Qx,Qy,HKL = self.xtl.Cell.reciprocal_space_plane(x_axis,y_axis,centre,q_max,cut_width)
+
+        Qx, Qy, HKL = self.xtl.Cell.reciprocal_space_plane(x_axis, y_axis, centre, q_max, cut_width)
         
         # Calculate intensities
         I = self.xtl.Scatter.intensity(HKL)
@@ -708,6 +721,71 @@ class Plotting:
         plt.ylim([0,1.1*np.max(IXR)])
         fp.labels(ttl,'psi [Deg]',pol)
 
+    def simulate_azimuth_resonant(self, hkl, energy_kev=None, polarisation='sp', F0=1, F1=1, F2=1, azim_zero=[1, 0, 0]):
+        """
+        Simulate azimuthal scan of resonant x-ray scattering
+            energy_kev = x-ray energy in keV
+            polarisation = x-ray polarisation: 'ss',{'sp'},'ps','pp'
+            F0/1/2 = Resonance factor Flm
+            azim_zero = [h,k,l] vector parallel to the origin of the azimuth
+        """
+
+        if energy_kev is None:
+            energy_kev = self.xtl.Scatter._energy_kev
+
+        azi = np.arange(-180, 180, 1.)
+        I = np.zeros(len(azi))
+        for n in range(len(azi)):
+            I[n] = self.xtl.Scatter.xray_resonant_magnetic(
+                HKL=hkl,
+                energy_kev=energy_kev,
+                azim_zero=azim_zero,
+                psi=azi[n],
+                polarisation=polarisation,
+                F0=F0, F1=F1, F2=F2)
+
+        ttl = '%s %5.3f keV\n(%1.0f,%1.0f,%1.0f) aziref=(%1.0f,%1.0f,%1.0f) %s'
+        ttl = ttl % (self.xtl.name, energy_kev, hkl[0], hkl[1], hkl[2], azim_zero[0], azim_zero[1], azim_zero[2], polarisation)
+
+        plt.figure(figsize=[12, 10])
+        plt.plot(azi, I, '-', lw=2)
+        plt.xlim([-180, 180])
+        plt.ylim([0, 1.1 * np.max(I)])
+        fp.labels(ttl, '$\Psi$ [Deg]', 'Resonant Magnetic Intensity')
+
+    def simulate_azimuth_nonresonant(self, hkl, energy_kev=None, polarisation='sp', azim_zero=[1, 0, 0]):
+        """
+        Simulate azimuthal scan of resonant x-ray scattering
+            energy_kev = x-ray energy in keV
+            polarisation = x-ray polarisation: 'ss',{'sp'},'ps','pp'
+            F0/1/2 = Resonance factor Flm
+            azim_zero = [h,k,l] vector parallel to the origin of the azimuth
+        """
+
+        if energy_kev is None:
+            energy_kev = self.xtl.Scatter._energy_kev
+
+        azi = np.arange(-180, 180, 1.)
+        I = np.zeros(len(azi))
+        for n in range(len(azi)):
+            I[n] = self.xtl.Scatter.xray_nonresonant_magnetic(
+                HKL=hkl,
+                energy_kev=energy_kev,
+                azim_zero=azim_zero,
+                psi=azi[n],
+                polarisation=polarisation)
+
+        ttl = '%s %5.3f keV\n(%1.0f,%1.0f,%1.0f) aziref=(%1.0f,%1.0f,%1.0f) %s'
+        ttl = ttl % (
+        self.xtl.name, energy_kev, hkl[0], hkl[1], hkl[2], azim_zero[0], azim_zero[1], azim_zero[2], polarisation)
+
+        plt.figure(figsize=[12, 10])
+        plt.plot(azi, I, '-', lw=2)
+        plt.xlim([-180, 180])
+        plt.ylim([0, 1.1 * np.max(I)])
+        fp.labels(ttl, '$\Psi$ [Deg]', 'Non-Resonant Magnetic Intensity')
+
+
     def simulate_polarisation_resonant(self, hkl, energy_kev=None, F0=1, F1=1, F2=1, azim_zero=[1, 0, 0], psi=0):
         """
         Simulate azimuthal scan of resonant x-ray scattering
@@ -782,8 +860,8 @@ class Plotting:
         :return: None
         """
 
-        U1, U2, U3 = xtl.Scatter.scatteringbasis(hkl, azim_zero, psi)
-        kin, kout, ein, eout = xtl.Scatter.scatteringvectors(hkl, energy_kev, azim_zero, psi, polarisation)
+        U1, U2, U3 = self.xtl.Scatter.scatteringbasis(hkl, azim_zero, psi)
+        kin, kout, ein, eout = self.xtl.Scatter.scatteringvectors(hkl, energy_kev, azim_zero, psi, polarisation)
 
         fig = plt.figure(figsize=[12, 12])
         ax = fig.add_subplot(111, projection='3d')

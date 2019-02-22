@@ -26,6 +26,8 @@ Version History:
 08/06/18 1.2    Python3 now fully supported
 """
 
+import sys
+
 from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
@@ -33,7 +35,14 @@ from .classes_crystal import Crystal, MultiCrystal
 from .classes_structures import Structures
 from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
+# GUI (requires tkinter)
+try:
+    from .classes_gui import Crystalgui as Startgui
+except ImportError:
+    print('GUI functionality not available, you need to install tkinter.')
+
 __version__ = '1.2'
+
 
 # Build 
 structure_list = Structures()

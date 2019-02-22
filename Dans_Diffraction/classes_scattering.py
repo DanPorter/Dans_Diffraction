@@ -57,6 +57,9 @@ class Scattering:
     _scattering_max_theta = 180.0
     _scattering_min_twotheta = -180.0
     _scattering_max_twotheta = 180.0
+
+    # Units
+    _powder_units = 'tth' # tth (two theta), Q, d
     
     # Complex Structure factor
     _return_structure_factor = False
