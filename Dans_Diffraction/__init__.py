@@ -17,13 +17,14 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.2
-Last updated: 08/06/18
+Version 1.3
+Last updated: 23/02/19
 
 Version History:
 02/03/18 1.0    Version History started.
 30/05/18 1.1    Fdmnes added
 08/06/18 1.2    Python3 now fully supported
+23/02/19 1.3    Graphical user intrface and magnetic x-ray scattering now implemented
 """
 
 import sys
@@ -41,7 +42,8 @@ try:
 except ImportError:
     print('GUI functionality not available, you need to install tkinter.')
 
-__version__ = '1.2'
+__version__ = '1.3'
+__date__ = '23/02/19'
 
 
 # Build 

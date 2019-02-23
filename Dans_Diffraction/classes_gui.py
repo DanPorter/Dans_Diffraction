@@ -8,11 +8,28 @@ DansCrystalGUI.py
   
   Requires:
       numpy, matplotlib, tkinter
+
+By Dan Porter, PhD
+Diamond
+2019
+
+Version 1.0
+Last updated: 23/02/19
+
+Version History:
+10/11/17 0.1    Program created
+23/02/19 1.0    Finished the basic program and gave it colours
+
+@author: DGPorter
 """
 
 # Built-ins
 import sys, os
 
+# Set TkAgg environment
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt # Plotting
 import numpy as np
 if sys.version_info[0] < 3:
     import Tkinter as tk
@@ -21,18 +38,18 @@ if sys.version_info[0] < 3:
 else:
     import tkinter as tk
     import filedialog
-    from tkinter import messagebox
-import matplotlib
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt # Plotting
+    #from tkinter import messagebox
 
 # Internal functions
 from .classes_crystal import Crystal
 from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
+from .classes_structures import Structures
 
-__version__ = '0.2'
+structure_list = Structures()
+
+__version__ = '1.0'
 
 # Fonts
 TF= ["Times", 10]
@@ -40,14 +57,27 @@ BF= ["Times", 14]
 SF= ["Times New Roman", 14]
 LF= ["Times", 14]
 HF= ['Courier',12]
+# Colours - background
+bkg = 'snow'
+ety = 'white'
+btn = 'light slate blue'
+opt = 'light slate blue'
+# Colours - active
+btn_active = 'grey'
+opt_active = 'grey'
+# Colours - Fonts
+txtcol = 'black'
+btn_txt = 'black'
+ety_txt = 'black'
+opt_txt = 'black'
 
 
 class Crystalgui:
     """
     Provide options for plotting and viewing Crystal data
     """
-    def __init__(self,xtl=None):
-        "Initialise"
+    def __init__(self, xtl=None):
+        """"Initialise Main GUI"""
         if xtl is None:
             self.xtl = Crystal()
         else:
@@ -56,10 +86,15 @@ class Crystalgui:
         # Create Tk inter instance
         self.root = tk.Tk()
         self.root.wm_title('Crystal  by D G Porter [dan.porter@diamond.ac.uk]')
-        #self.root.minsize(width=640, height=480)
-        self.root.maxsize(width=1920, height=1200)
-        
-        
+        # self.root.minsize(width=640, height=480)
+        self.root.maxsize(width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight())
+        self.root.tk_setPalette(
+            background=bkg,
+            foreground=txtcol,
+            activeBackground=opt_active,
+            activeForeground=txtcol)
+
+        # Create Widget elements from top down
         frame = tk.Frame(self.root)
         frame.pack(side=tk.LEFT,anchor=tk.N)
         
@@ -67,42 +102,49 @@ class Crystalgui:
         f_file = tk.Frame(frame)
         f_file.pack(side=tk.TOP,expand=tk.YES,fill=tk.X)
         self.file = tk.StringVar(frame,self.xtl.filename)
-        var = tk.Label(f_file, text='CIF file:',font=SF,width=10)
+        var = tk.Label(f_file, text='CIF file:', font=SF, width=10)
         var.pack(side=tk.LEFT,expand=tk.NO)
-        var = tk.Label(f_file, textvariable=self.file,font=TF,width=50)
-        var.pack(side=tk.LEFT,expand=tk.YES)
-        var = tk.Button(f_file, text='Load CIF',font=BF, command=self.fun_loadcif)
+        var = tk.Label(f_file, textvariable=self.file, font=TF, width=50)
+        var.pack(side=tk.LEFT, expand=tk.YES)
+        var = tk.Button(f_file, text='Load CIF',font=BF, bg=btn, activebackground=btn_active, command=self.fun_loadcif)
         var.pack(side=tk.LEFT,expand=tk.NO,padx=5)
         
         # Name (variable)
         f_name = tk.Frame(frame)
         f_name.pack(side=tk.TOP,expand=tk.YES,fill=tk.X)
         self.name = tk.StringVar(frame,self.xtl.name)
-        var = tk.Label(f_name, text='Name:',font=SF,width=10)
+        var = tk.Label(f_name, text='Name:', font=SF, width=10)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(f_name, textvariable=self.name,font=TF, width=40)
+        var = tk.Entry(f_name, textvariable=self.name, font=TF, width=40, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         var.bind('<Return>',self.update_name)
         var.bind('<KP_Enter>',self.update_name)
+
+        # List of structures
+        self.struct_list = tk.StringVar(frame, 'Structures')
+        var = tk.OptionMenu(f_name, self.struct_list, *structure_list.list, command=self.fun_loadstruct)
+        var.config(font=SF, width=10, bg=opt, activebackground=opt_active)
+        var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
+        var.pack(side=tk.RIGHT)
         
         # Buttons 1
         f_but = tk.Frame(frame)
         f_but.pack(side=tk.TOP)
-        var = tk.Button(f_but, text='Lattice\nParameters', font=BF, command=self.fun_latpar)
+        var = tk.Button(f_but, text='Lattice\nParameters', font=BF, bg=btn, activebackground=btn_active, command=self.fun_latpar)
         var.pack(side=tk.LEFT)
-        var = tk.Button(f_but, text='Symmetric\nPositions', font=BF, command=self.fun_atoms)
+        var = tk.Button(f_but, text='Symmetric\nPositions', font=BF, bg=btn, activebackground=btn_active, command=self.fun_atoms)
         var.pack(side=tk.LEFT)
-        var = tk.Button(f_but, text='Symmetry\nOperations', font=BF, command=self.fun_symmetry)
+        var = tk.Button(f_but, text='Symmetry\nOperations', font=BF, bg=btn, activebackground=btn_active, command=self.fun_symmetry)
         var.pack(side=tk.LEFT)
-        var = tk.Button(f_but, text='General\nPositions', font=BF, command=self.fun_structure)
+        var = tk.Button(f_but, text='General\nPositions', font=BF, bg=btn, activebackground=btn_active, command=self.fun_structure)
         var.pack(side=tk.LEFT)
         
         # Buttons 2
         f_but = tk.Frame(frame)
         f_but.pack(side=tk.TOP)
-        var = tk.Button(f_but, text='Plot\nCrystal', font=BF, command=self.fun_plotxtl)
+        var = tk.Button(f_but, text='Plot\nCrystal', font=BF, bg=btn, activebackground=btn_active, command=self.fun_plotxtl)
         var.pack(side=tk.LEFT)
-        var = tk.Button(f_but, text='Simulate\nStructure Factors', font=BF, command=self.fun_simulate)
+        var = tk.Button(f_but, text='Simulate\nStructure Factors', bg=btn, activebackground=btn_active, font=BF, command=self.fun_simulate)
         var.pack(side=tk.LEFT)
 
         # start mainloop
@@ -124,7 +166,7 @@ class Crystalgui:
     
     def fun_loadcif(self):
         #root = Tk().withdraw() # from Tkinter
-        defdir = os.path.join(os.path.dirname(__file__),'Structures')
+        defdir = os.path.join(os.path.dirname(__file__), 'Structures')
         #defdir = os.path.expanduser('~')
         filename = filedialog.askopenfilename(initialdir=defdir,
                                               filetypes=[('cif file', '.cif'), ('magnetic cif', '.mcif'),
@@ -132,7 +174,13 @@ class Crystalgui:
         if filename:
             self.xtl = Crystal(filename)
             self.fun_set()
-    
+
+    def fun_loadstruct(self, event=None):
+        """Load from structure_list"""
+        if self.struct_list.get() in structure_list.list:
+            self.xtl = getattr(structure_list, self.struct_list.get()).build()
+            self.fun_set()
+
     def update_name(self):
         newname = self.name.get()
         self.xtl.name = newname
@@ -169,7 +217,7 @@ class Crystalgui:
         Scatteringgui(self.xtl)
 
     def on_closing(self):
-        "End mainloop on close window"
+        """End mainloop on close window"""
         self.root.destroy()
 
 
@@ -178,14 +226,19 @@ class Latpargui:
     View and edit the lattice parameters
     """
     def __init__(self,xtl):
-        "Initialise"
+        """"Initialise"""
         self.xtl = xtl
         self.Cell = xtl.Cell
         # Create Tk inter instance
         self.root = tk.Tk()
         self.root.wm_title(xtl.name+' Lattice Parameters')
         #self.root.minsize(width=640, height=480)
-        self.root.maxsize(width=1920, height=1200)
+        self.root.maxsize(width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight())
+        self.root.tk_setPalette(
+            background=bkg,
+            foreground=txtcol,
+            activeBackground=opt_active,
+            activeForeground=txtcol)
         
         frame = tk.Frame(self.root)
         frame.pack(side=tk.LEFT,anchor=tk.N)
@@ -202,17 +255,17 @@ class Latpargui:
         self.b = tk.DoubleVar(frame,self.Cell.b)
         self.c = tk.DoubleVar(frame,self.Cell.c)
         
-        var = tk.Label(frm1, text='a:', width=10)
+        var = tk.Label(frm1, text='a:', width=10, font=SF)
         var.pack(side=tk.LEFT,padx=5,pady=5)
-        var = tk.Entry(frm1, textvariable=self.a, width=10)
+        var = tk.Entry(frm1, textvariable=self.a, width=10, font=TF, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT,padx=2,pady=5)
-        var = tk.Label(frm1, text='b:', width=10)
+        var = tk.Label(frm1, text='b:', width=10, font=SF)
         var.pack(side=tk.LEFT,padx=5,pady=5)
-        var = tk.Entry(frm1, textvariable=self.b, width=10)
+        var = tk.Entry(frm1, textvariable=self.b, width=10, font=TF, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT,padx=2,pady=5)
-        var = tk.Label(frm1, text='c:', width=10)
+        var = tk.Label(frm1, text='c:', width=10, font=SF)
         var.pack(side=tk.LEFT,padx=5,pady=5)
-        var = tk.Entry(frm1, textvariable=self.c, width=10)
+        var = tk.Entry(frm1, textvariable=self.c, width=10, font=TF, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT,padx=2,pady=5)
         
         # Lattice angles
@@ -223,24 +276,24 @@ class Latpargui:
         self.beta = tk.DoubleVar(frame,self.Cell.beta)
         self.gamma = tk.DoubleVar(frame,self.Cell.gamma)
         
-        var = tk.Label(frm1, text='Alpha:', width=10)
+        var = tk.Label(frm1, text='Alpha:', width=10, font=SF)
         var.pack(side=tk.LEFT,padx=5,pady=5)
-        var = tk.Entry(frm1, textvariable=self.alpha, width=10)
+        var = tk.Entry(frm1, textvariable=self.alpha, width=10, font=TF, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT,padx=2,pady=5)
-        var = tk.Label(frm1, text='Beta:', width=10)
+        var = tk.Label(frm1, text='Beta:', width=10, font=SF)
         var.pack(side=tk.LEFT,padx=5,pady=5)
-        var = tk.Entry(frm1, textvariable=self.beta, width=10)
+        var = tk.Entry(frm1, textvariable=self.beta, width=10, font=TF, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT,padx=2,pady=5)
-        var = tk.Label(frm1, text='Gamma:', width=10)
+        var = tk.Label(frm1, text='Gamma:', width=10, font=SF)
         var.pack(side=tk.LEFT,padx=5,pady=5)
-        var = tk.Entry(frm1, textvariable=self.gamma, width=10)
+        var = tk.Entry(frm1, textvariable=self.gamma, width=10, font=TF, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT,padx=2,pady=5)
         
         # Button
         frm1 = tk.Frame(frame)
         frm1.pack(side=tk.TOP)
         
-        var = tk.Button(frm1, text='Update', command=self.fun_update)
+        var = tk.Button(frm1, text='Update', command=self.fun_update, bg=btn, activebackground=btn_active, font=BF)
         var.pack()
     
     def fun_update(self):
@@ -287,7 +340,12 @@ class Atomsgui:
         self.root = tk.Tk()
         self.root.wm_title(ttl)
         #self.root.minsize(width=640, height=480)
-        self.root.maxsize(width=1920, height=1200)
+        self.root.maxsize(width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight())
+        self.root.tk_setPalette(
+            background=bkg,
+            foreground=txtcol,
+            activeBackground=opt_active,
+            activeForeground=txtcol)
         
         frame = tk.Frame(self.root)
         frame.pack(side=tk.TOP,fill=tk.BOTH, expand=tk.YES)
@@ -295,15 +353,15 @@ class Atomsgui:
         #--- label ---
         labframe = tk.Frame(frame,relief='groove')
         labframe.pack(side=tk.TOP, fill=tk.X)
-        var = tk.Label(labframe, text=label_text,font=SF,justify='left')
+        var = tk.Label(labframe, text=label_text, font=SF, justify='left')
         var.pack(side=tk.LEFT)
         
         #--- Button ---
         frm1 = tk.Frame(frame)
         frm1.pack(side=tk.BOTTOM, fill=tk.X)
-        var = tk.Button(frm1, text='Update', font=BF, command=self.fun_update)
+        var = tk.Button(frm1, text='Update', font=BF, command=self.fun_update, bg=btn, activebackground=btn_active)
         var.pack(side=tk.RIGHT)
-        var = tk.Button(frm1, text=mag_button, font=BF, command=self.fun_magnets)
+        var = tk.Button(frm1, text=mag_button, font=BF, command=self.fun_magnets, bg=btn, activebackground=btn_active)
         var.pack(side=tk.LEFT)
         
         #--- Text box ---
@@ -318,11 +376,11 @@ class Atomsgui:
         scany.pack(side=tk.RIGHT, fill=tk.Y)
         
         # Editable string box
-        self.text = tk.Text(frame_box,width=default_width,height=10,font=HF,wrap=tk.NONE)
+        self.text = tk.Text(frame_box, width=default_width, height=10, font=HF, wrap=tk.NONE, bg=ety)
         self.text.pack(side=tk.TOP,fill=tk.BOTH, expand=tk.YES)
         self.fun_set()
         
-        self.text.config(xscrollcommand=scanx.set,yscrollcommand=scany.set)
+        self.text.config(xscrollcommand=scanx.set, yscrollcommand=scany.set)
         scanx.config(command=self.text.xview)
         scany.config(command=self.text.yview)
 
@@ -436,7 +494,12 @@ class Symmetrygui:
         self.root = tk.Tk()
         self.root.wm_title(xtl.name+' Symmetry Operations')
         #self.root.minsize(width=640, height=480)
-        self.root.maxsize(width=1920, height=1200)
+        self.root.maxsize(width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight())
+        self.root.tk_setPalette(
+            background=bkg,
+            foreground=txtcol,
+            activeBackground=opt_active,
+            activeForeground=txtcol)
         
         frame = tk.Frame(self.root)
         frame.pack(side=tk.TOP)
@@ -444,11 +507,13 @@ class Symmetrygui:
         #---Labels---
         label_frame = tk.Frame(frame,relief=tk.GROOVE)
         label_frame.pack(side=tk.TOP, fill=tk.X)
-        var = tk.Label(label_frame, text='n',font=SF,justify=tk.CENTER,width=4,height=2,relief=tk.RIDGE)
+        var = tk.Label(label_frame, text='n', font=SF, justify=tk.CENTER, width=4, height=2, relief=tk.RIDGE)
         var.pack(side=tk.LEFT,pady=1)
-        var = tk.Label(label_frame, text='Symmetry Operations',font=SF,justify=tk.CENTER,width=25,height=2,relief=tk.RIDGE)
+        var = tk.Label(label_frame, text='Symmetry Operations', font=SF, justify=tk.CENTER, width=25, height=2,
+                       relief=tk.RIDGE)
         var.pack(side=tk.LEFT,pady=1)
-        var = tk.Label(label_frame, text='Magnetic Operations',font=SF,justify=tk.CENTER,width=25,height=2,relief=tk.RIDGE)
+        var = tk.Label(label_frame, text='Magnetic Operations', font=SF, justify=tk.CENTER, width=25, height=2,
+                       relief=tk.RIDGE)
         var.pack(side=tk.LEFT,pady=1)
         
         #---Edit Boxes---
@@ -460,13 +525,13 @@ class Symmetrygui:
         self.scany.pack(side=tk.RIGHT, fill=tk.Y)
         
         # Box 1: n
-        self.text_1 = tk.Text(box_frame,width=4,height=10,font=SF)
+        self.text_1 = tk.Text(box_frame, width=4, height=10, font=SF, bg=ety)
         self.text_1.pack(side=tk.LEFT,pady=1,padx=1)
         # Box 1: Symmetry operations
-        self.text_2 = tk.Text(box_frame,width=28,height=10,font=SF)
+        self.text_2 = tk.Text(box_frame, width=28, height=10, font=SF, bg=ety)
         self.text_2.pack(side=tk.LEFT,pady=1)
         # Box 1: Magnetic operations
-        self.text_3 = tk.Text(box_frame,width=28,height=10,font=SF)
+        self.text_3 = tk.Text(box_frame, width=28, height=10, font=SF, bg=ety)
         self.text_3.pack(side=tk.LEFT,pady=1)
         
         # Mouse Wheel scroll:
@@ -485,7 +550,7 @@ class Symmetrygui:
         frm1 = tk.Frame(self.root)
         frm1.pack(side=tk.TOP)
         
-        var = tk.Button(frm1, text='Update', command=self.fun_update)
+        var = tk.Button(frm1, text='Update', command=self.fun_update, font=BF, bg=btn, activebackground=btn_active)
         var.pack()
     
     def fun_move(self, *args):
@@ -560,20 +625,26 @@ class Scatteringgui:
     """
     Simulate scattering of various forms
     """
-    def __init__(self,xtl):
-        "Initialise"
+    def __init__(self, xtl):
+        """Initialise"""
         self.xtl = xtl
         # Create Tk inter instance
         self.root = tk.Tk()
         self.root.wm_title('Scattering %s' % xtl.name)
         #self.root.minsize(width=640, height=480)
-        self.root.maxsize(width=1920, height=1200)
+        self.root.maxsize(width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight())
+        self.root.tk_setPalette(
+            background=bkg,
+            foreground=txtcol,
+            activeBackground=opt_active,
+            activeForeground=txtcol)
         
         frame = tk.Frame(self.root)
         frame.pack(side=tk.LEFT,anchor=tk.N)
         
         # Variatbles
-        self.energy_kev = tk.DoubleVar(frame,8.0)
+        self.energy_kev = tk.DoubleVar(frame, 8.0)
+        self.edge = tk.StringVar(frame, 'Edge')
         self.type = tk.StringVar(frame,'X-Ray')
         self.orientation = tk.StringVar(frame,'Reflection')
         self.direction_h = tk.IntVar(frame,0)
@@ -598,14 +669,17 @@ class Scatteringgui:
         self.resF2 = tk.DoubleVar(frame, 0.0)
         self.magresult = tk.StringVar(frame, 'I = --')
 
+        # X-ray edges:
+        self.xr_edges, self.xr_energies = self.xtl.Properties.xray_edges()
+
         #---Line 1---
         line1 = tk.Frame(frame)
-        line1.pack(side=tk.TOP,fill=tk.X,pady=5)
+        line1.pack(side=tk.TOP, fill=tk.X, pady=5)
         
-        var = tk.Label(line1, text='Scattering',font=LF)
+        var = tk.Label(line1, text='Scattering', font=LF)
         var.pack(side=tk.LEFT)
         
-        var = tk.Button(line1, text='I16', font=BF, command=self.fun_i16)
+        var = tk.Button(line1, text='I16', font=BF, command=self.fun_i16, bg=btn, activebackground=btn_active)
         var.pack(side=tk.RIGHT)
         
         #---Line 2---
@@ -615,7 +689,11 @@ class Scatteringgui:
         # Energy
         var = tk.Label(line2, text='Energy (keV):',font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line2, textvariable=self.energy_kev, font=TF, width=4)
+        var = tk.OptionMenu(line2, self.edge, *self.xr_edges, command=self.fun_edge)
+        var.config(font=SF, width=5, bg=opt, activebackground=opt_active)
+        var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line2, textvariable=self.energy_kev, font=TF, width=8, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         
         # Type
@@ -623,23 +701,25 @@ class Scatteringgui:
         var = tk.Label(line2, text='Type:',font=SF)
         var.pack(side=tk.LEFT)
         var = tk.OptionMenu(line2, self.type, *types)
-        var.config(font=SF,width=10)
+        var.config(font=SF, width=10, bg=opt, activebackground=opt_active)
+        var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
         var.pack(side=tk.LEFT)
         
         # Orientation
         orients = ['None','Reflection','Transmission']
         var = tk.OptionMenu(line2, self.orientation, *orients)
-        var.config(font=SF,width=10)
+        var.config(font=SF, width=10, bg=opt, activebackground=opt_active)
+        var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
         var.pack(side=tk.LEFT)
         
         # Direction
         var = tk.Label(line2, text='Direction:',font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line2, textvariable=self.direction_h, font=TF, width=2)
+        var = tk.Entry(line2, textvariable=self.direction_h, font=TF, width=2, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line2, textvariable=self.direction_k, font=TF, width=2)
+        var = tk.Entry(line2, textvariable=self.direction_k, font=TF, width=2, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line2, textvariable=self.direction_l, font=TF, width=2)
+        var = tk.Entry(line2, textvariable=self.direction_l, font=TF, width=2, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         
         #--- Line 3 ---
@@ -649,60 +729,64 @@ class Scatteringgui:
         # Theta offset
         var = tk.Label(line3, text='Offset:',font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line3, textvariable=self.theta_offset, font=TF, width=5)
+        var = tk.Entry(line3, textvariable=self.theta_offset, font=TF, width=5, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         
         # Theta min
         var = tk.Label(line3, text='Min Theta:',font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line3, textvariable=self.theta_min, font=TF, width=5)
+        var = tk.Entry(line3, textvariable=self.theta_min, font=TF, width=5, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         
         # Theta max
         var = tk.Label(line3, text='Max Theta:',font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line3, textvariable=self.theta_max, font=TF, width=5)
+        var = tk.Entry(line3, textvariable=self.theta_max, font=TF, width=5, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         
         # TwoTheta min
         var = tk.Label(line3, text='Min TwoTheta:',font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line3, textvariable=self.twotheta_min, font=TF, width=5)
+        var = tk.Entry(line3, textvariable=self.twotheta_min, font=TF, width=5, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         
         # TwoTheta max
         var = tk.Label(line3, text='Max TwoTheta:',font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line3, textvariable=self.twotheta_max, font=TF, width=5)
+        var = tk.Entry(line3, textvariable=self.twotheta_max, font=TF, width=5, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         
         #--- Line 4 ---
         line4 = tk.Frame(frame)
         line4.pack(side=tk.TOP,fill=tk.X,pady=5)
         
-        var = tk.Button(line4, text='Display Intensities', font=BF, command=self.fun_intensities)
+        var = tk.Button(line4, text='Display Intensities', font=BF, command=self.fun_intensities, bg=btn,
+                        activebackground=btn_active)
         var.pack(side=tk.LEFT)
         
-        var = tk.Button(line4, text='Plot Powder', font=BF, command=self.fun_powder)
+        var = tk.Button(line4, text='Plot Powder', font=BF, command=self.fun_powder, bg=btn,
+                        activebackground=btn_active)
         var.pack(side=tk.LEFT)
 
         xaxistypes = ['two-theta', 'd-spacing', 'Q']
         var = tk.Label(line4, text='Units:', font=SF)
         var.pack(side=tk.LEFT)
         var = tk.OptionMenu(line4, self.powder_units, *xaxistypes)
-        var.config(font=SF, width=10)
+        var.config(font=SF, width=10, bg=opt, activebackground=opt_active)
+        var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
         var.pack(side=tk.LEFT)
         
         # hkl check
         hklbox = tk.LabelFrame(line4, text='Quick Check')
         hklbox.pack(side=tk.RIGHT)
-        var = tk.Entry(hklbox, textvariable=self.hkl_check, font=TF, width=6)
+        var = tk.Entry(hklbox, textvariable=self.hkl_check, font=TF, width=6, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         var.bind('<Return>',self.fun_hklcheck)
         var.bind('<KP_Enter>',self.fun_hklcheck)
         var = tk.Label(hklbox, textvariable=self.hkl_result,font=TF, width=22)
         var.pack(side=tk.LEFT)
-        var = tk.Button(hklbox, text='Check HKL', font=BF, command=self.fun_hklcheck)
+        var = tk.Button(hklbox, text='Check HKL', font=BF, command=self.fun_hklcheck, bg=btn,
+                        activebackground=btn_active)
         var.pack(side=tk.LEFT, pady=2)
         
         #--- Line 5 ---
@@ -713,24 +797,23 @@ class Scatteringgui:
         # i value
         var = tk.Label(line5, text='i:',font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line5, textvariable=self.val_i, font=TF, width=3)
+        var = tk.Entry(line5, textvariable=self.val_i, font=TF, width=3, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         
         # directions
         vframe = tk.Frame(line5)
         vframe.pack(side=tk.LEFT, padx=3)
-        var = tk.Button(vframe, text='HKi', font=BF, command=self.fun_hki,width=5)
+        var = tk.Button(vframe, text='HKi', font=BF, command=self.fun_hki,width=5, bg=btn, activebackground=btn_active)
         var.pack()
-        var = tk.Button(vframe, text='HiL', font=BF, command=self.fun_hil,width=5)
+        var = tk.Button(vframe, text='HiL', font=BF, command=self.fun_hil,width=5, bg=btn, activebackground=btn_active)
         var.pack()
         
         vframe = tk.Frame(line5)
         vframe.pack(side=tk.LEFT)
-        var = tk.Button(vframe, text='iKL', font=BF, command=self.fun_ikl,width=5)
+        var = tk.Button(vframe, text='iKL', font=BF, command=self.fun_ikl,width=5, bg=btn, activebackground=btn_active)
         var.pack()
-        var = tk.Button(vframe, text='HHi', font=BF, command=self.fun_hhi,width=5)
+        var = tk.Button(vframe, text='HHi', font=BF, command=self.fun_hhi,width=5, bg=btn, activebackground=btn_active)
         var.pack()
-
 
         #---X-ray Magnetic scattering----
         if np.any(self.xtl.Structure.mxmymz()):
@@ -745,7 +828,7 @@ class Scatteringgui:
             hframe.pack()
             var = tk.Label(hframe, text='       HKL:', font=SF, width=11)
             var.pack(side=tk.LEFT)
-            var = tk.Entry(hframe, textvariable=self.hkl_magnetic, font=TF, width=6)
+            var = tk.Entry(hframe, textvariable=self.hkl_magnetic, font=TF, width=6, bg=ety, fg=ety_txt)
             var.pack(side=tk.LEFT)
             var.bind('<Return>',self.fun_hklmag)
             var.bind('<KP_Enter>',self.fun_hklmag)
@@ -754,7 +837,7 @@ class Scatteringgui:
             hframe.pack()
             var = tk.Label(vframe, text='Azim. Ref.:', font=SF, width=11)
             var.pack(side=tk.LEFT)
-            var = tk.Entry(vframe, textvariable=self.azim_zero, font=TF, width=6)
+            var = tk.Entry(vframe, textvariable=self.azim_zero, font=TF, width=6, bg=ety, fg=ety_txt)
             var.pack(side=tk.LEFT)
 
             # Resonant value
@@ -765,21 +848,21 @@ class Scatteringgui:
             hframe.pack()
             var = tk.Label(hframe, text='F0:', font=SF)
             var.pack(side=tk.LEFT)
-            var = tk.Entry(hframe, textvariable=self.resF0, font=TF, width=3)
+            var = tk.Entry(hframe, textvariable=self.resF0, font=TF, width=3, bg=ety, fg=ety_txt)
             var.pack(side=tk.LEFT)
 
             hframe = tk.Frame(vframe)
             hframe.pack()
             var = tk.Label(hframe, text='F1:', font=SF)
             var.pack(side=tk.LEFT)
-            var = tk.Entry(hframe, textvariable=self.resF1, font=TF, width=3)
+            var = tk.Entry(hframe, textvariable=self.resF1, font=TF, width=3, bg=ety, fg=ety_txt)
             var.pack(side=tk.LEFT)
 
             hframe = tk.Frame(vframe)
             hframe.pack()
             var = tk.Label(hframe, text='F2:', font=SF)
             var.pack(side=tk.LEFT)
-            var = tk.Entry(hframe, textvariable=self.resF2, font=TF, width=3)
+            var = tk.Entry(hframe, textvariable=self.resF2, font=TF, width=3, bg=ety, fg=ety_txt)
             var.pack(side=tk.LEFT)
 
             vframe = tk.Frame(resbox)
@@ -792,7 +875,8 @@ class Scatteringgui:
             var = tk.Label(hframe, text='Polarisation:', font=SF)
             var.pack(side=tk.LEFT)
             var = tk.OptionMenu(hframe, self.polval, *poltypes)
-            var.config(font=SF, width=5)
+            var.config(font=SF, width=5, bg=opt, activebackground=opt_active)
+            var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
             var.pack(side=tk.LEFT)
 
             hframe = tk.Frame(vframe)
@@ -804,7 +888,7 @@ class Scatteringgui:
             # psi
             var = tk.Label(hframe, text='psi:', font=SF, width=4)
             var.pack(side=tk.LEFT)
-            var = tk.Entry(hframe, textvariable=self.psival, font=TF, width=4)
+            var = tk.Entry(hframe, textvariable=self.psival, font=TF, width=4, bg=ety, fg=ety_txt)
             var.pack(side=tk.LEFT)
             var.bind('<Return>',self.fun_hklmag)
             var.bind('<KP_Enter>',self.fun_hklmag)
@@ -813,16 +897,17 @@ class Scatteringgui:
             vframe.pack(side=tk.LEFT, fill=tk.Y, padx=3)
 
             # Azimuth Button
-            var = tk.Button(vframe, text='Calc. Mag. Inten.', font=BF, command=self.fun_hklmag)
+            var = tk.Button(vframe, text='Calc. Mag. Inten.', font=BF, command=self.fun_hklmag, bg=btn,
+                            activebackground=btn_active)
             var.pack()
             # Magnetic Result
             var = tk.Label(vframe, textvariable=self.magresult, font=SF, width=12)
             var.pack(fill=tk.Y)
 
             # Azimuth Button
-            var = tk.Button(resbox, text='Simulate\n Azimuth', font=BF, command=self.fun_azimuth, width=7)
+            var = tk.Button(resbox, text='Simulate\n Azimuth', font=BF, command=self.fun_azimuth, width=7, bg=btn,
+                            activebackground=btn_active)
             var.pack(side=tk.LEFT)
-
 
     def fun_set(self):
         "Set gui parameters from crystal"
@@ -876,7 +961,14 @@ class Scatteringgui:
         self.theta_max.set(150)
         self.twotheta_min.set(0)
         self.twotheta_max.set(130)
-    
+
+    def fun_edge(self, event=None):
+        """X-ray edge option menu"""
+        edge = self.edge.get()
+        if self.edge.get() in self.xr_edges:
+            idx = self.xr_edges.index(edge)
+            self.energy_kev.set(self.xr_energies[idx])
+
     def fun_hklcheck(self, event=None):
         "Show single hkl intensity"
         
@@ -900,7 +992,7 @@ class Scatteringgui:
             string = self.xtl.Scatter.print_tran_reflections(min_intensity=-1, max_intensity=None)
         else:
             string = self.xtl.Scatter.print_all_reflections(min_intensity=-1, max_intensity=None)
-        String_Viewer(string, 'Intensities %s' % self.xtl.name)
+        StringViewer(string, 'Intensities %s' % self.xtl.name)
     
     def fun_powder(self):
         """Plot Powder"""
@@ -910,13 +1002,13 @@ class Scatteringgui:
         max_q = fc.calQmag(self.twotheta_max.get(), energy)
         if min_q < 0: min_q=0.0
 
-        if self.xtl.Scatter._powder_units.lower() in ['tth', 'angle', 'twotheta', 'theta']:
+        if self.xtl.Scatter._powder_units.lower() in ['tth', 'angle', 'twotheta', 'theta', 'two-theta']:
             minx = fc.cal2theta(min_q, energy)
             maxx = fc.cal2theta(max_q, energy)
         elif self.xtl.Scatter._powder_units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
-            if min_q < 0.01: min_q = 0.01
-            minx = fc.caldspace(min_q)
-            maxx = fc.caldspace(max_q)
+            if min_q < 0.01: min_q = 0.5
+            minx = 0
+            maxx = fc.caldspace(min_q)
         else:
             minx = min_q
             maxx = max_q
@@ -1059,9 +1151,7 @@ class Scatteringgui:
             plt.show()
 
 
-
-
-class String_Viewer:
+class StringViewer:
     """
     Simple GUI that displays strings
     """
@@ -1071,7 +1161,12 @@ class String_Viewer:
         self.root = tk.Tk()
         self.root.wm_title(title)
         #self.root.minsize(width=640, height=480)
-        self.root.maxsize(width=1920, height=1200)
+        self.root.maxsize(width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight())
+        self.root.tk_setPalette(
+            background=bkg,
+            foreground=txtcol,
+            activeBackground=opt_active,
+            activeForeground=txtcol)
         
         frame = tk.Frame(self.root)
         frame.pack(side=tk.TOP,fill=tk.BOTH, expand=tk.YES)
@@ -1085,7 +1180,7 @@ class String_Viewer:
         #--- Button ---
         frm1 = tk.Frame(frame)
         frm1.pack(side=tk.BOTTOM, fill=tk.X)
-        var = tk.Button(frm1, text='Close', font=BF, command=self.fun_close)
+        var = tk.Button(frm1, text='Close', font=BF, command=self.fun_close, bg=btn, activebackground=btn_active)
         var.pack(fill=tk.X)
         
         #--- Text box ---
@@ -1109,9 +1204,7 @@ class String_Viewer:
         scany.config(command=self.text.yview)
     
     def fun_close(self):
-        "close window"
-        
-        # Close window
+        """close window"""
         self.root.destroy()
 
 if __name__ == '__main__':

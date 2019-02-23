@@ -7,13 +7,14 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.1
-Last updated: 11/03/18
+Version 1.2
+Last updated: 23/02/19
 
 Version History:
 10/11/17 0.1    Program created
 06/01/18 1.0    Program renamed
 11/03/18 1.1    Added properties.info(), element.info()
+23/02/19 1.2    Added xray_edges
 
 @author: DGPorter
 """
@@ -31,7 +32,7 @@ class Properties:
     Properties functions for the Crystal Object
     """
     def __init__(self, xtl):
-        "initialise"
+        """initialise"""
         self.xtl = xtl
 
         types = np.unique(self.xtl.Structure.type)
@@ -39,22 +40,44 @@ class Properties:
             setattr(self,str(element),Element(str(element)))
 
     def volume(self):
-        "Returns the volume in A^3"
+        """Returns the volume in A^3"""
         return self.xtl.Cell.volume()
 
     def density(self):
-        "Return the density in g/cm"
+        """Return the density in g/cm"""
 
         vol = self.xtl.Cell.volume()*1e-24 # cm^3
         weight = self.xtl.Structure.weight()/fg.Na # g
         return weight/vol
 
     def weight(self):
-        "Return the molecular weight in g/mol"
+        """Return the molecular weight in g/mol"""
         return self.xtl.Structure.weight()
 
+    def xray_edges(self):
+        """
+        Returns the x-ray absorption edges available and their energies
+        string, energies = self.xray_edges()
+        E.G.
+        string = ['Ru K', 'Ru L1', 'Ru L2' ...]
+        energies = [22., ...]
+        """
+
+        types = np.unique(self.xtl.Structure.type)
+        edges = ['K', 'L1', 'L2', 'L3', 'M1', 'M2', 'M3', 'M4', 'M5']
+        out_str = []
+        out_eng = []
+        for element in types:
+            atom = getattr(self, element)
+            for edge in edges:
+                energy = getattr(atom, edge)
+                if energy > 0.1:
+                    out_str += ['%s %s'%(element, edge)]
+                    out_eng += [energy]
+        return out_str, out_eng
+
     def molfraction(self,Z=1):
-        "Display the molecular weight of a compound and atomic fractions"
+        """Display the molecular weight of a compound and atomic fractions"""
 
         type = self.xtl.Structure.type
         occ = self.xtl.Structure.occupancy
@@ -205,7 +228,7 @@ class Properties:
         return diff[ii,:],label[ii]
 
     def info(self):
-        "Prints various properties of the crystal"
+        """Prints various properties of the crystal"""
 
         print('-----------%s-----------'%self.xtl.name)
         print(' Weight: %5.2f g/mol' %(self.weight()))
@@ -226,7 +249,7 @@ class Element:
     Element Class
     """
     def __init__(self,element='Co'):
-        "Initialise properties"
+        """Initialise properties"""
 
         props = fc.atom_properties(element) # returns a numpy structured array
         prop_names = props.dtype.names
@@ -235,7 +258,7 @@ class Element:
             setattr(self,key,props[key][0])
 
     def info(self):
-        "Display atomic properties"
+        """Display atomic properties"""
 
         prop_names = self.properties.dtype.names
         for key in prop_names:
