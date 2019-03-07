@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 2.5
-Last updated: 08/06/18
+Version 2.6
+Last updated: 06/03/19
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -23,6 +23,7 @@ Version History:
 02/05/18 2.3    Added comparison of lower case elements and symmetry values
 04/06/18 2.4    Added new checks to readcif, corrected atomic_properties for python3/numpy1.14
 08/06/18 2.5    Corrected a few errors and added some more comments
+06/03/19 2.6    Added print_atom_properties
 
 @author: DGPorter
 """
@@ -32,7 +33,7 @@ import numpy as np
 
 from . import functions_general as fg
 
-__version__ = '2.5'
+__version__ = '2.6'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -422,9 +423,6 @@ def atom_properties(elements=None, fields=None):
           Weight        = Standard atomic weight (g)
     """
 
-    # elements must be a list e.g. ['Co','O']
-    elements = np.char.lower(np.asarray(elements).reshape(-1))
-
     atomfile = os.path.join(datadir, 'Dans Element Properties.txt')
     file = open(atomfile, 'rb')
     # Note: in Python3, genfromtxt enodes strings in the bytes format, which
@@ -433,6 +431,8 @@ def atom_properties(elements=None, fields=None):
     file.close()
 
     if elements is not None:
+        # elements must be a list e.g. ['Co','O']
+        elements = np.char.lower(np.asarray(elements).reshape(-1))
         indx = [None] * len(elements)
         for n in range(len(data)):
             d = data[n]
@@ -447,6 +447,25 @@ def atom_properties(elements=None, fields=None):
         return data
 
     return data[fields]
+
+
+def print_atom_properties(elements=None):
+    """
+    Outputs string of stored atomic properties
+    :param elements: str or list or None
+            str: 'Co'
+            list: ['Co', 'O']
+    :return: str
+    """
+
+    prop = atom_properties(elements)
+    keys = prop.dtype.names
+    elename = ' '.join(['%10s'%ele for ele in prop['Element']])
+    out = '%8s : %s\n'%('', elename)
+    for key in keys:
+        propval = ' '.join(['%10s'%ele for ele in prop[key]])
+        out += '%8s : %s\n' % (key, propval)
+    return out
 
 
 def xray_scattering_factor(element, Qmag=0):

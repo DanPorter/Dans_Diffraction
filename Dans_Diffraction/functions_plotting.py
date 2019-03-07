@@ -16,8 +16,8 @@ Usage:
 All plots generated require plt.show() call, unless using interactive mode
 
 
-Version 1.4
-Last updated: 30/05/18
+Version 1.5
+Last updated: 07/03/19
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -25,6 +25,7 @@ Version History:
 17/04/18 1.2    Removed plt.show from other functions
 03/05/18 1.3    Removed plot_vector_lines(vec_a,vec_b), replaced with plot_lattice_lines(Q, vec_a, vec_b)
 30/05/18 1.4    Added multiplot
+07/03/19 1.5    Added plot_attenuation and others
 
 @author: DGPorter
 """
@@ -39,7 +40,7 @@ from mpl_toolkits.mplot3d import proj3d
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.4'
+__version__ = '1.5'
 
 '----------------------------Plot manipulation--------------------------'
 
@@ -69,8 +70,9 @@ def labels(ttl=None, xvar=None, yvar=None, zvar=None, size='Normal', font='Times
     plt.xticks(fontsize=tik, fontname=font)
     plt.yticks(fontsize=tik, fontname=font)
     plt.setp(plt.gca().spines.values(), linewidth=2)
-    plt.ticklabel_format(useOffset=False)
-    plt.ticklabel_format(style='sci',scilimits=(-3,3))
+    if plt.gca().get_yaxis().get_scale() != 'log':
+        plt.ticklabel_format(useOffset=False)
+        plt.ticklabel_format(style='sci',scilimits=(-3,3))
 
     if ttl is not None:
         plt.gca().set_title(ttl, fontsize=tit, fontweight='bold', fontname=font)
@@ -638,3 +640,52 @@ def plot_ewald_coverage(energy_kev, color='k', linewidth=2):
     plt.plot(Q2x, Q2y, color, linewidth, label=r'2$\theta$=$\theta$')
     plt.plot(Q3x, Q3y, color, linewidth, label=r'$\theta$=0')
     plt.axis([-q_max, q_max, 0, q_max])
+
+
+def plot_xray_scattering_factor(elements, maxq=10):
+    """
+    Plot x-ray scattering factor for 1 or more elements
+    :param elements:
+    :return: None
+    """
+
+    q = np.linspace(0, maxq, 200)
+    xrf = fc.xray_scattering_factor(elements, q)
+
+    newplot(q, xrf)
+    plt.legend(np.asarray(elements).reshape(-1), loc=0, frameon=False, fontsize=18)
+    labels('X-Ray Scattering Factor', 'Q [$\AA^{-1}$]')
+
+
+def plot_magnetic_form_factor(elements, maxq=10):
+    """
+    Plot magnetic form factor for 1 or more elements
+    :param elements:
+    :return: None
+    """
+
+    q = np.linspace(0, maxq, 200)
+    mff = fc.magnetic_form_factor(elements, q)
+
+    newplot(q, mff)
+    plt.legend(np.asarray(elements).reshape(-1), loc=0, frameon=False, fontsize=18)
+    labels('Magnetic Form Factor', 'Q [$\AA^{-1}$]')
+
+
+def plot_xray_attenuation(elements, min_energy=0, max_energy=20):
+    """
+    Plot x-ray scattering factor for 1 or more elements
+    :param elements:
+    :return: None
+    """
+
+    Zarray = fc.atom_properties(elements, 'Z')
+    ene = np.arange(min_energy, max_energy+0.01, 0.01)
+
+    Aarray = np.array([fc.attenuation(Z, ene) for Z in Zarray]).T
+    newplot(ene, Aarray)
+    plt.yscale('log')
+    plt.xlim([min_energy, max_energy])
+    plt.legend(np.asarray(elements).reshape(-1), loc=0, frameon=False, fontsize=18)
+    labels('X-Ray Attenuation', 'Energy [keV]', r'$\mu/\rho$ [cm$^2$/g]')
+

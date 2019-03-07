@@ -6,14 +6,14 @@ def readme():
 setup(
     name = 'Dans_Diffraction',
     packages = ['Dans_Diffraction'],
-    version = '1.2.0',
+    version = '1.3.0',
     description = 'Generate diffracted intensities from crystals',
     long_description = readme(),
     author = 'Dan Porter',
     author_email = 'd.g.porter@outlook.com',
     url = 'https://github.com/DanPorter/Dans_Diffraction',
     download_url = 'https://github.com/DanPorter/Dans_Diffraction/archive/0.1.tar.gz',
-    keywords = ['crystal','cif','diffraction','crystallography','science'],
+    keywords = ['crystal','cif','diffraction','crystallography','science','x-ray','neutron','resonant','magnetic','magnetism'],
     classifiers = [
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',

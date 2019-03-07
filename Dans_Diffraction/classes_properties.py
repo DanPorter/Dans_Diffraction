@@ -24,7 +24,7 @@ import numpy as np
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.1'
+__version__ = '1.2'
 
 
 class Properties:
@@ -76,8 +76,12 @@ class Properties:
                     out_eng += [energy]
         return out_str, out_eng
 
-    def molfraction(self,Z=1):
-        """Display the molecular weight of a compound and atomic fractions"""
+    def molfraction(self, Z=1):
+        """
+        Display the molecular weight of a compound and atomic fractions
+        :param Z: filling number
+        :return: str
+        """
 
         type = self.xtl.Structure.type
         occ = self.xtl.Structure.occupancy
@@ -89,14 +93,17 @@ class Properties:
         for n,element in enumerate(ats):
             atno[n] = sum([occ[m] for m,x in enumerate(type) if x == element])
 
+        outstr=''
+
         total_weight = self.weight()
-        print('Weight = ',total_weight/Z,'g/mol')
+        outstr += 'Weight = %6.2f g/mol\n' % (total_weight / Z)
 
-        for n,element in enumerate(ats):
+        for n, element in enumerate(ats):
             ff = 100*atno[n]*weights[n]/total_weight
-            print('{:3s} [{:8.3f}] {:5.2g} {:5.2f}%'.format(element,weights[n],atno[n]/Z,ff))
+            outstr += '{:3s} [{:8.3f}] {:5.2g} {:5.2f}%\n'.format(element,weights[n],atno[n]/Z,ff)
+        return outstr
 
-    def molname(self,element=None,element_no=1,latex=False):
+    def molname(self, element=None, element_no=1, latex=False):
         """
         Generate molecular name of crystal
             element : str : specify element that will have a coordination number
@@ -133,7 +140,7 @@ class Properties:
                     name += [a+'{:4.2f}'.format(atfrac)]
         return ''.join(name)
 
-    def absorption(self,energy_kev=None):
+    def absorption(self, energy_kev=None):
         """
         Returns the sample absorption coefficient in um^-1 at the requested energy in keV
         """
@@ -150,7 +157,7 @@ class Properties:
         u = up*self.density()/10000
         return u
 
-    def diamagnetic_susceptibility(self,type='volume'):
+    def diamagnetic_susceptibility(self, type='volume'):
         """
         Calculate diamagnetic contribution to susceptibility
 

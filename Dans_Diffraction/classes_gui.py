@@ -13,12 +13,13 @@ By Dan Porter, PhD
 Diamond
 2019
 
-Version 1.0
+Version 1.1
 Last updated: 23/02/19
 
 Version History:
 10/11/17 0.1    Program created
 23/02/19 1.0    Finished the basic program and gave it colours
+07/03/19 1.1    Added properties
 
 @author: DGPorter
 """
@@ -142,9 +143,14 @@ class Crystalgui:
         # Buttons 2
         f_but = tk.Frame(frame)
         f_but.pack(side=tk.TOP)
-        var = tk.Button(f_but, text='Plot\nCrystal', font=BF, bg=btn, activebackground=btn_active, command=self.fun_plotxtl)
+        var = tk.Button(f_but, text='Plot\nCrystal', font=BF, bg=btn, activebackground=btn_active,
+                        command=self.fun_plotxtl)
         var.pack(side=tk.LEFT)
-        var = tk.Button(f_but, text='Simulate\nStructure Factors', bg=btn, activebackground=btn_active, font=BF, command=self.fun_simulate)
+        var = tk.Button(f_but, text='Simulate\nStructure Factors', bg=btn, activebackground=btn_active, font=BF,
+                        command=self.fun_simulate)
+        var.pack(side=tk.LEFT)
+        var = tk.Button(f_but, text='Properties', height=2, bg=btn, activebackground=btn_active, font=BF,
+                        command=self.fun_properties)
         var.pack(side=tk.LEFT)
 
         # start mainloop
@@ -215,6 +221,10 @@ class Crystalgui:
     def fun_simulate(self):
         self.fun_set()
         Scatteringgui(self.xtl)
+
+    def fun_properties(self):
+        self.fun_set()
+        Propertiesgui(self.xtl)
 
     def on_closing(self):
         """End mainloop on close window"""
@@ -621,6 +631,189 @@ class Symmetrygui:
         self.root.destroy()
 
 
+class Propertiesgui:
+    """
+    Show properties of atomis in Crystal
+    """
+
+    def __init__(self, xtl):
+        """Initialise"""
+        self.xtl = xtl
+        # Create Tk inter instance
+        self.root = tk.Tk()
+        self.root.wm_title('Properties %s' % xtl.name)
+        # self.root.minsize(width=640, height=480)
+        self.root.maxsize(width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight())
+        self.root.tk_setPalette(
+            background=bkg,
+            foreground=txtcol,
+            activeBackground=opt_active,
+            activeForeground=txtcol)
+
+        frame = tk.Frame(self.root)
+        frame.pack(side=tk.LEFT, anchor=tk.N)
+
+        # Crystal Atoms
+        atoms = np.unique(xtl.Atoms.type)
+        elements = fc.atom_properties(None,'Element')
+
+        # Variables
+        self.zfraction = tk.DoubleVar(frame, 1)
+        self.atoms = tk.StringVar(frame, ' '.join(atoms))
+        self.atomopt = tk.StringVar(frame, 'Elements:')
+        self.energy_kev = tk.DoubleVar(frame, 8.0)
+        self.wavelength = tk.DoubleVar(frame, 1.5498)
+        self.edge = tk.StringVar(frame, 'Edge')
+
+        # X-ray edges:
+        self.xr_edges, self.xr_energies = self.xtl.Properties.xray_edges()
+        self.xr_edges.insert(0, 'Cu Ka')
+        self.xr_edges.insert(1, 'Mo Ka')
+        self.xr_energies.insert(0, fg.Cu)
+        self.xr_energies.insert(1, fg.Mo)
+
+        # ---Line 1---
+        line = tk.Frame(frame)
+        line.pack(side=tk.TOP, fill=tk.X, expand=tk.TRUE, pady=5)
+
+        # Cell properties
+        var = tk.Label(line, text='Weight = %8.2f g/mol'%xtl.Properties.weight())
+        var.pack(side=tk.LEFT)
+        var = tk.Label(line, text='Volume = %8.2f A^3' % xtl.Properties.volume())
+        var.pack(side=tk.LEFT)
+        var = tk.Label(line, text='Density = %8.2f g/cm' % xtl.Properties.density())
+        var.pack(side=tk.LEFT)
+
+        # ---Line 2---
+        line = tk.Frame(frame)
+        line.pack(side=tk.TOP, fill=tk.X, expand=tk.TRUE, pady=5)
+
+        # Energy wavelength Conversions
+        var = tk.Label(line, text='Energy:')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.energy_kev, font=TF, width=16, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>',self.fun_energy2wave)
+        var.bind('<KP_Enter>',self.fun_energy2wave)
+        var = tk.Label(line, text='keV <-> Wavelength:')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.wavelength, font=TF, width=16, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_wave2energy)
+        var.bind('<KP_Enter>', self.fun_wave2energy)
+        var = tk.Label(line, text='A')
+        var.pack(side=tk.LEFT)
+        var = tk.OptionMenu(line, self.edge, *self.xr_edges, command=self.fun_edge)
+        var.config(font=SF, width=5, bg=opt, activebackground=opt_active)
+        var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
+        var.pack(side=tk.LEFT)
+
+        # ---Line 3---
+        line = tk.Frame(frame)
+        line.pack(side=tk.TOP, fill=tk.X, pady=5)
+
+        var = tk.Label(line, text='Elements', font=LF)
+        var.pack(side=tk.LEFT)
+
+        var = tk.Entry(line, textvariable=self.atoms, font=TF, width=16, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+
+        var = tk.OptionMenu(line, self.atomopt, *elements, command=self.fun_element)
+        var.config(font=SF, width=10, bg=opt, activebackground=opt_active)
+        var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
+        var.pack(side=tk.LEFT)
+
+        var = tk.Button(line, text='Mass Fraction', font=BF, command=self.fun_frac, bg=btn, activebackground=btn_active)
+        var.pack(side=tk.LEFT)
+        var = tk.Label(line, text=' Z:')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.zfraction, font=TF, width=2, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+
+        # ---Line 4---
+        line = tk.Frame(frame)
+        line.pack(side=tk.TOP, fill=tk.X, pady=5)
+
+        var = tk.Button(line, text='Properties', height=2, font=BF, command=self.fun_prop, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT)
+
+        var = tk.Button(line, text='X-Ray\nScattering Factor', font=BF, command=self.fun_xrscat, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT)
+
+        var = tk.Button(line, text='Magnetic\nForm Factor', font=BF, command=self.fun_magff, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT)
+
+        var = tk.Button(line, text='X-Ray\nAttenuation', font=BF, command=self.fun_xratten, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT)
+
+    def fun_frac(self):
+        """Atomic Fraction"""
+        z = self.zfraction.get()
+        out = self.xtl.Properties.molfraction(z)
+        StringViewer(out, self.xtl.name)
+
+    def fun_energy2wave(self, event=None):
+        """Convert energy to wavelength"""
+        energy = self.energy_kev.get()
+        wavelength = fc.energy2wave(energy)
+        self.wavelength.set(wavelength)
+
+    def fun_wave2energy(self, event=None):
+        """Convert wavelength to energy"""
+        wavelength = self.wavelength.get()
+        energy = fc.wave2energy(wavelength)
+        self.energy_kev.set(energy)
+
+    def fun_edge(self, event=None):
+        """Add edge energy"""
+        edge = self.edge.get()
+        if self.edge.get() in self.xr_edges:
+            idx = self.xr_edges.index(edge)
+            self.energy_kev.set(self.xr_energies[idx])
+            self.fun_energy2wave()
+
+    def fun_element(self, event=None):
+        """Dropdown menu"""
+        atom = self.atomopt.get()
+        self.atoms.set(atom)
+
+    def fun_prop(self):
+        """Properties button"""
+        elements = self.atoms.get()
+        elements = elements.replace(',',' ')
+        elelist = elements.split()
+        out = fc.print_atom_properties(elelist)
+        StringViewer(out, 'Element Properties')
+
+    def fun_xrscat(self):
+        """Properties button"""
+        elements = self.atoms.get()
+        elements = elements.replace(',',' ')
+        elelist = elements.split()
+        fp.plot_xray_scattering_factor(elelist)
+        plt.show()
+
+    def fun_magff(self):
+        """Properties button"""
+        elements = self.atoms.get()
+        elements = elements.replace(',',' ')
+        elelist = elements.split()
+        fp.plot_magnetic_form_factor(elelist)
+        plt.show()
+
+    def fun_xratten(self):
+        """Properties button"""
+        elements = self.atoms.get()
+        elements = elements.replace(',',' ')
+        elelist = elements.split()
+        fp.plot_xray_attenuation(elelist)
+        plt.show()
+
+
 class Scatteringgui:
     """
     Simulate scattering of various forms
@@ -671,6 +864,10 @@ class Scatteringgui:
 
         # X-ray edges:
         self.xr_edges, self.xr_energies = self.xtl.Properties.xray_edges()
+        self.xr_edges.insert(0, 'Cu Ka')
+        self.xr_edges.insert(1, 'Mo Ka')
+        self.xr_energies.insert(0, fg.Cu)
+        self.xr_energies.insert(1, fg.Mo)
 
         #---Line 1---
         line1 = tk.Frame(frame)
@@ -1155,7 +1352,7 @@ class StringViewer:
     """
     Simple GUI that displays strings
     """
-    def __init__(self,string,title=''):
+    def __init__(self, string, title=''):
         "Initialise"
         # Create Tk inter instance
         self.root = tk.Tk()
