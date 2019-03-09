@@ -27,8 +27,10 @@ Version History:
 23/02/19 1.3    Graphical user intrface and magnetic x-ray scattering now implemented
 """
 
-import sys
-
+# Set TkAgg environment
+import matplotlib
+matplotlib.use('TkAgg')
+# Dans Diffraction
 from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc

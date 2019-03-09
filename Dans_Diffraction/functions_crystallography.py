@@ -1130,8 +1130,9 @@ def hkl2str(hkl):
     :return: str '(h,k,l)'
     """
 
-    out = '(%1.0f,%1.0f,%1.0f)'
+    out = '(%1.3g,%1.3g,%1.3g)'
     hkl = np.asarray(hkl, dtype=np.float).reshape([-1, 3])
+    hkl = np.around(hkl, 5)
     return '\n'.join([out % (x[0], x[1], x[2]) for x in hkl])
 
 

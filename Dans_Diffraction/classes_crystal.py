@@ -24,8 +24,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.3
-Last updated: 31/10/18
+Version 2.4
+Last updated: 09/03/19
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -35,6 +35,7 @@ Version History:
 05/04/18 2.2    Magnetic symmetry automatically inverted for odd time
 04/06/18 2.3    removeatom added to Atom class
 31/10/18 2.3    Update Symmetry.symmetric_coordinates funcitons, add ability to view all or only non-identical
+09/03/19 2.4    Add print functions to Symmetry
 
 @author: DGPorter
 """
@@ -48,7 +49,7 @@ from .classes_properties import Properties
 from .classes_scattering import Scattering
 from .classes_plotting import Plotting, MultiPlotting, PlottingSuperstructure
 
-__version__ = '2.3'
+__version__ = '2.4'
 
 
 class Crystal:
@@ -1134,14 +1135,14 @@ class Symmetry:
         
         # Remove identical positions
         if remove_identical:
-            unique_uvw,uniqueidx,matchidx = fg.unique_vector(sym_uvw,tol=0.01)
+            unique_uvw, uniqueidx, matchidx = fg.unique_vector(sym_uvw, tol=0.01)
             sym_uvw = unique_uvw
 
         if MXMYMZ is None:
             return sym_uvw
         
         # Apply magnetic symmetry operations to magnetic vectors
-        mx,my,mz = MXMYMZ
+        mx, my, mz = MXMYMZ
         sym_xyz = fc.gen_sym_pos(self.symmetry_operations_magnetic, mx, my, mz)
         
         # Remove positions that were identical
@@ -1166,7 +1167,7 @@ class Symmetry:
         sym_uvw = fc.fitincell(sym_uvw)
         
         # Remove identical positions
-        unique_uvw,uniqueidx,matchidx = fg.unique_vector(sym_uvw,tol=0.01)
+        unique_uvw, uniqueidx, matchidx = fg.unique_vector(sym_uvw, tol=0.01)
         
         if MXMYMZ is None:
             return np.array(self.symmetry_operations)[uniqueidx]
@@ -1187,28 +1188,34 @@ class Symmetry:
               1   0.9000  0.0000  0.0000             -x,-y,-z             -x,-y,-z
               2   0.0000  0.1000  0.0000                y,x,z                y,x,z
         """
-        
-        UVW = np.asarray(UVW,dtype=np.float).reshape([-1,3])
 
-        for u,v,w in UVW:
+        UVW = np.asarray(UVW, dtype=np.float).reshape([-1, 3])
+
+        out = ''
+        for u, v, w in UVW:
             # Apply symmetry operations to atomic positions
-            sym_uvw = fc.gen_sym_pos(self.symmetry_operations,u,v,w)
+            sym_uvw = fc.gen_sym_pos(self.symmetry_operations, u, v, w)
             sym_uvw = fc.fitincell(sym_uvw)
             
             # Remove identical positions
-            unique_uvw,uniqueidx,matchidx = fg.unique_vector(sym_uvw,tol=0.01)
-            
-            print(' (%1.3g, %1.3g, %1.3g)'%(u,v,w))
-            print('  n       u       v       w             Symmetry    Magnetic Symmetry')
+            unique_uvw, uniqueidx, matchidx = fg.unique_vector(sym_uvw, tol=0.01)
+
+            out += ' (%1.3g, %1.3g, %1.3g)\n' % (u, v, w)
+            out += '  n       u       v       w             Symmetry    Magnetic Symmetry\n'
             if remove_identical:
                 # Only display distict positions
                 for n in range(len(unique_uvw)):
-                    print('%3d %7.4f %7.4f %7.4f %20s %20s' % (uniqueidx[n], unique_uvw[n,0], unique_uvw[n,1], unique_uvw[n,2], self.symmetry_operations[uniqueidx[n]], self.symmetry_operations_magnetic[uniqueidx[n]]))
+                    out += '%3d %7.4f %7.4f %7.4f %20s %20s\n' % (
+                    uniqueidx[n], unique_uvw[n, 0], unique_uvw[n, 1], unique_uvw[n, 2],
+                    self.symmetry_operations[uniqueidx[n]], self.symmetry_operations_magnetic[uniqueidx[n]])
             else:
                 for n in range(len(sym_uvw)):
-                    print('%3d %7.4f %7.4f %7.4f %20s %20s' % (n, sym_uvw[n,0], sym_uvw[n,1], sym_uvw[n,2], self.symmetry_operations[n], self.symmetry_operations_magnetic[n]))
+                    out += '%3d %7.4f %7.4f %7.4f %20s %20s\n' % (
+                    n, sym_uvw[n, 0], sym_uvw[n, 1], sym_uvw[n, 2], self.symmetry_operations[n],
+                    self.symmetry_operations_magnetic[n])
+        return out
     
-    def symmetric_reflections(self,HKL):
+    def symmetric_reflections(self, HKL):
         """
         Returns array of symmetric reflection indices
         Uses fc.gen_sym_mat
@@ -1249,7 +1256,7 @@ class Symmetry:
         symHKL = self.symmetric_reflections(HKL)
         
         # Remove identical positions
-        unique_hkl,uniqueidx,matchidx = fg.unique_vector(symHKL,tol=0.01)
+        unique_hkl, uniqueidx, matchidx = fg.unique_vector(symHKL, tol=0.01)
         return unique_hkl
     
     def symmetric_reflections_count(self,HKL):
@@ -1269,7 +1276,7 @@ class Symmetry:
         symHKL = self.symmetric_reflections(HKL)
         
         # Remove identical positions
-        unique_hkl,uniqueidx,matchidx = fg.unique_vector(symHKL,tol=0.01)
+        unique_hkl, uniqueidx, matchidx = fg.unique_vector(symHKL, tol=0.01)
         
         # Count reflections at identical positions
         count = np.zeros(len(unique_hkl))
@@ -1277,7 +1284,7 @@ class Symmetry:
             count[n] = matchidx.count(n)
         return unique_hkl, count
     
-    def symmetric_intensity(self,HKL,I,dI=None):
+    def symmetric_intensity(self, HKL, I, dI=None):
         """
         Returns symmetric reflections with summed intensities of repeated reflections
         Uses fc.gen_sym_mat
@@ -1305,7 +1312,7 @@ class Symmetry:
         symI = np.repeat(I,NsymOps) # repeats each element of I
         
         # Remove identical positions
-        unique_hkl,uniqueidx,matchidx = fg.unique_vector(symHKL,tol=0.01)
+        unique_hkl, uniqueidx, matchidx = fg.unique_vector(symHKL, tol=0.01)
         unique_I = symI[uniqueidx]
         
         # Sum intensity at duplicate positions
@@ -1323,7 +1330,27 @@ class Symmetry:
         unique_dI = sym_dI[uniqueidx]
         sum_dI = unique_dI*count # *np.sqrt(count)?
         return unique_hkl, sum_I, sum_dI
-    
+
+    def print_symmetric_vectors(self, HKL):
+        """
+        Print symmetric vectors
+        :param HKL: [h,k,l] reflection
+        :return: str
+        """
+
+        HKL = np.asarray(HKL, dtype=np.float).reshape((-1, 3))
+        ops = np.array(self.symmetry_operations)
+        out=''
+        for hkl in HKL:
+            symHKL = self.symmetric_reflections(hkl)
+            unique_hkl, uniqueidx, matchidx = fg.unique_vector(symHKL, tol=0.01)
+            out += '--%s--\n' % fc.hkl2str(hkl)
+            for n in range(len(unique_hkl)):
+                symops = ops[np.array(matchidx) == n]
+                symstr = '   '.join(symops)
+                out += '  %2d %16s  : %2d : %s\n' % (n, fc.hkl2str(unique_hkl[n]), len(symops), symstr)
+        return out
+
     def symmetric_magnetic_vectors(self,MXMYMZ):
         """
         NOT COMPLETE
@@ -1406,6 +1433,7 @@ class Superstructure(Crystal):
     P = [[1,0,0],[0,1,0],[0,0,1]]
     
     def __init__(self, Parent, P):
+        """Initialise"""
         
         # Instatiate crystal attributes
         self.Cell = Cell()
@@ -1417,7 +1445,7 @@ class Superstructure(Crystal):
         #self.Scatter = Scattering(self)
         
         self.name = Parent.name + ' supercell'
-        self.P = np.asarray(P,dtype=np.float)
+        self.P = np.asarray(P, dtype=np.float)
         self.Parent = Parent
         newUV = Parent.Cell.calculateR(P)
         self.new_cell(fc.UV2latpar(newUV))
@@ -1439,7 +1467,7 @@ class Superstructure(Crystal):
         self.scale = Parent.scale*Ncell
         
         # Get Parent atoms
-        uvw,type,label,occ,uiso,mxmymz = Parent.Structure.get()
+        uvw, type, label, occ, uiso, mxmymz = Parent.Structure.get()
         
         # Generate all atomic positions
         new_uvw = np.empty([0,3])
@@ -1540,7 +1568,7 @@ class MultiCrystal(MultiPlotting):
     """
     _scattering_type = 'xray'
 
-    def __init__(self,crystal_list):
+    def __init__(self, crystal_list):
         """
         Multi-crystal class
         """

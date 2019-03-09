@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.4
-Last updated: 08/06/18
+Version 1.5
+Last updated: 09/03/19
 
 Version History:
 18/08/17 0.1    Program created
@@ -123,7 +123,7 @@ class Plotting:
         
         plt.title(self.xtl.name,fontsize=20,fontweight='bold')
     
-    def plot_layers(self,layer_axis=2,layer_width=0.05,show_labels=False):
+    def plot_layers(self, layer_axis=2, layer_width=0.05, show_labels=False):
         """
         Separate the structure into layers along the chosen axis
         and plot the atoms in each layer in a separate figure.
@@ -145,16 +145,16 @@ class Plotting:
             layer_axis_y = 1 # b
         
         # Generate layers
-        uvw_st,type_st,label_st,occ_st,uiso_st,mxmymz_st = self.xtl.Structure.get()
+        uvw_st, type_st, label_st, occ_st, uiso_st, mxmymz_st = self.xtl.Structure.get()
         vals,uniqeidx,matchidx = fg.unique_vector(uvw_st[:,layer_axis], layer_width)
         # unique_vector takes the first value of each layer, the average is better
         layers = [np.mean(uvw_st[np.asarray(matchidx)==n,layer_axis]) for n in range(len(vals))]
         
         # Generate atomic positions
-        uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.generate_lattice(1,1,1)
+        uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
         
         # Split atom types, color & radii
-        labels,idx,invidx = np.unique(label,return_index=True,return_inverse=True)
+        labels, idx, invidx = np.unique(label, return_index=True, return_inverse=True)
         label_colors = plt.cm.gist_rainbow(np.linspace(0,1,len(labels)))
         colors = label_colors[invidx,:]
         sizes = fc.atom_properties(type, 'Radii')
@@ -785,7 +785,6 @@ class Plotting:
         plt.ylim([0, 1.1 * np.max(I)])
         fp.labels(ttl, '$\Psi$ [Deg]', 'Non-Resonant Magnetic Intensity')
 
-
     def simulate_polarisation_resonant(self, hkl, energy_kev=None, F0=1, F1=1, F2=1, azim_zero=[1, 0, 0], psi=0):
         """
         Simulate azimuthal scan of resonant x-ray scattering
@@ -887,9 +886,9 @@ class Plotting:
                 [kout[0, 1], kout[0, 1] + eout[0, 1]],
                 [kout[0, 2], kout[0, 2] + eout[0, 2]], '-g')  # eout
 
-        ax.plot([0, a[0]], [0, a[1]], [0, a[2]], '-m')  # a
-        ax.plot([0, b[0]], [0, b[1]], [0, b[2]], '-m')  # b
-        ax.plot([0, c[0]], [0, c[1]], [0, c[2]], '-m')  # c
+        #ax.plot([0, a[0]], [0, a[1]], [0, a[2]], '-m')  # a
+        #ax.plot([0, b[0]], [0, b[1]], [0, b[2]], '-m')  # b
+        #ax.plot([0, c[0]], [0, c[1]], [0, c[2]], '-m')  # c
 
         # Add moment manually after
         #ax.plot([0, moment[0, 0]], [0, moment[0, 1]], [0, moment[0, 2]], '-r', lw=2)  # moment
@@ -907,8 +906,8 @@ class PlottingSuperstructure(Plotting):
      - Effects functions such as xtl.Plot.simulate_hk0()
     """
     
-    def generate_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],
-                                    q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
+    def generate_intensity_cut(self,x_axis=[1,0,0], y_axis=[0,1,0], centre=[0,0,0],
+                                    q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05):
         """
         Generate a cut through reciprocal space, returns an array with centred reflections
         Inputs:

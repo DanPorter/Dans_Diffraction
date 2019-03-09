@@ -14,12 +14,12 @@ Diamond
 2019
 
 Version 1.1
-Last updated: 23/02/19
+Last updated: 09/03/19
 
 Version History:
 10/11/17 0.1    Program created
 23/02/19 1.0    Finished the basic program and gave it colours
-07/03/19 1.1    Added properties
+09/03/19 1.1    Added properties, superstructure, other improvements
 
 @author: DGPorter
 """
@@ -27,9 +27,6 @@ Version History:
 # Built-ins
 import sys, os
 
-# Set TkAgg environment
-import matplotlib
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt # Plotting
 import numpy as np
 if sys.version_info[0] < 3:
@@ -50,7 +47,7 @@ from .classes_structures import Structures
 
 structure_list = Structures()
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 # Fonts
 TF= ["Times", 10]
@@ -61,8 +58,8 @@ HF= ['Courier',12]
 # Colours - background
 bkg = 'snow'
 ety = 'white'
-btn = 'light slate blue'
-opt = 'light slate blue'
+btn = 'azure' #'light slate blue'
+opt = 'azure' #'light slate blue'
 # Colours - active
 btn_active = 'grey'
 opt_active = 'grey'
@@ -146,11 +143,17 @@ class Crystalgui:
         var = tk.Button(f_but, text='Plot\nCrystal', font=BF, bg=btn, activebackground=btn_active,
                         command=self.fun_plotxtl)
         var.pack(side=tk.LEFT)
+        var = tk.Button(f_but, text='Plot\nLayers', font=BF, bg=btn, activebackground=btn_active,
+                        command=self.fun_plotlayers)
+        var.pack(side=tk.LEFT)
         var = tk.Button(f_but, text='Simulate\nStructure Factors', bg=btn, activebackground=btn_active, font=BF,
                         command=self.fun_simulate)
         var.pack(side=tk.LEFT)
-        var = tk.Button(f_but, text='Properties', height=2, bg=btn, activebackground=btn_active, font=BF,
+        var = tk.Button(f_but, text='Properties\n& Conversions', bg=btn, activebackground=btn_active, font=BF,
                         command=self.fun_properties)
+        var.pack(side=tk.LEFT)
+        var = tk.Button(f_but, text='Super\nStructure', bg=btn, activebackground=btn_active, font=BF,
+                        command=self.fun_superstructure)
         var.pack(side=tk.LEFT)
 
         # start mainloop
@@ -217,6 +220,11 @@ class Crystalgui:
         self.fun_set()
         self.xtl.Plot.plot_crystal()
         plt.show()
+
+    def fun_plotlayers(self):
+        self.fun_set()
+        self.xtl.Plot.plot_layers(layer_axis=2, layer_width=0.15, show_labels=True)
+        plt.show()
     
     def fun_simulate(self):
         self.fun_set()
@@ -225,6 +233,10 @@ class Crystalgui:
     def fun_properties(self):
         self.fun_set()
         Propertiesgui(self.xtl)
+
+    def fun_superstructure(self):
+        self.fun_set()
+        Superstructuregui(self.xtl)
 
     def on_closing(self):
         """End mainloop on close window"""
@@ -497,7 +509,7 @@ class Symmetrygui:
     View and edit the symmetry operations
     """
     def __init__(self,xtl):
-        "Initialise"
+        """"Initialise"""
         self.xtl = xtl
         self.Symmetry = xtl.Symmetry
         # Create Tk inter instance
@@ -514,7 +526,7 @@ class Symmetrygui:
         frame = tk.Frame(self.root)
         frame.pack(side=tk.TOP)
         
-        #---Labels---
+        # ---Labels---
         label_frame = tk.Frame(frame,relief=tk.GROOVE)
         label_frame.pack(side=tk.TOP, fill=tk.X)
         var = tk.Label(label_frame, text='n', font=SF, justify=tk.CENTER, width=4, height=2, relief=tk.RIDGE)
@@ -526,7 +538,7 @@ class Symmetrygui:
                        relief=tk.RIDGE)
         var.pack(side=tk.LEFT,pady=1)
         
-        #---Edit Boxes---
+        # ---Edit Boxes---
         box_frame = tk.Frame(frame)
         box_frame.pack(side=tk.TOP, fill=tk.BOTH)
         
@@ -555,28 +567,83 @@ class Symmetrygui:
         #scany.config(command=self.text1.yview)
         
         self.fun_set()
-        
-        # Button
+
         frm1 = tk.Frame(self.root)
         frm1.pack(side=tk.TOP)
-        
-        var = tk.Button(frm1, text='Update', command=self.fun_update, font=BF, bg=btn, activebackground=btn_active)
-        var.pack()
-    
+
+        # Button
+        var = tk.Button(frm1, text='Update', command=self.fun_update, height=2, font=BF, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT)
+
+        # uvw entry
+        var = tk.Label(frm1, text='(u v w)=')
+        var.pack(side=tk.LEFT)
+        self.uvw = tk.StringVar(frm1, '0.5 0 0')
+        var = tk.Entry(frm1, textvariable=self.uvw, font=TF, width=12, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_symuvw)
+        var.bind('<KP_Enter>', self.fun_symuvw)
+        var = tk.Button(frm1, text='Symmetric\nPositions', font=BF, bg=btn, activebackground=btn_active,
+                        command=self.fun_symuvw)
+        var.pack(side=tk.LEFT)
+
+        # hkl entry
+        var = tk.Label(frm1, text='(h k l)=')
+        var.pack(side=tk.LEFT)
+        self.hkl = tk.StringVar(frm1, '1 0 0')
+        var = tk.Entry(frm1, textvariable=self.hkl, font=TF, width=12, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_symhkl)
+        var.bind('<KP_Enter>', self.fun_symhkl)
+        var = tk.Button(frm1, text='Symmetric\nReflections', font=BF, bg=btn, activebackground=btn_active,
+                        command=self.fun_symhkl)
+        var.pack(side=tk.LEFT)
+
+    def update(self):
+        """Update crystal"""
+
+        # Get string from text box
+        sym = self.text_2.get('1.0', tk.END)  # symmetry operations
+        mag = self.text_3.get('1.0', tk.END)  # magnetic operations
+
+        # remove 'm'
+        mag = mag.replace('m', '')
+
+        # Analyse string
+        sym_lines = sym.splitlines()
+        mag_lines = mag.splitlines()
+
+        if len(sym_lines) != len(mag_lines):
+            print('Warning: The number of symmetry and magnetic operations are not the same!')
+
+        sym_ops = []
+        mag_ops = []
+        for sym, mag in zip(sym_lines, mag_lines):
+            if len(sym.strip()) == 0: continue
+            if len(mag.strip()) == 0: mag = fc.symmetry_ops2magnetic([sym.strip()])[0]
+            sym_ops += [sym.strip()]
+            mag_ops += [mag.strip()]
+
+        self.Symmetry.symmetry_operations = sym_ops
+        self.Symmetry.symmetry_operations_magnetic = mag_ops
+        self.Symmetry.generate_matrices()
+
     def fun_move(self, *args):
-        "Move within text frame"
+        """Move within text frame"""
         self.scany.set(*args)
         self.text_1.yview('moveto',args[0])
         self.text_2.yview('moveto',args[0])
         self.text_3.yview('moveto',args[0])
     
     def fun_scroll(self, *args):
-        "Move scrollbar"
+        """Move scrollbar"""
         self.text_1.yview(*args)
         self.text_2.yview(*args)
         self.text_3.yview(*args)
     
     def fun_mousewheel(self, event):
+        """Move scollbar"""
         self.text_1.yview("scroll", event.delta,"units")
         self.text_2.yview("scroll",event.delta,"units")
         self.text_3.yview("scroll",event.delta,"units")
@@ -585,6 +652,7 @@ class Symmetrygui:
         return "break"
     
     def fun_set(self):
+        """Generate the text box"""
         # Build string
         Nops = len(self.Symmetry.symmetry_operations)
         symstr = ''
@@ -592,41 +660,42 @@ class Symmetrygui:
         for n in range(Nops):
             self.text_1.insert(tk.END,'%3.0f\n'%n)
             sym = self.Symmetry.symmetry_operations[n].strip('\"\'')
-            mag = self.Symmetry.symmetry_operations_magnetic[n].strip('\"\'').replace('x','mx').replace('y','my').replace('z','mz')
+            mag = self.Symmetry.symmetry_operations_magnetic[n]
+            mag = mag.strip('\"\'').replace('x','mx').replace('y','my').replace('z','mz')
             symstr += '%25s\n' %(sym)
             magstr += '%25s\n' %(mag)
         
         # Insert string in text box
         self.text_2.insert(tk.END,symstr)
         self.text_3.insert(tk.END,magstr)
+
+    def fun_symuvw(self, event=None):
+        """create symmetric uvw position"""
+        self.update()
+        uvw = self.uvw.get()
+        uvw = uvw.replace(',', ' ')  # remove commas
+        uvw = uvw.replace('(', '').replace(')', '')  # remove brackets
+        uvw = uvw.replace('[', '').replace(']', '')  # remove brackets
+        uvw = np.fromstring(uvw, sep=' ')
+        out = self.xtl.Symmetry.print_symmetric_coordinate_operations(uvw)
+        StringViewer(out, 'Symmetric Positions')
+
+    def fun_symhkl(self, event=None):
+        """create symmetric hkl reflections"""
+        self.update()
+        hkl = self.hkl.get()
+        hkl = hkl.replace(',', ' ')  # remove commas
+        hkl = hkl.replace('(', '').replace(')', '')  # remove brackets
+        hkl = hkl.replace('[', '').replace(']', '')  # remove brackets
+        hkl = np.fromstring(hkl, sep=' ')
+        out = self.xtl.Symmetry.print_symmetric_vectors(hkl)
+        StringViewer(out, 'Symmetric Reflections')
     
     def fun_update(self):
-        # Get string from text box
-        sym = self.text_2.get('1.0', tk.END) # symmetry operations
-        mag = self.text_3.get('1.0', tk.END) # magnetic operations
-        
-        # remove 'm'
-        mag = mag.replace('m','')
-        
-        # Analyse string
-        sym_lines = sym.splitlines()
-        mag_lines = mag.splitlines()
-        
-        if len(sym_lines) != len(mag_lines):
-            print('Warning: The number of symmetry and magnetic operations are not the same!')
-        
-        sym_ops = []
-        mag_ops = []
-        for sym,mag in zip(sym_lines,mag_lines):
-            if len(sym.strip()) == 0: continue
-            if len(mag.strip()) == 0: mag = fc.symmetry_ops2magnetic([sym.strip()])[0]
-            sym_ops += [sym.strip()]
-            mag_ops += [mag.strip()]
-        
-        self.Symmetry.symmetry_operations = sym_ops
-        self.Symmetry.symmetry_operations_magnetic = mag_ops
-        self.Symmetry.generate_matrices()
-        
+        """Update button"""
+
+        self.update()
+
         # Close window
         self.root.destroy()
 
@@ -664,6 +733,9 @@ class Propertiesgui:
         self.energy_kev = tk.DoubleVar(frame, 8.0)
         self.wavelength = tk.DoubleVar(frame, 1.5498)
         self.edge = tk.StringVar(frame, 'Edge')
+        self.twotheta = tk.DoubleVar(frame, 90.0)
+        self.qmag = tk.DoubleVar(frame, 5.733)
+        self.dspace = tk.DoubleVar(frame, 1.096)
 
         # X-ray edges:
         self.xr_edges, self.xr_energies = self.xtl.Properties.xray_edges()
@@ -674,7 +746,7 @@ class Propertiesgui:
 
         # ---Line 1---
         line = tk.Frame(frame)
-        line.pack(side=tk.TOP, fill=tk.X, expand=tk.TRUE, pady=5)
+        line.pack(side=tk.TOP, expand=tk.TRUE, pady=5)
 
         # Cell properties
         var = tk.Label(line, text='Weight = %8.2f g/mol'%xtl.Properties.weight())
@@ -686,7 +758,7 @@ class Propertiesgui:
 
         # ---Line 2---
         line = tk.Frame(frame)
-        line.pack(side=tk.TOP, fill=tk.X, expand=tk.TRUE, pady=5)
+        line.pack(side=tk.TOP, expand=tk.TRUE, pady=5)
 
         # Energy wavelength Conversions
         var = tk.Label(line, text='Energy:')
@@ -710,7 +782,34 @@ class Propertiesgui:
 
         # ---Line 3---
         line = tk.Frame(frame)
-        line.pack(side=tk.TOP, fill=tk.X, pady=5)
+        line.pack(side=tk.TOP, expand=tk.TRUE, pady=5)
+
+        # Two-Theta - Q - d conversion
+        var = tk.Label(line, text='Two-Theta:')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.twotheta, font=TF, width=10, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_tth2q)
+        var.bind('<KP_Enter>', self.fun_tth2q)
+        var = tk.Label(line, text='Deg <-> Q:')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.qmag, font=TF, width=10, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_q2tth)
+        var.bind('<KP_Enter>', self.fun_q2tth)
+        var = tk.Label(line, text='A^-1 <-> d-spacing:')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.dspace, font=TF, width=10, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_d2tth)
+        var.bind('<KP_Enter>', self.fun_d2tth)
+        var = tk.Label(line, text='A')
+        var.pack(side=tk.LEFT)
+
+
+        # ---Line 3---
+        line = tk.Frame(frame)
+        line.pack(side=tk.TOP, pady=5)
 
         var = tk.Label(line, text='Elements', font=LF)
         var.pack(side=tk.LEFT)
@@ -732,7 +831,7 @@ class Propertiesgui:
 
         # ---Line 4---
         line = tk.Frame(frame)
-        line.pack(side=tk.TOP, fill=tk.X, pady=5)
+        line.pack(side=tk.TOP, pady=5)
 
         var = tk.Button(line, text='Properties', height=2, font=BF, command=self.fun_prop, bg=btn,
                         activebackground=btn_active)
@@ -760,13 +859,15 @@ class Propertiesgui:
         """Convert energy to wavelength"""
         energy = self.energy_kev.get()
         wavelength = fc.energy2wave(energy)
-        self.wavelength.set(wavelength)
+        self.wavelength.set(round(wavelength, 4))
+        self.fun_tth2q()
 
     def fun_wave2energy(self, event=None):
         """Convert wavelength to energy"""
         wavelength = self.wavelength.get()
         energy = fc.wave2energy(wavelength)
-        self.energy_kev.set(energy)
+        self.energy_kev.set(round(energy, 5))
+        self.fun_tth2q()
 
     def fun_edge(self, event=None):
         """Add edge energy"""
@@ -775,6 +876,33 @@ class Propertiesgui:
             idx = self.xr_edges.index(edge)
             self.energy_kev.set(self.xr_energies[idx])
             self.fun_energy2wave()
+
+    def fun_tth2q(self, event=None):
+        """Convert two-theta to q and d"""
+        tth = self.twotheta.get()
+        energy = self.energy_kev.get()
+        qmag = fc.calQmag(tth, energy)
+        dspace = fc.caldspace(qmag)
+        self.qmag.set(round(qmag, 4))
+        self.dspace.set(round(dspace, 4))
+
+    def fun_q2tth(self, event=None):
+        """Convert Q to tth and d"""
+        qmag = self.qmag.get()
+        energy = self.energy_kev.get()
+        tth = fc.cal2theta(qmag, energy)
+        dspace = fc.caldspace(qmag)
+        self.twotheta.set(round(tth, 4))
+        self.dspace.set(round(dspace, 4))
+
+    def fun_d2tth(self, event=None):
+        """Convert d to tth and q"""
+        dspace = self.dspace.get()
+        energy = self.energy_kev.get()
+        qmag = fc.caldspace(dspace)
+        tth = fc.cal2theta(qmag, energy)
+        self.qmag.set(round(qmag, 4))
+        self.twotheta.set(round(tth, 4))
 
     def fun_element(self, event=None):
         """Dropdown menu"""
@@ -850,7 +978,7 @@ class Scatteringgui:
         self.twotheta_max = tk.DoubleVar(frame,180.0)
         self.powder_units = tk.StringVar(frame, 'Two-Theta')
         self.hkl_check = tk.StringVar(frame,'0 0 1')
-        self.hkl_result = tk.StringVar(frame,'I:%8.0f TTH:%6.2f'%(0,0))
+        self.hkl_result = tk.StringVar(frame,'I:%10.0f TTH:%8.2f'%(0,0))
         self.val_i = tk.IntVar(frame,0)
         self.hkl_magnetic = tk.StringVar(frame,'0 0 1')
         self.azim_zero = tk.StringVar(frame,'1 0 0')
@@ -875,7 +1003,12 @@ class Scatteringgui:
         
         var = tk.Label(line1, text='Scattering', font=LF)
         var.pack(side=tk.LEFT)
-        
+
+        var = tk.Button(line1, text='Supernova', font=BF, command=self.fun_supernova, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.RIGHT)
+        var = tk.Button(line1, text='Wish', font=BF, command=self.fun_wish, bg=btn, activebackground=btn_active)
+        var.pack(side=tk.RIGHT)
         var = tk.Button(line1, text='I16', font=BF, command=self.fun_i16, bg=btn, activebackground=btn_active)
         var.pack(side=tk.RIGHT)
         
@@ -982,9 +1115,9 @@ class Scatteringgui:
         var.bind('<KP_Enter>',self.fun_hklcheck)
         var = tk.Label(hklbox, textvariable=self.hkl_result,font=TF, width=22)
         var.pack(side=tk.LEFT)
-        var = tk.Button(hklbox, text='Check HKL', font=BF, command=self.fun_hklcheck, bg=btn,
-                        activebackground=btn_active)
-        var.pack(side=tk.LEFT, pady=2)
+        #var = tk.Button(hklbox, text='Check HKL', font=BF, command=self.fun_hklcheck, bg=btn,
+        #                activebackground=btn_active)
+        #var.pack(side=tk.LEFT, pady=2)
         
         #--- Line 5 ---
         line5 = tk.Frame(frame)
@@ -1107,7 +1240,7 @@ class Scatteringgui:
             var.pack(side=tk.LEFT)
 
     def fun_set(self):
-        "Set gui parameters from crystal"
+        """"Set gui parameters from crystal"""
         
         self.type.set(self.xtl._scattering_type)
         #self.energy_kev.set(8)
@@ -1127,7 +1260,7 @@ class Scatteringgui:
             self.direction_l.set(self.xtl._scattering_parallel_direction[2])
     
     def fun_get(self):
-        "Set crytal parameters from gui"
+        """Set crytal parameters from gui"""
         
         scat = self.xtl.Scatter
         scat._scattering_type = self.type.get()
@@ -1149,15 +1282,44 @@ class Scatteringgui:
             scat._scattering_parallel_direction[2] = self.direction_l.get()
     
     def fun_i16(self):
-        "Add I16 parameters"
+        """"Add I16 parameters"""
         
         self.type.set('X-Ray')
         self.energy_kev.set(8.0)
-        self.theta_offset.set(0)
-        self.theta_min.set(-20)
-        self.theta_max.set(150)
-        self.twotheta_min.set(0)
-        self.twotheta_max.set(130)
+        self.edge.set('Edge')
+        self.powder_units.set('Two-Theta')
+        self.theta_offset.set(0.0)
+        self.theta_min.set(-20.0)
+        self.theta_max.set(150.0)
+        self.twotheta_min.set(0.0)
+        self.twotheta_max.set(130.0)
+
+    def fun_wish(self):
+        """"Add Wish parameters"""
+
+        self.type.set('Neutron')
+        self.energy_kev.set(17.7)
+        self.edge.set('Edge')
+        self.powder_units.set('d-spacing')
+        self.theta_offset.set(0.0)
+        self.theta_min.set(-180.0)
+        self.theta_max.set(180.0)
+        self.twotheta_min.set(10.0)
+        self.twotheta_max.set(170.0)
+
+    def fun_supernova(self):
+        """Add SuperNova parameters"""
+
+        self.type.set('X-Ray')
+        idx = self.xr_edges.index('Mo Ka')
+        self.edge.set('Mo Ka')
+        self.energy_kev.set(self.xr_energies[idx])
+        self.powder_units.set('Two-Theta')
+        self.theta_offset.set(0.0)
+        self.theta_min.set(-180.0)
+        self.theta_max.set(180.0)
+        self.twotheta_min.set(-170.0)
+        self.twotheta_max.set(170.0)
 
     def fun_edge(self, event=None):
         """X-ray edge option menu"""
@@ -1167,7 +1329,7 @@ class Scatteringgui:
             self.energy_kev.set(self.xr_energies[idx])
 
     def fun_hklcheck(self, event=None):
-        "Show single hkl intensity"
+        """"Show single hkl intensity"""
         
         self.fun_get()
         hkl = self.hkl_check.get()
@@ -1176,11 +1338,23 @@ class Scatteringgui:
         hkl = hkl.replace('[','').replace(']','') # remove brackets
         hkl = np.fromstring(hkl,sep=' ')
         I = self.xtl.Scatter.intensity(hkl)
-        tth = self.xtl.Cell.tth(hkl)
-        self.hkl_result.set('I:%8.0f TTH:%6.2f'%(I,tth))
-    
+
+        unit = self.powder_units.get()
+        energy = self.energy_kev.get()
+        tth = self.xtl.Cell.tth(hkl, energy)
+
+        if unit.lower() in ['tth', 'angle', 'twotheta', 'theta', 'two-theta']:
+            self.hkl_result.set('I:%10.0f TTH:%8.2f' % (I, tth))
+        elif unit.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
+            q = fc.calQmag(tth, energy)
+            d = fc.caldspace(q)
+            self.hkl_result.set('I:%10.0f   d:%8.2f A' % (I, d))
+        else:
+            q = fc.calQmag(tth, energy)
+            self.hkl_result.set('I:%8.0f   Q:%8.2f A^-1' % (I, q))
+
     def fun_intensities(self):
-        "Display intensities"
+        """Display intensities"""
         
         self.fun_get()
         if self.orientation.get() == 'Reflection':
@@ -1241,12 +1415,6 @@ class Scatteringgui:
         i = self.val_i.get()
         self.xtl.Plot.simulate_hhl(i)
         plt.show()
-    
-    def fun_simulate(self):
-        """Unknown"""
-        self.xtl.Scatter._energy_kev
-        self.xtl.Scatter._polarised
-        self.xtl.Scatter._polarisation_vector_incident
 
     def fun_hklmag(self, event=None):
         """"Magnetic scattering"""
@@ -1348,12 +1516,212 @@ class Scatteringgui:
             plt.show()
 
 
+class Superstructuregui:
+    """
+    Generate a superstructure
+    """
+
+    def __init__(self, xtl):
+        """Initialise"""
+        self.xtl = xtl
+        # Create Tk inter instance
+        self.root = tk.Tk()
+        self.root.wm_title('Properties %s' % xtl.name)
+        # self.root.minsize(width=640, height=480)
+        self.root.maxsize(width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight())
+        self.root.tk_setPalette(
+            background=bkg,
+            foreground=txtcol,
+            activeBackground=opt_active,
+            activeForeground=txtcol)
+
+        frame = tk.Frame(self.root)
+        frame.pack(side=tk.LEFT, anchor=tk.N)
+
+        # Variables
+        if hasattr(xtl, 'P'):
+            # self.P = xtl.P
+            self.P = np.linalg.inv(xtl.P)
+        else:
+            self.P = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+        self.a1 = tk.DoubleVar(frame, self.P[0][0])
+        self.a2 = tk.DoubleVar(frame, self.P[0][1])
+        self.a3 = tk.DoubleVar(frame, self.P[0][2])
+        self.b1 = tk.DoubleVar(frame, self.P[1][0])
+        self.b2 = tk.DoubleVar(frame, self.P[1][1])
+        self.b3 = tk.DoubleVar(frame, self.P[1][2])
+        self.c1 = tk.DoubleVar(frame, self.P[2][0])
+        self.c2 = tk.DoubleVar(frame, self.P[2][1])
+        self.c3 = tk.DoubleVar(frame, self.P[2][2])
+        self.parent_hkl = tk.StringVar(frame, '1 0 0')
+        self.super_hkl = tk.StringVar(frame, '1 0 0')
+        lp = self.xtl.Cell.lp()
+        self.latpar1 = tk.StringVar(frame, '    a = %6.3f    b = %6.3f     c = %6.3f' % lp[:3])
+        self.latpar2 = tk.StringVar(frame, 'alpha = %6.3f beta = %6.3f gamma = %6.3f' % lp[3:])
+
+        # Supercell box
+        box = tk.LabelFrame(frame, text='Superstructure Cell')
+        box.pack(side=tk.TOP, padx=4)
+
+        # ---Line B1---
+        bline = tk.Frame(box)
+        bline.pack(side=tk.TOP, expand=tk.TRUE, pady=5)
+        var = tk.Label(bline, text='a\' =')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(bline, textvariable=self.a1, font=TF, width=3, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_updatecell)
+        var.bind('<KP_Enter>', self.fun_updatecell)
+        var = tk.Label(bline, text='*a + ')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(bline, textvariable=self.a2, font=TF, width=3, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_updatecell)
+        var.bind('<KP_Enter>', self.fun_updatecell)
+        var = tk.Label(bline, text='*b + ')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(bline, textvariable=self.a3, font=TF, width=3, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_updatecell)
+        var.bind('<KP_Enter>', self.fun_updatecell)
+        var = tk.Label(bline, text='*c')
+        var.pack(side=tk.LEFT)
+
+        # ---Line B2---
+        bline = tk.Frame(box)
+        bline.pack(side=tk.TOP, expand=tk.TRUE, pady=5)
+        var = tk.Label(bline, text='b\' =')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(bline, textvariable=self.b1, font=TF, width=3, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_updatecell)
+        var.bind('<KP_Enter>', self.fun_updatecell)
+        var = tk.Label(bline, text='*a + ')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(bline, textvariable=self.b2, font=TF, width=3, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_updatecell)
+        var.bind('<KP_Enter>', self.fun_updatecell)
+        var = tk.Label(bline, text='*b + ')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(bline, textvariable=self.b3, font=TF, width=3, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_updatecell)
+        var.bind('<KP_Enter>', self.fun_updatecell)
+        var = tk.Label(bline, text='*c')
+        var.pack(side=tk.LEFT)
+
+        # ---Line B3---
+        bline = tk.Frame(box)
+        bline.pack(side=tk.TOP, expand=tk.TRUE, pady=5)
+        var = tk.Label(bline, text='c\' =')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(bline, textvariable=self.c1, font=TF, width=3, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_updatecell)
+        var.bind('<KP_Enter>', self.fun_updatecell)
+        var = tk.Label(bline, text='*a + ')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(bline, textvariable=self.c2, font=TF, width=3, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_updatecell)
+        var.bind('<KP_Enter>', self.fun_updatecell)
+        var = tk.Label(bline, text='*b + ')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(bline, textvariable=self.c3, font=TF, width=3, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_updatecell)
+        var.bind('<KP_Enter>', self.fun_updatecell)
+        var = tk.Label(bline, text='*c')
+        var.pack(side=tk.LEFT)
+
+        # Update
+        var = tk.Button(frame, text='Update', font=BF, bg=btn, activebackground=btn_active,
+                        command=self.fun_updatecell)
+        var.pack(side=tk.TOP, fill=tk.X, expand=tk.TRUE)
+
+        # Cell properties
+        var = tk.Label(frame, textvariable=self.latpar1)
+        var.pack(side=tk.TOP)
+        var = tk.Label(frame, textvariable=self.latpar2)
+        var.pack(side=tk.TOP)
+
+        # Index hkl
+        line = tk.Label(frame)
+        line.pack(side=tk.TOP)
+        var = tk.Label(line, text='Parent (h k l)=')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.parent_hkl, font=TF, width=12, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_parent2super)
+        var.bind('<KP_Enter>', self.fun_parent2super)
+        var = tk.Label(line, text=' <-> Super (h\' k\' l\')=')
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.super_hkl, font=TF, width=12, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_super2parent)
+        var.bind('<KP_Enter>', self.fun_super2parent)
+
+        # Generate
+        var = tk.Button(frame, text='Generate Supercell', font=BF, bg=btn, activebackground=btn_active,
+                        command=self.fun_gencell)
+        var.pack(side=tk.TOP, fill=tk.X, expand=tk.TRUE)
+
+    def fun_updatecell(self, event=None):
+        """Update cell parameters"""
+        self.P = [[self.a1.get(), self.a2.get(), self.a3.get()],
+                  [self.b1.get(), self.b2.get(), self.b3.get()],
+                  [self.c1.get(), self.c2.get(), self.c3.get()]]
+        newUV = self.xtl.Cell.calculateR(self.P)
+        newLP = fc.UV2latpar(newUV)
+
+        self.latpar1.set('    a = %6.3f    b = %6.3f     c = %6.3f' % newLP[:3])
+        self.latpar2.set('alpha = %6.3f beta = %6.3f gamma = %6.3f' % newLP[3:])
+        self.fun_parent2super()
+
+    def fun_gencell(self, event=None):
+        """Generate new supercell"""
+        sup = self.xtl.generate_superstructure(self.P)
+        Crystalgui(sup)
+        self.root.destroy()
+
+    def fun_parent2super(self, event=None):
+        """Convert parent hkl to super hkl"""
+        hkl = self.parent_hkl.get()
+        hkl = hkl.replace(',', ' ')  # remove commas
+        hkl = hkl.replace('(', '').replace(')', '')  # remove brackets
+        hkl = hkl.replace('[', '').replace(']', '')  # remove brackets
+        hkl = np.fromstring(hkl, sep=' ')
+
+        newUV = self.xtl.Cell.calculateR(self.P)
+        newUVstar = fc.RcSp(newUV)
+        Q = self.xtl.Cell.calculateQ(hkl)
+        newhkl = fc.indx(Q, newUVstar)
+        newhkl = tuple([round(x, 3) for x in newhkl[0]])
+        self.super_hkl.set('%1.3g %1.3g %1.3g' % newhkl)
+
+    def fun_super2parent(self, event=None):
+        """Convert super hkl to parent hkl"""
+        hkl = self.super_hkl.get()
+        hkl = hkl.replace(',', ' ')  # remove commas
+        hkl = hkl.replace('(', '').replace(')', '')  # remove brackets
+        hkl = hkl.replace('[', '').replace(']', '')  # remove brackets
+        hkl = np.fromstring(hkl, sep=' ')
+
+        newUV = self.xtl.Cell.calculateR(self.P)
+        newUVstar = fc.RcSp(newUV)
+        Q = np.dot(hkl, newUVstar)
+        newhkl = self.xtl.Cell.indexQ(Q)
+        newhkl = tuple([round(x, 3) for x in newhkl[0]])
+        self.parent_hkl.set('%1.3g %1.3g %1.3g' % newhkl)
+
+
 class StringViewer:
     """
     Simple GUI that displays strings
     """
     def __init__(self, string, title=''):
-        "Initialise"
+        """Initialise"""
         # Create Tk inter instance
         self.root = tk.Tk()
         self.root.wm_title(title)
@@ -1364,37 +1732,41 @@ class StringViewer:
             foreground=txtcol,
             activeBackground=opt_active,
             activeForeground=txtcol)
+
+        # Textbox height
+        height = string.count('\n')
+        if height > 40: height = 40
         
         frame = tk.Frame(self.root)
-        frame.pack(side=tk.TOP,fill=tk.BOTH, expand=tk.YES)
+        frame.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
         
-        #--- label ---
+        # --- label ---
         #labframe = tk.Frame(frame,relief='groove')
         #labframe.pack(side=tk.TOP, fill=tk.X)
         #var = tk.Label(labframe, text=label_text,font=SF,justify='left')
         #var.pack(side=tk.LEFT)
         
-        #--- Button ---
+        # --- Button ---
         frm1 = tk.Frame(frame)
         frm1.pack(side=tk.BOTTOM, fill=tk.X)
         var = tk.Button(frm1, text='Close', font=BF, command=self.fun_close, bg=btn, activebackground=btn_active)
         var.pack(fill=tk.X)
         
-        #--- Text box ---
+        # --- Text box ---
         frame_box = tk.Frame(frame)
         frame_box.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
         
         # Scrollbars
-        scanx = tk.Scrollbar(frame_box,orient=tk.HORIZONTAL)
+        scanx = tk.Scrollbar(frame_box, orient=tk.HORIZONTAL)
         scanx.pack(side=tk.BOTTOM, fill=tk.X)
         
         scany = tk.Scrollbar(frame_box)
         scany.pack(side=tk.RIGHT, fill=tk.Y)
         
         # Editable string box
-        self.text = tk.Text(frame_box,width=40,height=30,font=HF,wrap=tk.NONE)
-        self.text.pack(side=tk.TOP,fill=tk.BOTH, expand=tk.YES)
-        self.text.insert(tk.END,string)
+        self.text = tk.Text(frame_box, width=40, height=height, font=HF, wrap=tk.NONE)
+        self.text.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
+        self.text.insert(tk.END, string)
         
         self.text.config(xscrollcommand=scanx.set,yscrollcommand=scany.set)
         scanx.config(command=self.text.xview)
@@ -1403,6 +1775,7 @@ class StringViewer:
     def fun_close(self):
         """close window"""
         self.root.destroy()
+
 
 if __name__ == '__main__':
     from Dans_Diffraction import Crystal,MultiCrystal,Structures
