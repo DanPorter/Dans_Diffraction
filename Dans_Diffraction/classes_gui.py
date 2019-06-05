@@ -882,7 +882,7 @@ class Propertiesgui:
         tth = self.twotheta.get()
         energy = self.energy_kev.get()
         qmag = fc.calQmag(tth, energy)
-        dspace = fc.caldspace(qmag)
+        dspace = fc.q2dspace(qmag)
         self.qmag.set(round(qmag, 4))
         self.dspace.set(round(dspace, 4))
 
@@ -891,7 +891,7 @@ class Propertiesgui:
         qmag = self.qmag.get()
         energy = self.energy_kev.get()
         tth = fc.cal2theta(qmag, energy)
-        dspace = fc.caldspace(qmag)
+        dspace = fc.q2dspace(qmag)
         self.twotheta.set(round(tth, 4))
         self.dspace.set(round(dspace, 4))
 
@@ -899,7 +899,7 @@ class Propertiesgui:
         """Convert d to tth and q"""
         dspace = self.dspace.get()
         energy = self.energy_kev.get()
-        qmag = fc.caldspace(dspace)
+        qmag = fc.q2dspace(dspace)
         tth = fc.cal2theta(qmag, energy)
         self.qmag.set(round(qmag, 4))
         self.twotheta.set(round(tth, 4))
@@ -1347,7 +1347,7 @@ class Scatteringgui:
             self.hkl_result.set('I:%10.0f TTH:%8.2f' % (I, tth))
         elif unit.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
             q = fc.calQmag(tth, energy)
-            d = fc.caldspace(q)
+            d = fc.q2dspace(q)
             self.hkl_result.set('I:%10.0f   d:%8.2f A' % (I, d))
         else:
             q = fc.calQmag(tth, energy)
@@ -1379,7 +1379,7 @@ class Scatteringgui:
         elif self.xtl.Scatter._powder_units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
             if min_q < 0.01: min_q = 0.5
             minx = 0
-            maxx = fc.caldspace(min_q)
+            maxx = fc.q2dspace(min_q)
         else:
             minx = min_q
             maxx = max_q

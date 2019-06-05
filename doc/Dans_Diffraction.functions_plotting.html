@@ -7,9 +7,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_plotting</strong></big></big> (version 1.4)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_plotting</strong></big></big> (version 1.7)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/grp66007/dropbox/python/dans_diffraction/dans_diffraction/functions_plotting.py">c:\users\grp66007\dropbox\python\dans_diffraction\dans_diffraction\functions_plotting.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/dgpor/dropbox/python/dans_diffraction/dans_diffraction/functions_plotting.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\functions_plotting.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;Handy&nbsp;plotting&nbsp;functions&nbsp;"functions_plotting.py"<br>
 &nbsp;<br>
 Contains&nbsp;various&nbsp;plotting&nbsp;shortcuts&nbsp;using&nbsp;matplotlib.pyplot<br>
@@ -26,8 +26,8 @@ Usage:&nbsp;<br>
 All&nbsp;plots&nbsp;generated&nbsp;require&nbsp;plt.show()&nbsp;call,&nbsp;unless&nbsp;using&nbsp;interactive&nbsp;mode<br>
 &nbsp;<br>
 &nbsp;<br>
-Version&nbsp;1.4<br>
-Last&nbsp;updated:&nbsp;30/05/18<br>
+Version&nbsp;1.7<br>
+Last&nbsp;updated:&nbsp;03/05/19<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 06/01/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created&nbsp;from&nbsp;DansGeneralProgs.py&nbsp;V2.3<br>
@@ -35,6 +35,9 @@ Version&nbsp;History:<br>
 17/04/18&nbsp;1.2&nbsp;&nbsp;&nbsp;&nbsp;Removed&nbsp;plt.show&nbsp;from&nbsp;other&nbsp;functions<br>
 03/05/18&nbsp;1.3&nbsp;&nbsp;&nbsp;&nbsp;Removed&nbsp;plot_vector_lines(vec_a,vec_b),&nbsp;replaced&nbsp;with&nbsp;<a href="#-plot_lattice_lines">plot_lattice_lines</a>(Q,&nbsp;vec_a,&nbsp;vec_b)<br>
 30/05/18&nbsp;1.4&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;multiplot<br>
+07/03/19&nbsp;1.5&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;plot_attenuation&nbsp;and&nbsp;others<br>
+22/03/19&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;plot_circle,&nbsp;updated&nbsp;vecplot&nbsp;and&nbsp;plot_lattice_lines<br>
+03/05/19&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;legend&nbsp;to&nbsp;labels&nbsp;function<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -657,20 +660,27 @@ Data and other attributes inherited from <a href="matplotlib.artist.html#Artist"
 :param&nbsp;vec_a:&nbsp;[1x3]&nbsp;array&nbsp;:&nbsp;a*&nbsp;vector<br>
 :param&nbsp;vec_b:&nbsp;[1x3]&nbsp;array&nbsp;:&nbsp;b*&nbsp;vector<br>
 :param&nbsp;axis:&nbsp;[1x4]&nbsp;axis&nbsp;array,&nbsp;plt.axis()<br>
-:return:&nbsp;None</tt></dd></dl>
- <dl><dt><a name="-labels"><strong>labels</strong></a>(ttl<font color="#909090">=None</font>, xvar<font color="#909090">=None</font>, yvar<font color="#909090">=None</font>, zvar<font color="#909090">=None</font>, size<font color="#909090">='Normal'</font>)</dt><dd><tt>Add&nbsp;formatted&nbsp;labels&nbsp;to&nbsp;current&nbsp;plot,&nbsp;also&nbsp;increases&nbsp;the&nbsp;tick&nbsp;size<br>
+:return:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;lattice&nbsp;points</tt></dd></dl>
+ <dl><dt><a name="-labels"><strong>labels</strong></a>(ttl<font color="#909090">=None</font>, xvar<font color="#909090">=None</font>, yvar<font color="#909090">=None</font>, zvar<font color="#909090">=None</font>, legend<font color="#909090">=False</font>, size<font color="#909090">='Normal'</font>, font<font color="#909090">='Times New Roman'</font>)</dt><dd><tt>Add&nbsp;formatted&nbsp;labels&nbsp;to&nbsp;current&nbsp;plot,&nbsp;also&nbsp;increases&nbsp;the&nbsp;tick&nbsp;size<br>
 :param&nbsp;ttl:&nbsp;title<br>
 :param&nbsp;xvar:&nbsp;x&nbsp;label<br>
 :param&nbsp;yvar:&nbsp;y&nbsp;label<br>
 :param&nbsp;zvar:&nbsp;z&nbsp;label&nbsp;(3D&nbsp;plots&nbsp;only)<br>
+:param&nbsp;legend:&nbsp;False/&nbsp;True,&nbsp;adds&nbsp;default&nbsp;legend&nbsp;to&nbsp;plot&nbsp;<br>
 :param&nbsp;size:&nbsp;'Normal'&nbsp;or&nbsp;'Big'<br>
+:param&nbsp;font:&nbsp;str&nbsp;font&nbsp;name,&nbsp;'Times&nbsp;New&nbsp;Roman'<br>
 :return:&nbsp;None</tt></dd></dl>
- <dl><dt><a name="-multiplot"><strong>multiplot</strong></a>(xvals, yvals<font color="#909090">=None</font>, datarange<font color="#909090">=None</font>, cmap<font color="#909090">='jet'</font>)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;a&nbsp;simple&nbsp;multiplot<br>
+ <dl><dt><a name="-multiplot"><strong>multiplot</strong></a>(xvals, yvals<font color="#909090">=None</font>, datarange<font color="#909090">=None</font>, cmap<font color="#909090">='jet'</font>, labels<font color="#909090">=None</font>, marker<font color="#909090">=None</font>)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;a&nbsp;simple&nbsp;multiplot&nbsp;with&nbsp;either&nbsp;colorbar&nbsp;or&nbsp;legend<br>
 E.G.<br>
 &nbsp;&nbsp;x&nbsp;=&nbsp;np.arange(-5,5,0.1)<br>
 &nbsp;&nbsp;ys&nbsp;=&nbsp;[x**2,&nbsp;1+x**2,&nbsp;2+x**2,&nbsp;3+x**2,&nbsp;4+x**2]<br>
 &nbsp;&nbsp;datarange&nbsp;=&nbsp;[0,1,2,3,4]<br>
-&nbsp;&nbsp;<a href="#-multiplot">multiplot</a>(x,ys,datarange,cmap='winter')</tt></dd></dl>
+&nbsp;&nbsp;<a href="#-multiplot">multiplot</a>(x,&nbsp;ys,&nbsp;datarange,&nbsp;cmap='winter')<br>
+OR:<br>
+&nbsp;&nbsp;x&nbsp;=&nbsp;np.arange(-5,5,0.1)<br>
+&nbsp;&nbsp;ys&nbsp;=&nbsp;[x**2,&nbsp;1+x**2,&nbsp;2+x**2,&nbsp;3+x**2,&nbsp;4+x**2]<br>
+&nbsp;&nbsp;labels&nbsp;=&nbsp;['x*x','2+x*x','3+x*x','4+x*x']<br>
+&nbsp;&nbsp;<a href="#-multiplot">multiplot</a>(x,&nbsp;ys,&nbsp;labels=labels)</tt></dd></dl>
  <dl><dt><a name="-newplot"><strong>newplot</strong></a>(*args, **kwargs)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;a&nbsp;simple&nbsp;plot<br>
 E.G.<br>
 &nbsp;&nbsp;x&nbsp;=&nbsp;np.arange(-5,5,0.1)<br>
@@ -698,25 +708,34 @@ Options:<br>
 :param&nbsp;cell_centre:&nbsp;[1x3]&nbsp;array&nbsp;:&nbsp;centre&nbsp;of&nbsp;cell,&nbsp;default&nbsp;[0,0,0]<br>
 :param&nbsp;CELL:&nbsp;[3x3]&nbsp;array&nbsp;:&nbsp;unit&nbsp;cell&nbsp;vectors&nbsp;[A,B,C]<br>
 :return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-plot_circle"><strong>plot_circle</strong></a>(radius<font color="#909090">=1.0</font>, centre<font color="#909090">=[0, 0]</font>, height<font color="#909090">=0</font>, *args, **kwargs)</dt><dd><tt>Generate&nbsp;circle&nbsp;on&nbsp;current&nbsp;plot<br>
+:param&nbsp;radius:&nbsp;radius&nbsp;of&nbsp;the&nbsp;circle<br>
+:param&nbsp;centre:&nbsp;[x,y]&nbsp;centre&nbsp;of&nbsp;the&nbsp;circle<br>
+:param&nbsp;height:&nbsp;reduce&nbsp;the&nbsp;radius&nbsp;by&nbsp;increasing&nbsp;the&nbsp;height&nbsp;from&nbsp;a&nbsp;surface<br>
+:param&nbsp;args:&nbsp;plot&nbsp;commands<br>
+:param&nbsp;kwargs:&nbsp;plot&nbsp;commands<br>
+:return:&nbsp;none</tt></dd></dl>
  <dl><dt><a name="-plot_ewald_coverage"><strong>plot_ewald_coverage</strong></a>(energy_kev, color<font color="#909090">='k'</font>, linewidth<font color="#909090">=2</font>)</dt><dd><tt>Plot&nbsp;Ewald&nbsp;coverage&nbsp;of&nbsp;a&nbsp;single&nbsp;axis&nbsp;diffractometer&nbsp;on&nbsp;current&nbsp;plot&nbsp;in&nbsp;2D<br>
 Includes&nbsp;boundaries&nbsp;for&nbsp;theta=0,&nbsp;twotheta=180&nbsp;and&nbsp;theta=twotheta<br>
 &nbsp;<br>
 :param&nbsp;energy_kev:&nbsp;float<br>
 :return:&nbsp;None</tt></dd></dl>
- <dl><dt><a name="-plot_lattice_lines"><strong>plot_lattice_lines</strong></a>(Q, vec_a<font color="#909090">=[1, 0, 0]</font>, vec_b<font color="#909090">=[0, 1, 0]</font>, linewidth<font color="#909090">=0.5</font>, shade<font color="#909090">=1.0</font>, color<font color="#909090">='k'</font>)</dt><dd><tt>Add&nbsp;lines&nbsp;defining&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;to&nbsp;the&nbsp;current&nbsp;plot<br>
+ <dl><dt><a name="-plot_lattice_lines"><strong>plot_lattice_lines</strong></a>(latt, vec_a<font color="#909090">=[1, 0, 0]</font>, vec_b<font color="#909090">=[0, 1, 0]</font>, axis<font color="#909090">=None</font>, *args, **kwargs)</dt><dd><tt>Add&nbsp;lines&nbsp;defining&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;to&nbsp;the&nbsp;current&nbsp;plot<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Generates&nbsp;square&nbsp;or&nbsp;hexagonal&nbsp;lines&nbsp;where&nbsp;vertices&nbsp;are&nbsp;the&nbsp;lattice&nbsp;points&nbsp;within&nbsp;the&nbsp;image.<br>
-:param&nbsp;Q:&nbsp;[nx2/3]&nbsp;array&nbsp;:&nbsp;points&nbsp;at&nbsp;which&nbsp;to&nbsp;generate&nbsp;lattice<br>
+:param&nbsp;latt:&nbsp;[nx2/3]&nbsp;array&nbsp;:&nbsp;points&nbsp;at&nbsp;which&nbsp;to&nbsp;generate&nbsp;lattice<br>
 :param&nbsp;vec_a:&nbsp;[1x2/3]&nbsp;array&nbsp;:&nbsp;a*&nbsp;vector<br>
 :param&nbsp;vec_b:&nbsp;[1x2/3]&nbsp;array&nbsp;:&nbsp;b*&nbsp;vector<br>
-:param&nbsp;linewidth:&nbsp;width&nbsp;of&nbsp;the&nbsp;lines,&nbsp;default=0.5<br>
-:param&nbsp;shade:&nbsp;line&nbsp;shading&nbsp;(0=light,&nbsp;1=dark),&nbsp;default=1.0<br>
-:param&nbsp;color:&nbsp;line&nbsp;colour,&nbsp;default='k'<br>
+:param&nbsp;axis:&nbsp;axis&nbsp;to&nbsp;plot&nbsp;on&nbsp;(None&nbsp;for&nbsp;plt.gca)<br>
+:param&nbsp;args:&nbsp;argments&nbsp;to&nbsp;pass&nbsp;to&nbsp;plot&nbsp;function,&nbsp;e.g.&nbsp;linewidth,&nbsp;alpha,&nbsp;color<br>
 :return:&nbsp;None</tt></dd></dl>
  <dl><dt><a name="-plot_lattice_points2D"><strong>plot_lattice_points2D</strong></a>(Q, markersize<font color="#909090">=12</font>, color<font color="#909090">='b'</font>, marker<font color="#909090">='o'</font>)</dt><dd><tt>Add&nbsp;points&nbsp;to&nbsp;the&nbsp;current&nbsp;axis<br>
 :param&nbsp;Q:&nbsp;[nx2/3]&nbsp;array&nbsp;:&nbsp;lattice&nbsp;points&nbsp;to&nbsp;plot<br>
 :param&nbsp;markersize:&nbsp;default&nbsp;12<br>
 :param&nbsp;color:&nbsp;default&nbsp;'b'<br>
 :param&nbsp;marker:&nbsp;default&nbsp;'o'<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-plot_magnetic_form_factor"><strong>plot_magnetic_form_factor</strong></a>(elements, maxq<font color="#909090">=10</font>)</dt><dd><tt>Plot&nbsp;magnetic&nbsp;form&nbsp;factor&nbsp;for&nbsp;1&nbsp;or&nbsp;more&nbsp;elements<br>
+:param&nbsp;elements:<br>
 :return:&nbsp;None</tt></dd></dl>
  <dl><dt><a name="-plot_vector_arrows"><strong>plot_vector_arrows</strong></a>(vec_a<font color="#909090">=[1, 0, 0]</font>, vec_b<font color="#909090">=[1, 0, 0]</font>, vec_a_lab<font color="#909090">=None</font>, vec_b_lab<font color="#909090">=None</font>, arrow_size<font color="#909090">=40</font>, color<font color="#909090">='b'</font>, fontsize<font color="#909090">=18</font>)</dt><dd><tt>Plot&nbsp;vector&nbsp;arrows&nbsp;for&nbsp;Cell&nbsp;on&nbsp;current&nbsp;axis<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Will&nbsp;generate&nbsp;two&nbsp;arrows&nbsp;on&nbsp;the&nbsp;current&nbsp;axis,&nbsp;pointing&nbsp;from&nbsp;the&nbsp;origin&nbsp;to&nbsp;vec_a&nbsp;and&nbsp;vec_b,&nbsp;respectivley.<br>
@@ -727,6 +746,12 @@ Includes&nbsp;boundaries&nbsp;for&nbsp;theta=0,&nbsp;twotheta=180&nbsp;and&nbsp;
 :param&nbsp;arrow_size:&nbsp;size&nbsp;of&nbsp;arrow,&nbsp;default&nbsp;40<br>
 :param&nbsp;color:&nbsp;&nbsp;arror&nbsp;colour,&nbsp;default&nbsp;'b'<br>
 :param&nbsp;fontsize:&nbsp;text&nbsp;size,&nbsp;default&nbsp;18<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-plot_xray_attenuation"><strong>plot_xray_attenuation</strong></a>(elements, min_energy<font color="#909090">=0</font>, max_energy<font color="#909090">=20</font>)</dt><dd><tt>Plot&nbsp;x-ray&nbsp;scattering&nbsp;factor&nbsp;for&nbsp;1&nbsp;or&nbsp;more&nbsp;elements<br>
+:param&nbsp;elements:<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-plot_xray_scattering_factor"><strong>plot_xray_scattering_factor</strong></a>(elements, maxq<font color="#909090">=10</font>)</dt><dd><tt>Plot&nbsp;x-ray&nbsp;scattering&nbsp;factor&nbsp;for&nbsp;1&nbsp;or&nbsp;more&nbsp;elements<br>
+:param&nbsp;elements:<br>
 :return:&nbsp;None</tt></dd></dl>
  <dl><dt><a name="-saveplot"><strong>saveplot</strong></a>(name, dpi<font color="#909090">=None</font>, figure<font color="#909090">=None</font>)</dt><dd><tt>Saves&nbsp;current&nbsp;figure&nbsp;as&nbsp;a&nbsp;png&nbsp;in&nbsp;the&nbsp;home&nbsp;directory<br>
 :param&nbsp;name:&nbsp;filename,&nbsp;including&nbsp;or&nbsp;expluding&nbsp;directory&nbsp;and&nbsp;or&nbsp;extension<br>
@@ -756,7 +781,12 @@ if&nbsp;XX&nbsp;and/or&nbsp;YY&nbsp;have&nbsp;a&nbsp;single&nbsp;dimension,&nbsp
 &nbsp;<br>
 E.G.<br>
 &nbsp;&nbsp;<a href="#-sliderplot">sliderplot</a>([1,2,3],[[2,4,6],[8,10,12],[14,16,18],[20,22,24]],slidervals=[3,6,9,12])</tt></dd></dl>
- <dl><dt><a name="-vecplot"><strong>vecplot</strong></a>(UV, mode<font color="#909090">='hk0'</font>, linewidth<font color="#909090">=1</font>, alpha<font color="#909090">=0.2</font>, color<font color="#909090">='k'</font>)</dt><dd><tt>Plot&nbsp;grid&nbsp;of&nbsp;a,b&nbsp;vectors</tt></dd></dl>
+ <dl><dt><a name="-vecplot"><strong>vecplot</strong></a>(UV, mode<font color="#909090">='hk0'</font>, axis<font color="#909090">=None</font>, *args, **kwargs)</dt><dd><tt>Plot&nbsp;grid&nbsp;of&nbsp;a,b&nbsp;vectors&nbsp;on&nbsp;current&nbsp;axis<br>
+:param&nbsp;UV:&nbsp;[a;b;c]&nbsp;array&nbsp;of&nbsp;unit&nbsp;vectors<br>
+:param&nbsp;mode:&nbsp;definition&nbsp;of&nbsp;axis&nbsp;plane,&nbsp;'hk0',&nbsp;'h0l',&nbsp;'0kl',&nbsp;'hhl'<br>
+:param&nbsp;axis:&nbsp;axis&nbsp;to&nbsp;create&nbsp;lines&nbsp;on,&nbsp;if&nbsp;None,&nbsp;plt.gca&nbsp;is&nbsp;used<br>
+:param&nbsp;args:&nbsp;arguments&nbsp;to&nbsp;pass&nbsp;to&nbsp;plot&nbsp;command,&nbsp;e.g.&nbsp;linewidth,&nbsp;alpha,&nbsp;color<br>
+:return:&nbsp;None</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">
@@ -764,5 +794,5 @@ E.G.<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>__version__</strong> = '1.4'</td></tr></table>
+<td width="100%"><strong>__version__</strong> = '1.7'</td></tr></table>
 </body></html>

@@ -7,9 +7,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_plotting</strong></big></big> (version 1.4)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_plotting</strong></big></big> (version 1.5)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/grp66007/dropbox/python/dans_diffraction/dans_diffraction/classes_plotting.py">c:\users\grp66007\dropbox\python\dans_diffraction\dans_diffraction\classes_plotting.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/dgpor/dropbox/python/dans_diffraction/dans_diffraction/classes_plotting.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_plotting.py</a></font></td></tr></table>
     <p><tt><a href="#Plotting">Plotting</a>&nbsp;Class&nbsp;"classes_plotting.py"<br>
 &nbsp;functions&nbsp;to&nbsp;plot&nbsp;the&nbsp;crystal&nbsp;structure&nbsp;and&nbsp;simulated&nbsp;<br>
 &nbsp;diffraction&nbsp;patterns.<br>
@@ -18,8 +18,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;1.4<br>
-Last&nbsp;updated:&nbsp;08/06/18<br>
+Version&nbsp;1.5<br>
+Last&nbsp;updated:&nbsp;09/03/19<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 18/08/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -28,6 +28,7 @@ Version&nbsp;History:<br>
 05/03/18&nbsp;1.2&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;plt.show()&nbsp;to&nbsp;functions<br>
 17/04/18&nbsp;1.3&nbsp;&nbsp;&nbsp;&nbsp;Removed&nbsp;plt.show()&nbsp;from&nbsp;functions&nbsp;(allowing&nbsp;plot&nbsp;editing&nbsp;+stackig&nbsp;in&nbsp;non-interactive&nbsp;mode)<br>
 08/06/18&nbsp;1.4&nbsp;&nbsp;&nbsp;&nbsp;Corrected&nbsp;call&nbsp;to&nbsp;simulate_lattice_lines&nbsp;in&nbsp;simulate_reciprocal_plane<br>
+21/01/19&nbsp;1.5&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;simulate_polarisation_resonant&nbsp;and&nbsp;_nonresonant<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -137,6 +138,14 @@ E.G.&nbsp;hk&nbsp;plane&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br
 
 <dl><dt><a name="Plotting-plot_3Dlattice"><strong>plot_3Dlattice</strong></a>(self, q_max<font color="#909090">=4.0</font>, x_axis<font color="#909090">=[1, 0, 0]</font>, y_axis<font color="#909090">=[0, 1, 0]</font>, centre<font color="#909090">=[0, 0, 0]</font>, cut_width<font color="#909090">=0.05</font>)</dt><dd><tt>Plot&nbsp;lattice&nbsp;points&nbsp;in&nbsp;3D</tt></dd></dl>
 
+<dl><dt><a name="Plotting-plot_3Dpolarisation"><strong>plot_3Dpolarisation</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, polarisation<font color="#909090">='sp'</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>, psi<font color="#909090">=0</font>)</dt><dd><tt>Plots&nbsp;the&nbsp;scattering&nbsp;vectors&nbsp;for&nbsp;a&nbsp;particular&nbsp;azimuth<br>
+:param&nbsp;hkl:<br>
+:param&nbsp;energy_kev:<br>
+:param&nbsp;polarisation:<br>
+:param&nbsp;azim_zero:<br>
+:param&nbsp;psi:<br>
+:return:&nbsp;None</tt></dd></dl>
+
 <dl><dt><a name="Plotting-plot_crystal"><strong>plot_crystal</strong></a>(self, show_labels<font color="#909090">=False</font>)</dt><dd><tt>Plot&nbsp;the&nbsp;atomic&nbsp;cell&nbsp;in&nbsp;3D<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Click&nbsp;and&nbsp;drag&nbsp;to&nbsp;rotate&nbsp;the&nbsp;structure&nbsp;in&nbsp;3D<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Atoms&nbsp;are&nbsp;coloured&nbsp;according&nbsp;to&nbsp;their&nbsp;label<br>
@@ -161,6 +170,18 @@ E.G.&nbsp;hk&nbsp;plot&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
 &nbsp;for&nbsp;inputs,&nbsp;see&nbsp;help(xtl.simulate_intensity_cut)</tt></dd></dl>
 
 <dl><dt><a name="Plotting-simulate_azimuth"><strong>simulate_azimuth</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, polarisation<font color="#909090">='sp'</font>, F0<font color="#909090">=1</font>, F1<font color="#909090">=1</font>, F2<font color="#909090">=1</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;scan&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
+
+<dl><dt><a name="Plotting-simulate_azimuth_nonresonant"><strong>simulate_azimuth_nonresonant</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, polarisation<font color="#909090">='sp'</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;scan&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
+
+<dl><dt><a name="Plotting-simulate_azimuth_resonant"><strong>simulate_azimuth_resonant</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, polarisation<font color="#909090">='sp'</font>, F0<font color="#909090">=1</font>, F1<font color="#909090">=1</font>, F2<font color="#909090">=1</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;scan&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering<br>
 &nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
 &nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
 &nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
@@ -197,7 +218,19 @@ E.G.&nbsp;hk&nbsp;plot&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hhl&nbsp;plot:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;xtl.<a href="#Plotting-simulate_intensity_cut">simulate_intensity_cut</a>([1,1,0],[0,0,1],[0,0,0])</tt></dd></dl>
 
-<dl><dt><a name="Plotting-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev<font color="#909090">=8.0</font>, peak_width<font color="#909090">=0.01</font>, background<font color="#909090">=0</font>)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern,&nbsp;plots&nbsp;in&nbsp;a&nbsp;new&nbsp;figure&nbsp;with&nbsp;labels</tt></dd></dl>
+<dl><dt><a name="Plotting-simulate_polarisation_nonresonant"><strong>simulate_polarisation_nonresonant</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>, psi<font color="#909090">=0</font>)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;scan&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
+
+<dl><dt><a name="Plotting-simulate_polarisation_resonant"><strong>simulate_polarisation_resonant</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, F0<font color="#909090">=1</font>, F1<font color="#909090">=1</font>, F2<font color="#909090">=1</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>, psi<font color="#909090">=0</font>)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;scan&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
+
+<dl><dt><a name="Plotting-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev<font color="#909090">=None</font>, peak_width<font color="#909090">=0.01</font>, background<font color="#909090">=0</font>)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern,&nbsp;plots&nbsp;in&nbsp;a&nbsp;new&nbsp;figure&nbsp;with&nbsp;labels</tt></dd></dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -218,9 +251,9 @@ generate_intensity_cut&nbsp;&amp;&nbsp;simulate_intensity_cut<br>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="PlottingSuperstructure-generate_intensity_cut"><strong>generate_intensity_cut</strong></a>(self, x_axis<font color="#909090">=[1, 0, 0]</font>, y_axis<font color="#909090">=[0, 1, 0]</font>, centre<font color="#909090">=[0, 0, 0]</font>, q_max<font color="#909090">=4.0</font>, cut_width<font color="#909090">=0.05</font>, background<font color="#909090">=0.0</font>, peak_width<font color="#909090">=0.05</font>)</dt><dd><tt>Generate&nbsp;a&nbsp;cut&nbsp;through&nbsp;reciprocal&nbsp;space,&nbsp;returns&nbsp;an&nbsp;array&nbsp;with&nbsp;centred&nbsp;reflections<br>
 Inputs:<br>
-&nbsp;&nbsp;x_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
-&nbsp;&nbsp;y_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
-&nbsp;&nbsp;centre&nbsp;=&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;x_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;supercell&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;y_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;supercell&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;centre&nbsp;=&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;supercell&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
 &nbsp;&nbsp;q_max&nbsp;=&nbsp;maximum&nbsp;distance&nbsp;to&nbsp;plot&nbsp;to&nbsp;-&nbsp;in&nbsp;A-1<br>
 &nbsp;&nbsp;cut_width&nbsp;=&nbsp;width&nbsp;in&nbsp;height&nbsp;that&nbsp;will&nbsp;be&nbsp;included,&nbsp;in&nbsp;A-1<br>
 &nbsp;&nbsp;background&nbsp;=&nbsp;average&nbsp;background&nbsp;value<br>
@@ -236,9 +269,9 @@ E.G.&nbsp;hk&nbsp;plane&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br
 &nbsp;&nbsp;&nbsp;&nbsp;plt.axis('image')</tt></dd></dl>
 
 <dl><dt><a name="PlottingSuperstructure-simulate_intensity_cut"><strong>simulate_intensity_cut</strong></a>(self, x_axis<font color="#909090">=[1, 0, 0]</font>, y_axis<font color="#909090">=[0, 1, 0]</font>, centre<font color="#909090">=[0, 0, 0]</font>, q_max<font color="#909090">=4.0</font>, cut_width<font color="#909090">=0.05</font>, background<font color="#909090">=0.0</font>, peak_width<font color="#909090">=0.05</font>)</dt><dd><tt>Plot&nbsp;a&nbsp;cut&nbsp;through&nbsp;reciprocal&nbsp;space,&nbsp;visualising&nbsp;the&nbsp;intensity<br>
-&nbsp;&nbsp;x_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
-&nbsp;&nbsp;y_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
-&nbsp;&nbsp;centre&nbsp;=&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;x_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;parent&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;y_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;parent&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;centre&nbsp;=&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;parent&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
 &nbsp;&nbsp;q_max&nbsp;=&nbsp;maximum&nbsp;distance&nbsp;to&nbsp;plot&nbsp;to&nbsp;-&nbsp;in&nbsp;A-1<br>
 &nbsp;&nbsp;cut_width&nbsp;=&nbsp;width&nbsp;in&nbsp;height&nbsp;that&nbsp;will&nbsp;be&nbsp;included,&nbsp;in&nbsp;A-1<br>
 &nbsp;&nbsp;background&nbsp;=&nbsp;average&nbsp;background&nbsp;value<br>
@@ -263,6 +296,14 @@ Methods inherited from <a href="Dans_Diffraction.classes_plotting.html#Plotting"
 &nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;=&nbsp;[1000x1]&nbsp;array&nbsp;of&nbsp;intensity&nbsp;values</tt></dd></dl>
 
 <dl><dt><a name="PlottingSuperstructure-plot_3Dlattice"><strong>plot_3Dlattice</strong></a>(self, q_max<font color="#909090">=4.0</font>, x_axis<font color="#909090">=[1, 0, 0]</font>, y_axis<font color="#909090">=[0, 1, 0]</font>, centre<font color="#909090">=[0, 0, 0]</font>, cut_width<font color="#909090">=0.05</font>)</dt><dd><tt>Plot&nbsp;lattice&nbsp;points&nbsp;in&nbsp;3D</tt></dd></dl>
+
+<dl><dt><a name="PlottingSuperstructure-plot_3Dpolarisation"><strong>plot_3Dpolarisation</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, polarisation<font color="#909090">='sp'</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>, psi<font color="#909090">=0</font>)</dt><dd><tt>Plots&nbsp;the&nbsp;scattering&nbsp;vectors&nbsp;for&nbsp;a&nbsp;particular&nbsp;azimuth<br>
+:param&nbsp;hkl:<br>
+:param&nbsp;energy_kev:<br>
+:param&nbsp;polarisation:<br>
+:param&nbsp;azim_zero:<br>
+:param&nbsp;psi:<br>
+:return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="PlottingSuperstructure-plot_crystal"><strong>plot_crystal</strong></a>(self, show_labels<font color="#909090">=False</font>)</dt><dd><tt>Plot&nbsp;the&nbsp;atomic&nbsp;cell&nbsp;in&nbsp;3D<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Click&nbsp;and&nbsp;drag&nbsp;to&nbsp;rotate&nbsp;the&nbsp;structure&nbsp;in&nbsp;3D<br>
@@ -293,6 +334,18 @@ E.G.&nbsp;hk&nbsp;plot&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
 &nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
 
+<dl><dt><a name="PlottingSuperstructure-simulate_azimuth_nonresonant"><strong>simulate_azimuth_nonresonant</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, polarisation<font color="#909090">='sp'</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;scan&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
+
+<dl><dt><a name="PlottingSuperstructure-simulate_azimuth_resonant"><strong>simulate_azimuth_resonant</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, polarisation<font color="#909090">='sp'</font>, F0<font color="#909090">=1</font>, F1<font color="#909090">=1</font>, F2<font color="#909090">=1</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;scan&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
+
 <dl><dt><a name="PlottingSuperstructure-simulate_ewald_coverage"><strong>simulate_ewald_coverage</strong></a>(self, energy_kev<font color="#909090">=8.0</font>, sample_normal<font color="#909090">=[0, 0, 1]</font>, sample_para<font color="#909090">=[1, 0, 0]</font>, phi<font color="#909090">=0</font>, chi<font color="#909090">=0</font>, **kwargs)</dt><dd><tt>NOT&nbsp;FINISHED<br>
 Plot&nbsp;ewald&nbsp;space&nbsp;coverage&nbsp;within&nbsp;a&nbsp;particular&nbsp;scattering&nbsp;plane<br>
 &nbsp;&nbsp;energy_kev&nbsp;=&nbsp;energy&nbsp;of&nbsp;incident&nbsp;radiation&nbsp;in&nbsp;keV<br>
@@ -310,7 +363,19 @@ Plot&nbsp;ewald&nbsp;space&nbsp;coverage&nbsp;within&nbsp;a&nbsp;particular&nbsp
 <dl><dt><a name="PlottingSuperstructure-simulate_hk0"><strong>simulate_hk0</strong></a>(self, L<font color="#909090">=0</font>, **kwargs)</dt><dd><tt>Plots&nbsp;the&nbsp;hk(L)&nbsp;layer&nbsp;of&nbsp;reciprocal&nbsp;space<br>
 &nbsp;for&nbsp;inputs,&nbsp;see&nbsp;help(xtl.simulate_intensity_cut)</tt></dd></dl>
 
-<dl><dt><a name="PlottingSuperstructure-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev<font color="#909090">=8.0</font>, peak_width<font color="#909090">=0.01</font>, background<font color="#909090">=0</font>)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern,&nbsp;plots&nbsp;in&nbsp;a&nbsp;new&nbsp;figure&nbsp;with&nbsp;labels</tt></dd></dl>
+<dl><dt><a name="PlottingSuperstructure-simulate_polarisation_nonresonant"><strong>simulate_polarisation_nonresonant</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>, psi<font color="#909090">=0</font>)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;scan&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
+
+<dl><dt><a name="PlottingSuperstructure-simulate_polarisation_resonant"><strong>simulate_polarisation_resonant</strong></a>(self, hkl, energy_kev<font color="#909090">=None</font>, F0<font color="#909090">=1</font>, F1<font color="#909090">=1</font>, F2<font color="#909090">=1</font>, azim_zero<font color="#909090">=[1, 0, 0]</font>, psi<font color="#909090">=0</font>)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;scan&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
+
+<dl><dt><a name="PlottingSuperstructure-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev<font color="#909090">=None</font>, peak_width<font color="#909090">=0.01</font>, background<font color="#909090">=0</font>)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern,&nbsp;plots&nbsp;in&nbsp;a&nbsp;new&nbsp;figure&nbsp;with&nbsp;labels</tt></dd></dl>
 
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -319,5 +384,5 @@ Plot&nbsp;ewald&nbsp;space&nbsp;coverage&nbsp;within&nbsp;a&nbsp;particular&nbsp
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>__version__</strong> = '1.4'</td></tr></table>
+<td width="100%"><strong>__version__</strong> = '1.5'</td></tr></table>
 </body></html>

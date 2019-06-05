@@ -7,9 +7,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_crystallography</strong></big></big> (version 2.5)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_crystallography</strong></big></big> (version 2.6)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/grp66007/dropbox/python/dans_diffraction/dans_diffraction/functions_crystallography.py">c:\users\grp66007\dropbox\python\dans_diffraction\dans_diffraction\functions_crystallography.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/dgpor/dropbox/python/dans_diffraction/dans_diffraction/functions_crystallography.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\functions_crystallography.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;functions_crystallography.py<br>
 &nbsp;<br>
 By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
@@ -21,8 +21,8 @@ Usage:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;OR<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;from&nbsp;Dans_Diffraction&nbsp;import&nbsp;functions_crystallography&nbsp;as&nbsp;fc<br>
 &nbsp;<br>
-Version&nbsp;2.5<br>
-Last&nbsp;updated:&nbsp;08/06/18<br>
+Version&nbsp;2.6<br>
+Last&nbsp;updated:&nbsp;06/03/19<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 09/07/15&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
@@ -33,6 +33,7 @@ Version&nbsp;History:<br>
 02/05/18&nbsp;2.3&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;comparison&nbsp;of&nbsp;lower&nbsp;case&nbsp;elements&nbsp;and&nbsp;symmetry&nbsp;values<br>
 04/06/18&nbsp;2.4&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;new&nbsp;checks&nbsp;to&nbsp;readcif,&nbsp;corrected&nbsp;atomic_properties&nbsp;for&nbsp;python3/numpy1.14<br>
 08/06/18&nbsp;2.5&nbsp;&nbsp;&nbsp;&nbsp;Corrected&nbsp;a&nbsp;few&nbsp;errors&nbsp;and&nbsp;added&nbsp;some&nbsp;more&nbsp;comments<br>
+06/03/19&nbsp;2.6&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;print_atom_properties<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -55,6 +56,10 @@ Version&nbsp;History:<br>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl><dt><a name="-Bmatrix"><strong>Bmatrix</strong></a>(UV)</dt><dd><tt>Calculate&nbsp;the&nbsp;Busing&nbsp;and&nbsp;Levy&nbsp;B&nbsp;matrix&nbsp;from&nbsp;a&nbsp;real&nbsp;space&nbsp;UV</tt></dd></dl>
+ <dl><dt><a name="-Q2hkl"><strong>Q2hkl</strong></a>(qvec, UVstar)</dt><dd><tt>Index&nbsp;vectors&nbsp;in&nbsp;an&nbsp;orthonal&nbsp;basis&nbsp;with&nbsp;a&nbsp;reciprocal&nbsp;basis<br>
+:param&nbsp;qvec:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;coordinates&nbsp;in&nbsp;an&nbsp;orthogonal&nbsp;basis&nbsp;in&nbsp;A-1<br>
+:param&nbsp;UV:&nbsp;[3x3]&nbsp;array&nbsp;of&nbsp;unit&nbsp;cell&nbsp;vectors&nbsp;[[a1,a2,a3],[b1,b2,b3],[c1,c2,c3]]<br>
+:return:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;vectors&nbsp;in&nbsp;reciprocal&nbsp;lattice&nbsp;units</tt></dd></dl>
  <dl><dt><a name="-RcSp"><strong>RcSp</strong></a>(UV)</dt><dd><tt>Generate&nbsp;reciprocal&nbsp;cell&nbsp;from&nbsp;real&nbsp;space&nbsp;unit&nbsp;vecors<br>
 Usage:<br>
 UVs&nbsp;=&nbsp;<a href="#-RcSp">RcSp</a>(UV)<br>
@@ -108,9 +113,28 @@ Available&nbsp;information&nbsp;includes:<br>
  <dl><dt><a name="-calQmag"><strong>calQmag</strong></a>(x2T, energy_kev<font color="#909090">=17.794</font>)</dt><dd><tt>Calculate&nbsp;|Q|&nbsp;at&nbsp;a&nbsp;particular&nbsp;2-theta&nbsp;(deg)&nbsp;for&nbsp;energy&nbsp;in&nbsp;eV<br>
 &nbsp;magQ&nbsp;=&nbsp;<a href="#-calQmag">calQmag</a>(X2T,energy_kev=17.794)</tt></dd></dl>
  <dl><dt><a name="-calc_vol"><strong>calc_vol</strong></a>(UV)</dt><dd><tt>Calculate&nbsp;volume&nbsp;in&nbsp;Angstrom^3&nbsp;from&nbsp;unit&nbsp;vectors</tt></dd></dl>
- <dl><dt><a name="-caldspace"><strong>caldspace</strong></a>(Qmag)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;|Q|<br>
-&nbsp;dspace&nbsp;=&nbsp;<a href="#-caldspace">caldspace</a>(Qmag)</tt></dd></dl>
- <dl><dt><a name="-cif2dict"><strong>cif2dict</strong></a>(cifvals)</dt><dd><tt>Convert&nbsp;output&nbsp;of&nbsp;readcif&nbsp;into&nbsp;crys&nbsp;dict"<br>
+ <dl><dt><a name="-caldspace"><strong>caldspace</strong></a>(twotheta, energy_kev<font color="#909090">=17.794</font>)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;two-theta<br>
+&nbsp;dspace&nbsp;=&nbsp;<a href="#-caldspace">caldspace</a>(tth,&nbsp;energy_kev)</tt></dd></dl>
+ <dl><dt><a name="-cif2dict"><strong>cif2dict</strong></a>(cifvals)</dt><dd><tt>From&nbsp;a&nbsp;dict&nbsp;of&nbsp;key:value&nbsp;pairs&nbsp;generated&nbsp;from&nbsp;a&nbsp;*.cif&nbsp;file&nbsp;(using&nbsp;readcif),<br>
+read&nbsp;standard&nbsp;crystallographic&nbsp;infromation&nbsp;into&nbsp;a&nbsp;crystal&nbsp;dictionary,&nbsp;with&nbsp;keys:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'filename'&nbsp;-&nbsp;cif&nbsp;filename<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'name'&nbsp;-&nbsp;name&nbsp;of&nbsp;structure<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'unit&nbsp;vector'&nbsp;&nbsp;&nbsp;-&nbsp;[3x3]&nbsp;array&nbsp;of&nbsp;basis&nbsp;vectors&nbsp;[a,b,c]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'parent&nbsp;cell'&nbsp;&nbsp;&nbsp;-&nbsp;[3x3]&nbsp;array&nbsp;of&nbsp;parent&nbsp;basis&nbsp;vectors&nbsp;[a,b,c]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'symmetry'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;list&nbsp;of&nbsp;string&nbsp;symmetry&nbsp;operations<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'space&nbsp;group'&nbsp;&nbsp;&nbsp;-&nbsp;Space&nbsp;Group&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'space&nbsp;group&nbsp;number'&nbsp;-&nbsp;Space&nbsp;group&nbsp;number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'cif'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;cif&nbsp;dict<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;following&nbsp;are&nbsp;specific&nbsp;to&nbsp;atomis&nbsp;within&nbsp;the&nbsp;unit&nbsp;cell:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'atom&nbsp;type'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;list&nbsp;of&nbsp;elements&nbsp;e.g.&nbsp;['Co','O',&nbsp;'O']<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'atom&nbsp;label'&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;list&nbsp;of&nbsp;atom&nbsp;site&nbsp;names&nbsp;e.g.&nbsp;['Co1,&nbsp;'O1',&nbsp;'O2']<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'atom&nbsp;position'&nbsp;-&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;positions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'atom&nbsp;occupancy'-&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;atom&nbsp;site&nbsp;occupancies<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'atom&nbsp;uiso'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;atom&nbsp;site&nbsp;isotropic&nbsp;thermal&nbsp;parameters<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'atom&nbsp;uaniso'&nbsp;&nbsp;&nbsp;-&nbsp;[nx6]&nbsp;array&nbsp;of&nbsp;atom&nbsp;site&nbsp;anisotropic&nbsp;thermal&nbsp;parameters<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'mag&nbsp;moment'&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;atom&nbsp;site&nbsp;magnetic&nbsp;moment&nbsp;vectors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'mag&nbsp;time'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;atom&nbsp;site&nbsp;magnetic&nbsp;time&nbsp;symmetry<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'misc']&nbsp;=&nbsp;[element,&nbsp;label,&nbsp;cif_pos,&nbsp;occ,&nbsp;Uiso]<br>
 :param&nbsp;cifvals:&nbsp;dict&nbsp;from&nbsp;readcif<br>
 :return:&nbsp;dict</tt></dd></dl>
  <dl><dt><a name="-debyewaller"><strong>debyewaller</strong></a>(uiso, Qmag<font color="#909090">=[0]</font>)</dt><dd><tt>Calculate&nbsp;the&nbsp;debye&nbsp;waller&nbsp;factor&nbsp;for&nbsp;a&nbsp;particular&nbsp;Q<br>
@@ -130,6 +154,8 @@ Available&nbsp;information&nbsp;includes:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;z&nbsp;-&nbsp;direction&nbsp;horizontal<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;Note:&nbsp;Currently&nbsp;only&nbsp;in&nbsp;the&nbsp;verticle&nbsp;geometry!</tt></dd></dl>
+ <dl><dt><a name="-dspace2q"><strong>dspace2q</strong></a>(dspace)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;|Q|<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qmag&nbsp;=&nbsp;<a href="#-q2dspace">q2dspace</a>(dspace)</tt></dd></dl>
  <dl><dt><a name="-energy2wave"><strong>energy2wave</strong></a>(energy_kev)</dt><dd><tt>Converts&nbsp;energy&nbsp;in&nbsp;keV&nbsp;to&nbsp;wavelength&nbsp;in&nbsp;A<br>
 &nbsp;wavelength&nbsp;=&nbsp;<a href="#-energy2wave">energy2wave</a>(energy)</tt></dd></dl>
  <dl><dt><a name="-fitincell"><strong>fitincell</strong></a>(uvw)</dt><dd><tt>Set&nbsp;all&nbsp;fractional&nbsp;coodinates&nbsp;between&nbsp;0&nbsp;and&nbsp;1<br>
@@ -196,6 +222,18 @@ E.G.<br>
 &nbsp;&nbsp;uvw&nbsp;=&nbsp;<a href="#-gen_symcen_pos">gen_symcen_pos</a>(['x,y,z','y,-x,z+1/2'],['x,y,z','x+1/3,y+1/3,z'],0.1,0.2,0.3)<br>
 &nbsp;&nbsp;uvw&nbsp;&gt;&gt;&nbsp;[[0.1,0.2,0.3]&nbsp;,&nbsp;[0.433,0.533,0.3]&nbsp;,&nbsp;[0.2,-0.1,0.8]&nbsp;,&nbsp;[0.533,-0.233,0.8]]</tt></dd></dl>
  <dl><dt><a name="-getenergy"><strong>getenergy</strong></a>()</dt></dl>
+ <dl><dt><a name="-hkl2Q"><strong>hkl2Q</strong></a>(hkl, UVstar)</dt><dd><tt>Convert&nbsp;reflection&nbsp;indices&nbsp;(hkl)&nbsp;to&nbsp;orthogonal&nbsp;basis&nbsp;in&nbsp;A-1<br>
+:param&nbsp;hkl:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;reflections<br>
+:param&nbsp;UV:&nbsp;[3x3]&nbsp;array&nbsp;of&nbsp;unit&nbsp;cell&nbsp;vectors&nbsp;[[a1,a2,a3],[b1,b2,b3],[c1,c2,c3]]<br>
+:return:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;wavevectors&nbsp;in&nbsp;an&nbsp;orthogonal&nbsp;basis,&nbsp;in&nbsp;A-1</tt></dd></dl>
+ <dl><dt><a name="-hkl2Qmag"><strong>hkl2Qmag</strong></a>(hkl, UVstar)</dt><dd><tt>Calcualte&nbsp;magnitude&nbsp;of&nbsp;Q&nbsp;from&nbsp;hkl&nbsp;reflection<br>
+:param&nbsp;hkl:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;reflections<br>
+:param&nbsp;UV:&nbsp;[3x3]&nbsp;array&nbsp;of&nbsp;unit&nbsp;cell&nbsp;vectors<br>
+:return:&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;wavevector&nbsp;magnitudes,&nbsp;in&nbsp;A-1</tt></dd></dl>
+ <dl><dt><a name="-hkl2dspace"><strong>hkl2dspace</strong></a>(hkl, UVstar)</dt><dd><tt>Calcualte&nbsp;d-spacing&nbsp;from&nbsp;hkl&nbsp;reflection<br>
+:param&nbsp;hkl:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;reflections<br>
+:param&nbsp;UV:&nbsp;[3x3]&nbsp;array&nbsp;of&nbsp;unit&nbsp;cell&nbsp;vectors<br>
+:return:&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;d-spacing&nbsp;in&nbsp;A</tt></dd></dl>
  <dl><dt><a name="-hkl2str"><strong>hkl2str</strong></a>(hkl)</dt><dd><tt>Convert&nbsp;hkl&nbsp;to&nbsp;string&nbsp;(h,k,l)<br>
 :param&nbsp;hkl:<br>
 :return:&nbsp;str&nbsp;'(h,k,l)'</tt></dd></dl>
@@ -250,13 +288,41 @@ E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&nbsp;x&nbsp;=&nbsp;array([0,1,0])<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&nbsp;y&nbsp;=&nbsp;array([0,0,1])<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&nbsp;z&nbsp;=&nbsp;array([1,0,0])</tt></dd></dl>
- <dl><dt><a name="-readcif"><strong>readcif</strong></a>(filename<font color="#909090">=None</font>, debug<font color="#909090">=False</font>)</dt><dd><tt>Read&nbsp;a&nbsp;cif&nbsp;file&nbsp;in&nbsp;as&nbsp;a&nbsp;structure&nbsp;<br>
-&nbsp;&nbsp;crys=<a href="#-readcif">readcif</a>(file)<br>
-&nbsp;&nbsp;crys[key]&nbsp;=&nbsp;value<br>
-keys&nbsp;are&nbsp;give&nbsp;by&nbsp;crys.keys()<br>
+ <dl><dt><a name="-print_atom_properties"><strong>print_atom_properties</strong></a>(elements<font color="#909090">=None</font>)</dt><dd><tt>Outputs&nbsp;string&nbsp;of&nbsp;stored&nbsp;atomic&nbsp;properties<br>
+:param&nbsp;elements:&nbsp;str&nbsp;or&nbsp;list&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;'Co'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list:&nbsp;['Co',&nbsp;'O']<br>
+:return:&nbsp;str</tt></dd></dl>
+ <dl><dt><a name="-q2dspace"><strong>q2dspace</strong></a>(Qmag)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;|Q|<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dspace&nbsp;=&nbsp;<a href="#-q2dspace">q2dspace</a>(Qmag)</tt></dd></dl>
+ <dl><dt><a name="-readcif"><strong>readcif</strong></a>(filename<font color="#909090">=None</font>, debug<font color="#909090">=False</font>)</dt><dd><tt>Open&nbsp;a&nbsp;Crystallographic&nbsp;Information&nbsp;File&nbsp;(*.cif)&nbsp;file&nbsp;and&nbsp;store&nbsp;all&nbsp;entries&nbsp;in&nbsp;a&nbsp;key:value&nbsp;dictionary<br>
+&nbsp;Looped&nbsp;values&nbsp;are&nbsp;stored&nbsp;as&nbsp;lists&nbsp;under&nbsp;a&nbsp;single&nbsp;key&nbsp;entry<br>
+&nbsp;All&nbsp;values&nbsp;are&nbsp;stored&nbsp;as&nbsp;strings<br>
+E.G.<br>
+&nbsp;&nbsp;crys=<a href="#-readcif">readcif</a>('somefile.cif')<br>
+&nbsp;&nbsp;crys['_cell_length_a']&nbsp;=&nbsp;'2.835(2)'<br>
 &nbsp;<br>
-To&nbsp;debug&nbsp;the&nbsp;file,&nbsp;use:<br>
-&nbsp;&nbsp;cif&nbsp;=&nbsp;<a href="#-readcif">readcif</a>(file,&nbsp;debug=True)</tt></dd></dl>
+crys[key]&nbsp;=&nbsp;value<br>
+available&nbsp;keys&nbsp;are&nbsp;give&nbsp;by&nbsp;crys.keys()<br>
+&nbsp;<br>
+To&nbsp;debug&nbsp;the&nbsp;file&nbsp;with&nbsp;outputted&nbsp;messages,&nbsp;use:<br>
+&nbsp;&nbsp;cif&nbsp;=&nbsp;<a href="#-readcif">readcif</a>(file,&nbsp;debug=True)<br>
+&nbsp;<br>
+Some&nbsp;useful&nbsp;standard&nbsp;CIF&nbsp;keywords:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_cell_length_a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_cell_length_b<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_cell_length_c<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_cell_angle_alpha<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_cell_angle_beta<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_cell_angle_gamma<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_space_group_symop_operation_xyz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_label<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_type_symbol<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_occupancy<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_U_iso_or_equiv<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_z</tt></dd></dl>
  <dl><dt><a name="-sum_sym_ref"><strong>sum_sym_ref</strong></a>(symhkl)</dt><dd><tt>Remove&nbsp;equivalent&nbsp;hkl&nbsp;positions&nbsp;and&nbsp;return&nbsp;the&nbsp;number&nbsp;of&nbsp;times&nbsp;each&nbsp;is&nbsp;generated.</tt></dd></dl>
  <dl><dt><a name="-symmetry_ops2magnetic"><strong>symmetry_ops2magnetic</strong></a>(operations)</dt><dd><tt>Convert&nbsp;list&nbsp;of&nbsp;string&nbsp;symmetry&nbsp;operations&nbsp;to&nbsp;magnetic&nbsp;symmetry&nbsp;operations<br>
 i.e.&nbsp;remove&nbsp;translations</tt></dd></dl>
@@ -275,6 +341,6 @@ Uses&nbsp;the&nbsp;oefficients&nbsp;for&nbsp;analytical&nbsp;approximation&nbsp;
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>__version__</strong> = '2.5'<br>
-<strong>datadir</strong> = r'C:\Users\grp66007\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\data'</td></tr></table>
+<td width="100%"><strong>__version__</strong> = '2.6'<br>
+<strong>datadir</strong> = r'C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\data'</td></tr></table>
 </body></html>

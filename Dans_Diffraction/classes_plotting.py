@@ -211,7 +211,7 @@ class Plotting:
                 parentUV = self.xtl.parentUV()
                 sclatt = fp.axis_lattice_points(parentUV[layer_axis_x,:], parentUV[layer_axis_y,:], plt.axis())
                 fp.plot_lattice_lines(sclatt, parentUV[layer_axis_x,:], parentUV[layer_axis_y,:],
-                                      linewidth=0.5, shade=0.5, color='k')
+                                      linewidth=0.5, alpha=0.5, color='k')
             #plt.legend()
             
             ttl = '%s\nLayer %2.0f = %5.3f' %(self.xtl.name,L,layer)

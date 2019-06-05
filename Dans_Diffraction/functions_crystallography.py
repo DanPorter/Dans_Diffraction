@@ -49,13 +49,34 @@ def getenergy():
 
 def readcif(filename=None, debug=False):
     """
-    Read a cif file in as a structure 
-      crys=readcif(file)
-      crys[key] = value
-    keys are give by crys.keys()
+    Open a Crystallographic Information File (*.cif) file and store all entries in a key:value dictionary
+     Looped values are stored as lists under a single key entry
+     All values are stored as strings
+    E.G.
+      crys=readcif('somefile.cif')
+      crys['_cell_length_a'] = '2.835(2)'
 
-    To debug the file, use:
+    crys[key] = value
+    available keys are give by crys.keys()
+
+    To debug the file with outputted messages, use:
       cif = readcif(file, debug=True)
+
+    Some useful standard CIF keywords:
+        _cell_length_a
+        _cell_length_b
+        _cell_length_c
+        _cell_angle_alpha
+        _cell_angle_beta
+        _cell_angle_gamma
+        _space_group_symop_operation_xyz
+        _atom_site_label
+        _atom_site_type_symbol
+        _atom_site_occupancy
+        _atom_site_U_iso_or_equiv
+        _atom_site_fract_x
+        _atom_site_fract_y
+        _atom_site_fract_z
     """
 
     # Get file name
@@ -160,7 +181,26 @@ def readcif(filename=None, debug=False):
 
 def cif2dict(cifvals):
     """
-    Convert output of readcif into crys dict"
+    From a dict of key:value pairs generated from a *.cif file (using readcif),
+    read standard crystallographic infromation into a crystal dictionary, with keys:
+        'filename' - cif filename
+        'name' - name of structure
+        'unit vector'   - [3x3] array of basis vectors [a,b,c]
+        'parent cell'   - [3x3] array of parent basis vectors [a,b,c]
+        'symmetry'      - list of string symmetry operations
+        'space group'   - Space Group string
+        'space group number' - Space group number
+        'cif'           - cif dict
+        The following are specific to atomis within the unit cell:
+        'atom type'     - list of elements e.g. ['Co','O', 'O']
+        'atom label'    - list of atom site names e.g. ['Co1, 'O1', 'O2']
+        'atom position' - [nx3] array of atomic positions
+        'atom occupancy'- [nx1] array of atom site occupancies
+        'atom uiso'     - [nx1] array of atom site isotropic thermal parameters
+        'atom uaniso'   - [nx6] array of atom site anisotropic thermal parameters
+        'mag moment'    - [nx3] array of atom site magnetic moment vectors
+        'mag time'      - [nx3] array of atom site magnetic time symmetry
+        'misc'] = [element, label, cif_pos, occ, Uiso]
     :param cifvals: dict from readcif
     :return: dict
     """
@@ -998,6 +1038,49 @@ def UV2latpar(UV):
     return a, b, c, alpha, beta, gamma
 
 
+def hkl2Q(hkl, UVstar):
+    """
+    Convert reflection indices (hkl) to orthogonal basis in A-1
+    :param hkl: [nx3] array of reflections
+    :param UV: [3x3] array of unit cell vectors [[a1,a2,a3],[b1,b2,b3],[c1,c2,c3]]
+    :return: [nx3] array of wavevectors in an orthogonal basis, in A-1
+    """
+    return np.dot(hkl, UVstar)
+
+
+def Q2hkl(qvec, UVstar):
+    """
+    Index vectors in an orthonal basis with a reciprocal basis
+    :param qvec: [nx3] array of coordinates in an orthogonal basis in A-1
+    :param UV: [3x3] array of unit cell vectors [[a1,a2,a3],[b1,b2,b3],[c1,c2,c3]]
+    :return: [nx3] array of vectors in reciprocal lattice units
+    """
+    return fg.index_coordinates(qvec, UVstar)
+
+
+def hkl2Qmag(hkl, UVstar):
+    """
+    Calcualte magnitude of Q from hkl reflection
+    :param hkl: [nx3] array of reflections
+    :param UV: [3x3] array of unit cell vectors
+    :return: [nx1] array of wavevector magnitudes, in A-1
+    """
+    Q = np.dot(hkl, UVstar)
+    return fg.mag(Q)
+
+
+def hkl2dspace(hkl, UVstar):
+    """
+    Calcualte d-spacing from hkl reflection
+    :param hkl: [nx3] array of reflections
+    :param UV: [3x3] array of unit cell vectors
+    :return: [nx1] array of d-spacing in A
+    """
+    Q = np.dot(hkl, UVstar)
+    Qmag = fg.mag(Q)
+    return q2dspace(Qmag)
+
+
 def calQmag(x2T, energy_kev=17.794):
     """
     Calculate |Q| at a particular 2-theta (deg) for energy in eV
@@ -1025,14 +1108,30 @@ def cal2theta(Qmag, energy_kev=17.794):
     return x2T
 
 
-def caldspace(Qmag):
+def caldspace(twotheta, energy_kev=17.794):
+    """
+    Calculate d-spacing from two-theta
+     dspace = caldspace(tth, energy_kev)
+    """
+    Qmag = calQmag(twotheta, energy_kev)
+    dspace = q2dspace(Qmag)
+    return dspace
+
+
+def q2dspace(Qmag):
     """
     Calculate d-spacing from |Q|
-     dspace = caldspace(Qmag)
+         dspace = q2dspace(Qmag)
     """
+    return 2 * np.pi / Qmag
 
-    dspace = 2 * np.pi / Qmag
-    return dspace
+
+def dspace2q(dspace):
+    """
+    Calculate d-spacing from |Q|
+         Qmag = q2dspace(dspace)
+    """
+    return 2 * np.pi / dspace
 
 
 def wave2energy(wavelength):

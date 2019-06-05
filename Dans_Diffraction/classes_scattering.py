@@ -484,7 +484,7 @@ class Scattering:
                     print(fmt%vals)
         return fxres
 
-    def xray_nonresonant_magnetic(self, HKL, energy_kev=None, azim_zero=[1, 0, 0], psi=0, polarisation='s-p'):
+    def xray_nonresonant_magnetic(self, HKL, energy_kev=None, azim_zero=[1, 0, 0], psi=0, polarisation='s-p', disp=False):
         """
         Calculate the non-resonant magnetic component of the structure factor
         for the given HKL, using x-ray rules and form factor
@@ -544,6 +544,25 @@ class Scattering:
         # Calculate structure factor
         SF = np.sum(fspin * dw * occ * np.exp(1j * 2 * np.pi * dot_KR), axis=1)
 
+        if disp:
+            for n in range(len(HKL)):
+                pr_h = '(%2.0f,%2.0f,%2.0f)'%tuple(HKL[n,:])
+                pr_b = '(%6.2g,%6.2g,%6.2g)'%tuple(B[n,:])
+                print('psi=%3.0f  %3d hkl=%10s B=%22s'%(psi, n, pr_h, pr_b))
+                ctot = 0j
+                for m in range(len(moment)):
+                    if np.sum(moment[m,:]**2) < 0.01: continue
+                    pr_m = '(%6.2g,%6.2g,%6.2g)'%tuple(moment[m,:])
+                    dot = np.dot(moment[m],B[n,:])
+                    pdot = '%6.3f'%dot
+                    phase = np.exp(1j * 2 * np.pi * dot_KR[n, m])
+                    prph = '%5.2f+i%5.2f'%(np.real(phase),np.imag(phase))
+                    prod = dot*phase
+                    pprd = '%5.2f+i%5.2f'%(np.real(prod),np.imag(prod))
+                    ctot += prod
+                    ptot = '%5.2f+i%5.2f'%(np.real(ctot),np.imag(ctot))
+                    print('\t%3d mom=%22s dot(mom,B)=%6s   exp(ik.r)=%12s   sum=%12s   tot=%12s'%(m,pr_m,pdot,prph,pprd,ptot))
+
         SF = SF / self.xtl.scale
 
         if self._return_structure_factor: return SF
@@ -552,7 +571,7 @@ class Scattering:
         I = SF * np.conj(SF)
         return np.real(I)
 
-    def xray_resonant_magnetic(self, HKL, energy_kev=None, azim_zero=[1, 0, 0], psi=0, polarisation='s-p', F0=0, F1=1, F2=0):
+    def xray_resonant_magnetic(self, HKL, energy_kev=None, azim_zero=[1, 0, 0], psi=0, polarisation='s-p', F0=0, F1=1, F2=0, disp=True):
         """
         Calculate the non-resonant magnetic component of the structure factor
         for the given HKL, using x-ray rules and form factor
@@ -598,6 +617,26 @@ class Scattering:
 
         # Calculate dot product
         dot_KR = np.dot(HKL, uvw.T)
+
+        if disp:
+            for ref in range(len(HKL)):
+                pr_h = '(%2.0f,%2.0f,%2.0f)'%tuple(HKL[ref,:])
+                print('psi=%3.0f  %3d hkl=%10s'%(psi, ref, pr_h))
+                ctot = 0j
+                for m in range(len(moment)):
+                    if np.sum(moment[m,:]**2) < 0.01: continue
+                    pr_m = '(%6.2g,%6.2g,%6.2g)'%tuple(moment[m,:])
+                    f0 = np.dot(eout[ref], ein[ref])
+                    f1 = np.dot(np.cross(eout[ref], ein[ref]), moment[m,:])
+                    f2 = np.dot(eout[ref], moment[m,:]) * np.dot(ein[ref], moment[m,:])
+                    dot = f0*F0 - 1j*f1*F1 + f2*F2
+                    phase = np.exp(1j * 2 * np.pi * dot_KR[ref, m])
+                    prph = '%5.2f+i%5.2f'%(np.real(phase),np.imag(phase))
+                    prod = dot*phase
+                    pprd = '%5.2f+i%5.2f'%(np.real(prod),np.imag(prod))
+                    ctot += prod
+                    ptot = '%5.2f+i%5.2f'%(np.real(ctot),np.imag(ctot))
+                    print('\t%3d mom=%22s f0=%5.2f f1=%5.2f f2=%5.2f   exp(ik.r)=%12s   sum=%12s   tot=%12s'%(m,pr_m,f0,f1,f2,prph,pprd,ptot))
 
         # Calculate structure factor
         SF = np.sum(fe1e1 * dw * occ * np.exp(1j * 2 * np.pi * dot_KR), axis=1)

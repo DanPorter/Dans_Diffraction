@@ -7,9 +7,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_crystal</strong></big></big> (version 2.3)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_crystal</strong></big></big> (version 2.4)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/grp66007/dropbox/python/dans_diffraction/dans_diffraction/classes_crystal.py">c:\users\grp66007\dropbox\python\dans_diffraction\dans_diffraction\classes_crystal.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/dgpor/dropbox/python/dans_diffraction/dans_diffraction/classes_crystal.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_crystal.py</a></font></td></tr></table>
     <p><tt>classes_crystal.py<br>
 A&nbsp;crystal&nbsp;object&nbsp;that&nbsp;reads&nbsp;crystallogaphic&nbsp;data&nbsp;from&nbsp;cif&nbsp;files&nbsp;and<br>
 can&nbsp;generate&nbsp;useful&nbsp;information&nbsp;such&nbsp;as&nbsp;reflection&nbsp;intensities&nbsp;and&nbsp;<br>
@@ -35,8 +35,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;2.3<br>
-Last&nbsp;updated:&nbsp;04/06/18<br>
+Version&nbsp;2.4<br>
+Last&nbsp;updated:&nbsp;09/03/19<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 27/07/17&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
@@ -45,6 +45,8 @@ Version&nbsp;History:<br>
 13/02/18&nbsp;2.1&nbsp;&nbsp;&nbsp;&nbsp;Move&nbsp;scattering&nbsp;commands&nbsp;to&nbsp;xtl.Scatter<br>
 05/04/18&nbsp;2.2&nbsp;&nbsp;&nbsp;&nbsp;Magnetic&nbsp;symmetry&nbsp;automatically&nbsp;inverted&nbsp;for&nbsp;odd&nbsp;time<br>
 04/06/18&nbsp;2.3&nbsp;&nbsp;&nbsp;&nbsp;removeatom&nbsp;added&nbsp;to&nbsp;Atom&nbsp;class<br>
+31/10/18&nbsp;2.3&nbsp;&nbsp;&nbsp;&nbsp;Update&nbsp;<a href="#Symmetry">Symmetry</a>.symmetric_coordinates&nbsp;funcitons,&nbsp;add&nbsp;ability&nbsp;to&nbsp;view&nbsp;all&nbsp;or&nbsp;only&nbsp;non-identical<br>
+09/03/19&nbsp;2.4&nbsp;&nbsp;&nbsp;&nbsp;Add&nbsp;print&nbsp;functions&nbsp;to&nbsp;<a href="#Symmetry">Symmetry</a><br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -156,16 +158,22 @@ E.G.<br>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="Cell-Bmatrix"><strong>Bmatrix</strong></a>(self)</dt><dd><tt>Calculate&nbsp;the&nbsp;Busing&nbsp;and&nbsp;Levy&nbsp;B&nbsp;matrix&nbsp;from&nbsp;a&nbsp;real&nbsp;space&nbsp;UV</tt></dd></dl>
 
-<dl><dt><a name="Cell-Qmag"><strong>Qmag</strong></a>(self, HKL)</dt><dd><tt>Returns&nbsp;the&nbsp;magnitude&nbsp;of&nbsp;wave-vector&nbsp;transfer&nbsp;of&nbsp;[h,k,l],&nbsp;in&nbsp;A-1</tt></dd></dl>
+<dl><dt><a name="Cell-Qmag"><strong>Qmag</strong></a>(self, HKL)</dt><dd><tt>Returns&nbsp;the&nbsp;magnitude&nbsp;of&nbsp;wave-vector&nbsp;transfer&nbsp;of&nbsp;[h,k,l],&nbsp;in&nbsp;A-1<br>
+:param&nbsp;HKL:&nbsp;list&nbsp;of&nbsp;hkl&nbsp;reflections<br>
+:return:&nbsp;list&nbsp;of&nbsp;Q&nbsp;values</tt></dd></dl>
 
 <dl><dt><a name="Cell-UV"><strong>UV</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;unit&nbsp;cell&nbsp;as&nbsp;a&nbsp;[3x3]&nbsp;array,&nbsp;[A,B,C]<br>
 The&nbsp;vector&nbsp;A&nbsp;is&nbsp;directed&nbsp;along&nbsp;the&nbsp;x-axis</tt></dd></dl>
 
-<dl><dt><a name="Cell-UVstar"><strong>UVstar</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;reciprocal&nbsp;unit&nbsp;cell&nbsp;as&nbsp;a&nbsp;[3x3]&nbsp;array,&nbsp;[A*,B*,C*]</tt></dd></dl>
+<dl><dt><a name="Cell-UVstar"><strong>UVstar</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;reciprocal&nbsp;unit&nbsp;cell&nbsp;as&nbsp;a&nbsp;[3x3]&nbsp;array,&nbsp;[A*,B*,C*]<br>
+:return:&nbsp;[a*;b*;c*]</tt></dd></dl>
 
 <dl><dt><a name="Cell-__init__"><strong>__init__</strong></a>(self, a<font color="#909090">=1.0</font>, b<font color="#909090">=1.0</font>, c<font color="#909090">=1.0</font>, alpha<font color="#909090">=90.0</font>, beta<font color="#909090">=90.0</font>, gamma<font color="#909090">=90.0</font>)</dt><dd><tt>Called&nbsp;on&nbsp;intialisation,&nbsp;defines&nbsp;lattice&nbsp;defaults</tt></dd></dl>
 
-<dl><dt><a name="Cell-all_hkl"><strong>all_hkl</strong></a>(self, energy_kev<font color="#909090">=8.048</font>, max_angle<font color="#909090">=180.0</font>)</dt><dd><tt>Returns&nbsp;an&nbsp;array&nbsp;of&nbsp;all&nbsp;(h,k,l)&nbsp;reflection&nbsp;at&nbsp;this&nbsp;energy</tt></dd></dl>
+<dl><dt><a name="Cell-all_hkl"><strong>all_hkl</strong></a>(self, energy_kev<font color="#909090">=8.048</font>, max_angle<font color="#909090">=180.0</font>)</dt><dd><tt>Returns&nbsp;an&nbsp;array&nbsp;of&nbsp;all&nbsp;(h,k,l)&nbsp;reflections&nbsp;at&nbsp;this&nbsp;energy<br>
+:param&nbsp;energy_kev:&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;max_angle:&nbsp;max&nbsp;two-theta&nbsp;angle<br>
+:return:&nbsp;array&nbsp;hkl[:,3]</tt></dd></dl>
 
 <dl><dt><a name="Cell-calculateQ"><strong>calculateQ</strong></a>(self, HKL)</dt><dd><tt>Convert&nbsp;coordinates&nbsp;[h,k,l],&nbsp;in&nbsp;the&nbsp;basis&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice,&nbsp;to<br>
 coordinates&nbsp;[x,y,z],&nbsp;in&nbsp;an&nbsp;orthogonal&nbsp;basis,&nbsp;in&nbsp;units&nbsp;of&nbsp;A-1<br>
@@ -173,7 +181,7 @@ coordinates&nbsp;[x,y,z],&nbsp;in&nbsp;an&nbsp;orthogonal&nbsp;basis,&nbsp;in&nb
 &nbsp;<br>
 E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Q&nbsp;=&nbsp;<a href="#Cell">Cell</a>.<a href="#Cell-calculateQ">calculateQ</a>([1,0,0])&nbsp;#&nbsp;for&nbsp;a&nbsp;hexagonal&nbsp;system,&nbsp;a&nbsp;=&nbsp;2.85<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;Q&nbsp;=&nbsp;array([[2.2046264,&nbsp;1.2728417,&nbsp;0.0000000]])</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;Q&nbsp;=&nbsp;array([[2.2046264,&nbsp;1.2728417,&nbsp;0.0000000]])</tt></dd></dl>
 
 <dl><dt><a name="Cell-calculateR"><strong>calculateR</strong></a>(self, UVW)</dt><dd><tt>Convert&nbsp;coordinates&nbsp;[u,v,w],&nbsp;in&nbsp;the&nbsp;basis&nbsp;of&nbsp;the&nbsp;unit&nbsp;cell,&nbsp;to<br>
 coordinates&nbsp;[x,y,z],&nbsp;in&nbsp;an&nbsp;orthogonal&nbsp;basis,&nbsp;in&nbsp;units&nbsp;of&nbsp;A<br>
@@ -181,11 +189,15 @@ coordinates&nbsp;[x,y,z],&nbsp;in&nbsp;an&nbsp;orthogonal&nbsp;basis,&nbsp;in&nb
 &nbsp;<br>
 E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;R&nbsp;=&nbsp;<a href="#Cell">Cell</a>.<a href="#Cell-calculateR">calculateR</a>([0.1,0,0])&nbsp;#&nbsp;for&nbsp;a&nbsp;hexagonal&nbsp;system,&nbsp;a&nbsp;=&nbsp;2.85<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;R&nbsp;=&nbsp;array([[0.285,&nbsp;0,&nbsp;0]])</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;R&nbsp;=&nbsp;array([[0.285,&nbsp;0,&nbsp;0]])</tt></dd></dl>
 
-<dl><dt><a name="Cell-dspace"><strong>dspace</strong></a>(self, HKL)</dt></dl>
+<dl><dt><a name="Cell-dspace"><strong>dspace</strong></a>(self, HKL)</dt><dd><tt>Calculate&nbsp;the&nbsp;d-spacing&nbsp;in&nbsp;A<br>
+:param&nbsp;HKL:&nbsp;array&nbsp;:&nbsp;list&nbsp;of&nbsp;reflections<br>
+:return:&nbsp;d-spacing</tt></dd></dl>
 
-<dl><dt><a name="Cell-fromcif"><strong>fromcif</strong></a>(self, cifvals)</dt><dd><tt>Import&nbsp;lattice&nbsp;parameters&nbsp;from&nbsp;a&nbsp;cif&nbsp;dictionary</tt></dd></dl>
+<dl><dt><a name="Cell-fromcif"><strong>fromcif</strong></a>(self, cifvals)</dt><dd><tt>Import&nbsp;lattice&nbsp;parameters&nbsp;from&nbsp;a&nbsp;cif&nbsp;dictionary"<br>
+:param&nbsp;cifvals:&nbsp;dict&nbsp;from&nbsp;readcif<br>
+:return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Cell-generate_lattice"><strong>generate_lattice</strong></a>(self, U, V, W)</dt><dd><tt>Returns&nbsp;the&nbsp;lattice&nbsp;parameters&nbsp;of&nbsp;a&nbsp;larger&nbsp;lattice</tt></dd></dl>
 
@@ -195,7 +207,7 @@ coordinates&nbsp;[h,k,l],&nbsp;in&nbsp;the&nbsp;basis&nbsp;of&nbsp;the&nbsp;reci
 &nbsp;<br>
 E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;HKL&nbsp;=&nbsp;<a href="#Cell-indexQ">indexQ</a>([2.2046264,&nbsp;1.2728417,&nbsp;0.0000000])&nbsp;#&nbsp;for&nbsp;a&nbsp;hexagonal&nbsp;system,&nbsp;a&nbsp;=&nbsp;2.85<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;HKL&nbsp;=&nbsp;[1,0,0]</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;HKL&nbsp;=&nbsp;[1,0,0]</tt></dd></dl>
 
 <dl><dt><a name="Cell-indexR"><strong>indexR</strong></a>(self, R)</dt><dd><tt>Convert&nbsp;coordinates&nbsp;[x,y,z],&nbsp;in&nbsp;an&nbsp;orthogonal&nbsp;basis,&nbsp;to<br>
 coordinates&nbsp;[u,v,w],&nbsp;in&nbsp;the&nbsp;basis&nbsp;of&nbsp;the&nbsp;unit&nbsp;cell<br>
@@ -203,9 +215,10 @@ coordinates&nbsp;[u,v,w],&nbsp;in&nbsp;the&nbsp;basis&nbsp;of&nbsp;the&nbsp;unit
 &nbsp;<br>
 E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;UVW&nbsp;=&nbsp;<a href="#Cell-indexR">indexR</a>([0.285,&nbsp;0,&nbsp;0])&nbsp;#&nbsp;for&nbsp;a&nbsp;hexagonal&nbsp;system,&nbsp;a&nbsp;=&nbsp;2.85<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;UVW&nbsp;=&nbsp;[0.1,0,0]</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;UVW&nbsp;=&nbsp;[0.1,0,0]</tt></dd></dl>
 
-<dl><dt><a name="Cell-info"><strong>info</strong></a>(self)</dt><dd><tt>Prints&nbsp;the&nbsp;lattice&nbsp;parameters&nbsp;and&nbsp;cell&nbsp;volume</tt></dd></dl>
+<dl><dt><a name="Cell-info"><strong>info</strong></a>(self)</dt><dd><tt>&nbsp;Prints&nbsp;the&nbsp;lattice&nbsp;parameters&nbsp;and&nbsp;cell&nbsp;volume"<br>
+:return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Cell-latt"><strong>latt</strong></a>(self, lattice_parameters)</dt><dd><tt>Generate&nbsp;lattice&nbsp;parameters&nbsp;with&nbsp;list<br>
 &nbsp;&nbsp;<a href="#Cell-latt">latt</a>([1])&nbsp;-&gt;&nbsp;a=b=c=1,alpha=beta=gamma=90<br>
@@ -213,9 +226,13 @@ E.G.<br>
 &nbsp;&nbsp;<a href="#Cell-latt">latt</a>([1,2,3,120])&nbsp;-&gt;&nbsp;a=1,b=2,c=3,alpha=beta=90,gamma=120<br>
 &nbsp;&nbsp;<a href="#Cell-latt">latt</a>([1,2,3,10,20,30])&nbsp;-&gt;&nbsp;a=1,b=2,c=3,alpha=10,beta=20,gamma=30</tt></dd></dl>
 
-<dl><dt><a name="Cell-lp"><strong>lp</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;lattice&nbsp;parameters</tt></dd></dl>
+<dl><dt><a name="Cell-lp"><strong>lp</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;lattice&nbsp;parameters<br>
+:return:&nbsp;a,b,c,alpha,beta,gamma</tt></dd></dl>
 
-<dl><dt><a name="Cell-max_hkl"><strong>max_hkl</strong></a>(self, energy_kev<font color="#909090">=8.048</font>, max_angle<font color="#909090">=180.0</font>)</dt><dd><tt>Returns&nbsp;the&nbsp;maximum&nbsp;index&nbsp;of&nbsp;h,&nbsp;k&nbsp;and&nbsp;l&nbsp;for&nbsp;a&nbsp;given&nbsp;energy</tt></dd></dl>
+<dl><dt><a name="Cell-max_hkl"><strong>max_hkl</strong></a>(self, energy_kev<font color="#909090">=8.048</font>, max_angle<font color="#909090">=180.0</font>)</dt><dd><tt>Returns&nbsp;the&nbsp;maximum&nbsp;index&nbsp;of&nbsp;h,&nbsp;k&nbsp;and&nbsp;l&nbsp;for&nbsp;a&nbsp;given&nbsp;energy<br>
+:param&nbsp;energy_kev:&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;max_angle:&nbsp;maximum&nbsp;two-theta&nbsp;at&nbsp;this&nbsp;energy<br>
+:return:&nbsp;maxh,&nbsp;maxk,&nbsp;maxl</tt></dd></dl>
 
 <dl><dt><a name="Cell-reciprocal_space_plane"><strong>reciprocal_space_plane</strong></a>(self, x_axis<font color="#909090">=[1, 0, 0]</font>, y_axis<font color="#909090">=[0, 1, 0]</font>, centre<font color="#909090">=[0, 0, 0]</font>, q_max<font color="#909090">=4.0</font>, cut_width<font color="#909090">=0.05</font>)</dt><dd><tt>Returns&nbsp;positions&nbsp;within&nbsp;a&nbsp;reciprocal&nbsp;space&nbsp;plane<br>
 &nbsp;&nbsp;x_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
@@ -228,15 +245,22 @@ Returns:&nbsp;X,Y,HKL<br>
 &nbsp;&nbsp;Qy&nbsp;=&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;y&nbsp;positions&nbsp;for&nbsp;each&nbsp;HKL&nbsp;in&nbsp;the&nbsp;plane<br>
 &nbsp;&nbsp;HKL=&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;each&nbsp;HKL&nbsp;in&nbsp;the&nbsp;plane</tt></dd></dl>
 
-<dl><dt><a name="Cell-sort_hkl"><strong>sort_hkl</strong></a>(self, HKL, ascend<font color="#909090">=True</font>)</dt><dd><tt>Returns&nbsp;array&nbsp;of&nbsp;(h,k,l)&nbsp;sorted&nbsp;by&nbsp;two-theta</tt></dd></dl>
+<dl><dt><a name="Cell-sort_hkl"><strong>sort_hkl</strong></a>(self, HKL, ascend<font color="#909090">=True</font>)</dt><dd><tt>Returns&nbsp;array&nbsp;of&nbsp;(h,k,l)&nbsp;sorted&nbsp;by&nbsp;two-theta<br>
+:param&nbsp;HKL:&nbsp;array&nbsp;:&nbsp;list&nbsp;of&nbsp;[h,k,l]&nbsp;values<br>
+:param&nbsp;ascend:&nbsp;True*/False&nbsp;:&nbsp;if&nbsp;False,&nbsp;lowest&nbsp;two-theta<br>
+:return:&nbsp;HKL[sorted,:]</tt></dd></dl>
 
 <dl><dt><a name="Cell-theta_reflection"><strong>theta_reflection</strong></a>(self, HKL, energy_kev<font color="#909090">=8.048</font>, specular<font color="#909090">=[0, 0, 1]</font>, theta_offset<font color="#909090">=0</font>)</dt><dd><tt>Calculate&nbsp;the&nbsp;sample&nbsp;angle&nbsp;for&nbsp;diffraction&nbsp;in&nbsp;reflection&nbsp;geometry&nbsp;given&nbsp;a&nbsp;particular&nbsp;specular&nbsp;direction</tt></dd></dl>
 
 <dl><dt><a name="Cell-theta_transmission"><strong>theta_transmission</strong></a>(self, HKL, energy_kev<font color="#909090">=8.048</font>, parallel<font color="#909090">=[0, 0, 1]</font>, theta_offset<font color="#909090">=0</font>)</dt><dd><tt>Calculate&nbsp;the&nbsp;sample&nbsp;angle&nbsp;for&nbsp;diffraction&nbsp;in&nbsp;transmission&nbsp;geometry&nbsp;given&nbsp;a&nbsp;particular&nbsp;direction&nbsp;parallel&nbsp;to&nbsp;the&nbsp;beam</tt></dd></dl>
 
-<dl><dt><a name="Cell-tth"><strong>tth</strong></a>(self, HKL, energy_kev<font color="#909090">=8.048</font>)</dt><dd><tt>Returns&nbsp;the&nbsp;two-theta&nbsp;angle,&nbsp;in&nbsp;deg,&nbsp;of&nbsp;[h,k,l]&nbsp;at&nbsp;specified&nbsp;energy&nbsp;in&nbsp;keV</tt></dd></dl>
+<dl><dt><a name="Cell-tth"><strong>tth</strong></a>(self, HKL, energy_kev<font color="#909090">=8.048</font>)</dt><dd><tt>Returns&nbsp;the&nbsp;two-theta&nbsp;angle,&nbsp;in&nbsp;deg,&nbsp;of&nbsp;[h,k,l]&nbsp;at&nbsp;specified&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;HKL:&nbsp;list&nbsp;of&nbsp;hkl&nbsp;reflections<br>
+:param&nbsp;energy_kev:&nbsp;energy&nbsp;in&nbsp;keV<br>
+:return:&nbsp;two-theta&nbsp;angles</tt></dd></dl>
 
-<dl><dt><a name="Cell-volume"><strong>volume</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;volume&nbsp;of&nbsp;the&nbsp;unit&nbsp;cell,&nbsp;in&nbsp;A^3</tt></dd></dl>
+<dl><dt><a name="Cell-volume"><strong>volume</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;volume&nbsp;of&nbsp;the&nbsp;unit&nbsp;cell,&nbsp;in&nbsp;A^3<br>
+:return:&nbsp;volume</tt></dd></dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -277,12 +301,16 @@ Also,&nbsp;see:<br>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="Crystal-__init__"><strong>__init__</strong></a>(self, filename<font color="#909090">=None</font>)</dt><dd><tt>Initialise&nbsp;the&nbsp;<a href="#Crystal">Crystal</a>&nbsp;class,&nbsp;read&nbsp;from&nbsp;cif&nbsp;file&nbsp;if&nbsp;given.</tt></dd></dl>
 
-<dl><dt><a name="Crystal-add_parent"><strong>add_parent</strong></a>(self, parent, P)</dt><dd><tt>Add&nbsp;parent&nbsp;structure,&nbsp;returning&nbsp;<a href="#Crystal">Crystal</a>&nbsp;as&nbsp;superstructure</tt></dd></dl>
+<dl><dt><a name="Crystal-add_parent"><strong>add_parent</strong></a>(self, parent, P)</dt><dd><tt>Add&nbsp;parent&nbsp;structure,&nbsp;returning&nbsp;<a href="#Crystal">Crystal</a>&nbsp;as&nbsp;superstructure<br>
+&nbsp;&nbsp;&nbsp;&nbsp;parent&nbsp;=&nbsp;<a href="#Crystal-name">Crystal</a>(cif_parent)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;xtl&nbsp;=&nbsp;<a href="#Crystal-name">Crystal</a>(cif_superstructure)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;su&nbsp;=&nbsp;xtl.<a href="#Crystal-add_parent">add_parent</a>(parent,&nbsp;[[1,1,0],[0,2,0],[0,0,1]])</tt></dd></dl>
 
 <dl><dt><a name="Crystal-generate_lattice"><strong>generate_lattice</strong></a>(self, U<font color="#909090">=1</font>, V<font color="#909090">=1</font>, W<font color="#909090">=0</font>)</dt><dd><tt>Generate&nbsp;lattice&nbsp;of&nbsp;a&nbsp;cell<br>
 &nbsp;latt&nbsp;=&nbsp;genlatt(crys,U=1,V=1,W=0)</tt></dd></dl>
 
-<dl><dt><a name="Crystal-generate_structure"><strong>generate_structure</strong></a>(self)</dt><dd><tt>Combines&nbsp;the&nbsp;atomic&nbsp;positions&nbsp;with&nbsp;symmetry&nbsp;operations,&nbsp;returning&nbsp;the&nbsp;full&nbsp;structure&nbsp;as&nbsp;an&nbsp;<a href="#Atoms">Atoms</a>&nbsp;class</tt></dd></dl>
+<dl><dt><a name="Crystal-generate_structure"><strong>generate_structure</strong></a>(self)</dt><dd><tt>Combines&nbsp;the&nbsp;atomic&nbsp;positions&nbsp;with&nbsp;symmetry&nbsp;operations,&nbsp;returning&nbsp;the&nbsp;full&nbsp;structure&nbsp;as&nbsp;an&nbsp;<a href="#Atoms">Atoms</a>&nbsp;class<br>
+:return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Crystal-generate_superstructure"><strong>generate_superstructure</strong></a>(self, P)</dt><dd><tt>Generate&nbsp;a&nbsp;superstructure&nbsp;of&nbsp;the&nbsp;current&nbsp;cell<br>
 &nbsp;&nbsp;&nbsp;&nbsp;a'&nbsp;=&nbsp;n1a&nbsp;+&nbsp;n2b&nbsp;+&nbsp;n3c<br>
@@ -306,9 +334,20 @@ superstructure&nbsp;<a href="#Crystal">Crystal</a>&nbsp;class</tt></dd></dl>
 
 <dl><dt><a name="Crystal-info"><strong>info</strong></a>(self)</dt><dd><tt>Prints&nbsp;information&nbsp;about&nbsp;the&nbsp;crystal&nbsp;structure</tt></dd></dl>
 
-<dl><dt><a name="Crystal-new_atoms"><strong>new_atoms</strong></a>(self, u<font color="#909090">=[0]</font>, v<font color="#909090">=[0]</font>, w<font color="#909090">=[0]</font>, type<font color="#909090">=None</font>, label<font color="#909090">=None</font>, occupancy<font color="#909090">=None</font>, uiso<font color="#909090">=None</font>, mxmymz<font color="#909090">=None</font>)</dt><dd><tt>Replace&nbsp;current&nbsp;atomic&nbsp;positions&nbsp;with&nbsp;new&nbsp;ones&nbsp;and&nbsp;regenerate&nbsp;structure</tt></dd></dl>
+<dl><dt><a name="Crystal-new_atoms"><strong>new_atoms</strong></a>(self, u<font color="#909090">=[0]</font>, v<font color="#909090">=[0]</font>, w<font color="#909090">=[0]</font>, type<font color="#909090">=None</font>, label<font color="#909090">=None</font>, occupancy<font color="#909090">=None</font>, uiso<font color="#909090">=None</font>, mxmymz<font color="#909090">=None</font>)</dt><dd><tt>Replace&nbsp;current&nbsp;atomic&nbsp;positions&nbsp;with&nbsp;new&nbsp;ones&nbsp;and&nbsp;regenerate&nbsp;structure<br>
+:param&nbsp;u:&nbsp;array&nbsp;:&nbsp;atomic&nbsp;positions&nbsp;u<br>
+:param&nbsp;v:&nbsp;array&nbsp;:&nbsp;atomic&nbsp;positions&nbsp;v<br>
+:param&nbsp;w:&nbsp;&nbsp;array&nbsp;:&nbsp;atomic&nbsp;positions&nbsp;w<br>
+:param&nbsp;type:&nbsp;&nbsp;array&nbsp;:&nbsp;atomic&nbsp;types<br>
+:param&nbsp;label:&nbsp;array&nbsp;:&nbsp;atomic&nbsp;labels<br>
+:param&nbsp;occupancy:&nbsp;array&nbsp;:&nbsp;atomic&nbsp;occupation<br>
+:param&nbsp;uiso:&nbsp;array&nbsp;:&nbsp;atomic&nbsp;isotropic&nbsp;thermal&nbsp;parameters<br>
+:param&nbsp;mxmymz:&nbsp;array&nbsp;:&nbsp;atomic&nbsp;magnetic&nbsp;vectors&nbsp;[mu,mv,mw]<br>
+:return:&nbsp;None</tt></dd></dl>
 
-<dl><dt><a name="Crystal-new_cell"><strong>new_cell</strong></a>(self, latt<font color="#909090">=[1.0]</font>)</dt><dd><tt>Replace&nbsp;the&nbsp;lattice&nbsp;parameters</tt></dd></dl>
+<dl><dt><a name="Crystal-new_cell"><strong>new_cell</strong></a>(self, latt<font color="#909090">=[1.0]</font>)</dt><dd><tt>Replace&nbsp;the&nbsp;lattice&nbsp;parameters<br>
+:param&nbsp;latt:&nbsp;[a,b,c,alpha,beta,gamma]<br>
+:return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Crystal-start_gui"><strong>start_gui</strong></a>(self)</dt><dd><tt>Start&nbsp;<a href="#Crystal">Crystal</a>&nbsp;GUI</tt></dd></dl>
 
@@ -402,7 +441,7 @@ Use&nbsp;&gt;&gt;hasattr(su,'Parent')&nbsp;to&nbsp;check&nbsp;is&nbsp;the&nbsp;c
 superstructure&nbsp;<a href="#Crystal">Crystal</a>&nbsp;class<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="Superstructure-__init__"><strong>__init__</strong></a>(self, Parent, P)</dt></dl>
+<dl><dt><a name="Superstructure-__init__"><strong>__init__</strong></a>(self, Parent, P)</dt><dd><tt>Initialise</tt></dd></dl>
 
 <dl><dt><a name="Superstructure-calculateQ_parent"><strong>calculateQ_parent</strong></a>(self, super_hkl)</dt><dd><tt>Indexes&nbsp;(h,k,l)&nbsp;coordinates&nbsp;in&nbsp;the&nbsp;frame&nbsp;same&nbsp;cartesian&nbsp;frame&nbsp;as&nbsp;the&nbsp;Parent&nbsp;structure<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Q&nbsp;=&nbsp;h'*a'*&nbsp;+&nbsp;k'*b'*&nbsp;+&nbsp;l'*c'*<br>
@@ -441,12 +480,16 @@ Data and other attributes defined here:<br>
 
 <hr>
 Methods inherited from <a href="Dans_Diffraction.classes_crystal.html#Crystal">Crystal</a>:<br>
-<dl><dt><a name="Superstructure-add_parent"><strong>add_parent</strong></a>(self, parent, P)</dt><dd><tt>Add&nbsp;parent&nbsp;structure,&nbsp;returning&nbsp;<a href="#Crystal">Crystal</a>&nbsp;as&nbsp;superstructure</tt></dd></dl>
+<dl><dt><a name="Superstructure-add_parent"><strong>add_parent</strong></a>(self, parent, P)</dt><dd><tt>Add&nbsp;parent&nbsp;structure,&nbsp;returning&nbsp;<a href="#Crystal">Crystal</a>&nbsp;as&nbsp;superstructure<br>
+&nbsp;&nbsp;&nbsp;&nbsp;parent&nbsp;=&nbsp;<a href="#Superstructure-name">Crystal</a>(cif_parent)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;xtl&nbsp;=&nbsp;<a href="#Superstructure-name">Crystal</a>(cif_superstructure)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;su&nbsp;=&nbsp;xtl.<a href="#Superstructure-add_parent">add_parent</a>(parent,&nbsp;[[1,1,0],[0,2,0],[0,0,1]])</tt></dd></dl>
 
 <dl><dt><a name="Superstructure-generate_lattice"><strong>generate_lattice</strong></a>(self, U<font color="#909090">=1</font>, V<font color="#909090">=1</font>, W<font color="#909090">=0</font>)</dt><dd><tt>Generate&nbsp;lattice&nbsp;of&nbsp;a&nbsp;cell<br>
 &nbsp;latt&nbsp;=&nbsp;genlatt(crys,U=1,V=1,W=0)</tt></dd></dl>
 
-<dl><dt><a name="Superstructure-generate_structure"><strong>generate_structure</strong></a>(self)</dt><dd><tt>Combines&nbsp;the&nbsp;atomic&nbsp;positions&nbsp;with&nbsp;symmetry&nbsp;operations,&nbsp;returning&nbsp;the&nbsp;full&nbsp;structure&nbsp;as&nbsp;an&nbsp;<a href="#Atoms">Atoms</a>&nbsp;class</tt></dd></dl>
+<dl><dt><a name="Superstructure-generate_structure"><strong>generate_structure</strong></a>(self)</dt><dd><tt>Combines&nbsp;the&nbsp;atomic&nbsp;positions&nbsp;with&nbsp;symmetry&nbsp;operations,&nbsp;returning&nbsp;the&nbsp;full&nbsp;structure&nbsp;as&nbsp;an&nbsp;<a href="#Atoms">Atoms</a>&nbsp;class<br>
+:return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Superstructure-generate_superstructure"><strong>generate_superstructure</strong></a>(self, P)</dt><dd><tt>Generate&nbsp;a&nbsp;superstructure&nbsp;of&nbsp;the&nbsp;current&nbsp;cell<br>
 &nbsp;&nbsp;&nbsp;&nbsp;a'&nbsp;=&nbsp;n1a&nbsp;+&nbsp;n2b&nbsp;+&nbsp;n3c<br>
@@ -470,9 +513,20 @@ superstructure&nbsp;<a href="#Crystal">Crystal</a>&nbsp;class</tt></dd></dl>
 
 <dl><dt><a name="Superstructure-info"><strong>info</strong></a>(self)</dt><dd><tt>Prints&nbsp;information&nbsp;about&nbsp;the&nbsp;crystal&nbsp;structure</tt></dd></dl>
 
-<dl><dt><a name="Superstructure-new_atoms"><strong>new_atoms</strong></a>(self, u<font color="#909090">=[0]</font>, v<font color="#909090">=[0]</font>, w<font color="#909090">=[0]</font>, type<font color="#909090">=None</font>, label<font color="#909090">=None</font>, occupancy<font color="#909090">=None</font>, uiso<font color="#909090">=None</font>, mxmymz<font color="#909090">=None</font>)</dt><dd><tt>Replace&nbsp;current&nbsp;atomic&nbsp;positions&nbsp;with&nbsp;new&nbsp;ones&nbsp;and&nbsp;regenerate&nbsp;structure</tt></dd></dl>
+<dl><dt><a name="Superstructure-new_atoms"><strong>new_atoms</strong></a>(self, u<font color="#909090">=[0]</font>, v<font color="#909090">=[0]</font>, w<font color="#909090">=[0]</font>, type<font color="#909090">=None</font>, label<font color="#909090">=None</font>, occupancy<font color="#909090">=None</font>, uiso<font color="#909090">=None</font>, mxmymz<font color="#909090">=None</font>)</dt><dd><tt>Replace&nbsp;current&nbsp;atomic&nbsp;positions&nbsp;with&nbsp;new&nbsp;ones&nbsp;and&nbsp;regenerate&nbsp;structure<br>
+:param&nbsp;u:&nbsp;array&nbsp;:&nbsp;atomic&nbsp;positions&nbsp;u<br>
+:param&nbsp;v:&nbsp;array&nbsp;:&nbsp;atomic&nbsp;positions&nbsp;v<br>
+:param&nbsp;w:&nbsp;&nbsp;array&nbsp;:&nbsp;atomic&nbsp;positions&nbsp;w<br>
+:param&nbsp;type:&nbsp;&nbsp;array&nbsp;:&nbsp;atomic&nbsp;types<br>
+:param&nbsp;label:&nbsp;array&nbsp;:&nbsp;atomic&nbsp;labels<br>
+:param&nbsp;occupancy:&nbsp;array&nbsp;:&nbsp;atomic&nbsp;occupation<br>
+:param&nbsp;uiso:&nbsp;array&nbsp;:&nbsp;atomic&nbsp;isotropic&nbsp;thermal&nbsp;parameters<br>
+:param&nbsp;mxmymz:&nbsp;array&nbsp;:&nbsp;atomic&nbsp;magnetic&nbsp;vectors&nbsp;[mu,mv,mw]<br>
+:return:&nbsp;None</tt></dd></dl>
 
-<dl><dt><a name="Superstructure-new_cell"><strong>new_cell</strong></a>(self, latt<font color="#909090">=[1.0]</font>)</dt><dd><tt>Replace&nbsp;the&nbsp;lattice&nbsp;parameters</tt></dd></dl>
+<dl><dt><a name="Superstructure-new_cell"><strong>new_cell</strong></a>(self, latt<font color="#909090">=[1.0]</font>)</dt><dd><tt>Replace&nbsp;the&nbsp;lattice&nbsp;parameters<br>
+:param&nbsp;latt:&nbsp;[a,b,c,alpha,beta,gamma]<br>
+:return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Superstructure-start_gui"><strong>start_gui</strong></a>(self)</dt><dd><tt>Start&nbsp;<a href="#Crystal">Crystal</a>&nbsp;GUI</tt></dd></dl>
 
@@ -505,88 +559,103 @@ Data and other attributes inherited from <a href="Dans_Diffraction.classes_cryst
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.<a href="#Symmetry-addsym">addsym</a>(['x,y,z+1/2','z,x,y'])&nbsp;&gt;&gt;&nbsp;adds&nbsp;multiple&nbsp;symmetry&nbsp;operation,&nbsp;magnetic&nbsp;operations&nbsp;are&nbsp;infered<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.<a href="#Symmetry-addsym">addsym</a>('x,y,z+1/2','x,y,-z')&nbsp;&gt;&gt;&nbsp;adds&nbsp;single&nbsp;symmetry&nbsp;operation&nbsp;+&nbsp;magnetic&nbsp;operation</tt></dd></dl>
 
-<dl><dt><a name="Symmetry-changesym"><strong>changesym</strong></a>(self, idx, operation)</dt><dd><tt>Change&nbsp;a&nbsp;symmetry&nbsp;operation</tt></dd></dl>
+<dl><dt><a name="Symmetry-changesym"><strong>changesym</strong></a>(self, idx, operation)</dt><dd><tt>Change&nbsp;a&nbsp;symmetry&nbsp;operation<br>
+:param&nbsp;idx:&nbsp;symmetry&nbsp;index<br>
+:param&nbsp;operation:&nbsp;str&nbsp;e.g.&nbsp;'x,-y,z'</tt></dd></dl>
 
-<dl><dt><a name="Symmetry-fromcif"><strong>fromcif</strong></a>(self, cifvals)</dt><dd><tt>Import&nbsp;symmetry&nbsp;information&nbsp;from&nbsp;a&nbsp;cif&nbsp;dictionary</tt></dd></dl>
+<dl><dt><a name="Symmetry-fromcif"><strong>fromcif</strong></a>(self, cifvals)</dt><dd><tt>Import&nbsp;symmetry&nbsp;information&nbsp;from&nbsp;a&nbsp;cif&nbsp;dictionary<br>
+:param&nbsp;cifvals:&nbsp;dict&nbsp;of&nbsp;values&nbsp;from&nbsp;cif<br>
+:return:</tt></dd></dl>
 
 <dl><dt><a name="Symmetry-generate_matrices"><strong>generate_matrices</strong></a>(self)</dt><dd><tt>Generates&nbsp;the&nbsp;symmetry&nbsp;matrices&nbsp;from&nbsp;string&nbsp;symmetry&nbsp;operations</tt></dd></dl>
 
 <dl><dt><a name="Symmetry-info"><strong>info</strong></a>(self)</dt><dd><tt>Prints&nbsp;the&nbsp;symmetry&nbsp;information<br>
 :return:&nbsp;None</tt></dd></dl>
 
-<dl><dt><a name="Symmetry-invert_magsym"><strong>invert_magsym</strong></a>(self, idx)</dt><dd><tt>Invert&nbsp;the&nbsp;time&nbsp;symmetry&nbsp;of&nbsp;a&nbsp;magnetic&nbsp;symmetry</tt></dd></dl>
+<dl><dt><a name="Symmetry-invert_magsym"><strong>invert_magsym</strong></a>(self, idx)</dt><dd><tt>Invert&nbsp;the&nbsp;time&nbsp;symmetry&nbsp;of&nbsp;a&nbsp;magnetic&nbsp;symmetry<br>
+:param&nbsp;idx:&nbsp;symmetry&nbsp;index,&nbsp;0:Nsym<br>
+:return:</tt></dd></dl>
 
-<dl><dt><a name="Symmetry-print_symmetric_coordinate_operations"><strong>print_symmetric_coordinate_operations</strong></a>(self, UVW)</dt><dd><tt>Returns&nbsp;array&nbsp;of&nbsp;symmetric&nbsp;operations&nbsp;for&nbsp;given&nbsp;position<br>
-Uses&nbsp;DansCrystalProgs.gen_sym_pos<br>
-Returns&nbsp;list&nbsp;of&nbsp;identical&nbsp;symmetry&nbsp;operations<br>
+<dl><dt><a name="Symmetry-print_symmetric_coordinate_operations"><strong>print_symmetric_coordinate_operations</strong></a>(self, UVW, remove_identical<font color="#909090">=True</font>)</dt><dd><tt>Returns&nbsp;array&nbsp;of&nbsp;symmetric&nbsp;operations&nbsp;for&nbsp;given&nbsp;position<br>
+Uses&nbsp;fc.gen_sym_pos<br>
+Returns&nbsp;list&nbsp;of&nbsp;identical&nbsp;symmetry&nbsp;operations,&nbsp;with&nbsp;identical&nbsp;positions&nbsp;removed<br>
+All&nbsp;positions&nbsp;returned&nbsp;if&nbsp;remove_identical=False<br>
 E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.symmetry_operations&nbsp;=&nbsp;['x,y,z','-x,-y,-z','y,x,z']<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.<a href="#Symmetry-symmetric_coordinate_operations">symmetric_coordinate_operations</a>([0.1,0,0])<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;&nbsp;[]</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.<a href="#Symmetry-print_symmetric_coordinate_operations">print_symmetric_coordinate_operations</a>([0.1,0,0])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;n&nbsp;&nbsp;u&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;w&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>&nbsp;&nbsp;&nbsp;&nbsp;Magnetic&nbsp;<a href="#Symmetry">Symmetry</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0.1000&nbsp;&nbsp;0.0000&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x,y,z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x,y,z<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;0.9000&nbsp;&nbsp;0.0000&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-x,-y,-z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-x,-y,-z<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;0.1000&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y,x,z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y,x,z</tt></dd></dl>
+
+<dl><dt><a name="Symmetry-print_symmetric_vectors"><strong>print_symmetric_vectors</strong></a>(self, HKL)</dt><dd><tt>Print&nbsp;symmetric&nbsp;vectors<br>
+:param&nbsp;HKL:&nbsp;[h,k,l]&nbsp;reflection<br>
+:return:&nbsp;str</tt></dd></dl>
 
 <dl><dt><a name="Symmetry-symmetric_coordinate_operations"><strong>symmetric_coordinate_operations</strong></a>(self, UVW, MXMYMZ<font color="#909090">=None</font>)</dt><dd><tt>Returns&nbsp;array&nbsp;of&nbsp;symmetric&nbsp;operations&nbsp;for&nbsp;given&nbsp;position<br>
-Uses&nbsp;DansCrystalProgs.gen_sym_pos<br>
-Returns&nbsp;list&nbsp;of&nbsp;identical&nbsp;symmetry&nbsp;operations<br>
+Uses&nbsp;fc.gen_sym_pos<br>
+Returns&nbsp;list&nbsp;of&nbsp;identical&nbsp;symmetry&nbsp;operations,&nbsp;with&nbsp;identical&nbsp;positions&nbsp;removed.<br>
 E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.symmetry_operations&nbsp;=&nbsp;['x,y,z','-x,-y,-z','y,x,z']<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.<a href="#Symmetry-symmetric_coordinate_operations">symmetric_coordinate_operations</a>([0.1,0,0])<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;&nbsp;[]</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;&nbsp;array(['x,y,z',&nbsp;'-x,-y,-z',&nbsp;'y,x,z'])</tt></dd></dl>
 
-<dl><dt><a name="Symmetry-symmetric_coordinates"><strong>symmetric_coordinates</strong></a>(self, UVW, MXMYMZ<font color="#909090">=None</font>)</dt><dd><tt>Returns&nbsp;array&nbsp;of&nbsp;symmetric&nbsp;coordinates<br>
-Uses&nbsp;DansCrystalProgs.gen_sym_pos<br>
+<dl><dt><a name="Symmetry-symmetric_coordinates"><strong>symmetric_coordinates</strong></a>(self, UVW, MXMYMZ<font color="#909090">=None</font>, remove_identical<font color="#909090">=True</font>)</dt><dd><tt>Returns&nbsp;array&nbsp;of&nbsp;symmetric&nbsp;coordinates<br>
+Uses&nbsp;fc.gen_sym_pos<br>
 Returns&nbsp;coordinates&nbsp;wrapped&nbsp;within&nbsp;the&nbsp;unit&nbsp;cell,&nbsp;with&nbsp;identical&nbsp;positions&nbsp;removed.<br>
+All&nbsp;positions&nbsp;returned&nbsp;if&nbsp;remove_identical=False<br>
 E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.symmetry_operations&nbsp;=&nbsp;['x,y,z','-x,-y,-z','y,x,z']<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.<a href="#Symmetry-symmetric_coordinates">symmetric_coordinates</a>([0.1,0,0])<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;&nbsp;array([[0.1,&nbsp;0.0,&nbsp;0.0],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0.9,&nbsp;0.0,&nbsp;0.0],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0.0,&nbsp;0.1,&nbsp;0.0]])</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;&nbsp;array([[0.1,&nbsp;0.0,&nbsp;0.0],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0.9,&nbsp;0.0,&nbsp;0.0],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0.0,&nbsp;0.1,&nbsp;0.0]])</tt></dd></dl>
 
 <dl><dt><a name="Symmetry-symmetric_intensity"><strong>symmetric_intensity</strong></a>(self, HKL, I, dI<font color="#909090">=None</font>)</dt><dd><tt>Returns&nbsp;symmetric&nbsp;reflections&nbsp;with&nbsp;summed&nbsp;intensities&nbsp;of&nbsp;repeated&nbsp;reflections<br>
-Uses&nbsp;DansCrystalProgs.gen_sym_mat<br>
+Uses&nbsp;fc.gen_sym_mat<br>
 E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.symmetry_operations&nbsp;=&nbsp;['x,y,z','-x,-y,-z','y,x,z']<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.generate_matrixes()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;HKL,&nbsp;I&nbsp;=&nbsp;<a href="#Symmetry">Symmetry</a>.<a href="#Symmetry-symmetric_intensity">symmetric_intensity</a>([1,1,0],10)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;&nbsp;HKL&nbsp;=&nbsp;array([[1,&nbsp;&nbsp;1,&nbsp;0],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;&nbsp;HKL&nbsp;=&nbsp;array([[1,&nbsp;&nbsp;1,&nbsp;0],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-1,-1,&nbsp;0]])<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;I&nbsp;=&nbsp;array([20,10])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;I&nbsp;=&nbsp;array([20,10])<br>
 &nbsp;&nbsp;&nbsp;&nbsp;OR<br>
 &nbsp;&nbsp;&nbsp;&nbsp;HKL,&nbsp;I,&nbsp;dI&nbsp;=&nbsp;<a href="#Symmetry">Symmetry</a>.<a href="#Symmetry-symmetric_intensity">symmetric_intensity</a>([1,1,0],10,1)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;&nbsp;HKL&nbsp;=&nbsp;array([[1,&nbsp;&nbsp;1,&nbsp;0],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;&nbsp;HKL&nbsp;=&nbsp;array([[1,&nbsp;&nbsp;1,&nbsp;0],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-1,-1,&nbsp;0]])<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;I&nbsp;=&nbsp;array([20,10])<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;dI&nbsp;=&nbsp;array([2,1])</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;I&nbsp;=&nbsp;array([20,10])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;dI&nbsp;=&nbsp;array([2,1])</tt></dd></dl>
 
 <dl><dt><a name="Symmetry-symmetric_magnetic_vectors"><strong>symmetric_magnetic_vectors</strong></a>(self, MXMYMZ)</dt><dd><tt>NOT&nbsp;COMPLETE</tt></dd></dl>
 
 <dl><dt><a name="Symmetry-symmetric_reflections"><strong>symmetric_reflections</strong></a>(self, HKL)</dt><dd><tt>Returns&nbsp;array&nbsp;of&nbsp;symmetric&nbsp;reflection&nbsp;indices<br>
-Uses&nbsp;DansCrystalProgs.gen_sym_mat<br>
+Uses&nbsp;fc.gen_sym_mat<br>
 E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.symmetry_operations&nbsp;=&nbsp;['x,y,z','-x,-y,-z','y,x,z']<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.generate_matrixes()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.<a href="#Symmetry-symmetric_reflections">symmetric_reflections</a>([1,0,0])<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;&nbsp;array([[1,&nbsp;&nbsp;0,&nbsp;0],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;&nbsp;array([[1,&nbsp;&nbsp;0,&nbsp;0],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-1,&nbsp;0,&nbsp;0],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0,&nbsp;-1,&nbsp;0]])</tt></dd></dl>
 
 <dl><dt><a name="Symmetry-symmetric_reflections_count"><strong>symmetric_reflections_count</strong></a>(self, HKL)</dt><dd><tt>Returns&nbsp;array&nbsp;of&nbsp;symmetric&nbsp;reflection&nbsp;indices,&nbsp;with&nbsp;identical&nbsp;reflections&nbsp;removed&nbsp;plus&nbsp;the&nbsp;counted&nbsp;sum&nbsp;of&nbsp;each&nbsp;reflection<br>
-Uses&nbsp;DansCrystalProgs.gen_sym_mat<br>
+Uses&nbsp;fc.gen_sym_mat<br>
 E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.symmetry_operations&nbsp;=&nbsp;['x,y,z','-x,-y,-z','y,x,z']<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.generate_matrixes()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;HKL,&nbsp;count&nbsp;=&nbsp;<a href="#Symmetry">Symmetry</a>.<a href="#Symmetry-symmetric_reflections">symmetric_reflections</a>([1,1,0])<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;&nbsp;HKL&nbsp;=&nbsp;array([[1,&nbsp;&nbsp;1,&nbsp;0],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;&nbsp;HKL&nbsp;=&nbsp;array([[1,&nbsp;&nbsp;1,&nbsp;0],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-1,-1,&nbsp;0]])<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;count&nbsp;=&nbsp;array([2,1])</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;count&nbsp;=&nbsp;array([2,1])</tt></dd></dl>
 
 <dl><dt><a name="Symmetry-symmetric_reflections_unique"><strong>symmetric_reflections_unique</strong></a>(self, HKL)</dt><dd><tt>Returns&nbsp;array&nbsp;of&nbsp;symmetric&nbsp;reflection&nbsp;indices,&nbsp;with&nbsp;identical&nbsp;reflections&nbsp;removed<br>
-Uses&nbsp;DansCrystalProgs.gen_sym_mat<br>
+Uses&nbsp;fc.gen_sym_mat<br>
 E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.symmetry_operations&nbsp;=&nbsp;['x,y,z','-x,-y,-z','y,x,z']<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.generate_matrixes()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.<a href="#Symmetry-symmetric_reflections">symmetric_reflections</a>([1,1,0])<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;&nbsp;array([[1,&nbsp;&nbsp;1,&nbsp;0],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;&nbsp;array([[1,&nbsp;&nbsp;1,&nbsp;0],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-1,-1,&nbsp;0]])</tt></dd></dl>
 
 <hr>
@@ -606,5 +675,5 @@ Data and other attributes defined here:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>__version__</strong> = '2.3'</td></tr></table>
+<td width="100%"><strong>__version__</strong> = '2.4'</td></tr></table>
 </body></html>

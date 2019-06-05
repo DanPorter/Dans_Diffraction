@@ -16,8 +16,8 @@ Usage:
 All plots generated require plt.show() call, unless using interactive mode
 
 
-Version 1.5
-Last updated: 07/03/19
+Version 1.7
+Last updated: 03/05/19
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -26,6 +26,8 @@ Version History:
 03/05/18 1.3    Removed plot_vector_lines(vec_a,vec_b), replaced with plot_lattice_lines(Q, vec_a, vec_b)
 30/05/18 1.4    Added multiplot
 07/03/19 1.5    Added plot_attenuation and others
+22/03/19 1.6    Added plot_circle, updated vecplot and plot_lattice_lines
+03/05/19 1.7    Added legend to labels function
 
 @author: DGPorter
 """
@@ -40,32 +42,35 @@ from mpl_toolkits.mplot3d import proj3d
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.5'
+__version__ = '1.7'
 
 '----------------------------Plot manipulation--------------------------'
 
 
-def labels(ttl=None, xvar=None, yvar=None, zvar=None, size='Normal', font='Times New Roman'):
+def labels(ttl=None, xvar=None, yvar=None, zvar=None, legend=False, size='Normal', font='Times New Roman'):
     """
     Add formatted labels to current plot, also increases the tick size
     :param ttl: title
     :param xvar: x label
     :param yvar: y label
     :param zvar: z label (3D plots only)
+    :param legend: False/ True, adds default legend to plot 
     :param size: 'Normal' or 'Big'
     :param font: str font name, 'Times New Roman'
     :return: None
     """
 
-    if size.lower() == 'big':
+    if size.lower() in ['big', 'large', 'xxl', 'xl']:
         tik = 30
         tit = 32
         lab = 35
+        leg = 25
     else:
         # Normal
         tik = 18
         tit = 20
         lab = 22
+        leg = 18
 
     plt.xticks(fontsize=tik, fontname=font)
     plt.yticks(fontsize=tik, fontname=font)
@@ -86,6 +91,9 @@ def labels(ttl=None, xvar=None, yvar=None, zvar=None, size='Normal', font='Times
     if zvar is not None:
         # Don't think this works, use ax.set_zaxis
         plt.gca().set_zlabel(zvar, fontsize=lab, fontname=font)
+
+    if legend:
+        plt.legend(loc=0, frameon=False, prop={'size':30,'family':'serif'})
 
 
 def saveplot(name, dpi=None, figure=None):
@@ -147,7 +155,7 @@ def newplot(*args, **kwargs):
     plt.ticklabel_format(style='sci', scilimits=(-3, 3))
 
 
-def multiplot(xvals,yvals=None,datarange=None,cmap='jet',labels=None,marker=None):
+def multiplot(xvals, yvals=None, datarange=None, cmap='jet', labels=None, marker=None):
     """
     Shortcut to creating a simple multiplot with either colorbar or legend
     E.G.
@@ -371,6 +379,24 @@ def plot_cell(cell_centre=[0, 0, 0], CELL=np.eye(3)):
     plt.plot(bpos[:, 0], bpos[:, 1], bpos[:, 2], c='k')  # cell box
 
 
+def plot_circle(radius=1.0, centre=[0,0], height=0, *args, **kwargs):
+    """
+    Generate circle on current plot
+    :param radius: radius of the circle
+    :param centre: [x,y] centre of the circle
+    :param height: reduce the radius by increasing the height from a surface
+    :param args: plot commands
+    :param kwargs: plot commands
+    :return: none
+    """
+
+    deg = np.linspace(0, 360, 361)
+    rad = np.deg2rad(deg)
+    x = centre[0] + np.sqrt((radius**2-height**2))*np.cos(rad)
+    y = centre[1] + np.sqrt((radius**2-height**2))*np.sin(rad)
+    plt.plot(x, y, *args, **kwargs)
+
+
 def plot_arrow(x, y, z=None, col='r', width=2, arrow_size=40):
     """
     Plot arrow in 2D or 3D on current axes
@@ -435,9 +461,14 @@ class Arrow3D(FancyArrowPatch):
 '----------------------- Crystal Plotting Programs----------------------'
 
 
-def vecplot(UV, mode='hk0', linewidth=1, alpha=0.2, color='k'):
+def vecplot(UV, mode='hk0', axis=None, *args, **kwargs):
     """
-    Plot grid of a,b vectors
+    Plot grid of a,b vectors on current axis
+    :param UV: [a;b;c] array of unit vectors
+    :param mode: definition of axis plane, 'hk0', 'h0l', '0kl', 'hhl'
+    :param axis: axis to create lines on, if None, plt.gca is used
+    :param args: arguments to pass to plot command, e.g. linewidth, alpha, color
+    :return: None
     """
 
     if mode == 'h0l':
@@ -450,32 +481,11 @@ def vecplot(UV, mode='hk0', linewidth=1, alpha=0.2, color='k'):
         # hhl ***untested
         UV = np.dot(np.array([[1, 1, 0], [0, 0, 1], [0, 1, 0]]), UV)
 
-    # Get current axis size
-    ax = plt.gca()
-    axsize = ax.axis()
-    max_ax = [axsize[1], axsize[3], 0]
-
-    # Generate HKL points within axis
-    max_hkl = np.max(np.ceil(np.abs(fc.indx(max_ax, UV))))
-    # Generate all hkl values in this range
-    HKL = fc.genHKL(max_hkl + 1, negative=True)
-    # lattice positions
-    Q = np.dot(HKL, UV)
-
-    # Angle between vectors
-    A = fg.ang(UV[0], UV[1])
-
-    # At each lattice point, draw the unit vectors
-    for n in range(len(Q)):
-        lp = Q[n, :]
-        uv1 = lp + UV[0, :]
-        uv2 = lp + UV[1, :]
-        ax.plot([lp[0], uv1[0]], [lp[1], uv1[1]], '-', linewidth=linewidth, alpha=alpha, color=color)
-        ax.plot([lp[0], uv2[0]], [lp[1], uv2[1]], '-', linewidth=linewidth, alpha=alpha, color=color)
-        if abs(A - np.pi / 3) < 0.01 or abs(A - 2 * np.pi / 3) < 0.01:
-            uv3 = lp - UV[0, :] + UV[1, :]
-            ax.plot([lp[0], uv3[0]], [lp[1], uv3[1]], '-', linewidth=linewidth, alpha=alpha, color=color)
-    ax.axis(axsize)
+    if axis is None:
+        axis = plt.gca()
+    axsize = axis.axis()
+    latt = axis_lattice_points(UV[0], UV[1], axis=axsize)
+    plot_lattice_lines(latt, UV[0], UV[1], axis=axis, *args, **kwargs)
 
 
 def UV_arrows(UV):
@@ -499,14 +509,14 @@ def axis_lattice_points(vec_a=[1, 0, 0], vec_b=[0, 1, 0], axis=[-4, 4, -4, 4]):
     :param vec_a: [1x3] array : a* vector
     :param vec_b: [1x3] array : b* vector
     :param axis: [1x4] axis array, plt.axis()
-    :return: None
+    :return: [nx3] array of lattice points
     """
 
     # Vectors
     A = np.asarray(vec_a, dtype=float).reshape([3])
     B = np.asarray(vec_b, dtype=float).reshape([3])
     # Generate a 3D cell to make use of indx function
-    U = np.array([A, B, [0, 0, 1]])
+    U = np.array([A, B, np.cross(A, B)])
     corners = [[axis[1], axis[2], 0],
                [axis[1], axis[3], 0],
                [axis[0], axis[2], 0],
@@ -519,8 +529,8 @@ def axis_lattice_points(vec_a=[1, 0, 0], vec_b=[0, 1, 0], axis=[-4, 4, -4, 4]):
     min_y = np.floor(np.min(idx[:, 1]))
     max_y = np.ceil(np.max(idx[:, 1]))
     hkl = fc.genHKL([min_x, max_x], [min_y, max_y], 0)
-    Q = np.dot(hkl, U)
-    return Q
+    latt = np.dot(hkl, U)
+    return latt
 
 
 def plot_lattice_points2D(Q, markersize=12, color='b', marker='o'):
@@ -540,21 +550,21 @@ def plot_lattice_points2D(Q, markersize=12, color='b', marker='o'):
     ax.axis(axsize)
 
 
-def plot_lattice_lines(Q, vec_a=[1, 0, 0], vec_b=[0, 1, 0], linewidth=0.5, shade=1.0, color='k'):
+def plot_lattice_lines(latt, vec_a=[1, 0, 0], vec_b=[0, 1, 0], axis=None, *args, **kwargs):
     """
     Add lines defining the reciprocal lattice to the current plot
         Generates square or hexagonal lines where vertices are the lattice points within the image.
-    :param Q: [nx2/3] array : points at which to generate lattice
+    :param latt: [nx2/3] array : points at which to generate lattice
     :param vec_a: [1x2/3] array : a* vector
     :param vec_b: [1x2/3] array : b* vector
-    :param linewidth: width of the lines, default=0.5
-    :param shade: line shading (0=light, 1=dark), default=1.0
-    :param color: line colour, default='k'
+    :param axis: axis to plot on (None for plt.gca)
+    :param args: argments to pass to plot function, e.g. linewidth, alpha, color
     :return: None
     """
 
-    ax = plt.gca()
-    axsize = ax.axis()
+    if axis is None:
+        axis = plt.gca()
+    axsize = axis.axis()
 
     # vectors
     A = np.asarray(vec_a, dtype=float).reshape([3])
@@ -564,24 +574,24 @@ def plot_lattice_lines(Q, vec_a=[1, 0, 0], vec_b=[0, 1, 0], linewidth=0.5, shade
     angle = fg.ang(A, B)
 
     # At each lattice point, draw the unit vectors
-    for n in range(len(Q)):
-        lp = Q[n, :]
+    for n in range(len(latt)):
+        lp = latt[n, :]
         uv1_1 = lp - A
         uv1_2 = lp + A
         uv2_1 = lp - B
         uv2_2 = lp + B
 
-        ax.plot([uv1_1[0], uv1_2[0]], [uv1_1[1], uv1_2[1]], '-', linewidth=linewidth, alpha=shade, color=color)
-        ax.plot([uv2_1[0], uv2_2[0]], [uv2_1[1], uv2_2[1]], '-', linewidth=linewidth, alpha=shade, color=color)
+        axis.plot([uv1_1[0], uv1_2[0]], [uv1_1[1], uv1_2[1]], 'k-', *args, **kwargs)
+        axis.plot([uv2_1[0], uv2_2[0]], [uv2_1[1], uv2_2[1]], 'k-', *args, **kwargs)
         if abs(angle - np.pi / 3) < 0.01:  # 60Deg
             uv3_1 = lp + A - B
             uv3_2 = lp - A + B
-            ax.plot([uv3_1[0], uv3_2[0]], [uv3_1[1], uv3_2[1]], '-', linewidth=linewidth, alpha=shade, color=color)
+            axis.plot([uv3_1[0], uv3_2[0]], [uv3_1[1], uv3_2[1]], 'k-', *args, **kwargs)
         elif abs(angle - 2 * np.pi / 3) < 0.01:  # 120 Deg
             uv3_1 = lp + A + B
             uv3_2 = lp - A - B
-            ax.plot([uv3_1[0], uv3_2[0]], [uv3_1[1], uv3_2[1]], '-', linewidth=linewidth, alpha=shade, color=color)
-    ax.axis(axsize)
+            axis.plot([uv3_1[0], uv3_2[0]], [uv3_1[1], uv3_2[1]], 'k-', *args, **kwargs)
+    axis.axis(axsize)
 
 
 def plot_vector_arrows(vec_a=[1, 0, 0], vec_b=[1, 0, 0], vec_a_lab=None, vec_b_lab=None,

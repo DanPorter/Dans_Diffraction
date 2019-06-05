@@ -486,7 +486,7 @@ class Cell:
         :return: d-spacing
         """
         Qmag = self.Qmag(HKL)
-        return fc.caldspace(Qmag)
+        return fc.q2dspace(Qmag)
     
     def max_hkl(self,energy_kev=8.048,max_angle=180.0):
         """

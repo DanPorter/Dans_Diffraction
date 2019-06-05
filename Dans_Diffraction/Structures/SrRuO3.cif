@@ -1,0 +1,87 @@
+
+#(C) 2018 by FIZ Karlsruhe - Leibniz Institute for Information Infrastructure.  All rights reserved.
+data_65691-ICSD
+_database_code_ICSD 65691
+_audit_creation_date 1990-06-08
+_audit_update_record 2006-04-01
+_chemical_name_systematic 'Strontium ruthenate(IV)'
+_chemical_formula_structural 'Sr (Ru O3)'
+_chemical_formula_sum 'O3 Ru1 Sr1'
+_chemical_name_structure_type Perovskite-GdFeO3
+_exptl_crystal_density_diffrn 6.51
+_cell_measurement_temperature 300.
+_publ_section_title
+'The structure of Sr Ru O3 by time-of-flight neutron powder diffraction'
+loop_
+_citation_id
+_citation_journal_full
+_citation_year
+_citation_journal_volume
+_citation_page_first
+_citation_page_last
+_citation_journal_id_ASTM
+primary 'Acta Crystallographica, Section C: Crystal Structure Communications'
+1989 45 365 367 ACSCEE
+loop_
+_publ_author_name
+'Jones, C.W.'
+'Battle, P.D.'
+'Lightfoot, P.'
+'Harrison, W.T.A.'
+_cell_length_a 5.5670(1)
+_cell_length_b 5.5304(1)
+_cell_length_c 7.8446(2)
+_cell_angle_alpha 90.
+_cell_angle_beta 90.
+_cell_angle_gamma 90.
+_cell_volume 241.52
+_cell_formula_units_Z 4
+_symmetry_space_group_name_H-M 'P b n m'
+_symmetry_Int_Tables_number 62
+_refine_ls_R_factor_all 0.0308
+loop_
+_symmetry_equiv_pos_site_id
+_symmetry_equiv_pos_as_xyz
+1 '-x+1/2, y+1/2, z'
+2 'x, y, -z+1/2'
+3 'x+1/2, -y+1/2, z+1/2'
+4 '-x, -y, -z'
+5 'x+1/2, -y+1/2, -z'
+6 '-x, -y, z+1/2'
+7 '-x+1/2, y+1/2, -z+1/2'
+8 'x, y, z'
+loop_
+_atom_type_symbol
+_atom_type_oxidation_number
+Sr2+ 2
+Ru4+ 4
+O2- -2
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_B_iso_or_equiv
+_atom_site_occupancy
+_atom_site_attached_hydrogens
+Sr1 Sr2+ 4 c -.0027(3) 0.0157(4) 0.25 . 1. 0
+Ru1 Ru4+ 4 b 0.5 0 0 . 1. 0
+O1 O2- 8 d 0.7248(2) 0.2764(2) 0.0278(2) . 1. 0
+O2 O2- 4 c 0.0532(4) 0.4966(5) 0.25 . 1. 0
+loop_
+_atom_site_aniso_label
+_atom_site_aniso_type_symbol
+_atom_site_aniso_B_11
+_atom_site_aniso_B_22
+_atom_site_aniso_B_33
+_atom_site_aniso_B_12
+_atom_site_aniso_B_13
+_atom_site_aniso_B_23
+Sr1 Sr2+ 0.61(6) 0.74(7) 0.71(8) 0.00(6) 0 0
+Ru1 Ru4+ 0.50(6) 0.42(6) 0.63(8) -.02(7) -.19(9) 0.04(8)
+O1 O2- 0.57(5) 0.69(5) 1.06(6) -.20(5) 0.27(6) -.03(6)
+O2 O2- 1.10(8) 1.00(9) 0.40(9) 0.13(10) 0 0
+#End of TTdata_65691-ICSD
