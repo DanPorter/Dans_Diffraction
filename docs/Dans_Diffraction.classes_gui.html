@@ -1,0 +1,310 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module Dans_Diffraction.classes_gui</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_gui</strong></big></big> (version 1.1)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/dgpor/dropbox/python/dans_diffraction/dans_diffraction/classes_gui.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_gui.py</a></font></td></tr></table>
+    <p><tt>DansCrystalGUI.py<br>
+&nbsp;&nbsp;Creates&nbsp;a&nbsp;graphical&nbsp;user&nbsp;interface&nbsp;for&nbsp;Dans_Diffraction&nbsp;software.&nbsp;<br>
+&nbsp;&nbsp;Based&nbsp;on&nbsp;tkinter.<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;Usage:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ipython&nbsp;-i&nbsp;-matplotlib&nbsp;tk&nbsp;DansCrystalGUI.py<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;Requires:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;numpy,&nbsp;matplotlib,&nbsp;tkinter<br>
+&nbsp;<br>
+By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
+Diamond<br>
+2019<br>
+&nbsp;<br>
+Version&nbsp;1.1<br>
+Last&nbsp;updated:&nbsp;09/03/19<br>
+&nbsp;<br>
+Version&nbsp;History:<br>
+10/11/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
+23/02/19&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Finished&nbsp;the&nbsp;basic&nbsp;program&nbsp;and&nbsp;gave&nbsp;it&nbsp;colours<br>
+09/03/19&nbsp;1.1&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;properties,&nbsp;superstructure,&nbsp;other&nbsp;improvements<br>
+&nbsp;<br>
+@author:&nbsp;DGPorter</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="Dans_Diffraction.functions_crystallography.html">Dans_Diffraction.functions_crystallography</a><br>
+<a href="Dans_Diffraction.functions_general.html">Dans_Diffraction.functions_general</a><br>
+<a href="tkFileDialog.html">tkFileDialog</a><br>
+</td><td width="25%" valign=top><a href="Dans_Diffraction.functions_plotting.html">Dans_Diffraction.functions_plotting</a><br>
+<a href="tkMessageBox.html">tkMessageBox</a><br>
+<a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="Tkinter.html">Tkinter</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_gui.html#Atomsgui">Atomsgui</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_gui.html#Crystalgui">Crystalgui</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_gui.html#Latpargui">Latpargui</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_gui.html#Propertiesgui">Propertiesgui</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_gui.html#Scatteringgui">Scatteringgui</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_gui.html#StringViewer">StringViewer</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_gui.html#Superstructuregui">Superstructuregui</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_gui.html#Symmetrygui">Symmetrygui</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Atomsgui">class <strong>Atomsgui</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>View&nbsp;and&nbsp;edit&nbsp;the&nbsp;atomic&nbsp;positions<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Atomsgui-__init__"><strong>__init__</strong></a>(self, xtl, symmetric_only<font color="#909090">=True</font>, magnetic_moments<font color="#909090">=False</font>)</dt><dd><tt>Initialise</tt></dd></dl>
+
+<dl><dt><a name="Atomsgui-fun_magnets"><strong>fun_magnets</strong></a>(self)</dt><dd><tt>"ReOpen&nbsp;window&nbsp;with&nbsp;magnetic&nbsp;moments</tt></dd></dl>
+
+<dl><dt><a name="Atomsgui-fun_set"><strong>fun_set</strong></a>(self)</dt><dd><tt>Get&nbsp;positions&nbsp;from&nbsp;crystal&nbsp;object,&nbsp;fill&nbsp;text&nbsp;boxes</tt></dd></dl>
+
+<dl><dt><a name="Atomsgui-fun_update"><strong>fun_update</strong></a>(self)</dt><dd><tt>Update&nbsp;atomic&nbsp;properties,&nbsp;close&nbsp;window</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Crystalgui">class <strong>Crystalgui</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Provide&nbsp;options&nbsp;for&nbsp;plotting&nbsp;and&nbsp;viewing&nbsp;Crystal&nbsp;data<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Crystalgui-__init__"><strong>__init__</strong></a>(self, xtl<font color="#909090">=None</font>)</dt><dd><tt>"Initialise&nbsp;Main&nbsp;GUI</tt></dd></dl>
+
+<dl><dt><a name="Crystalgui-fun_atoms"><strong>fun_atoms</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Crystalgui-fun_get"><strong>fun_get</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Crystalgui-fun_latpar"><strong>fun_latpar</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Crystalgui-fun_loadcif"><strong>fun_loadcif</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Crystalgui-fun_loadstruct"><strong>fun_loadstruct</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>Load&nbsp;from&nbsp;structure_list</tt></dd></dl>
+
+<dl><dt><a name="Crystalgui-fun_plotlayers"><strong>fun_plotlayers</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Crystalgui-fun_plotxtl"><strong>fun_plotxtl</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Crystalgui-fun_properties"><strong>fun_properties</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Crystalgui-fun_set"><strong>fun_set</strong></a>(self)</dt><dd><tt>###################################################################################<br>
+##############################&nbsp;FUNCTIONS&nbsp;##########################################<br>
+###################################################################################</tt></dd></dl>
+
+<dl><dt><a name="Crystalgui-fun_simulate"><strong>fun_simulate</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Crystalgui-fun_structure"><strong>fun_structure</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Crystalgui-fun_superstructure"><strong>fun_superstructure</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Crystalgui-fun_symmetry"><strong>fun_symmetry</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Crystalgui-on_closing"><strong>on_closing</strong></a>(self)</dt><dd><tt>End&nbsp;mainloop&nbsp;on&nbsp;close&nbsp;window</tt></dd></dl>
+
+<dl><dt><a name="Crystalgui-update_name"><strong>update_name</strong></a>(self)</dt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Latpargui">class <strong>Latpargui</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>View&nbsp;and&nbsp;edit&nbsp;the&nbsp;lattice&nbsp;parameters<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Latpargui-__init__"><strong>__init__</strong></a>(self, xtl)</dt><dd><tt>"Initialise</tt></dd></dl>
+
+<dl><dt><a name="Latpargui-fun_update"><strong>fun_update</strong></a>(self)</dt><dd><tt>Update&nbsp;lattice&nbsp;parameters,&nbsp;close&nbsp;window</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Propertiesgui">class <strong>Propertiesgui</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Show&nbsp;properties&nbsp;of&nbsp;atomis&nbsp;in&nbsp;Crystal<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Propertiesgui-__init__"><strong>__init__</strong></a>(self, xtl)</dt><dd><tt>Initialise</tt></dd></dl>
+
+<dl><dt><a name="Propertiesgui-fun_d2tth"><strong>fun_d2tth</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>Convert&nbsp;d&nbsp;to&nbsp;tth&nbsp;and&nbsp;q</tt></dd></dl>
+
+<dl><dt><a name="Propertiesgui-fun_edge"><strong>fun_edge</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>Add&nbsp;edge&nbsp;energy</tt></dd></dl>
+
+<dl><dt><a name="Propertiesgui-fun_element"><strong>fun_element</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>Dropdown&nbsp;menu</tt></dd></dl>
+
+<dl><dt><a name="Propertiesgui-fun_energy2wave"><strong>fun_energy2wave</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>Convert&nbsp;energy&nbsp;to&nbsp;wavelength</tt></dd></dl>
+
+<dl><dt><a name="Propertiesgui-fun_frac"><strong>fun_frac</strong></a>(self)</dt><dd><tt>Atomic&nbsp;Fraction</tt></dd></dl>
+
+<dl><dt><a name="Propertiesgui-fun_magff"><strong>fun_magff</strong></a>(self)</dt><dd><tt>Properties&nbsp;button</tt></dd></dl>
+
+<dl><dt><a name="Propertiesgui-fun_prop"><strong>fun_prop</strong></a>(self)</dt><dd><tt>Properties&nbsp;button</tt></dd></dl>
+
+<dl><dt><a name="Propertiesgui-fun_q2tth"><strong>fun_q2tth</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>Convert&nbsp;Q&nbsp;to&nbsp;tth&nbsp;and&nbsp;d</tt></dd></dl>
+
+<dl><dt><a name="Propertiesgui-fun_tth2q"><strong>fun_tth2q</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>Convert&nbsp;two-theta&nbsp;to&nbsp;q&nbsp;and&nbsp;d</tt></dd></dl>
+
+<dl><dt><a name="Propertiesgui-fun_wave2energy"><strong>fun_wave2energy</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>Convert&nbsp;wavelength&nbsp;to&nbsp;energy</tt></dd></dl>
+
+<dl><dt><a name="Propertiesgui-fun_xratten"><strong>fun_xratten</strong></a>(self)</dt><dd><tt>Properties&nbsp;button</tt></dd></dl>
+
+<dl><dt><a name="Propertiesgui-fun_xrscat"><strong>fun_xrscat</strong></a>(self)</dt><dd><tt>Properties&nbsp;button</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Scatteringgui">class <strong>Scatteringgui</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Simulate&nbsp;scattering&nbsp;of&nbsp;various&nbsp;forms<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Scatteringgui-__init__"><strong>__init__</strong></a>(self, xtl)</dt><dd><tt>Initialise</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_azimuth"><strong>fun_azimuth</strong></a>(self)</dt><dd><tt>Simulate&nbsp;azimuthal&nbsp;magnetic&nbsp;scattering</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_edge"><strong>fun_edge</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>X-ray&nbsp;edge&nbsp;option&nbsp;menu</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_get"><strong>fun_get</strong></a>(self)</dt><dd><tt>Set&nbsp;crytal&nbsp;parameters&nbsp;from&nbsp;gui</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_hhi"><strong>fun_hhi</strong></a>(self)</dt><dd><tt>Plot&nbsp;hhl&nbsp;plane</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_hil"><strong>fun_hil</strong></a>(self)</dt><dd><tt>Plot&nbsp;hil&nbsp;plane</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_hki"><strong>fun_hki</strong></a>(self)</dt><dd><tt>Plot&nbsp;hki&nbsp;plane</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_hklcheck"><strong>fun_hklcheck</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>"Show&nbsp;single&nbsp;hkl&nbsp;intensity</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_hklmag"><strong>fun_hklmag</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>"Magnetic&nbsp;scattering</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_i16"><strong>fun_i16</strong></a>(self)</dt><dd><tt>"Add&nbsp;I16&nbsp;parameters</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_ikl"><strong>fun_ikl</strong></a>(self)</dt><dd><tt>Plot&nbsp;ikl&nbsp;plane</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_intensities"><strong>fun_intensities</strong></a>(self)</dt><dd><tt>Display&nbsp;intensities</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_powder"><strong>fun_powder</strong></a>(self)</dt><dd><tt>Plot&nbsp;Powder</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_set"><strong>fun_set</strong></a>(self)</dt><dd><tt>"Set&nbsp;gui&nbsp;parameters&nbsp;from&nbsp;crystal</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_supernova"><strong>fun_supernova</strong></a>(self)</dt><dd><tt>Add&nbsp;SuperNova&nbsp;parameters</tt></dd></dl>
+
+<dl><dt><a name="Scatteringgui-fun_wish"><strong>fun_wish</strong></a>(self)</dt><dd><tt>"Add&nbsp;Wish&nbsp;parameters</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="StringViewer">class <strong>StringViewer</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Simple&nbsp;GUI&nbsp;that&nbsp;displays&nbsp;strings<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="StringViewer-__init__"><strong>__init__</strong></a>(self, string, title<font color="#909090">=''</font>)</dt><dd><tt>Initialise</tt></dd></dl>
+
+<dl><dt><a name="StringViewer-fun_close"><strong>fun_close</strong></a>(self)</dt><dd><tt>close&nbsp;window</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Superstructuregui">class <strong>Superstructuregui</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Generate&nbsp;a&nbsp;superstructure<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Superstructuregui-__init__"><strong>__init__</strong></a>(self, xtl)</dt><dd><tt>Initialise</tt></dd></dl>
+
+<dl><dt><a name="Superstructuregui-fun_gencell"><strong>fun_gencell</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>Generate&nbsp;new&nbsp;supercell</tt></dd></dl>
+
+<dl><dt><a name="Superstructuregui-fun_parent2super"><strong>fun_parent2super</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>Convert&nbsp;parent&nbsp;hkl&nbsp;to&nbsp;super&nbsp;hkl</tt></dd></dl>
+
+<dl><dt><a name="Superstructuregui-fun_super2parent"><strong>fun_super2parent</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>Convert&nbsp;super&nbsp;hkl&nbsp;to&nbsp;parent&nbsp;hkl</tt></dd></dl>
+
+<dl><dt><a name="Superstructuregui-fun_updatecell"><strong>fun_updatecell</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>Update&nbsp;cell&nbsp;parameters</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Symmetrygui">class <strong>Symmetrygui</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>View&nbsp;and&nbsp;edit&nbsp;the&nbsp;symmetry&nbsp;operations<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Symmetrygui-__init__"><strong>__init__</strong></a>(self, xtl)</dt><dd><tt>"Initialise</tt></dd></dl>
+
+<dl><dt><a name="Symmetrygui-fun_mousewheel"><strong>fun_mousewheel</strong></a>(self, event)</dt><dd><tt>Move&nbsp;scollbar</tt></dd></dl>
+
+<dl><dt><a name="Symmetrygui-fun_move"><strong>fun_move</strong></a>(self, *args)</dt><dd><tt>Move&nbsp;within&nbsp;text&nbsp;frame</tt></dd></dl>
+
+<dl><dt><a name="Symmetrygui-fun_scroll"><strong>fun_scroll</strong></a>(self, *args)</dt><dd><tt>Move&nbsp;scrollbar</tt></dd></dl>
+
+<dl><dt><a name="Symmetrygui-fun_set"><strong>fun_set</strong></a>(self)</dt><dd><tt>Generate&nbsp;the&nbsp;text&nbsp;box</tt></dd></dl>
+
+<dl><dt><a name="Symmetrygui-fun_symhkl"><strong>fun_symhkl</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>create&nbsp;symmetric&nbsp;hkl&nbsp;reflections</tt></dd></dl>
+
+<dl><dt><a name="Symmetrygui-fun_symuvw"><strong>fun_symuvw</strong></a>(self, event<font color="#909090">=None</font>)</dt><dd><tt>create&nbsp;symmetric&nbsp;uvw&nbsp;position</tt></dd></dl>
+
+<dl><dt><a name="Symmetrygui-fun_update"><strong>fun_update</strong></a>(self)</dt><dd><tt>Update&nbsp;button</tt></dd></dl>
+
+<dl><dt><a name="Symmetrygui-update"><strong>update</strong></a>(self)</dt><dd><tt>Update&nbsp;crystal</tt></dd></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>BF</strong> = ['Times', 14]<br>
+<strong>HF</strong> = ['Courier', 12]<br>
+<strong>LF</strong> = ['Times', 14]<br>
+<strong>SF</strong> = ['Times New Roman', 14]<br>
+<strong>TF</strong> = ['Times', 10]<br>
+<strong>__version__</strong> = '1.1'<br>
+<strong>bkg</strong> = 'snow'<br>
+<strong>btn</strong> = 'azure'<br>
+<strong>btn_active</strong> = 'grey'<br>
+<strong>btn_txt</strong> = 'black'<br>
+<strong>ety</strong> = 'white'<br>
+<strong>ety_txt</strong> = 'black'<br>
+<strong>opt</strong> = 'azure'<br>
+<strong>opt_active</strong> = 'grey'<br>
+<strong>opt_txt</strong> = 'black'<br>
+<strong>structure_list</strong> = &lt;Dans_Diffraction.classes_structures.Structures instance&gt;<br>
+<strong>txtcol</strong> = 'black'</td></tr></table>
+</body></html>
