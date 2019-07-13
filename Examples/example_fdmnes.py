@@ -16,6 +16,7 @@ f = cf+'/../Dans_Diffraction/Structures/Ca2RuO4.cif'
 
 xtl = dif.Crystal(f)
 
+dif.classes_gui.RunFDMNESgui(xtl)
 
 fdm = dif.Fdmnes(xtl) # this might take a while the first time as the fdmnes_win64.exe file is found
 

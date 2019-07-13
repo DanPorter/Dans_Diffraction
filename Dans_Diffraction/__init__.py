@@ -17,14 +17,15 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.3
-Last updated: 23/02/19
+Version 1.4
+Last updated: 13/07/19
 
 Version History:
 02/03/18 1.0    Version History started.
 30/05/18 1.1    Fdmnes added
 08/06/18 1.2    Python3 now fully supported
 23/02/19 1.3    Graphical user intrface and magnetic x-ray scattering now implemented
+13/07/19 1.4    FDMNES functionality added
 """
 
 # Set TkAgg environment
@@ -36,7 +37,9 @@ from . import functions_plotting as fp
 from . import functions_crystallography as fc
 from .classes_crystal import Crystal, MultiCrystal
 from .classes_structures import Structures
-from .classes_fdmnes import Fdmnes, FdmnesAnalysis
+from .classes_fdmnes import fdmnes_activate
+if fdmnes_activate():
+    from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 # GUI (requires tkinter)
 try:
