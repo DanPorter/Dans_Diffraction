@@ -128,7 +128,7 @@ su.P # superstructure matrix
 ```
 
 ### Graphical Front End
-![All GUI elements](Screenshots/GUI all.png)
+![All GUI elements](Screenshots/GUI_all.png)
 
 Start a new GUI, then select a cif file:
 ```python
@@ -157,5 +157,5 @@ See class documentation for more information.
 
 Once activated, FDMNES GUI elements become available from the main window, emulating functionality of the classes.
 
-![FDMNES Run](Screenshots/GUI 08.png)
-![FDMNES Analyse](Screenshots/GUI 09.png)
+![FDMNES Run](Screenshots/GUI_08.png)
+![FDMNES Analyse](Screenshots/GUI_09.png)
