@@ -6,18 +6,15 @@ Calculate list of reflections
 import sys,os
 import numpy as np
 import matplotlib.pyplot as plt # Plotting
-from Dans_Diffraction import functions_general as fg
-from Dans_Diffraction import functions_plotting as fp
-from Dans_Diffraction import Crystal
-from Dans_Diffraction import structure_list
-
-cf=os.path.dirname(__file__)
+cf = os.path.dirname(__file__)
+sys.path.insert(0,os.path.join(cf,'..'))
+import Dans_Diffraction as dif
 
 
 #f = cf+'/../Dans_Diffraction/Structures/Ca2RuO4.cif'
-f = structure_list.Ca2RuO4.filename
+f = dif.structure_list.Ca2RuO4.filename
 
-xtl = Crystal(f)
+xtl = dif.Crystal(f)
 xtl.Atoms.changeatom(1,mxmymz=[0,3,0])
 xtl.generate_structure()
 

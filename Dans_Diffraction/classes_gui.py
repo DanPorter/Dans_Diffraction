@@ -45,8 +45,8 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 from .classes_structures import Structures
-from .classes_fdmnes import fdmnes_activate
-if fdmnes_activate():
+from .classes_fdmnes import fdmnes_checker
+if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 structure_list = Structures()
@@ -64,6 +64,7 @@ bkg = 'snow'
 ety = 'white'
 btn = 'azure' #'light slate blue'
 opt = 'azure' #'light slate blue'
+btn2 = 'gold'
 # Colours - active
 btn_active = 'grey'
 opt_active = 'grey'
@@ -106,7 +107,7 @@ class Crystalgui:
         self.file = tk.StringVar(frame, self.xtl.filename)
         var = tk.Label(f_file, text='CIF file:', font=SF, width=10)
         var.pack(side=tk.LEFT, expand=tk.NO)
-        var = tk.Label(f_file, textvariable=self.file, font=TF, width=50)
+        var = tk.Label(f_file, textvariable=self.file, font=TF)
         var.pack(side=tk.LEFT, expand=tk.YES)
         var = tk.Button(f_file, text='Load CIF', font=BF, bg=btn, activebackground=btn_active, command=self.fun_loadcif)
         var.pack(side=tk.LEFT, expand=tk.NO, padx=5)
@@ -125,9 +126,9 @@ class Crystalgui:
         # List of structures
         self.struct_list = tk.StringVar(frame, 'Structures')
         var = tk.OptionMenu(f_name, self.struct_list, *structure_list.list, command=self.fun_loadstruct)
-        var.config(font=SF, width=10, bg=opt, activebackground=opt_active)
+        var.config(font=SF, width=20, bg=opt, activebackground=opt_active)
         var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
-        var.pack(side=tk.RIGHT)
+        var.pack(side=tk.RIGHT, fill=tk.X, padx=5)
         
         # Buttons 1
         f_but = tk.Frame(frame)
@@ -159,7 +160,7 @@ class Crystalgui:
         var = tk.Button(f_but, text='Super\nStructure', bg=btn, activebackground=btn_active, font=BF,
                         command=self.fun_superstructure)
         var.pack(side=tk.LEFT)
-        if fdmnes_activate():
+        if fdmnes_checker():
             var = tk.Button(f_but, text='Run\nFDMNES', bg=btn, activebackground=btn_active, font=BF,
                             command=self.fun_fdmnes)
             var.pack(side=tk.LEFT)
@@ -247,6 +248,7 @@ class Crystalgui:
         Superstructuregui(self.xtl)
 
     def fun_fdmnes(self):
+        from .classes_fdmnes import Fdmnes, FdmnesAnalysis
         RunFDMNESgui(self.xtl)
 
     def on_closing(self):
@@ -348,7 +350,7 @@ class Atomsgui:
     """
     View and edit the atomic positions
     """
-    def __init__(self,xtl,symmetric_only=True,magnetic_moments=False):
+    def __init__(self, xtl, symmetric_only=True, magnetic_moments=False):
         """Initialise"""
         self.xtl = xtl
         self.symmetric_only = symmetric_only
@@ -760,11 +762,11 @@ class Propertiesgui:
         line.pack(side=tk.TOP, expand=tk.TRUE, pady=5)
 
         # Cell properties
-        var = tk.Label(line, text='Weight = %8.2f g/mol'%xtl.Properties.weight())
+        var = tk.Label(line, text='Weight = %8.2f g/mol'%xtl.Properties.weight(), font=TF)
         var.pack(side=tk.LEFT)
-        var = tk.Label(line, text='Volume = %8.2f A^3' % xtl.Properties.volume())
+        var = tk.Label(line, text='Volume = %8.2f A^3' % xtl.Properties.volume(), font=TF)
         var.pack(side=tk.LEFT)
-        var = tk.Label(line, text='Density = %8.2f g/cm' % xtl.Properties.density())
+        var = tk.Label(line, text='Density = %8.2f g/cm' % xtl.Properties.density(), font=TF)
         var.pack(side=tk.LEFT)
 
         # ---Line 2---
@@ -772,19 +774,19 @@ class Propertiesgui:
         line.pack(side=tk.TOP, expand=tk.TRUE, pady=5)
 
         # Energy wavelength Conversions
-        var = tk.Label(line, text='Energy:')
+        var = tk.Label(line, text='Energy:', font=TF)
         var.pack(side=tk.LEFT)
         var = tk.Entry(line, textvariable=self.energy_kev, font=TF, width=16, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         var.bind('<Return>',self.fun_energy2wave)
         var.bind('<KP_Enter>',self.fun_energy2wave)
-        var = tk.Label(line, text='keV <-> Wavelength:')
+        var = tk.Label(line, text='keV <-> Wavelength:', font=TF)
         var.pack(side=tk.LEFT)
         var = tk.Entry(line, textvariable=self.wavelength, font=TF, width=16, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         var.bind('<Return>', self.fun_wave2energy)
         var.bind('<KP_Enter>', self.fun_wave2energy)
-        var = tk.Label(line, text='A')
+        var = tk.Label(line, text='A', font=TF)
         var.pack(side=tk.LEFT)
         var = tk.OptionMenu(line, self.edge, *self.xr_edges, command=self.fun_edge)
         var.config(font=SF, width=5, bg=opt, activebackground=opt_active)
@@ -796,25 +798,25 @@ class Propertiesgui:
         line.pack(side=tk.TOP, expand=tk.TRUE, pady=5)
 
         # Two-Theta - Q - d conversion
-        var = tk.Label(line, text='Two-Theta:')
+        var = tk.Label(line, text='Two-Theta:', font=TF)
         var.pack(side=tk.LEFT)
         var = tk.Entry(line, textvariable=self.twotheta, font=TF, width=10, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         var.bind('<Return>', self.fun_tth2q)
         var.bind('<KP_Enter>', self.fun_tth2q)
-        var = tk.Label(line, text='Deg <-> Q:')
+        var = tk.Label(line, text='Deg <-> Q:', font=TF)
         var.pack(side=tk.LEFT)
         var = tk.Entry(line, textvariable=self.qmag, font=TF, width=10, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         var.bind('<Return>', self.fun_q2tth)
         var.bind('<KP_Enter>', self.fun_q2tth)
-        var = tk.Label(line, text='A^-1 <-> d-spacing:')
+        var = tk.Label(line, text='A^-1 <-> d-spacing:', font=TF)
         var.pack(side=tk.LEFT)
         var = tk.Entry(line, textvariable=self.dspace, font=TF, width=10, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         var.bind('<Return>', self.fun_d2tth)
         var.bind('<KP_Enter>', self.fun_d2tth)
-        var = tk.Label(line, text='A')
+        var = tk.Label(line, text='A', font=TF)
         var.pack(side=tk.LEFT)
 
 
@@ -835,7 +837,7 @@ class Propertiesgui:
 
         var = tk.Button(line, text='Mass Fraction', font=BF, command=self.fun_frac, bg=btn, activebackground=btn_active)
         var.pack(side=tk.LEFT)
-        var = tk.Label(line, text=' Z:')
+        var = tk.Label(line, text=' Z:', font=TF)
         var.pack(side=tk.LEFT)
         var = tk.Entry(line, textvariable=self.zfraction, font=TF, width=2, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
@@ -1038,7 +1040,7 @@ class Scatteringgui:
         var.pack(side=tk.LEFT)
         
         # Type
-        types = ['X-Ray','Neutron','XRay Magnetic','Neutron Magnetic','XRay Resonant']
+        types = ['X-Ray', 'Neutron', 'XRay Magnetic', 'Neutron Magnetic', 'XRay Resonant']
         var = tk.Label(line2, text='Type:',font=SF)
         var.pack(side=tk.LEFT)
         var = tk.OptionMenu(line2, self.type, *types)
@@ -1047,7 +1049,7 @@ class Scatteringgui:
         var.pack(side=tk.LEFT)
         
         # Orientation
-        orients = ['None','Reflection','Transmission']
+        orients = ['None', 'Reflection', 'Transmission']
         var = tk.OptionMenu(line2, self.orientation, *orients)
         var.config(font=SF, width=10, bg=opt, activebackground=opt_active)
         var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
@@ -1063,7 +1065,7 @@ class Scatteringgui:
         var = tk.Entry(line2, textvariable=self.direction_l, font=TF, width=2, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         
-        #--- Line 3 ---
+        # --- Line 3 ---
         line3 = tk.Frame(frame)
         line3.pack(side=tk.TOP,fill=tk.X,pady=5)
         
@@ -1097,11 +1099,11 @@ class Scatteringgui:
         var = tk.Entry(line3, textvariable=self.twotheta_max, font=TF, width=5, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         
-        #--- Line 4 ---
+        # --- Line 4 ---
         line4 = tk.Frame(frame)
-        line4.pack(side=tk.TOP,fill=tk.X,pady=5)
+        line4.pack(side=tk.TOP, fill=tk.X, pady=5)
         
-        var = tk.Button(line4, text='Display Intensities', font=BF, command=self.fun_intensities, bg=btn,
+        var = tk.Button(line4, text='Display Intensities', font=BF, command=self.fun_intensities, bg=btn2,
                         activebackground=btn_active)
         var.pack(side=tk.LEFT)
         
@@ -1130,11 +1132,11 @@ class Scatteringgui:
         #                activebackground=btn_active)
         #var.pack(side=tk.LEFT, pady=2)
         
-        #--- Line 5 ---
+        # --- Line 5 ---
         line5 = tk.Frame(frame)
         line5.pack(side=tk.TOP,pady=5)
 
-        #---HKL Planes---
+        # ---HKL Planes---
         # i value
         var = tk.Label(line5, text='i:',font=SF)
         var.pack(side=tk.LEFT)
@@ -1911,7 +1913,7 @@ class RunFDMNESgui:
         var = tk.Button(lline, text='Write fdm start file', font=BF, bg=btn, activebackground=btn_active,
                         command=self.fun_writefdmfile)
         var.pack()
-        var = tk.Button(lline, text='Write Files & Run FDMNES', font=BF, bg='gold', activebackground=btn_active,
+        var = tk.Button(lline, text='Write Files & Run FDMNES', font=BF, bg=btn2, activebackground=btn_active,
                         command=self.fun_runfdmnes)
         var.pack()
         var = tk.Button(lline, text='Plot Results', font=BF, bg=btn, activebackground=btn_active,
@@ -2036,7 +2038,7 @@ class AnaFDMNESgui:
         default_width = 60
         default_height = 30
 
-        if output_path is None:
+        if output_path is None or not os.path.isfile(os.path.join(output_path, output_name + '.txt')):
             self.fun_loadpath()
 
         self.fdm = FdmnesAnalysis(output_path, output_name)

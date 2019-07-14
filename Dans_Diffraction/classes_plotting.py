@@ -43,7 +43,7 @@ class Plotting:
         "initialise"
         self.xtl = xtl
     
-    def plot_crystal(self,show_labels=False):
+    def plot_crystal(self, show_labels=False):
         """
         Plot the atomic cell in 3D
             Click and drag to rotate the structure in 3D
@@ -84,8 +84,8 @@ class Plotting:
             
             xyz = np.array([R[m,:] for m in range(len(R)) if invidx[m] == n])
             iii = np.array([I[m] for m in range(len(R)) if invidx[m] == n])
-            col = np.tile(colors[n], (len(xyz),1) )
-            ax.scatter(xyz[iii,0],xyz[iii,1],xyz[iii,2],s=sizes[n],c=col,label=labels[n],cmap=colors)
+            col = np.tile(colors[n], (len(xyz[iii,:]),1) )
+            ax.scatter(xyz[iii,0], xyz[iii,1], xyz[iii,2], s=sizes[n], c=col, label=labels[n], cmap=colors)
             
             #mxyz = np.array([mxmymz[m,:] for m in range(len(R)) if invidx[m] == n])
             

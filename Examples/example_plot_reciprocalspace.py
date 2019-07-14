@@ -6,15 +6,15 @@ Generate a plane in reciprocal space
 import sys,os
 import numpy as np
 import matplotlib.pyplot as plt # Plotting
-from Dans_Diffraction.classes_crystal import Crystal
-
-cf=os.path.dirname(__file__)
+cf = os.path.dirname(__file__)
+sys.path.insert(0,os.path.join(cf,'..'))
+import Dans_Diffraction as dif
 
 
 f = cf+'/../Dans_Diffraction/Structures/Diamond.cif'
 f = cf+'/../Dans_Diffraction/Structures/Na0.8CoO2_P63mmc.cif'
 
-xtl = Crystal(f)
+xtl = dif.Crystal(f)
 
 xtl.Plot.simulate_hk0(L=0)
 plt.show()

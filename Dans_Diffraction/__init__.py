@@ -11,7 +11,7 @@ Usage:
 Usage:
     ***From Terminal***
     cd /location/of/file
-    ipython -i -pyplot Dans_Diffraction
+    ipython -i -matplotlib tk Dans_Diffraction
 
 By Dan Porter, PhD
 Diamond
@@ -25,7 +25,7 @@ Version History:
 30/05/18 1.1    Fdmnes added
 08/06/18 1.2    Python3 now fully supported
 23/02/19 1.3    Graphical user intrface and magnetic x-ray scattering now implemented
-13/07/19 1.4    FDMNES functionality added
+13/07/19 1.4    FDMNES GUI functionality added
 """
 
 # Set TkAgg environment
@@ -37,8 +37,8 @@ from . import functions_plotting as fp
 from . import functions_crystallography as fc
 from .classes_crystal import Crystal, MultiCrystal
 from .classes_structures import Structures
-from .classes_fdmnes import fdmnes_activate
-if fdmnes_activate():
+from .classes_fdmnes import fdmnes_checker
+if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 # GUI (requires tkinter)
@@ -47,13 +47,17 @@ try:
 except ImportError:
     print('GUI functionality not available, you need to install tkinter.')
 
-__version__ = '1.3'
-__date__ = '23/02/19'
+__version__ = '1.4'
+__date__ = '13/07/19'
 
 
-# Build 
+# Build
 structure_list = Structures()
 
-if __name__ == '__main__':
-    
-    xtl = Crystal()
+
+# FDMNES Activation
+def activate_fdmnes():
+    """To activate FDMNES functionality"""
+    fdmnes_checker(activate=True)
+    if fdmnes_checker():
+        from .classes_fdmnes import Fdmnes, FdmnesAnalysis

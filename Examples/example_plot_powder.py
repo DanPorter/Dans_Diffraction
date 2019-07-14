@@ -6,9 +6,9 @@ Plot powder patter from crystal
 import sys,os
 import numpy as np
 import matplotlib.pyplot as plt # Plotting
+cf = os.path.dirname(__file__)
+sys.path.insert(0,os.path.join(cf,'..'))
 import Dans_Diffraction as dif
-
-cf=os.path.dirname(__file__)
 
 
 f = cf+'/../Dans_Diffraction/Structures/Diamond.cif'

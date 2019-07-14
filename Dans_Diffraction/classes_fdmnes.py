@@ -711,7 +711,7 @@ class Spherical:
 ############## FUNCTIONS ########################
 
 
-def fdmnes_activate(activate=False):
+def fdmnes_checker(activate=False):
     """Returns True if fdmnes available and activated"""
 
     datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -721,7 +721,10 @@ def fdmnes_activate(activate=False):
         find_fdmnes(reset=True)
 
     if os.path.isfile(pointerfile):
-        return True
+        with open(pointerfile) as file:
+            location = file.readline()
+        if os.path.isfile(location):
+            return True
     return False
 
 
@@ -742,9 +745,8 @@ def find_fdmnes(fdmnes_filename='fdmnes_win64.exe', reset=False):
     pointerfile = os.path.join(datadir, 'data', 'FDMNES_pointer.txt')
 
     if os.path.isfile(pointerfile) and not reset:
-        file = open(pointerfile)
-        location = file.readline()
-        file.close()
+        with open(pointerfile) as file:
+            location = file.readline()
         if os.path.isfile(location):
             return location
 
