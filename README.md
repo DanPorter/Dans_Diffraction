@@ -7,6 +7,9 @@ By Dan Porter, Diamond Light Source
 2018
 
 TL;DR:
+```text
+$ ipython -i -m Dans_Diffraction
+```
 ```python
 import Dans_Diffraction as dif
 xtl = dif.Crystal('some_file.cif')
@@ -42,7 +45,7 @@ $ git clone https://github.com/DanPorter/Dans_Diffraction.git
 # Operation
 Dans_Diffraction is best run within an interactive python environment:
 ```text
-$ ipython -i Dans_Diffraction
+$ ipython -i -m Dans_Diffraction
 ```
 
 Dans_Diffraction can also be run in scripts as an import, example scripts are provided in the [Examples](Examples) folder.
