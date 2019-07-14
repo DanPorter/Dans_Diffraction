@@ -70,7 +70,7 @@ xtl.Structure.addatom(idx=0, u=0, v=0, w=0, type='Co', label='Co1')
 xtl.Plot.plot_crystal() # 3D plot
 xtl.Plot.plot_layers() # 2D plot for layered materials
 ```
-![3D Plot]('Screenshots/3Dstructrue_Ca3CoMnO6.png')
+![3D Plot](Screenshots/3Dstructrue_Ca3CoMnO6.png)
 
 
 ### Alter crystal symmetry
@@ -96,8 +96,8 @@ xtl.print_all_refelctions() # Returns formated string of all allowed reflections
 xtl.Plot.simulate_powder() # Powder pattern
 xtl.Plot.simulate_hk0() # Reciprocal space plane
 ```
-![Powder Pattern]('Screenshots/powder_diamond.png')
-![HK0 Simulation]('Screenshots/supercell_diffraction.png')
+![Powder Pattern](Screenshots/powder_diamond.png)
+![HK0 Simulation](Screenshots/supercell_diffraction.png)
 
 Magnetic scattering is also available for neutrons and x-rays (both resonant and non-resonant), using the appropriate magnetic form-factors.
 ```python
@@ -128,7 +128,7 @@ su.P # superstructure matrix
 ```
 
 ### Graphical Front End
-![All GUI elements]('Screenshots/GUI all.png')
+![All GUI elements](Screenshots/GUI all.png)
 
 Start a new GUI, then select a cif file:
 ```python
@@ -157,5 +157,5 @@ See class documentation for more information.
 
 Once activated, FDMNES GUI elements become available from the main window, emulating functionality of the classes.
 
-![FDMNES Run]('Screenshots/GUI 08.png')
-![FDMNES Analyse]('Screenshots/GUI 09.png')
+![FDMNES Run](Screenshots/GUI 08.png)
+![FDMNES Analyse](Screenshots/GUI 09.png)
