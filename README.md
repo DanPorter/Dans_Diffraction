@@ -6,10 +6,11 @@ Reads crystallographic cif files and simulates diffraction
 By Dan Porter, Diamond Light Source
 2018
 
-TL;DR:
+#### TL;DR:
 ```text
 $ ipython -i -m Dans_Diffraction
 ```
+
 ```python
 import Dans_Diffraction as dif
 xtl = dif.Crystal('some_file.cif')

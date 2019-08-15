@@ -14,7 +14,7 @@ Diamond
 2019
 
 Version 1.2
-Last updated: 13/07/19
+Last updated: 15/08/19
 
 Version History:
 10/11/17 0.1    Program created
@@ -737,6 +737,7 @@ class Propertiesgui:
 
         # Crystal Atoms
         atoms = np.unique(xtl.Atoms.type)
+        atoms = fc.arrange_atom_order(atoms)
         elements = fc.atom_properties(None,'Element')
 
         # Variables
@@ -756,6 +757,16 @@ class Propertiesgui:
         self.xr_edges.insert(1, 'Mo Ka')
         self.xr_energies.insert(0, fg.Cu)
         self.xr_energies.insert(1, fg.Mo)
+
+        # ---Line 0---
+        line = tk.Frame(frame)
+        line.pack(side=tk.TOP, expand=tk.TRUE, pady=5)
+
+        # Cell Name
+        var = tk.Label(line, text=xtl.Properties.molname(), font=TF)
+        var.pack(side=tk.LEFT)
+        var = tk.Label(line, text=xtl.Properties.molcharge(), font=TF)
+        var.pack(side=tk.LEFT, padx=15)
 
         # ---Line 1---
         line = tk.Frame(frame)

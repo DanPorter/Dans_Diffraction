@@ -7,14 +7,16 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.2
-Last updated: 23/02/19
+Version 1.3
+Last updated: 15/08/19
 
 Version History:
 10/11/17 0.1    Program created
 06/01/18 1.0    Program renamed
 11/03/18 1.1    Added properties.info(), element.info()
 23/02/19 1.2    Added xray_edges
+15/08019 1.3    Added molcharge
+
 
 @author: DGPorter
 """
@@ -24,7 +26,7 @@ import numpy as np
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.2'
+__version__ = '1.3'
 
 
 class Properties:
@@ -103,42 +105,72 @@ class Properties:
             outstr += '{:3s} [{:8.3f}] {:5.2g} {:5.2f}%\n'.format(element,weights[n],atno[n]/Z,ff)
         return outstr
 
-    def molname(self, element=None, element_no=1, latex=False):
+    def molname(self, element=None, element_no=None, latex=False):
         """
         Generate molecular name of crystal
             element : str : specify element that will have a coordination number
             element_no : float : The coordination number of element
             latex : True/False : if true, outputs in latex format
+        :return: str
         """
 
-        type = self.xtl.Structure.type
-        occ = self.xtl.Structure.occupancy
+        type = np.asarray(self.xtl.Structure.type)
+        occ = np.asarray(self.xtl.Structure.occupancy)
 
         # Count elements
-        ats = np.unique(type) # need to arrange this by alcali/TM/O
+        ats = np.unique(type)
+        ats = fc.arrange_atom_order(ats)  # arrange this by alcali/TM/O
         atno = {}
         for a in ats:
             atno[a] = sum([occ[n] for n,x in enumerate(type) if x == a])
 
+        # default - set max Z atom to it's occupancy
         if element is None:
-            element = min(atno, key=atno.get)
+            z = fc.atom_properties(ats, 'Z')
+            element = ats[ np.argmax(z) ]
+            #element = min(atno, key=atno.get)
 
-        name = []
+        if element_no is None:
+            element_no = np.max(occ[type == element])
+
+        divideby = atno[element]/ element_no
+        name = fc.count_atoms(type, occ, divideby, latex)
+        name = ''.join(name)
+        return name
+
+    def molcharge(self, element=None, element_no=None, latex=False):
+        """
+        Generate molecular charge composition of crystal
+            element : str : specify element that will have a coordination number
+            element_no : float : The coordination number of element
+            latex : True/False : if true, outputs in latex format
+            charge: True/False : if true, outputs chemical charge format
+        :return: str
+        """
+
+        type = np.asarray(self.xtl.Structure.type)
+        occ = np.asarray(self.xtl.Structure.occupancy)
+
+        # Count elements
+        ats = np.unique(type)
+        ats = fc.arrange_atom_order(ats)  # arrange this by alcali/TM/O
+        atno = {}
         for a in ats:
-            atfrac = element_no*atno[a]/atno[element]
-            if np.abs(1-atfrac) < 0.01:
-                name += [a]
-            elif np.abs(atfrac - np.round(atfrac)) < 0.01:
-                if latex:
-                    name += [a+'$_{{{:1.0f}}}$'.format(atfrac)]
-                else:
-                    name += [a+'{:1.0f}'.format(atfrac)]
-            else:
-                if latex:
-                    name += [a+'$_{{{:4.2f}}}$'.format(atfrac)]
-                else:
-                    name += [a+'{:4.2f}'.format(atfrac)]
-        return ''.join(name)
+            atno[a] = sum([occ[n] for n,x in enumerate(type) if x == a])
+
+        # default - set max Z atom to it's occupancy
+        if element is None:
+            z = fc.atom_properties(ats, 'Z')
+            element = ats[ np.argmax(z) ]
+            #element = min(atno, key=atno.get)
+
+        if element_no is None:
+            element_no = np.max(occ[type == element])
+
+        divideby = atno[element]/ element_no
+        name = fc.count_charges(type, occ, divideby, latex)
+        name = ' '.join(name)
+        return name
 
     def absorption(self, energy_kev=None):
         """
@@ -202,7 +234,7 @@ class Properties:
             X += -(N/D)*C*(Zeff*r*r)
         return X
 
-    def atomic_neighbours(self,structure_index=0,radius=2.5,disp=False):
+    def atomic_neighbours(self, structure_index=0, radius=2.5, disp=False):
         """
         Returns the relative positions of atoms within a radius of the selected atom
             vector, label = atomic_distances(idx, radius)
@@ -227,7 +259,6 @@ class Properties:
         label = label[jj]
         mag = mag[jj]
         ii = np.where(mag<radius)[0]
-
 
         if disp:
             for i in ii:

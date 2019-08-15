@@ -29,14 +29,17 @@ Version History:
 """
 
 # Set TkAgg environment
-import matplotlib
-matplotlib.use('TkAgg')
+#import matplotlib
+#matplotlib.use('TkAgg')
+
 # Dans Diffraction
 from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 from .classes_crystal import Crystal, MultiCrystal
 from .classes_structures import Structures
+
+# FDMNES
 from .classes_fdmnes import fdmnes_checker
 if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
@@ -48,7 +51,7 @@ except ImportError:
     print('GUI functionality not available, you need to install tkinter.')
 
 __version__ = '1.4'
-__date__ = '13/07/19'
+__date__ = '12/08/19'
 
 
 # Build

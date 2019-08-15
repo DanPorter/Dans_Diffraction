@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 2.6
-Last updated: 06/03/19
+Version 2.7
+Last updated: 14/08/19
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -24,6 +24,7 @@ Version History:
 04/06/18 2.4    Added new checks to readcif, corrected atomic_properties for python3/numpy1.14
 08/06/18 2.5    Corrected a few errors and added some more comments
 06/03/19 2.6    Added print_atom_properties
+14/08/19 2.7    Added new Dans Element Properties file with extra comment line, new functions added
 
 @author: DGPorter
 """
@@ -33,7 +34,7 @@ import numpy as np
 
 from . import functions_general as fg
 
-__version__ = '2.6'
+__version__ = '2.7'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -423,6 +424,40 @@ def cif2dict(cifvals):
     return crys
 
 
+def read_atom_properties_file(filedir):
+    """
+    Reads the text file "Dans Element Properties.txt"
+    Returns a list of dicts containing atomic properites from multiple sources
+      data = read_atom_properties_file(filedir)
+      data[22]['Element']
+    :param filedir: location of "Dans Element Properties.txt"
+    :return: [dict, ...]
+    """
+    with open(filedir, 'rt') as f:
+        lines = f.readlines()
+
+    head = None
+    data = []
+    for line in lines:
+        # Header
+        if '#' in line: continue
+        if head is None: head = line.split(); continue
+        # Data
+        vals = line.split()
+        element = {}
+        for n in range(len(vals)):
+            try:
+                value = int(vals[n])
+            except ValueError:
+                try:
+                    value = float(vals[n])
+                except ValueError:
+                    value = vals[n]
+            element[head[n]] = value
+        data += [element]
+    return data
+
+
 def atom_properties(elements=None, fields=None):
     """
     Loads the atomic properties of a particular atom from a database
@@ -438,6 +473,13 @@ def atom_properties(elements=None, fields=None):
     Available information includes:
           Z             = Element number
           Element Name  = Element name
+          Group         = Element Group on periodic table
+          Period        = Element period on periodic table
+          Block         = Element electronic block (s,p,d,f)
+          ValenceE      = Number of valence electrons
+          Config        = Element electronic orbital configuration
+          Radii         = Atomic Radii (pm)
+          Weight        = Standard atomic weight (g)
           Coh_b         = Bound coherent neutron scattering length
           Inc_b         = Bound incoherent neutron scattering length
           Nabs          = Neutron absorption coefficient
@@ -458,17 +500,14 @@ def atom_properties(elements=None, fields=None):
           j0_C          = Magnetic Form factor
           j0_c          = Magnetic Form factor
           j0_D          = Magnetic Form factor
-          Radii         = Atomic Radii (pm)
-          ValenceE      = Number of valence electrons
-          Weight        = Standard atomic weight (g)
     """
 
     atomfile = os.path.join(datadir, 'Dans Element Properties.txt')
-    file = open(atomfile, 'rb')
-    # Note: in Python3, genfromtxt enodes strings in the bytes format, which
-    # cannot be compared == with ascii strings (elements)
-    data = np.genfromtxt(file, skip_header=5, dtype=None, names=True)
-    file.close()
+    try:
+        data = np.genfromtxt(atomfile, skip_header=6, dtype=None, names=True, encoding='ascii')
+    except TypeError:
+        # Numpy version < 1.14
+        data = np.genfromtxt(atomfile, skip_header=6, dtype=None, names=True)
 
     if elements is not None:
         # elements must be a list e.g. ['Co','O']
@@ -476,7 +515,7 @@ def atom_properties(elements=None, fields=None):
         indx = [None] * len(elements)
         for n in range(len(data)):
             d = data[n]
-            fileelement = d['Element'].lower().decode('ascii')
+            fileelement = d['Element'].lower()
             if fileelement in elements:
                 for m in range(len(elements)):
                     if fileelement == elements[m]:
@@ -617,6 +656,211 @@ def attenuation(element_Z, energy_keV):
 
     energies = xma_data[:, 0] / 1000.
     return np.interp(energy_keV, energies, xma_data[:, element_Z])
+
+
+def element_symbol(element_Z):
+    """
+    Returns the element sympol for element_Z
+    :param element_Z: int
+    :return: str
+    """
+    symbols = atom_properties(None, 'Element')
+    return symbols[element_Z-1]
+
+
+def element_z(element):
+    """
+    Returns the element number Z
+    :param element: str
+    :return: int
+    """
+    z = atom_properties(element, 'Z')
+    if len(z) == 1:
+        return z[0]
+    return z
+
+
+def orbital_configuration(element_Z):
+    """
+    Returns the orbital configuration of an element as a list of strings
+    :param element_Z: int
+    :return: ['1s2', '2s2', '2p6', ...]
+    """
+
+    config = atom_properties(element_symbol(element_Z), 'Config')
+    return config[0].split('.')
+
+
+def split_element_symbol(element):
+    """
+    From element symbol, split charge and occupancy
+      symbol, occupancy, charge = split_element_symbol('Co3+')
+    :param element: str
+    :return: symbol: str
+    :return: occupancy: float
+    :return: charge: float
+    """
+
+    atom_n = re.findall('[A-Z][a-z]?|[0-9]+[.]?[0-9]*', element)
+    symbol = atom_n[0]
+    charge = 0
+    occupancy = 1
+    if len(atom_n) > 1:
+        if '-' in element:
+            charge = -float(atom_n[1])
+        elif '+' in element:
+            charge = float(atom_n[1])
+        else:
+            occupancy = float(atom_n[1])
+    return symbol, occupancy, charge
+
+
+def default_atom_charge(element):
+    """
+    Returns the default charge value for the element
+    :param element: str: 'Fe'
+    :return: int or nan
+    """
+
+    element = np.asarray(element).reshape(-1)
+    charge = np.zeros(len(element))
+    for n in range(len(element)):
+        symbol, occupancy, elecharge = split_element_symbol(element[n])
+        group = atom_properties(symbol, 'Group')[0]
+        if elecharge != 0:
+            charge[n] = elecharge
+        elif group == 1:
+            charge[n] = 1*occupancy
+        elif group == 2:
+            charge[n] = 2*occupancy
+        elif group == 16:
+            charge[n] = -2*occupancy
+        elif group == 17:
+            charge[n] = -1*occupancy
+        elif group == 18:
+            charge[n] = 0
+        else:
+            charge[n] = np.nan
+    if len(charge) == 1:
+        return charge[0]
+    return charge
+
+
+def balance_atom_charge(list_of_elements, occupancy=None):
+    """
+    Determine the default charges and assign remaining charge to
+    unspecified elements
+    :param list_of_elements:
+    :return: [list of charges]
+    """
+
+    if occupancy is None:
+        occupancy = np.ones(len(list_of_elements))
+    else:
+        occupancy = np.asarray(occupancy)
+
+    charge = np.zeros(len(list_of_elements))
+    for n in range(len(list_of_elements)):
+        _, occ, _ = split_element_symbol(list_of_elements[n])
+        charge[n] = occupancy[n]*default_atom_charge(list_of_elements[n])
+        occupancy[n] = occupancy[n]*occ
+
+    remaining_charge = -np.nansum(charge)
+    uncharged = np.sum(occupancy[np.isnan(charge)])
+    for n in range(len(list_of_elements)):
+        if np.isnan(charge[n]):
+            charge[n] = occupancy[n]*remaining_charge/uncharged
+    return charge
+
+
+def arrange_atom_order(list_of_elements):
+    """
+    Arrange a list of elements in the correct chemical order
+      ['Li','Co','O'] = arrange_atom_order(['Co', 'O', 'Li'])
+    :param list_of_elements: [list of str]
+    :return: [list of str]
+    """
+
+    list_of_elements = np.asarray(list_of_elements)
+    group = atom_properties(list_of_elements, 'Group')
+    idx = np.argsort(group)
+    return list(list_of_elements[idx])
+
+
+def count_atoms(list_of_elements, occupancy=None, divideby=1, latex=False):
+    """
+    Count atoms in a list of elements, returning condenced list of elements
+    :param list_of_elements: list of element symbols
+    :param occupancy: list of occupancies of each element (default=None)
+    :param divideby: divide each count by this (default=1)
+    :param latex: False*/True
+    :return: [list of str]
+    """
+
+    if occupancy is None:
+        occupancy = np.ones(len(list_of_elements))
+
+    # Count elements
+    ats = np.unique(list_of_elements)
+    ats = arrange_atom_order(ats)  # arrange this by alcali/TM/O
+    outstr = []
+    for a in ats:
+        atno = sum([occupancy[n] for n, x in enumerate(list_of_elements) if x == a])/float(divideby)
+        if np.abs(atno - 1) < 0.01:
+            atstr = ''
+        else:
+            atstr = '%0.2g' % atno
+            if latex:
+                atstr = '$_{%s}$' % atstr
+
+        outstr += ['%s%s' % (a, atstr)]
+    return outstr
+
+
+def count_charges(list_of_elements, occupancy=None, divideby=1, latex=False):
+    """
+    Count atoms in a list of elements, returning condenced list of elements with charges
+    :param list_of_elements: list of element symbols
+    :param occupancy: list of occupancies of each element (default=None)
+    :param divideby: divide each count by this (default=1)
+    :param latex: False*/True
+    :return: [list of str]
+    """
+
+    if occupancy is None:
+        occupancy = np.ones(len(list_of_elements))
+
+    # Determine element charges
+    charge = balance_atom_charge(list_of_elements, occupancy)
+
+    # Count elements
+    ats = np.unique(list_of_elements)
+    ats = arrange_atom_order(ats)  # arrange this by alcali/TM/O
+    atno = {}
+    chno = {}
+    for a in ats:
+        atno[a] = sum([occupancy[n] for n, x in enumerate(list_of_elements) if x == a])/float(divideby)
+        chno[a] = sum([charge[n] for n, x in enumerate(list_of_elements) if x == a])/(atno[a]*float(divideby))
+
+    outstr = []
+    for a in ats:
+        if np.abs(chno[a]-1) < 0.01:
+            chstr = '+'
+        elif np.abs(chno[a]+1) < 0.01:
+            chstr = '-'
+        elif chno[a] > 0:
+            chstr = '%0.2g+' % chno[a]
+        else:
+            chstr = '%0.2g-' % abs(chno[a])
+
+        if latex:
+            chstr = '$^{%s}$' % chstr
+
+        if np.abs(atno[a]-1) < 0.01:
+            outstr += ['%s%s' % (a, chstr)]
+        else:
+            outstr += ['%0.2g[%s%s]' % (atno[a], a, chstr)]
+    return outstr
 
 
 '-------------------Lattice Transformations------------------------------'

@@ -1059,7 +1059,7 @@ class MultiPlotting:
     """
     Plotting functions for the Multi-Crystal Object
     """
-    def simulate_powder(self,energy_kev=8.0,peak_width=0.05,background=0):
+    def simulate_powder(self, energy_kev=8.0, peak_width=0.05, background=0):
         """
         Generates a powder pattern for multiple phases
         """

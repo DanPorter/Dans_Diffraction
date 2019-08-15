@@ -7,14 +7,15 @@ By Dan Porter, PhD
 Diamond
 2018
 
-Version 1.2
-Last updated: 13/07/19
+Version 1.3
+Last updated: 07/08/19
 
 Version History:
 17/04/18 0.9    Program created
 04/06/18 1.0    Program completed and tested
 11/06/18 1.1    Analysis updated to find density with _sd1 and _sd0
 13/07/19 1.2    Small updates for gui functionality
+07/08/19 1.3    Changed reflist in FdmnesAnalysis to list of hkl
 
 @author: DGPorter
 """
@@ -27,7 +28,7 @@ from mpl_toolkits.mplot3d import Axes3D  # 3D plotting
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.2'
+__version__ = '1.3'
 
 
 class Fdmnes:
@@ -451,6 +452,7 @@ class FdmnesAnalysis:
         # Read Bav file (_bav.txt)
         with open(bav_name) as bavfile:
             self.output_text = bavfile.read()
+            self.header = self.output_text[:self.output_text.find('Symsite')]
 
         # Read XANES file (_conv.txt)
         enxanes, Ixanes = read_conv(convname)
@@ -461,18 +463,24 @@ class FdmnesAnalysis:
 
         # Read density of states file
         # sometimes this is _sd0.txt and sometimes _sd1.txt
-        if os.path.isfile(densityname%0):
-            self.density = Density(densityname%0)
-        elif os.path.isfile(densityname%1):
-            self.density = Density(densityname%1)
+        if os.path.isfile(densityname % 0):
+            self.density = Density(densityname % 0)
+        elif os.path.isfile(densityname % 1):
+            self.density = Density(densityname % 1)
 
         self.energy = energy
         self.angle = angle
         self.reflections = intensity
-        self.reflist = intensity.keys()
+        #self.reflist = intensity.keys()
+
+        # Generate list of reflections (sigma-pi refs only)
+        fnd = re.findall('-?\d+[\s-]+\d+[\s-]+\d+\s+sigma pi', self.header)
+        self.reflist = []
+        for val in fnd:
+            self.reflist += [[int(i) for i in re.findall('-?\d+', val)]]
 
         # Assign reflection files
-        for n, ref in enumerate(self.reflist):
+        for n, ref in enumerate(intensity.keys()):
             refname = ref.replace('(', '').replace(')', '').replace('-', '_')
             refobj = Reflection(self.energy, self.angle, self.reflections[ref], ref, calc_name)
             setattr(self, refname, refobj)
@@ -489,7 +497,7 @@ class FdmnesAnalysis:
         Returns header of calculation output fipe (*_bav.txt)
         :return: str
         """
-        return self.output_text[:bavtext.find('Symsite')]
+        return self.header
 
 
 class Reflection:
@@ -861,6 +869,8 @@ def azi_cut(storeeng, intensities, cutenergy=None):
         i, j = np.unravel_index(np.argmax(intensities), intensities.shape)
         print(' Highest value = {} at {} eV [{},{}]'.format(intensities[i, j], storeeng[i], i, j))
         cutenergy = storeeng[i]
+    elif cutenergy == 'all' or cutenergy == 'sum':
+        return np.sum(intensities, axis=0)
 
     enpos = np.argmin(abs(storeeng - cutenergy))
     if np.abs(storeeng[enpos] - cutenergy) > 5:
@@ -888,6 +898,8 @@ def eng_cut(storeang, intensities, cutangle=None):
         i, j = np.unravel_index(np.argmax(intensities), intensities.shape)
         print(' Highest value = {} at {} Deg [{},{}]'.format(intensities[i, j], storeang[j], i, j))
         cutangle = storeang[j]
+    elif cutangle == 'all' or cutangle == 'sum':
+        return np.sum(intensities, axis=1)
 
     angpos = np.argmin(abs(storeang - cutangle))
     if np.abs(storeang[angpos] - cutangle) > 5:

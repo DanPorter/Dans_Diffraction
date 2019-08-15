@@ -11,6 +11,7 @@ setup(
     packages=['Dans_Diffraction'],
     version='1.4.0',
     description='Generate diffracted intensities from crystals',
+    long_description_content_type='text/markdown',
     long_description=readme(),
     author='Dan Porter',
     author_email='d.g.porter@outlook.com',
