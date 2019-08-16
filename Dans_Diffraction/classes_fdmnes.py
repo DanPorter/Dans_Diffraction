@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2018
 
-Version 1.3
-Last updated: 07/08/19
+Version 1.4
+Last updated: 16/08/19
 
 Version History:
 17/04/18 0.9    Program created
@@ -16,6 +16,7 @@ Version History:
 11/06/18 1.1    Analysis updated to find density with _sd1 and _sd0
 13/07/19 1.2    Small updates for gui functionality
 07/08/19 1.3    Changed reflist in FdmnesAnalysis to list of hkl
+16/08/19 1.4    Added BavFile to read parts of .bav file
 
 @author: DGPorter
 """
@@ -28,7 +29,7 @@ from mpl_toolkits.mplot3d import Axes3D  # 3D plotting
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.3'
+__version__ = '1.4'
 
 
 class Fdmnes:
@@ -451,15 +452,14 @@ class FdmnesAnalysis:
 
         # Read Bav file (_bav.txt)
         with open(bav_name) as bavfile:
-            self.output_text = bavfile.read()
-            self.header = self.output_text[:self.output_text.find('Symsite')]
+            self.bavfile = BavFile(bavfile.read())
+            #self.output_text = bavfile.read()
+
 
         # Read XANES file (_conv.txt)
-        enxanes, Ixanes = read_conv(convname)
-        self.xanes = Xanes(enxanes, Ixanes, calc_name)
-
-        # Read reflection files (_scan_conv.txt)
-        energy, angle, intensity = read_scan_conv(scan_conv_name)
+        if os.path.isfile(convname):
+            enxanes, Ixanes = read_conv(convname)
+            self.xanes = Xanes(enxanes, Ixanes, calc_name)
 
         # Read density of states file
         # sometimes this is _sd0.txt and sometimes _sd1.txt
@@ -468,36 +468,104 @@ class FdmnesAnalysis:
         elif os.path.isfile(densityname % 1):
             self.density = Density(densityname % 1)
 
-        self.energy = energy
-        self.angle = angle
-        self.reflections = intensity
-        #self.reflist = intensity.keys()
+        if os.path.isfile(scan_conv_name):
+            # Read reflection files (_scan_conv.txt)
+            energy, angle, intensity = read_scan_conv(scan_conv_name)
+            self.energy = energy
+            self.angle = angle
+            self.reflections = intensity
+            #self.reflist = intensity.keys()
 
-        # Generate list of reflections (sigma-pi refs only)
-        fnd = re.findall('-?\d+[\s-]+\d+[\s-]+\d+\s+sigma pi', self.header)
-        self.reflist = []
-        for val in fnd:
-            self.reflist += [[int(i) for i in re.findall('-?\d+', val)]]
+            # Generate list of reflections (sigma-pi refs only)
+            self.reflist = self.bavfile.reflections()
+            self.refkeys = []
+            self.sphkeys = []
 
-        # Assign reflection files
-        for n, ref in enumerate(intensity.keys()):
-            refname = ref.replace('(', '').replace(')', '').replace('-', '_')
-            refobj = Reflection(self.energy, self.angle, self.reflections[ref], ref, calc_name)
-            setattr(self, refname, refobj)
+            # Assign reflection files
+            for n, ref in enumerate(intensity.keys()):
+                refname = ref.replace('(', '').replace(')', '').replace('-', '_')
+                refobj = Reflection(self.energy, self.angle, self.reflections[ref], ref, calc_name)
+                setattr(self, refname, refobj)
+                self.refkeys += [refname]
 
-            # Read spherical contribution files
-            sphrefname = 'sph_' + refname
-            if os.path.isfile(spherename % (n + 1)):
-                data = np.genfromtxt(spherename % (n + 1), skip_header=3, names=True)
-                sphobj = Spherical(data, ref, calc_name)
-                setattr(self, sphrefname, sphobj)
+                # Read spherical contribution files
+                sphrefname = 'sph_' + refname
+                if os.path.isfile(spherename % (n + 1)):
+                    data = np.genfromtxt(spherename % (n + 1), skip_header=3, names=True)
+                    sphobj = Spherical(data, ref, calc_name)
+                    setattr(self, sphrefname, sphobj)
+                    self.sphkeys += [sphrefname]
+        else:
+            self.reflist = []
+            self.refkeys = []
+            self.sphkeys = []
 
     def info(self):
         """
         Returns header of calculation output fipe (*_bav.txt)
         :return: str
         """
-        return self.header
+        return self.bavfile.header()
+
+
+class BavFile:
+    def __init__(self, text):
+        self.text = text
+        self.potrmt = potrmt(text)
+
+    def header(self):
+        """
+        Returns the top part of the file
+        :return:
+        """
+        return self.text[:self.text.find('Symsite')]
+
+    def reflections(self):
+        """
+        Return list of reflections specified in the header
+        :return: list
+        """
+
+        rgex = [r'-?\d+[\s-]+\d+[\s-]+\d+\s+sigma pi',
+                r'-?\d+[\s-]+\d+[\s-]+\d+\s+sigma sigma',
+                r'-?\d+[\s-]+\d+[\s-]+\d+\s+pi pi',
+                r'-?\d+[\s-]+\d+[\s-]+\d+\s+pi sigma']
+        rgex = ' | '.join(rgex)
+
+        fnd  = re.findall(rgex, self.header())
+        reflist = []
+        for val in fnd:
+            reflist += [[int(i) for i in re.findall(r'-?\d+', val)]]
+        return reflist
+
+    def cycles(self):
+        """
+        Returns the number of cycles completed
+        :return:
+        """
+        return self.text.count('Cycle')
+
+    def charge_str(self):
+        """
+        returns final cycle ion charge
+        :return: str
+        """
+        z = self.potrmt['Z']
+        ch = self.potrmt['ch_ion']
+        outstr = '  Z : ch_ion\n'
+        outstr+= '\n'.join(['%3d : %s' % (z[n], ch[n]) for n in range(len(z))])
+        return outstr
+
+    def potrmt_str(self):
+        """
+        Return final cycle "Potrmt" string
+        :return: str
+        """
+        keys = list(self.potrmt.keys())
+        outstr = ' '.join(['%8s' % key for key in keys]) + '\n'
+        for n in range(len(self.potrmt[keys[0]])):
+            outstr += ' '.join(['%8s' % self.potrmt[key][n] for key in keys]) + '\n'
+        return outstr
 
 
 class Reflection:
@@ -815,7 +883,7 @@ def read_scan_conv(filename='out_scan_conv.txt'):
 
     # Determine reflections in file
     filetext = file.read()  # generate string
-    reftext = re.findall(r'I\(\-?\d+-?\d+?-?\d+?\)\w+', filetext)  # find reflection strings
+    reftext = re.findall(r'I\(-?\d+-?\d+?-?\d+?\)\w+', filetext)  # find reflection strings
 
     refs = np.unique(reftext)  # remove duplicates
     Npeak = len(refs)
@@ -906,3 +974,32 @@ def eng_cut(storeang, intensities, cutangle=None):
         print("You havent choosen the right cutangle. angpos = {} [{}]".format(angpos, storeang[angpos]))
     return intensities[:, angpos]
 
+
+def potrmt(bav_text):
+    """
+    Get the final cycle charge values from the _bav.txt file
+
+    :param bav_text: str _bav.txt file
+    :return: dict with keys ['Z', 'charge', 'ch_ion', 'Vmft', 'Ionic radius']
+    """
+
+    # Header
+    idx = bav_text.rfind('ch_ion')  # last occurance of ch_ion
+    if idx == -1:
+        return {}
+    hline = bav_text[ bav_text[:idx].rfind('\n') : bav_text[idx:].find('\n') + idx ].strip()
+    head = re.split(r'\s\s+', hline.strip())
+
+    lines = bav_text[idx:].split('\n')
+    values = []
+    for line in lines[1:]:
+        data = line.split()
+        if len(data) != len(head): break
+        data = [float(item.replace('*', '')) for item in data]
+        values += [data]
+
+    values = np.array(values)
+    out = {}
+    for n in range(len(head)):
+        out[head[n]] = values[:, n]
+    return out

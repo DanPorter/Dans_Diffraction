@@ -14,7 +14,7 @@ Diamond
 2019
 
 Version 1.2
-Last updated: 15/08/19
+Last updated: 16/08/19
 
 Version History:
 10/11/17 0.1    Program created
@@ -2085,7 +2085,7 @@ class AnaFDMNESgui:
         line.pack(side=tk.TOP, fill=tk.X, pady=5)
         var = tk.Label(line, text='Reflections:', font=SF)
         var.pack(side=tk.LEFT)
-        self.reflist = [ref.replace('(', '').replace(')', '').replace('-', '_') for ref in self.fdm.reflist]
+        self.reflist = [ref.replace('(', '').replace(')', '').replace('-', '_') for ref in self.fdm.refkeys]
         self.reflection = tk.StringVar(frame, self.reflist[0])
         var = tk.OptionMenu(line, self.reflection, *self.reflist)
         var.config(font=SF, width=10, bg=opt, activebackground=opt_active)
@@ -2128,9 +2128,37 @@ class AnaFDMNESgui:
                         command=self.fun_refazim)
         var.pack(side=tk.LEFT, padx=6)
 
+        # ---Line 6---
+        var = tk.Label(left, text='Number of cycles: %d' % self.fdm.bavfile.cycles(), font=SF)
+        var.pack(anchor=tk.W)
+        var = tk.Label(left, text='Final Cycle Charge state:', font=SF)
+        var.pack(anchor=tk.W)
+        var = tk.Label(left, text=self.fdm.bavfile.potrmt_str(), font=HF)
+        var.pack(anchor=tk.W)
+
         # RRRRightRRR
+        right = tk.Frame(frame)
+        right.pack(side=tk.LEFT, expand=tk.YES)
+
+        # ---Search box---
+        line = tk.Frame(right)
+        line.pack(side=tk.TOP, fill=tk.X, pady=5)
+        var = tk.Label(line, text='Search:', font=SF)
+        var.pack(side=tk.LEFT)
+        self.bavsearch = tk.StringVar(frame, '')
+        var = tk.Entry(line, textvariable=self.bavsearch, font=SF, width=30, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT, expand=tk.YES, padx=6)
+        var.bind('<Return>', self.fun_search_next)
+        var.bind('<KP_Enter>', self.fun_search_next)
+        var = tk.Button(line, text='Next', font=BF, bg=btn, activebackground=btn_active, width=5,
+                        command=self.fun_search_next)
+        var.pack(side=tk.LEFT, padx=6)
+        var = tk.Button(line, text='Prev', font=BF, bg=btn, activebackground=btn_active, width=5,
+                        command=self.fun_search_prev)
+        var.pack(side=tk.LEFT, padx=6)
+
         # |||Text Box|||
-        box = tk.LabelFrame(frame, text='FDMNES _bav.txt File')
+        box = tk.LabelFrame(right, text='FDMNES _bav.txt File')
         box.pack(side=tk.LEFT, padx=4, fill=tk.BOTH, expand=tk.YES)
 
         # Scrollbars
@@ -2144,11 +2172,15 @@ class AnaFDMNESgui:
         self.text = tk.Text(box, width=default_width, height=default_height, font=HF, wrap=tk.NONE, bg=ety)
         self.text.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
         self.text.delete('1.0', tk.END)
-        self.text.insert(tk.END, self.fdm.output_text)
+        self.text.insert(tk.END, self.fdm.bavfile.text)
+        self.text.config(state=tk.DISABLED)
 
         self.text.config(xscrollcommand=scanx.set, yscrollcommand=scany.set)
         scanx.config(command=self.text.xview)
         scany.config(command=self.text.yview)
+
+        # Set cursor
+        self.text.mark_set(tk.INSERT, "1.0")
 
     def fun_loadpath(self, event=None):
         """Button Select - Open new folder"""
@@ -2210,6 +2242,32 @@ class AnaFDMNESgui:
         refob = self.fdm.__getattribute__(refn)
         refob.plot_azi(energy)
         plt.show()
+
+    def fun_search_next(self, event=None):
+        """Button Next"""
+        search_text = self.bavsearch.get()
+        if search_text == '': return
+
+        searchpos = self.text.index(tk.INSERT) + "+1c"
+
+        res = self.text.search(search_text, searchpos, stopindex=tk.END)
+        if res == '': return
+        self.text.focus_set()
+        self.text.mark_set(tk.INSERT, res)
+        self.text.see(tk.INSERT)
+
+    def fun_search_prev(self, event=None):
+        """Button Prev"""
+        search_text = self.bavsearch.get()
+        if search_text == '': return
+
+        searchpos = self.text.index(tk.INSERT) + "-1c"
+
+        res = self.text.search(search_text, searchpos, stopindex=None, backwards=True)
+        if res == '': return
+        self.text.focus_set()
+        self.text.mark_set(tk.INSERT, res)
+        self.text.see(tk.INSERT)
 
 
 class StringViewer:
