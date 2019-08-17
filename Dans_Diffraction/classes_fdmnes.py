@@ -798,10 +798,30 @@ def fdmnes_checker(activate=False):
 
     if os.path.isfile(pointerfile):
         with open(pointerfile) as file:
-            location = file.readline()
-        if os.path.isfile(location):
-            return True
+            for location in file:
+                loc = location.strip()
+                if os.path.isfile(loc):
+                    return True
     return False
+
+
+def fdmnes_location():
+    """
+    Returns the current location of the FDMNES pointer, or None otherwise
+    :return: str
+    """
+
+    # Dans_Diffraction FDMNES pointer file
+    datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
+    pointerfile = os.path.join(datadir, 'data', 'FDMNES_pointer.txt')
+
+    if os.path.isfile(pointerfile):
+        with open(pointerfile) as file:
+            for location in file:
+                loc = location.strip()
+                if os.path.isfile(loc):
+                    return loc
+    return find_fdmnes()
 
 
 def find_fdmnes(fdmnes_filename='fdmnes_win64.exe', reset=False):
@@ -820,11 +840,12 @@ def find_fdmnes(fdmnes_filename='fdmnes_win64.exe', reset=False):
     datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
     pointerfile = os.path.join(datadir, 'data', 'FDMNES_pointer.txt')
 
-    if os.path.isfile(pointerfile) and not reset:
+    if os.path.isfile(pointerfile):
         with open(pointerfile) as file:
-            location = file.readline()
-        if os.path.isfile(location):
-            return location
+            for location in file:
+                loc = location.strip()
+                if os.path.isfile(loc):
+                    return loc
 
     # Find FDMNES
     print('Hang on... just looking for %s...' % fdmnes_filename)
