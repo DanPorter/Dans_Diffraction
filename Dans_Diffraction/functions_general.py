@@ -15,14 +15,15 @@ Usage:
     - from Dans_Diffraction import functions_general as fg
 
 
-Version 1.3
-Last updated: 31/10/18
+Version 1.4
+Last updated: 18/10/19
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
 02/05/18 1.1    Added find_vector
 24/05/18 1.2    Corrected 'quad' for the case (1,-2,1)=1
 31/10/18 1.3    Added complex2str
+20/08/19 1.4    Added search_dict_lists
 
 @author: DGPorter
 """
@@ -30,7 +31,7 @@ Version History:
 import sys, os, re
 import numpy as np
 
-__version__ = '1.2'
+__version__ = '1.4'
 
 # File directory
 directory = os.path.abspath(os.path.dirname(__file__))
@@ -46,6 +47,7 @@ Na = 6.022e23  # Avagadro's No
 A = 1e-10  # m Angstrom
 Cu = 8.048  # Cu-Ka emission energy, keV
 Mo = 17.4808  # Mo-Ka emission energy, keV
+#Mo = 17.4447 # Mo emission energy, keV
 
 '--------------------------Misc General Programs------------------------'
 
@@ -315,6 +317,22 @@ def find_vector(A, V, difference=0.01):
         return idx
 
 
+def search_dict_lists(d, **kwargs):
+    """
+    Search equal length lists in a dictionary for specific values
+    e.g.
+        idx = search_dict_lists(cif, _geom_bond_atom_site_label_1='Ru1',
+                                     _geom_bond_atom_site_label_2='O1',
+                                     _geom_bond_site_symmetry_2='.')
+    :param d: dict
+    :param kwargs: keyword=item
+    :return: boolean array index
+    """
+    search = [np.array(d[key]) == value for key, value in kwargs.items()]
+    bool = np.product(search, axis=0)
+    return np.argwhere(bool).reshape(-1)
+
+
 def detail(A):
     """
     Prints details about the given vector,
@@ -352,7 +370,12 @@ def print_arrays(arrays=[]):
 
 
 def cell(lengths=[1, 1, 1], rotation=[0, 0, 0]):
-    " Returns a unit CELL with vectors defined by length and rotation (Deg)"
+    """
+    Returns a unit CELL with vectors defined by length and rotation (Deg)
+    :param lengths:
+    :param rotation:
+    :return:
+    """
     CELL = np.eye(3) * lengths
     CELL = rot3D(CELL, *rotation)
     return CELL
@@ -615,7 +638,13 @@ def complex2str(val, fmt='6.1f'):
 
 
 def multi_replace(string, old=[], new=[]):
-    "Replace multiple strings at once"
+    """
+    Replace multiple strings at once
+    :param string:
+    :param old:
+    :param new:
+    :return:
+    """
 
     if type(new) is str:
         new = [new]

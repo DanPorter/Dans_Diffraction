@@ -506,7 +506,7 @@ class Cell:
         :return: maxh, maxk, maxl
         """
 
-        Qmax = fc.calQmag(max_angle, energy_kev)
+        Qmax = fc.calqmag(max_angle, energy_kev)
         Qpos = [[Qmax, Qmax, Qmax],
                 [-Qmax, Qmax, Qmax],
                 [Qmax, -Qmax, Qmax],
@@ -526,7 +526,7 @@ class Cell:
         :return: array hkl[:,3]
         """
 
-        Qmax = fc.calQmag(max_angle, energy_kev)
+        Qmax = fc.calqmag(max_angle, energy_kev)
 
         # Find the largest indices
         hmax, kmax, lmax = self.max_hkl(energy_kev, max_angle)

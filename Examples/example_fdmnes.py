@@ -15,6 +15,11 @@ import Dans_Diffraction as dif
 
 f = cf+'/../Dans_Diffraction/Structures/Ca2RuO4.cif'
 
+# Activate FDMNES
+dif.fdmnes_checker() # returns true/false
+dif.activate_fdmnes()
+
+
 xtl = dif.Crystal(f)
 
 dif.classes_gui.RunFDMNESgui(xtl)

@@ -12,7 +12,7 @@ Usage:
     - from Dans_Diffraction import functions_crystallography as fc
 
 Version 2.7
-Last updated: 14/08/19
+Last updated: 18/10/19
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -1325,31 +1325,31 @@ def hkl2dspace(hkl, UVstar):
     return q2dspace(Qmag)
 
 
-def calQmag(x2T, energy_kev=17.794):
+def calqmag(twotheta, energy_kev=17.794):
     """
-    Calculate |Q| at a particular 2-theta (deg) for energy in eV
-     magQ = calQmag(X2T,energy_kev=17.794)
+    Calculate |Q| at a particular 2-theta (deg) for energy in keV
+     magQ = calqmag(twotheta, energy_kev=17.794)
     """
 
     energy = energy_kev * 1000.0  # energy in eV
-    xT = x2T * np.pi / 360  # theta in radians
+    theta = twotheta * np.pi / 360  # theta in radians
     # Calculate |Q|
-    magQ = np.sin(xT) * energy * fg.e * 4 * np.pi / (fg.h * fg.c * 1e10)
-    return magQ
+    magq = np.sin(theta) * energy * fg.e * 4 * np.pi / (fg.h * fg.c * 1e10)
+    return magq
 
 
-def cal2theta(Qmag, energy_kev=17.794):
+def cal2theta(qmag, energy_kev=17.794):
     """
-    Calculate theta at particular energy in eV from |Q|
-     X2T = cal2theta(Qmag,energy_kev=17794)
+    Calculate theta at particular energy in keV from |Q|
+     twotheta = cal2theta(Qmag,energy_kev=17.794)
     """
 
     energy = energy_kev * 1000.0  # energy in eV
     # Calculate 2theta angles for x-rays
-    x2T = 2 * np.arcsin(Qmag * 1e10 * fg.h * fg.c / (energy * fg.e * 4 * np.pi))
+    twotheta = 2 * np.arcsin(qmag * 1e10 * fg.h * fg.c / (energy * fg.e * 4 * np.pi))
     # return x2T in degrees
-    x2T = x2T * 180 / np.pi
-    return x2T
+    twotheta = twotheta * 180 / np.pi
+    return twotheta
 
 
 def caldspace(twotheta, energy_kev=17.794):
@@ -1357,17 +1357,17 @@ def caldspace(twotheta, energy_kev=17.794):
     Calculate d-spacing from two-theta
      dspace = caldspace(tth, energy_kev)
     """
-    Qmag = calQmag(twotheta, energy_kev)
-    dspace = q2dspace(Qmag)
+    qmag = calqmag(twotheta, energy_kev)
+    dspace = q2dspace(qmag)
     return dspace
 
 
-def q2dspace(Qmag):
+def q2dspace(qmag):
     """
     Calculate d-spacing from |Q|
          dspace = q2dspace(Qmag)
     """
-    return 2 * np.pi / Qmag
+    return 2 * np.pi / qmag
 
 
 def dspace2q(dspace):

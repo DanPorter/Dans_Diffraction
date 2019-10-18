@@ -277,7 +277,7 @@ class Plotting:
         
         # Get reflections
         angle_max = 180
-        q_max = fc.calQmag(angle_max, energy_kev)
+        q_max = fc.calqmag(angle_max, energy_kev)
         HKL = self.xtl.Cell.all_hkl(energy_kev, angle_max)
         HKL = self.xtl.Cell.sort_hkl(HKL) # required for labels
         Qmag = self.xtl.Cell.Qmag(HKL)
@@ -553,7 +553,7 @@ class Plotting:
         
         # calclate max_q
 
-        q_max = fc.calQmag(180, energy_kev)
+        q_max = fc.calqmag(180, energy_kev)
 
         # Create intensity plot
         self.simulate_intensity_cut(sample_para, sample_normal,[0,0,0],q_max,**kwargs)
@@ -1066,7 +1066,7 @@ class MultiPlotting:
         
         # Get reflections
         angle_max = 180
-        q_max = fc.calQmag(angle_max, energy_kev)
+        q_max = fc.calqmag(angle_max, energy_kev)
         
         plt.figure(figsize=[16,8])
         colours = iter(['b','g','r','c','m','y','k'])

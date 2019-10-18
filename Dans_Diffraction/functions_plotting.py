@@ -17,7 +17,7 @@ All plots generated require plt.show() call, unless using interactive mode
 
 
 Version 1.7
-Last updated: 03/05/19
+Last updated: 18/10/19
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -93,7 +93,7 @@ def labels(ttl=None, xvar=None, yvar=None, zvar=None, legend=False, size='Normal
         plt.gca().set_zlabel(zvar, fontsize=lab, fontname=font)
 
     if legend:
-        plt.legend(loc=0, frameon=False, prop={'size':30,'family':'serif'})
+        plt.legend(loc=0, frameon=False, prop={'size': leg, 'family': 'serif'})
 
 
 def saveplot(name, dpi=None, figure=None):
@@ -637,7 +637,7 @@ def plot_ewald_coverage(energy_kev, color='k', linewidth=2):
     :return: None
     """
 
-    q_max = fc.calQmag(180, energy_kev)
+    q_max = fc.calqmag(180, energy_kev)
 
     # calculate diffractometer angles
     angles = np.arange(0, 180, 0.1)

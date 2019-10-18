@@ -905,7 +905,7 @@ class Propertiesgui:
         """Convert two-theta to q and d"""
         tth = self.twotheta.get()
         energy = self.energy_kev.get()
-        qmag = fc.calQmag(tth, energy)
+        qmag = fc.calqmag(tth, energy)
         dspace = fc.q2dspace(qmag)
         self.qmag.set(round(qmag, 4))
         self.dspace.set(round(dspace, 4))
@@ -1370,11 +1370,11 @@ class Scatteringgui:
         if unit.lower() in ['tth', 'angle', 'twotheta', 'theta', 'two-theta']:
             self.hkl_result.set('I:%10.0f TTH:%8.2f' % (I, tth))
         elif unit.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
-            q = fc.calQmag(tth, energy)
+            q = fc.calqmag(tth, energy)
             d = fc.q2dspace(q)
             self.hkl_result.set('I:%10.0f   d:%8.2f A' % (I, d))
         else:
-            q = fc.calQmag(tth, energy)
+            q = fc.calqmag(tth, energy)
             self.hkl_result.set('I:%8.0f   Q:%8.2f A^-1' % (I, q))
 
     def fun_intensities(self):
@@ -1393,8 +1393,8 @@ class Scatteringgui:
         """Plot Powder"""
         self.fun_get()
         energy = self.energy_kev.get()
-        min_q = fc.calQmag(self.twotheta_min.get(), energy)
-        max_q = fc.calQmag(self.twotheta_max.get(), energy)
+        min_q = fc.calqmag(self.twotheta_min.get(), energy)
+        max_q = fc.calqmag(self.twotheta_max.get(), energy)
         if min_q < 0: min_q=0.0
 
         if self.xtl.Scatter._powder_units.lower() in ['tth', 'angle', 'twotheta', 'theta', 'two-theta']:
