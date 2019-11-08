@@ -44,6 +44,8 @@ from . import functions_crystallography as fc
 
 __version__ = '1.7'
 
+default_font = 'Times New Roman'
+
 '----------------------------Plot manipulation--------------------------'
 
 
@@ -622,9 +624,9 @@ def plot_vector_arrows(vec_a=[1, 0, 0], vec_b=[1, 0, 0], vec_a_lab=None, vec_b_l
         vec_b_lab = 'b*'
 
     plot_arrow([0, vec_a[0, 0]], [0, vec_a[0, 1]], arrow_size=arrow_size, col=color)
-    plt.text(vec_a[0, 0], vec_a[0, 1], vec_a_lab, fontname='Times', weight='bold', size=fontsize)
+    plt.text(vec_a[0, 0], vec_a[0, 1], vec_a_lab, fontname=default_font, weight='bold', size=fontsize)
     plot_arrow([0, vec_b[0, 0]], [0, vec_b[0, 1]], arrow_size=arrow_size, col=color)
-    plt.text(vec_b[0, 0], vec_b[0, 1], vec_b_lab, fontname='Times', weight='bold', size=fontsize)
+    plt.text(vec_b[0, 0], vec_b[0, 1], vec_b_lab, fontname=default_font, weight='bold', size=fontsize)
     ax.axis(axsize)
 
 
