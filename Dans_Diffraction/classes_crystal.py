@@ -25,7 +25,7 @@ Diamond
 2017
 
 Version 2.5
-Last updated: 12/08/19
+Last updated: 08/11/19
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -570,7 +570,8 @@ class Cell:
         c_cart = self.calculateQ(centre)
 
         # Generate lattice of reciprocal space points
-        hmax, kmax, lmax = fc.maxHKL(q_max, self.UVstar())
+        maxq = np.sqrt(q_max ** 2 + q_max ** 2)
+        hmax, kmax, lmax = fc.maxHKL(maxq, self.UVstar())
         HKL = fc.genHKL([hmax, -hmax], [kmax, -kmax], [lmax, -lmax])
         HKL = HKL + centre  # reflection about central reflection
         Q = self.calculateQ(HKL)

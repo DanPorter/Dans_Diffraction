@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.5
-Last updated: 09/03/19
+Version 1.6
+Last updated: 08/11/19
 
 Version History:
 18/08/17 0.1    Program created
@@ -19,6 +19,7 @@ Version History:
 17/04/18 1.3    Removed plt.show() from functions (allowing plot editing +stackig in non-interactive mode)
 08/06/18 1.4    Corrected call to simulate_lattice_lines in simulate_reciprocal_plane
 21/01/19 1.5    Added simulate_polarisation_resonant and _nonresonant
+08/11/19 1.6    Increased pixel width on powder plots, improved superstructure recriprocal space planes
 
 @author: DGPorter
 """
@@ -32,7 +33,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.5'
+__version__ = '1.6'
 
 
 class Plotting:
@@ -217,7 +218,7 @@ class Plotting:
             ttl = '%s\nLayer %2.0f = %5.3f' %(self.xtl.name,L,layer)
             plt.title(ttl,fontsize=20,fontweight='bold')
     
-    def generate_powder(self,q_max=8,peak_width=0.01,background=0):
+    def generate_powder(self, q_max=8, peak_width=0.01, background=0):
         """
         Generates a powder pattern and returns the results
           tth,I = generate_powder(energy_kev=8.0,peak_width=0.05,background=0)
@@ -230,7 +231,7 @@ class Plotting:
         """
         
         # Get reflections
-        hmax,kmax,lmax  = fc.maxHKL(q_max,self.xtl.Cell.UVstar())
+        hmax,kmax,lmax  = fc.maxHKL(q_max, self.xtl.Cell.UVstar())
         HKL = fc.genHKL([hmax,-hmax],[kmax,-kmax],[lmax,-lmax])
         HKL = self.xtl.Cell.sort_hkl(HKL) # required for labels
         Qmag = self.xtl.Cell.Qmag(HKL)
@@ -257,7 +258,7 @@ class Plotting:
         
         # Convolve with a gaussian (if >0 or not None)
         if peak_width:
-            gauss_x = np.arange(-peak_width_pixels,peak_width_pixels+1) # gaussian width = 2*FWHM
+            gauss_x = np.arange(-3*peak_width_pixels,3*peak_width_pixels+1) # gaussian width = 2*FWHM
             G = fg.gauss(gauss_x,0,height=1,cen=0,FWHM=peak_width_pixels,bkg=0)
             mesh = np.convolve(mesh,G, mode='same') 
         
@@ -265,7 +266,7 @@ class Plotting:
         if background:
             bkg = np.random.normal(background,np.sqrt(background), [pixels])
             mesh = mesh+bkg
-        return mesh_q,mesh
+        return mesh_q, mesh
     
     def simulate_powder(self, energy_kev=None, peak_width=0.01, background=0):
         """
@@ -469,7 +470,7 @@ class Plotting:
         vec_b = fg.norm(np.cross(vec_c,vec_a))
         
         # Generate intensity cut
-        X,Y,mesh = self.generate_intensity_cut(x_axis, y_axis, centre, q_max, cut_width, background, peak_width)
+        X, Y, mesh = self.generate_intensity_cut(x_axis, y_axis, centre, q_max, cut_width, background, peak_width)
         
         # create figure
         plt.figure(figsize=[12,10])
@@ -911,9 +912,9 @@ class PlottingSuperstructure(Plotting):
         """
         Generate a cut through reciprocal space, returns an array with centred reflections
         Inputs:
-          x_axis = direction along x, in units of the supercell reciprocal lattice (hkl)
-          y_axis = direction along y, in units of the supercell reciprocal lattice (hkl)
-          centre = centre of the plot, in units of the supercell reciprocal lattice (hkl)
+          x_axis = direction along x, in units of the parent reciprocal lattice (hkl)
+          y_axis = direction along y, in units of the parent reciprocal lattice (hkl)
+          centre = centre of the plot, in units of the parent reciprocal lattice (hkl)
           q_max = maximum distance to plot to - in A-1
           cut_width = width in height that will be included, in A-1
           background = average background value
@@ -929,34 +930,59 @@ class PlottingSuperstructure(Plotting):
             plt.axis('image')
         """
 
-        Qx, Qy, HKL = self.xtl.Cell.reciprocal_space_plane(x_axis, y_axis, centre, q_max, cut_width)
-        I = self.xtl.Scatter.intensity(HKL)
-        
-        # Apply Parent symmetry
-        pHKL = self.xtl.superhkl2parent(HKL)
-        pHKL,I = self.xtl.Parent.Symmetry.symmetric_intensity(pHKL, I)
-        HKL = self.xtl.parenthkl2super(pHKL)
-        Q = self.xtl.calculateQ_parent(HKL)
+        # Check q_max
+        c_cart = self.xtl.calculateQ_parent(centre)
 
-        # Determine location of new symmetrised HKL on mesh grid
+        # Generate lattice of reciprocal space points
+        maxq = np.sqrt(q_max**2 + q_max**2 + np.sum(c_cart**2)) # generate all reflections
+        print('Max Q distance: %4.2f A-1'%maxq)
+        hmax, kmax, lmax = fc.maxHKL(maxq, self.xtl.Cell.UVstar())
+        HKL = fc.genHKL([hmax, -hmax], [kmax, -kmax], [lmax, -lmax])
+        HKL = HKL #+ centre  # reflection about central reflection
+        print('Number of reflections in sphere: %1.0f'%len(HKL))
+
+        # Determine the directions in cartesian space
         x_cart = self.xtl.calculateQ_parent(x_axis)
         y_cart = self.xtl.calculateQ_parent(y_axis)
         x_cart, y_cart, z_cart = fc.orthogonal_axes(x_cart, y_cart)
-        c_cart =self.xtl.calculateQ_parent(centre)
+
+        # generate box in reciprocal space
         CELL = np.array([2 * q_max * x_cart, -2 * q_max * y_cart, cut_width * z_cart])
+
+        # Loop through HKLs to check which symmetric reflections are within the box
+        HKLinbox = []
+        for hkl in HKL:
+            phkl = self.xtl.superhkl2parent(hkl)
+            symhkl = self.xtl.Parent.Symmetry.symmetric_reflections_unique(phkl)
+            symQ = self.xtl.Parent.Cell.calculateQ(symhkl)
+
+            box_coord = fg.index_coordinates(symQ - c_cart, CELL)
+            if np.any(np.all(np.abs(box_coord) <= 0.5, axis=1)):
+                HKLinbox += [hkl]
+        print('Number of non-symmetric reflections in box: %1.0f'%len(HKLinbox))
+
+        # Calculate intensity
+        I = self.xtl.Scatter.intensity(HKLinbox)
+
+        # Apply Parent symmetry
+        pHKL = self.xtl.superhkl2parent(HKLinbox)
+        pHKL, I = self.xtl.Parent.Symmetry.symmetric_intensity(pHKL, I)
+        HKL = self.xtl.parenthkl2super(pHKL)
+        Q = self.xtl.calculateQ_parent(HKL)
+
         box_coord = fg.index_coordinates(Q - c_cart, CELL)
         incell = np.all(np.abs(box_coord) <= 0.5, axis=1)
         plane_coord = 2 * q_max * box_coord[incell, :]
-        I = I[incell]
         Qx = plane_coord[:, 0]
         Qy = plane_coord[:, 1]
-        
+        I = I[incell]
+
         # create plotting mesh
         pixels = 1000 # reduce this to make convolution faster
         pixel_size = (2.0*q_max)/pixels
         mesh = np.zeros([pixels,pixels])
         mesh_x = np.linspace(-q_max,q_max,pixels)
-        X,Y = np.meshgrid(mesh_x,mesh_x)
+        X,Y = np.meshgrid(mesh_x, mesh_x)
         
         # add reflections to background
         pixel_i = ((Qx/(2*q_max) + 0.5)*pixels).astype(int)
@@ -1082,7 +1108,7 @@ class MultiPlotting:
             # create plotting mesh
             pixels = 2000*q_max # reduce this to make convolution faster
             pixel_size = q_max/pixels
-            peak_width_pixels = peak_width/pixel_size
+            peak_width_pixels = peak_width/(1.0*pixel_size)
             mesh = np.zeros([int(pixels)])
             mesh_q = np.linspace(0,q_max,pixels)
             mesh_tth = fc.cal2theta(mesh_q, energy_kev)
@@ -1121,7 +1147,7 @@ class MultiPlotting:
             
             # Convolve with a gaussian
             if peak_width:
-                gauss_x = np.arange(-peak_width_pixels,peak_width_pixels+1) # gaussian width = 2*FWHM
+                gauss_x = np.arange(-3*peak_width_pixels,3*peak_width_pixels+1) # gaussian width = 2*FWHM
                 G = fg.gauss(gauss_x,0,height=1,cen=0,FWHM=peak_width_pixels,bkg=0)
                 mesh = np.convolve(mesh,G, mode='same') 
             
