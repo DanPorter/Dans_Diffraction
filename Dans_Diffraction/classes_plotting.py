@@ -931,7 +931,7 @@ class PlottingSuperstructure(Plotting):
         """
 
         # Check q_max
-        c_cart = self.xtl.calculateQ_parent(centre)
+        c_cart = self.xtl.Parent.Cell.calculateQ(centre)
 
         # Generate lattice of reciprocal space points
         maxq = np.sqrt(q_max**2 + q_max**2 + np.sum(c_cart**2)) # generate all reflections
@@ -1077,7 +1077,9 @@ class PlottingSuperstructure(Plotting):
         # Plot labels
         xlab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0], x_axis[1], x_axis[2])
         ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0], y_axis[1], y_axis[2])
-        ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name, centre[0], centre[1], centre[2])
+        supercentre = self.xtl.parenthkl2super(centre)[0]
+        ttl = '%s\n(%1.3g,%1.3g,%1.3g)$_{p}$ = (%1.3g,%1.3g,%1.3g)$_{s}$' \
+              % (self.xtl.name, centre[0], centre[1], centre[2], supercentre[0], supercentre[1], supercentre[2])
         fp.labels(ttl, xlab, ylab)
 
 
