@@ -2,7 +2,7 @@
 Example python file creating GUI using Dans_Diffraction
 """
 
-import sys,os
+import sys, os
 #import matplotlib
 #matplotlib.use('tkagg')
 #import numpy as np

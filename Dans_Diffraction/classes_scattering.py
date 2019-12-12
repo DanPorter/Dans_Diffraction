@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.3
-Last updated: 21/01/19
+Version 1.4
+Last updated: 12/12/19
 
 Version History:
 10/09/17 0.1    Program created
@@ -16,6 +16,7 @@ Version History:
 06/01/18 1.1    Renamed classes_scattering.py
 31/10/18 1.2    Added print_symmetric_contributions
 21/01/19 1.3    Added non-resonant diffraction, corrected resonant diffraction
+12/12/19 1.4    Added multiple_scattering code
 
 @author: DGPorter
 """
@@ -25,8 +26,9 @@ import numpy as np
 
 from . import functions_general as fg
 from . import functions_crystallography as fc
+from . import multiple_scattering as ms
 
-__version__ = '1.3'
+__version__ = '1.4'
 __scattering_types__ = {'xray': ['xray','x','x-ray','thomson','charge'],
                         'neutron': ['neutron','n','nuclear'],
                         'xray magnetic': ['xray magnetic','magnetic xray','spin xray','xray spin'],
@@ -869,7 +871,7 @@ class Scattering:
                 print('Scattering type not defined')
         return np.array(intensity)
     
-    def hkl(self,HKL,energy_kev=None):
+    def hkl(self, HKL, energy_kev=None):
         " Calculate the two-theta and intensity of the given HKL, display the result"
         
         if energy_kev is None:
@@ -884,7 +886,7 @@ class Scattering:
         for n in range(len(tth)):
             print('(%2.0f,%2.0f,%2.0f) %8.2f  %9.2f' % (HKL[n,0],HKL[n,1],HKL[n,2],tth[n],inten[n]))
     
-    def hkl_reflection(self,HKL,energy_kev=None):
+    def hkl_reflection(self, HKL, energy_kev=None):
         " Calculate the theta, two-theta and intensity of the given HKL in reflection geometry, display the result"
         
         if energy_kev is None:
@@ -892,14 +894,18 @@ class Scattering:
         
         HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
         tth = self.xtl.Cell.tth(HKL,energy_kev)
-        theta = self.xtl.Cell.theta_reflection(HKL, energy_kev, self._scattering_specular_direction,self._scattering_theta_offset)
+        theta = self.xtl.Cell.theta_reflection(HKL, energy_kev, self._scattering_specular_direction, self._scattering_theta_offset)
         inten = self.intensity(HKL)
         
         print('Energy = %6.3f keV' % energy_kev)
-        print('Specular Direction = (%1.0g,%1.0g,%1.0g)' %(self._scattering_specular_direction[0],self._scattering_specular_direction[1],self._scattering_specular_direction[2]))
+        print('Specular Direction = (%1.0g,%1.0g,%1.0g)' %
+              (self._scattering_specular_direction[0],
+               self._scattering_specular_direction[1],
+               self._scattering_specular_direction[2]))
         print('( h, k, l)    Theta TwoTheta  Intensity')
         for n in range(len(tth)):
-            print('(%2.0f,%2.0f,%2.0f) %8.2f %8.2f  %9.2f' % (HKL[n,0],HKL[n,1],HKL[n,2],theta[n],tth[n],inten[n]))
+            print('(%2.0f,%2.0f,%2.0f) %8.2f %8.2f  %9.2f' %
+                  (HKL[n, 0], HKL[n, 1], HKL[n, 2], theta[n], tth[n], inten[n]))
     
     def hkl_transmission(self,HKL,energy_kev=None):
         " Calculate the theta, two-theta and intensity of the given HKL in transmission geometry, display the result"
@@ -1336,6 +1342,26 @@ class Scattering:
             outstr+= fmt % (sel_HKL[n,0],sel_HKL[n,1],sel_HKL[n,2],sel_tth[n],sel_angles[n],sel_intensity[n])
         outstr+= 'Reflections: %1.0f\n'%count
         return outstr
+
+    def multiple_scattering(self, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], numsteps=60,
+                            full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False, plot=True):
+        """
+        Run multiple scattering code, plot result.
+        See multiple_scattering.py for more details.
+        :param hkl: [h,k,l] principle reflection
+        :param azir: [h,k,l] reference of azimuthal 0 angle
+        :param pv: [s,p] polarisation vector
+        :param energy_range: [min, max] energy range in keV
+        :param numsteps: int: number of calculation steps from energy min to max
+        :param full: True/False: calculation type: full
+        :param pv1: True/False: calculation type: pv1
+        :param pv2: True/False: calculation type: pv2
+        :param sfonly: True/False: calculation type: sfonly *default
+        :param pv1xsf1: True/False: calculation type: pv1xsf1?
+        :param plot: True/False
+        :return: array
+        """
+        return ms.run_calcms(self.xtl, hkl, azir, pv, energy_range, numsteps, full, pv1, pv2, sfonly, pv1xsf1, plot)
 
 
 class ScatteringTypes:

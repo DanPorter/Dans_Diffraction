@@ -24,8 +24,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.5
-Last updated: 08/11/19
+Version 2.6
+Last updated: 12/12/19
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -37,6 +37,7 @@ Version History:
 31/10/18 2.3    Update Symmetry.symmetric_coordinates funcitons, add ability to view all or only non-identical
 09/03/19 2.4    Add print functions to Symmetry
 12/08/19 2.5    self.info outputs string, __repr__ methods added
+12/12/19 2.6    Added Symmetry.is_symmetric_reflection(ref1, ref2), added multiple scattering code
 
 @author: DGPorter
 """
@@ -50,7 +51,7 @@ from .classes_properties import Properties
 from .classes_scattering import Scattering
 from .classes_plotting import Plotting, MultiPlotting, PlottingSuperstructure
 
-__version__ = '2.5'
+__version__ = '2.6'
 
 
 class Crystal:
@@ -463,6 +464,17 @@ class Cell:
         """
         Qmag = self.Qmag(HKL)
         return fc.cal2theta(Qmag, energy_kev)
+
+    def angle(self, hkl1, hkl2):
+        """
+        Return the angle between two reflections
+        :param hkl1: [h,k,l] reflection 1
+        :param hkl2: [h,k,l] reflection 2
+        :return: angle in degrees
+        """
+        q1 = self.calculateQ(hkl1)
+        q2 = self.calculateQ(hkl2)
+        return np.abs(fg.ang(q1, q2, deg=True))
 
     def theta_reflection(self, HKL, energy_kev=8.048, specular=[0, 0, 1], theta_offset=0):
         """
@@ -1388,6 +1400,18 @@ class Symmetry:
         unique_dI = sym_dI[uniqueidx]
         sum_dI = unique_dI * count  # *np.sqrt(count)?
         return unique_hkl, sum_I, sum_dI
+
+    def is_symmetric_reflection(self, hkl1, hkl2, tolerance=0.01):
+        """
+        Check if reflection 1 is a symmetric equivalent of reflection 2
+        :param hkl1: [h,k,l] reflection 1
+        :param hkl2: [h,k,l] reflection 2
+        :param tolerance: tolerance for matching reflections
+        :return: True/ False
+        """
+        symm_hkl = self.symmetric_reflections(hkl2)
+        difference = fg.mag(hkl1 - symm_hkl)
+        return np.any(difference < tolerance)
 
     def print_symmetric_vectors(self, HKL):
         """
