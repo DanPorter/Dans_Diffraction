@@ -17,8 +17,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.4
-Last updated: 13/07/19
+Version 1.5
+Last updated: 13/12/19
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -26,6 +26,7 @@ Version History:
 08/06/18 1.2    Python3 now fully supported
 23/02/19 1.3    Graphical user intrface and magnetic x-ray scattering now implemented
 13/07/19 1.4    FDMNES GUI functionality added
+13/12/19 1.5    Multiple Scattering added, tkGUI refactored, Startgui changed to start_gui
 """
 
 # Set TkAgg environment
@@ -44,18 +45,23 @@ from .classes_fdmnes import fdmnes_checker
 if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
-# GUI (requires tkinter)
-try:
-    from .classes_gui import Crystalgui as Startgui
-except ImportError:
-    print('GUI functionality not available, you need to install tkinter.')
 
-__version__ = '1.4'
-__date__ = '12/08/19'
+__version__ = '1.5'
+__date__ = '13/12/19'
 
 
 # Build
 structure_list = Structures()
+
+
+# tkGUI Activation
+def start_gui(xtl=None):
+    """Start GUI window (requires tkinter)"""
+    try:
+        from .tkgui import CrystalGui
+        CrystalGui(xtl)
+    except ImportError:
+        print('GUI functionality not available, you need to install tkinter.')
 
 
 # FDMNES Activation

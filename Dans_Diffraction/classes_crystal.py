@@ -258,8 +258,8 @@ class Crystal:
         :return: None
         """
         try:
-            from Dans_Diffraction.classes_gui import Crystalgui
-            Crystalgui(self)
+            from .tkgui import CrystalGui
+            CrystalGui(self)
         except ImportError:
             print('Sorry, you need to install tkinter!')
 

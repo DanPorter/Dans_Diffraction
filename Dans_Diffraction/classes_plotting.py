@@ -894,6 +894,109 @@ class Plotting:
         # Add moment manually after
         #ax.plot([0, moment[0, 0]], [0, moment[0, 1]], [0, moment[0, 2]], '-r', lw=2)  # moment
 
+    def plot_multiple_scattering(self, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], numsteps=60,
+                                 full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False):
+        """
+        Run the multiple scattering code and plot the result
+        See multiple_scattering.py for more details.
+
+        :param xtl: Crystal structure from Dans_Diffraction
+        :param hkl: [h,k,l] principle reflection
+        :param azir: [h,k,l] reference of azimuthal 0 angle
+        :param pv: [s,p] polarisation vector
+        :param energy_range: [min, max] energy range in keV
+        :param numsteps: int: number of calculation steps from energy min to max
+        :param full: True/False: calculation type: full
+        :param pv1: True/False: calculation type: pv1
+        :param pv2: True/False: calculation type: pv2
+        :param sfonly: True/False: calculation type: sfonly *default
+        :param pv1xsf1: True/False: calculation type: pv1xsf1?
+        :return: None
+        """
+
+        mslist = self.xtl.Scatter.multiple_scattering(hkl, azir, pv, energy_range, numsteps,
+                                                      full=full, pv1=pv1, pv2=pv2, sfonly=sfonly, pv1xsf1=pv1xsf1)
+
+        if full:
+            calcstr = 'SF1*SF2*PV2'
+        elif pv1:
+            calcstr = 'PV1'
+        elif pv2:
+            calcstr = 'PV2'
+        elif sfonly:
+            calcstr = 'SF1*SF2'
+        elif pv1xsf1:
+            calcstr = 'SF1*PV1'
+        else:
+            calcstr = 'Geometry Only'
+
+        plt.figure(figsize=(10, 5), dpi=130)
+        if pv1 + pv2 + sfonly + full + pv1xsf1 != 0:
+            plt.scatter(mslist[:, 3], mslist[:, 7], c=mslist[:, -1], s=2, cmap=plt.cm.gray_r, lw=0)
+            plt.scatter(mslist[:, 4], mslist[:, 7], c=mslist[:, -1], s=2, cmap=plt.cm.gray_r, lw=0)
+            plt.colorbar()
+        else:
+            plt.scatter(mslist[:, 3], mslist[:, -1], s=2, lw=0)
+            plt.scatter(mslist[:, 4], mslist[:, -1], s=2, lw=0)
+        plt.xlim(-180, 180)
+        plt.ylim(energy_range[0], energy_range[1])
+        ttl = 'Multiple Scattering %s\n' % self.xtl.name
+        ttl += 'Calculation: %s\n' % calcstr
+        ttl += 'hkl = %s Incident polarisation vector = %s' % (hkl, str(pv))
+        plt.title(ttl, fontsize=12)
+        plt.xlabel(r'$\psi$ (deg)', fontsize=10)
+        plt.ylabel('Energy (keV)', fontsize=10)
+        plt.subplots_adjust(bottom=0.2)
+        plt.show()
+
+    def plot_ms_azimuth(self, hkl, energy_kev, azir=[0, 0, 1], pv=[1, 0], numsteps=3, peak_width=0.1,
+                        full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False, log=False):
+        """
+        Run the multiple scattering code and plot the result
+        See multiple_scattering.py for more details.
+
+        :param xtl: Crystal structure from Dans_Diffraction
+        :param hkl: [h,k,l] principle reflection
+        :param energy_kev: calculation energy
+        :param azir: [h,k,l] reference of azimuthal 0 angle
+        :param pv: [s,p] polarisation vector
+        :param numsteps: int: number of calculation steps from energy min to max
+        :param full: True/False: calculation type: full
+        :param pv1: True/False: calculation type: pv1
+        :param pv2: True/False: calculation type: pv2
+        :param sfonly: True/False: calculation type: sfonly *default
+        :param pv1xsf1: True/False: calculation type: pv1xsf1?
+        :param log: log y scale
+        :return: None
+        """
+
+        azimuth, intensity = self.xtl.Scatter.ms_azimuth(hkl, energy_kev, azir, pv, numsteps, peak_width,
+                                                         full=full, pv1=pv1, pv2=pv2, sfonly=sfonly, pv1xsf1=pv1xsf1)
+
+        if full:
+            calcstr = 'SF1*SF2*PV2'
+        elif pv1:
+            calcstr = 'PV1'
+        elif pv2:
+            calcstr = 'PV2'
+        elif sfonly:
+            calcstr = 'SF1*SF2'
+        elif pv1xsf1:
+            calcstr = 'SF1*PV1'
+        else:
+            calcstr = 'Geometry Only'
+
+        fp.newplot(azimuth, intensity, '-', lw=3, label='%6.3f keV')
+        plt.xlim(-180, 180)
+        if log:
+            plt.yscale('log')
+        ttl = 'Multiple Scattering %s\n' % self.xtl.name
+        ttl += 'Calculation: %s, E = %5.3f keV\n' % (calcstr, energy_kev)
+        ttl += 'hkl = %s Incident polarisation vector = %s' % (hkl, str(pv))
+        fp.labels(ttl, r'$\psi$ (deg)', 'Intensity')
+        plt.subplots_adjust(bottom=0.2)
+        plt.show()
+
 
 class PlottingSuperstructure(Plotting):
     """

@@ -37,9 +37,12 @@ __version__ = '1.0'
 
 
 def run_calcms(xtl, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], numsteps=60,
-               full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False, plot=True):
+               full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False):
     """
     Run the multiple scattering code
+
+    mslist = run_calcms(xtl, [0,0,1])
+
     :param xtl: Crystal structure from Dans_Diffraction
     :param hkl: [h,k,l] principle reflection
     :param azir: [h,k,l] reference of azimuthal 0 angle
@@ -51,7 +54,6 @@ def run_calcms(xtl, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], num
     :param pv2: True/False: calculation type: pv2
     :param sfonly: True/False: calculation type: sfonly *default
     :param pv1xsf1: True/False: calculation type: pv1xsf1?
-    :param plot: True/False
     :return: array
     """
 
@@ -70,9 +72,10 @@ def run_calcms(xtl, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], num
     loopnum = 1
 
     # ------------------------------------------------------------------------------
-    if pv1 + pv2 + sfonly + full >= 2:
+    if pv1 + pv2 + sfonly + full + pv1xsf1 > 1:
         print('Choose only one intensity option')
-        return mslist
+        print('full=%s, pv1=%s, pv2=%s, sfonly=%s, pv1xsf1=%s' % (full, pv1, pv2, sfonly, pv1xsf1))
+        return None
     elif pv1 + pv2 + sfonly + full + pv1xsf1 == 0:
         print('Geometry Only')
         mslist = [[np.NAN, np.NAN, np.NAN, np.NAN, np.NAN, np.NAN, np.NAN]]
@@ -84,7 +87,7 @@ def run_calcms(xtl, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], num
         # SF0*Gauss*SF1*SF2*PV2
         # ===========================================================================
         if full:
-            calcstr = 'SF1*SF2*PV2'
+            #print('full calculation: SF1*SF2*PV2')
             ms = Calcms(lattice, hkl, hkl, reflist, enval, azir, sf, sf2)  # [:,[3,4,5]]
             polfull = ms.polfull(pv)
             mslist = np.concatenate((mslist, ms.polfull(pv)), 0)
@@ -92,21 +95,21 @@ def run_calcms(xtl, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], num
         # PV1 only
         # ===========================================================================
         elif pv1:
-            calcstr = 'PV1'
+            #print('pv1 calculation: PV1')
             ms = Calcms(lattice, hkl, hkl, reflist, enval, azir, sf, sf2)
             mslist = np.concatenate((mslist, ms.pol1only(pv)), 0)
         # ===========================================================================
         # PV2 only
         # ===========================================================================
         elif pv2:
-            calcstr = 'PV2'
+            #print('pv2 calculation: PV2')
             ms = Calcms(lattice, hkl, hkl, reflist, enval, azir, sf, sf2)
             mslist = np.concatenate((mslist, ms.pol2only(pv)), 0)
         # ===========================================================================
         # SF only
         # ===========================================================================
         elif sfonly:
-            calcstr = 'SF1*SF2'
+            #print('sfonly calculation: SF1*SF2')
             ms = Calcms(lattice, hkl, hkl, reflist, enval, azir, sf, sf2)
             mslist = np.concatenate((mslist, ms.sfonly()), 0)
 
@@ -114,14 +117,14 @@ def run_calcms(xtl, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], num
         # SF only
         # ===========================================================================
         elif pv1xsf1:
-            calcstr = 'SF1*PV1'
+            #print('pv1xsf1 calculation: SF1*PV1')
             ms = Calcms(lattice, hkl, hkl, reflist, enval, azir, sf)
             mslist = np.concatenate((mslist, ms.pv1xsf1(pv)), 0)
         # ===========================================================================
         # Geometry only - no structure factors
         # ===========================================================================
         else:
-            calcstr = 'Geometry Only'
+            print('Geometry Only')
             ms = Calcms(lattice, hkl, hkl, reflist, enval, azir)
             mslist = np.concatenate((mslist, ms.geometry()), 0)
 
@@ -129,25 +132,6 @@ def run_calcms(xtl, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], num
 
     keepindex = np.where([~np.isnan(mslist).any(1)])[1]
     mslist = np.array(mslist[keepindex, :])
-
-    if plot:
-        fig = plt.figure(figsize=(10, 5), dpi=130)
-        ax = fig.add_subplot(111)
-        if pv1 + pv2 + sfonly + full + pv1xsf1 != 0:
-            plt.scatter(mslist[:, 3], mslist[:, 7], c=mslist[:, -1], s=2, cmap=plt.cm.gray_r, lw=0)
-            plt.scatter(mslist[:, 4], mslist[:, 7], c=mslist[:, -1], s=2, cmap=plt.cm.gray_r, lw=0)
-            plt.colorbar()
-        else:
-            plt.scatter(mslist[:, 3], mslist[:, -1], s=2, lw=0)
-            plt.scatter(mslist[:, 4], mslist[:, -1], s=2, lw=0)
-        plt.xlim(-180, 180)
-        plt.ylim(energy_range[0], energy_range[1])
-        plt.title('Multiple Scattering\nCalculation: %s\nhkl = %s Incident polarisation vector = %s' %
-                  (calcstr, hkl, str(pv)), fontsize=12)
-        plt.xlabel(r'$\psi$ (deg)', fontsize=10)
-        plt.ylabel('Energy (keV)', fontsize=10)
-        fig.subplots_adjust(bottom=0.2)
-        plt.show()
     return mslist
 
 

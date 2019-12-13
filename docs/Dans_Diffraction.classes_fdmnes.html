@@ -1,15 +1,14 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head><title>Python: module Dans_Diffraction.classes_fdmnes</title>
-<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head><body bgcolor="#f0f0f8">
 
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="index.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_fdmnes</strong></big></big> (version 1.1)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_fdmnes</strong></big></big> (version 1.4)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/dgpor/dropbox/python/dans_diffraction/dans_diffraction/classes_fdmnes.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_fdmnes.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_fdmnes.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_fdmnes.py</a></font></td></tr></table>
     <p><tt>FDMNES&nbsp;class&nbsp;"classes_fdmnes.py"<br>
 &nbsp;functions&nbsp;for&nbsp;generating&nbsp;fdmnes&nbsp;files<br>
 &nbsp;<br>
@@ -17,13 +16,16 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2018<br>
 &nbsp;<br>
-Version&nbsp;1.1<br>
-Last&nbsp;updated:&nbsp;11/06/18<br>
+Version&nbsp;1.4<br>
+Last&nbsp;updated:&nbsp;16/08/19<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 17/04/18&nbsp;0.9&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
 04/06/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;completed&nbsp;and&nbsp;tested<br>
 11/06/18&nbsp;1.1&nbsp;&nbsp;&nbsp;&nbsp;Analysis&nbsp;updated&nbsp;to&nbsp;find&nbsp;density&nbsp;with&nbsp;_sd1&nbsp;and&nbsp;_sd0<br>
+13/07/19&nbsp;1.2&nbsp;&nbsp;&nbsp;&nbsp;Small&nbsp;updates&nbsp;for&nbsp;gui&nbsp;functionality<br>
+07/08/19&nbsp;1.3&nbsp;&nbsp;&nbsp;&nbsp;Changed&nbsp;reflist&nbsp;in&nbsp;<a href="#FdmnesAnalysis">FdmnesAnalysis</a>&nbsp;to&nbsp;list&nbsp;of&nbsp;hkl<br>
+16/08/19&nbsp;1.4&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;<a href="#BavFile">BavFile</a>&nbsp;to&nbsp;read&nbsp;parts&nbsp;of&nbsp;.bav&nbsp;file<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -47,20 +49,67 @@ Version&nbsp;History:<br>
     
 <tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl>
-<dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_fdmnes.html#Density">Density</a>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_fdmnes.html#BavFile">BavFile</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_fdmnes.html#Density">Density</a>
 </font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_fdmnes.html#Fdmnes">Fdmnes</a>
 </font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_fdmnes.html#FdmnesAnalysis">FdmnesAnalysis</a>
 </font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_fdmnes.html#Reflection">Reflection</a>
 </font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_fdmnes.html#Spherical">Spherical</a>
 </font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_fdmnes.html#Xanes">Xanes</a>
 </font></dt></dl>
+</dd>
+</dl>
  <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Density">class <strong>Density</strong></a></font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="BavFile">class <strong>BavFile</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
-<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#BavFile">BavFile</a>(text)<br>
+&nbsp;<br>
+<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="BavFile-__init__"><strong>__init__</strong></a>(self, text)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="BavFile-charge_str"><strong>charge_str</strong></a>(self)</dt><dd><tt>returns&nbsp;final&nbsp;cycle&nbsp;ion&nbsp;charge<br>
+:return:&nbsp;str</tt></dd></dl>
+
+<dl><dt><a name="BavFile-cycles"><strong>cycles</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;number&nbsp;of&nbsp;cycles&nbsp;completed<br>
+:return:</tt></dd></dl>
+
+<dl><dt><a name="BavFile-header"><strong>header</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;top&nbsp;part&nbsp;of&nbsp;the&nbsp;file<br>
+:return:</tt></dd></dl>
+
+<dl><dt><a name="BavFile-potrmt_str"><strong>potrmt_str</strong></a>(self)</dt><dd><tt>Return&nbsp;final&nbsp;cycle&nbsp;"Potrmt"&nbsp;string<br>
+:return:&nbsp;str</tt></dd></dl>
+
+<dl><dt><a name="BavFile-reflections"><strong>reflections</strong></a>(self)</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;reflections&nbsp;specified&nbsp;in&nbsp;the&nbsp;header<br>
+:return:&nbsp;list</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Density">class <strong>Density</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Density">Density</a>(file)<br>
+&nbsp;<br>
+<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="Density-__init__"><strong>__init__</strong></a>(self, file)</dt><dd><tt>Load&nbsp;<a href="#Density">Density</a>&nbsp;of&nbsp;states&nbsp;file&nbsp;from&nbsp;FDMNES&nbsp;calculations&nbsp;'..._sd0.txt'<br>
 :param&nbsp;file:&nbsp;filename</tt></dd></dl>
@@ -68,14 +117,24 @@ Version&nbsp;History:<br>
 <dl><dt><a name="Density-plot"><strong>plot</strong></a>(self)</dt><dd><tt>Creates&nbsp;a&nbsp;plot&nbsp;of&nbsp;the&nbsp;DOS&nbsp;spectra,&nbsp;with&nbsp;all&nbsp;d&nbsp;states&nbsp;in&nbsp;one&nbsp;plot<br>
 :return:&nbsp;None</tt></dd></dl>
 
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Fdmnes">class <strong>Fdmnes</strong></a></font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="Fdmnes">class <strong>Fdmnes</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>FDMNES&nbsp;Create&nbsp;files&nbsp;and&nbsp;run&nbsp;program<br>
+<td colspan=2><tt><a href="#Fdmnes">Fdmnes</a>(xtl)<br>
+&nbsp;<br>
+FDMNES&nbsp;Create&nbsp;files&nbsp;and&nbsp;run&nbsp;program<br>
 &nbsp;<br>
 E.G.<br>
 fdm&nbsp;=&nbsp;<a href="#Fdmnes">Fdmnes</a>(xtl)<br>
@@ -92,30 +151,31 @@ analysis&nbsp;=&nbsp;fdm.<a href="#Fdmnes-analyse">analyse</a>()<br>&nbsp;</tt><
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="Fdmnes-__init__"><strong>__init__</strong></a>(self, xtl)</dt><dd><tt>initialise<br>
-:param&nbsp;xtl:&nbsp;object</tt></dd></dl>
+:param&nbsp;xtl:&nbsp;<a href="builtins.html#object">object</a></tt></dd></dl>
 
-<dl><dt><a name="Fdmnes-analyse"><strong>analyse</strong></a>(self, folder_name<font color="#909090">=None</font>)</dt><dd><tt>Analyse&nbsp;the&nbsp;completed&nbsp;calculation<br>
+<dl><dt><a name="Fdmnes-analyse"><strong>analyse</strong></a>(self, folder_name=None)</dt><dd><tt>Analyse&nbsp;the&nbsp;completed&nbsp;calculation<br>
 :param&nbsp;folder_name:&nbsp;if&nbsp;not&nbsp;None,&nbsp;loads&nbsp;data&nbsp;from&nbsp;here<br>
 :return:&nbsp;<a href="#FdmnesAnalysis">FdmnesAnalysis</a>&nbsp;Object</tt></dd></dl>
 
-<dl><dt><a name="Fdmnes-azimuthal_reference"><strong>azimuthal_reference</strong></a>(self, hkl<font color="#909090">=[1, 0, 0]</font>)</dt><dd><tt>Generate&nbsp;the&nbsp;azimuthal&nbsp;reference<br>
+<dl><dt><a name="Fdmnes-azimuthal_reference"><strong>azimuthal_reference</strong></a>(self, hkl=[1, 0, 0])</dt><dd><tt>Generate&nbsp;the&nbsp;azimuthal&nbsp;reference<br>
 :param&nbsp;hkl:&nbsp;(1*3)&nbsp;array&nbsp;[h,k,l]<br>
 :return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Fdmnes-create_directory"><strong>create_directory</strong></a>(self)</dt><dd><tt>Create&nbsp;a&nbsp;directory&nbsp;in&nbsp;the&nbsp;FDMNES/Sim&nbsp;folder<br>
 :return:&nbsp;None</tt></dd></dl>
 
-<dl><dt><a name="Fdmnes-create_files"><strong>create_files</strong></a>(self, folder_name<font color="#909090">=None</font>)</dt><dd><tt>Create&nbsp;FDMNES&nbsp;calculation&nbsp;directory&nbsp;and&nbsp;files<br>
+<dl><dt><a name="Fdmnes-create_files"><strong>create_files</strong></a>(self, folder_name=None, param_string=None)</dt><dd><tt>Create&nbsp;FDMNES&nbsp;calculation&nbsp;directory&nbsp;and&nbsp;files<br>
 &nbsp;-&nbsp;creates&nbsp;new&nbsp;directory<br>
 &nbsp;-&nbsp;writes&nbsp;the&nbsp;input&nbsp;file&nbsp;to&nbsp;that&nbsp;directory<br>
 :param&nbsp;folder_name:&nbsp;Set&nbsp;a&nbsp;folder&nbsp;name&nbsp;with&nbsp;the&nbsp;'sim'&nbsp;folder&nbsp;of&nbsp;fdmnes,&nbsp;or&nbsp;None&nbsp;for&nbsp;default<br>
+:param&nbsp;param_string:&nbsp;Pass&nbsp;a&nbsp;string&nbsp;of&nbsp;the&nbsp;parameter&nbsp;input&nbsp;file&nbsp;to&nbsp;write<br>
 :return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Fdmnes-generate_input_path"><strong>generate_input_path</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;input&nbsp;file&nbsp;pathname<br>
 &nbsp;E.G.&nbsp;'c:\FDMNES\sim\Fe2O3\FDMNES_Fe2O3.txt'<br>
 :return:&nbsp;filepath</tt></dd></dl>
 
-<dl><dt><a name="Fdmnes-generate_output_path"><strong>generate_output_path</strong></a>(self, folder_name<font color="#909090">=None</font>, overwrite<font color="#909090">=False</font>)</dt><dd><tt>Creates&nbsp;an&nbsp;automatic&nbsp;output&nbsp;path&nbsp;in&nbsp;the&nbsp;FDMNES/Sims&nbsp;directory<br>
+<dl><dt><a name="Fdmnes-generate_output_path"><strong>generate_output_path</strong></a>(self, folder_name=None, overwrite=False)</dt><dd><tt>Creates&nbsp;an&nbsp;automatic&nbsp;output&nbsp;path&nbsp;in&nbsp;the&nbsp;FDMNES/Sims&nbsp;directory<br>
 &nbsp;If&nbsp;overwrite&nbsp;is&nbsp;False&nbsp;and&nbsp;the&nbsp;directory&nbsp;already&nbsp;exists,&nbsp;a&nbsp;number&nbsp;will&nbsp;be&nbsp;appended&nbsp;to&nbsp;the&nbsp;name<br>
 :param&nbsp;folder_name:&nbsp;str&nbsp;or&nbsp;None,&nbsp;if&nbsp;None&nbsp;xtl.name&nbsp;will&nbsp;be&nbsp;used<br>
 :param&nbsp;overwrite:&nbsp;True/False<br>
@@ -131,37 +191,49 @@ analysis&nbsp;=&nbsp;fdm.<a href="#Fdmnes-analyse">analyse</a>()<br>&nbsp;</tt><
 Remember&nbsp;to&nbsp;use&nbsp;self.<strong>create_files</strong>&nbsp;and&nbsp;self.<strong>write_fdmfile</strong>&nbsp;first!<br>
 :return:&nbsp;subprocess.call&nbsp;output</tt></dd></dl>
 
-<dl><dt><a name="Fdmnes-setup"><strong>setup</strong></a>(self, exe_path<font color="#909090">=None</font>, output_path<font color="#909090">=None</font>, output_name<font color="#909090">=None</font>, folder_name<font color="#909090">=None</font>, input_name<font color="#909090">=None</font>, comment<font color="#909090">=None</font>, radius<font color="#909090">=None</font>, edge<font color="#909090">=None</font>, absorber<font color="#909090">=None</font>, scf<font color="#909090">=None</font>, quadrupole<font color="#909090">=None</font>, azi_ref<font color="#909090">=None</font>, hkl_reflections<font color="#909090">=None</font>)</dt><dd><tt>Set&nbsp;FDMNES&nbsp;Parameters<br>
+<dl><dt><a name="Fdmnes-setup"><strong>setup</strong></a>(self, exe_path=None, output_path=None, output_name=None, folder_name=None, input_name=None, comment=None, range=None, radius=None, edge=None, absorber=None, green=None, scf=None, quadrupole=None, azi_ref=None, hkl_reflections=None)</dt><dd><tt>Set&nbsp;FDMNES&nbsp;Parameters<br>
 :param&nbsp;exe_path:&nbsp;Location&nbsp;of&nbsp;FDMNES&nbsp;executable,&nbsp;e.g.&nbsp;'c:\FDMNESdmnes_win64.exe'<br>
 :param&nbsp;output_path:&nbsp;Specify&nbsp;the&nbsp;output&nbsp;path<br>
 :param&nbsp;folder_name:&nbsp;Specify&nbsp;output&nbsp;folder&nbsp;name&nbsp;(replaces&nbsp;output_path)<br>
 :param&nbsp;output_name:&nbsp;Name&nbsp;of&nbsp;FDMNES&nbsp;output&nbsp;files<br>
 :param&nbsp;input_name:&nbsp;Name&nbsp;of&nbsp;FDMNES&nbsp;input&nbsp;file<br>
 :param&nbsp;comment:&nbsp;A&nbsp;comment&nbsp;written&nbsp;in&nbsp;the&nbsp;input&nbsp;file<br>
+:param&nbsp;range:&nbsp;str&nbsp;energy&nbsp;range&nbsp;in&nbsp;eV&nbsp;relative&nbsp;to&nbsp;Fermi&nbsp;energy<br>
 :param&nbsp;radius:&nbsp;calculation&nbsp;radius<br>
 :param&nbsp;edge:&nbsp;absorptin&nbsp;edge,&nbsp;'K',&nbsp;'L3',&nbsp;'L2'<br>
 :param&nbsp;absorber:&nbsp;absorbing&nbsp;element,&nbsp;'Co'<br>
+:param&nbsp;green:&nbsp;Green's&nbsp;function&nbsp;(muffin-tin&nbsp;potential)<br>
 :param&nbsp;scf:&nbsp;True/False,&nbsp;Self&nbsp;consistent&nbsp;solution<br>
 :param&nbsp;quadrupole:&nbsp;False/True,&nbsp;E1E2&nbsp;terms&nbsp;allowed<br>
 :param&nbsp;azi_ref:&nbsp;azimuthal&nbsp;reference,&nbsp;[1,0,0]<br>
 :param&nbsp;hkl_reflections:&nbsp;list&nbsp;of&nbsp;hkl&nbsp;reflections&nbsp;[[1,0,0],[0,1,0]]<br>
 :return:&nbsp;None</tt></dd></dl>
 
-<dl><dt><a name="Fdmnes-write_fdmfile"><strong>write_fdmfile</strong></a>(self, file_list<font color="#909090">=None</font>)</dt><dd><tt>Create&nbsp;fdmfile&nbsp;with&nbsp;list&nbsp;of&nbsp;calculations<br>
+<dl><dt><a name="Fdmnes-write_fdmfile"><strong>write_fdmfile</strong></a>(self, file_list=None)</dt><dd><tt>Create&nbsp;fdmfile&nbsp;with&nbsp;list&nbsp;of&nbsp;calculations<br>
 :param&nbsp;file_list:&nbsp;list&nbsp;of&nbsp;parameter&nbsp;file&nbsp;names&nbsp;for&nbsp;fdmfile,&nbsp;or&nbsp;None&nbsp;to&nbsp;only&nbsp;calculate&nbsp;current&nbsp;parameters<br>
 :return:&nbsp;None</tt></dd></dl>
 
-<dl><dt><a name="Fdmnes-write_runfile"><strong>write_runfile</strong></a>(self, param_string<font color="#909090">=None</font>)</dt><dd><tt>Write&nbsp;FDMNES&nbsp;input&nbsp;data&nbsp;to&nbsp;a&nbsp;file<br>
+<dl><dt><a name="Fdmnes-write_runfile"><strong>write_runfile</strong></a>(self, param_string=None)</dt><dd><tt>Write&nbsp;FDMNES&nbsp;input&nbsp;data&nbsp;to&nbsp;a&nbsp;file<br>
 :return:&nbsp;None</tt></dd></dl>
 
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="FdmnesAnalysis">class <strong>FdmnesAnalysis</strong></a></font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="FdmnesAnalysis">class <strong>FdmnesAnalysis</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>Create&nbsp;fdmnes&nbsp;object&nbsp;from&nbsp;*_scan_conv.txt&nbsp;file<br>
+<td colspan=2><tt><a href="#FdmnesAnalysis">FdmnesAnalysis</a>(output_path,&nbsp;output_name='out')<br>
+&nbsp;<br>
+Create&nbsp;fdmnes&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;*_scan_conv.txt&nbsp;file<br>
 &nbsp;<br>
 Usage:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;fdm&nbsp;=&nbsp;<a href="#FdmnesAnalysis">FdmnesAnalysis</a>(output_path,&nbsp;output_name)<br>
@@ -175,7 +247,7 @@ Usage:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;fdm.sph_I100sp.plot()<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="FdmnesAnalysis-__init__"><strong>__init__</strong></a>(self, output_path, output_name<font color="#909090">='out'</font>)</dt><dd><tt>Loads&nbsp;data&nbsp;from&nbsp;an&nbsp;FDMNES&nbsp;calculation,&nbsp;allowing&nbsp;plotting&nbsp;and&nbsp;data&nbsp;cuts<br>
+<dl><dt><a name="FdmnesAnalysis-__init__"><strong>__init__</strong></a>(self, output_path, output_name='out')</dt><dd><tt>Loads&nbsp;data&nbsp;from&nbsp;an&nbsp;FDMNES&nbsp;calculation,&nbsp;allowing&nbsp;plotting&nbsp;and&nbsp;data&nbsp;cuts<br>
 &nbsp;E.G.<br>
 &nbsp;fdm&nbsp;=&nbsp;<a href="#FdmnesAnalysis">FdmnesAnalysis</a>('c:\FDMNES\Fe2O3','out')<br>
 &nbsp;fdm.xanes.plot()<br>
@@ -184,13 +256,28 @@ Usage:<br>
 :param&nbsp;output_path:&nbsp;directory&nbsp;of&nbsp;the&nbsp;calculation&nbsp;to&nbsp;be&nbsp;loaded<br>
 :param&nbsp;output_name:&nbsp;base&nbsp;output&nbsp;name&nbsp;for&nbsp;the&nbsp;calculation&nbsp;(default='out')</tt></dd></dl>
 
+<dl><dt><a name="FdmnesAnalysis-info"><strong>info</strong></a>(self)</dt><dd><tt>Returns&nbsp;header&nbsp;of&nbsp;calculation&nbsp;output&nbsp;fipe&nbsp;(*_bav.txt)<br>
+:return:&nbsp;str</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Reflection">class <strong>Reflection</strong></a></font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="Reflection">class <strong>Reflection</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
-<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Reflection">Reflection</a>(energy,&nbsp;angle,&nbsp;intensity,&nbsp;refname,&nbsp;calc_name)<br>
+&nbsp;<br>
+<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="Reflection-__init__"><strong>__init__</strong></a>(self, energy, angle, intensity, refname, calc_name)</dt><dd><tt>Container&nbsp;for&nbsp;FDMNES&nbsp;RXS&nbsp;calculations&nbsp;for&nbsp;each&nbsp;reflection<br>
 :param&nbsp;energy:&nbsp;array&nbsp;of&nbsp;energy&nbsp;values&nbsp;[1xm]<br>
@@ -199,32 +286,44 @@ Usage:<br>
 :param&nbsp;refname:&nbsp;reflection&nbsp;name,&nbsp;for&nbsp;plot&nbsp;title<br>
 :param&nbsp;calc_name:&nbsp;calculation&nbsp;name,&nbsp;for&nbsp;plot&nbsp;title</tt></dd></dl>
 
-<dl><dt><a name="Reflection-azi_cut"><strong>azi_cut</strong></a>(self, cutenergy<font color="#909090">=None</font>)</dt><dd><tt>Returns&nbsp;the&nbsp;array&nbsp;of&nbsp;intensitiy&nbsp;values&nbsp;at&nbsp;a&nbsp;particular&nbsp;energy<br>
+<dl><dt><a name="Reflection-azi_cut"><strong>azi_cut</strong></a>(self, cutenergy=None)</dt><dd><tt>Returns&nbsp;the&nbsp;array&nbsp;of&nbsp;intensitiy&nbsp;values&nbsp;at&nbsp;a&nbsp;particular&nbsp;energy<br>
 :param&nbsp;cutenergy:&nbsp;energy&nbsp;of&nbsp;cut&nbsp;(eV)<br>
 :return:&nbsp;array&nbsp;of&nbsp;intensities</tt></dd></dl>
 
-<dl><dt><a name="Reflection-eng_cut"><strong>eng_cut</strong></a>(self, cutangle<font color="#909090">=None</font>)</dt><dd><tt>Returns&nbsp;the&nbsp;array&nbsp;of&nbsp;intensitiy&nbsp;values&nbsp;at&nbsp;a&nbsp;particular&nbsp;angle<br>
+<dl><dt><a name="Reflection-eng_cut"><strong>eng_cut</strong></a>(self, cutangle=None)</dt><dd><tt>Returns&nbsp;the&nbsp;array&nbsp;of&nbsp;intensitiy&nbsp;values&nbsp;at&nbsp;a&nbsp;particular&nbsp;angle<br>
 :param&nbsp;cutangle:&nbsp;angle&nbsp;of&nbsp;cut&nbsp;(deg)<br>
 :return:&nbsp;array&nbsp;of&nbsp;intensities</tt></dd></dl>
 
 <dl><dt><a name="Reflection-plot3D"><strong>plot3D</strong></a>(self)</dt><dd><tt>Generate&nbsp;a&nbsp;3D&nbsp;figure&nbsp;of&nbsp;energy&nbsp;vs&nbsp;angle&nbsp;vs&nbsp;intensity<br>
 :return:&nbsp;None</tt></dd></dl>
 
-<dl><dt><a name="Reflection-plot_azi"><strong>plot_azi</strong></a>(self, cutenergy<font color="#909090">='max'</font>)</dt><dd><tt>Generate&nbsp;a&nbsp;plot&nbsp;of&nbsp;azimuthal&nbsp;dependence&nbsp;at&nbsp;a&nbsp;particular&nbsp;energy<br>
+<dl><dt><a name="Reflection-plot_azi"><strong>plot_azi</strong></a>(self, cutenergy='max')</dt><dd><tt>Generate&nbsp;a&nbsp;plot&nbsp;of&nbsp;azimuthal&nbsp;dependence&nbsp;at&nbsp;a&nbsp;particular&nbsp;energy<br>
 :param&nbsp;cutenergy:&nbsp;'max'&nbsp;to&nbsp;use&nbsp;the&nbsp;maximum&nbsp;height&nbsp;energy,&nbsp;or&nbsp;an&nbsp;energy&nbsp;in&nbsp;eV<br>
 :return:&nbsp;None</tt></dd></dl>
 
-<dl><dt><a name="Reflection-plot_eng"><strong>plot_eng</strong></a>(self, cutangle<font color="#909090">='max'</font>)</dt><dd><tt>Generate&nbsp;a&nbsp;plot&nbsp;of&nbsp;energy&nbsp;dependence&nbsp;at&nbsp;a&nbsp;particular&nbsp;azimuth<br>
-:param&nbsp;cutangle:&nbsp;'max'&nbsp;to&nbsp;ut&nbsp;eh&nbsp;emaximum&nbsp;height&nbsp;angle,&nbsp;or&nbsp;an&nbsp;angle&nbsp;in&nbsp;deg<br>
+<dl><dt><a name="Reflection-plot_eng"><strong>plot_eng</strong></a>(self, cutangle='max')</dt><dd><tt>Generate&nbsp;a&nbsp;plot&nbsp;of&nbsp;energy&nbsp;dependence&nbsp;at&nbsp;a&nbsp;particular&nbsp;azimuth<br>
+:param&nbsp;cutangle:&nbsp;'max'&nbsp;to&nbsp;use&nbsp;the&nbsp;maximum&nbsp;intensity&nbsp;height&nbsp;angle,&nbsp;or&nbsp;an&nbsp;angle&nbsp;in&nbsp;deg<br>
 :return:&nbsp;None</tt></dd></dl>
 
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Spherical">class <strong>Spherical</strong></a></font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="Spherical">class <strong>Spherical</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
-<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Spherical">Spherical</a>(data,&nbsp;refname,&nbsp;calc_name)<br>
+&nbsp;<br>
+<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="Spherical-__init__"><strong>__init__</strong></a>(self, data, refname, calc_name)</dt><dd><tt>Load&nbsp;contribution&nbsp;from&nbsp;spherical&nbsp;harmonics&nbsp;from&nbsp;out_sph_signal_rxs1.txt<br>
 :param&nbsp;data:&nbsp;data&nbsp;array&nbsp;from&nbsp;genfromtext<br>
@@ -234,13 +333,25 @@ Usage:<br>
 <dl><dt><a name="Spherical-plot"><strong>plot</strong></a>(self)</dt><dd><tt>Plot&nbsp;the&nbsp;spherical&nbsp;components<br>
 :return:&nbsp;None</tt></dd></dl>
 
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Xanes">class <strong>Xanes</strong></a></font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="Xanes">class <strong>Xanes</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
-<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Xanes">Xanes</a>(energy,&nbsp;intensity,&nbsp;calc_name)<br>
+&nbsp;<br>
+<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="Xanes-__init__"><strong>__init__</strong></a>(self, energy, intensity, calc_name)</dt><dd><tt>Container&nbsp;for&nbsp;XANES&nbsp;spectra&nbsp;from&nbsp;FDMNES<br>
 :param&nbsp;energy:&nbsp;array&nbsp;of&nbsp;energy&nbsp;values<br>
@@ -250,6 +361,14 @@ Usage:<br>
 <dl><dt><a name="Xanes-plot"><strong>plot</strong></a>(self)</dt><dd><tt>Plot&nbsp;the&nbsp;<a href="#Xanes">Xanes</a>&nbsp;spectra<br>
 :return:&nbsp;None</tt></dd></dl>
 
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#eeaa77">
@@ -257,7 +376,7 @@ Usage:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-azi_cut"><strong>azi_cut</strong></a>(storeeng, intensities, cutenergy<font color="#909090">=None</font>)</dt><dd><tt>Generate&nbsp;azimuthal&nbsp;cut&nbsp;at&nbsp;a&nbsp;particular&nbsp;energy<br>
+<td width="100%"><dl><dt><a name="-azi_cut"><strong>azi_cut</strong></a>(storeeng, intensities, cutenergy=None)</dt><dd><tt>Generate&nbsp;azimuthal&nbsp;cut&nbsp;at&nbsp;a&nbsp;particular&nbsp;energy<br>
 cutintensity&nbsp;=&nbsp;<a href="#-azi_cut">azi_cut</a>(storeeng,intensities,cutenergy)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;storeeng&nbsp;=&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;energies&nbsp;from&nbsp;read_scan_conv<br>
 &nbsp;&nbsp;&nbsp;&nbsp;intensities&nbsp;=&nbsp;[nxm]&nbsp;array&nbsp;of&nbsp;simulated&nbsp;intensities&nbsp;for&nbsp;a&nbsp;single&nbsp;reflection&nbsp;(e.g.&nbsp;storevals['I(100)sp'])<br>
@@ -268,26 +387,35 @@ cutintensity&nbsp;=&nbsp;<a href="#-azi_cut">azi_cut</a>(storeeng,intensities,cu
 e.g.<br>
 &nbsp;energy,angle,intensities&nbsp;=&nbsp;<a href="#-read_scan_conv">read_scan_conv</a>(filename)<br>
 &nbsp;cutintensity&nbsp;=&nbsp;<a href="#-azi_cut">azi_cut</a>(energy,intensities['I(100)sp'],cutenergy='max')</tt></dd></dl>
- <dl><dt><a name="-eng_cut"><strong>eng_cut</strong></a>(storeang, intensities, cutangle<font color="#909090">=None</font>)</dt><dd><tt>Generate&nbsp;energy&nbsp;cut&nbsp;at&nbsp;a&nbsp;particular&nbsp;azimuthal&nbsp;angle<br>
+ <dl><dt><a name="-eng_cut"><strong>eng_cut</strong></a>(storeang, intensities, cutangle=None)</dt><dd><tt>Generate&nbsp;energy&nbsp;cut&nbsp;at&nbsp;a&nbsp;particular&nbsp;azimuthal&nbsp;angle<br>
 cutintensity&nbsp;=&nbsp;<a href="#-eng_cut">eng_cut</a>(storeang,intensities,cutangle)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;storeang&nbsp;=&nbsp;[mx1]&nbsp;array&nbsp;of&nbsp;angles&nbsp;from&nbsp;read_scan_conv<br>
 &nbsp;&nbsp;&nbsp;&nbsp;intensities&nbsp;=&nbsp;[nxm]&nbsp;array&nbsp;of&nbsp;simulated&nbsp;intensities&nbsp;for&nbsp;a&nbsp;single&nbsp;reflection&nbsp;(e.g.&nbsp;storevals['I(100)sp'])<br>
 &nbsp;&nbsp;&nbsp;&nbsp;cutangle&nbsp;=&nbsp;angle&nbsp;to&nbsp;take&nbsp;the&nbsp;cut&nbsp;at,&nbsp;will&nbsp;take&nbsp;value&nbsp;closest&nbsp;to&nbsp;cutenergy.&nbsp;In&nbsp;Deg.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;cutenergy&nbsp;=&nbsp;'max'&nbsp;-&nbsp;take&nbsp;the&nbsp;cut&nbsp;angle&nbsp;at&nbsp;the&nbsp;maximum&nbsp;intensity.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cutangle&nbsp;=&nbsp;'max'&nbsp;-&nbsp;take&nbsp;the&nbsp;cut&nbsp;angle&nbsp;at&nbsp;the&nbsp;maximum&nbsp;intensity.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;cutintensity&nbsp;=&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;simulated&nbsp;intensity&nbsp;at&nbsp;this&nbsp;angle<br>
 &nbsp;<br>
 e.g.<br>
 &nbsp;energies,angles,intensities&nbsp;=&nbsp;<a href="#-read_scan_conv">read_scan_conv</a>(filename)<br>
 &nbsp;cutintensity&nbsp;=&nbsp;<a href="#-eng_cut">eng_cut</a>(angles,intensities['I(100)sp'],cutangle=180)</tt></dd></dl>
- <dl><dt><a name="-find_fdmnes"><strong>find_fdmnes</strong></a>(fdmnes_filename<font color="#909090">='fdmnes_win64.exe'</font>)</dt><dd><tt>Finds&nbsp;the&nbsp;path&nbsp;of&nbsp;the&nbsp;fdmnes_win64.exe&nbsp;file<br>
+ <dl><dt><a name="-fdmnes_checker"><strong>fdmnes_checker</strong></a>(activate=False)</dt><dd><tt>Returns&nbsp;True&nbsp;if&nbsp;fdmnes&nbsp;available&nbsp;and&nbsp;activated</tt></dd></dl>
+ <dl><dt><a name="-fdmnes_location"><strong>fdmnes_location</strong></a>()</dt><dd><tt>Returns&nbsp;the&nbsp;current&nbsp;location&nbsp;of&nbsp;the&nbsp;FDMNES&nbsp;pointer,&nbsp;or&nbsp;None&nbsp;otherwise<br>
+:return:&nbsp;str</tt></dd></dl>
+ <dl><dt><a name="-find_fdmnes"><strong>find_fdmnes</strong></a>(fdmnes_filename='fdmnes_win64.exe', reset=False)</dt><dd><tt>Finds&nbsp;the&nbsp;path&nbsp;of&nbsp;the&nbsp;fdmnes_win64.exe&nbsp;file<br>
 &nbsp;The&nbsp;name&nbsp;of&nbsp;the&nbsp;file&nbsp;is&nbsp;taken&nbsp;from&nbsp;the&nbsp;envrionment&nbsp;varialbe&nbsp;fdmnes_filename<br>
 &nbsp;The&nbsp;first&nbsp;time&nbsp;this&nbsp;is&nbsp;run,&nbsp;it&nbsp;will&nbsp;take&nbsp;a&nbsp;while,&nbsp;searching&nbsp;through&nbsp;every&nbsp;folder&nbsp;for&nbsp;the&nbsp;file<br>
 &nbsp;On&nbsp;completion,&nbsp;a&nbsp;file&nbsp;will&nbsp;be&nbsp;generated&nbsp;in&nbsp;the&nbsp;/data&nbsp;directory&nbsp;with&nbsp;the&nbsp;filepath<br>
 &nbsp;Subsequent&nbsp;runs&nbsp;will&nbsp;quickly&nbsp;load&nbsp;from&nbsp;this&nbsp;file<br>
+:param&nbsp;fdmnes_filename:&nbsp;name&nbsp;of&nbsp;the&nbsp;executable&nbsp;to&nbsp;search&nbsp;for<br>
+:param&nbsp;reset:&nbsp;if&nbsp;True,&nbsp;pointerfile&nbsp;will&nbsp;be&nbsp;ignored.<br>
 :return:&nbsp;str&nbsp;:&nbsp;location&nbsp;of&nbsp;fdmnes&nbsp;executable&nbsp;file</tt></dd></dl>
- <dl><dt><a name="-read_conv"><strong>read_conv</strong></a>(filename<font color="#909090">='out_conv.txt'</font>, plot<font color="#909090">=False</font>)</dt><dd><tt>Reads&nbsp;fdmnes&nbsp;output&nbsp;file&nbsp;out_conv.txt,&nbsp;that&nbsp;gives&nbsp;the&nbsp;XANES&nbsp;spectra<br>
+ <dl><dt><a name="-potrmt"><strong>potrmt</strong></a>(bav_text)</dt><dd><tt>Get&nbsp;the&nbsp;final&nbsp;cycle&nbsp;charge&nbsp;values&nbsp;from&nbsp;the&nbsp;_bav.txt&nbsp;file<br>
+&nbsp;<br>
+:param&nbsp;bav_text:&nbsp;str&nbsp;_bav.txt&nbsp;file<br>
+:return:&nbsp;dict&nbsp;with&nbsp;keys&nbsp;['Z',&nbsp;'charge',&nbsp;'ch_ion',&nbsp;'Vmft',&nbsp;'Ionic&nbsp;radius']</tt></dd></dl>
+ <dl><dt><a name="-read_conv"><strong>read_conv</strong></a>(filename='out_conv.txt', plot=False)</dt><dd><tt>Reads&nbsp;fdmnes&nbsp;output&nbsp;file&nbsp;out_conv.txt,&nbsp;that&nbsp;gives&nbsp;the&nbsp;XANES&nbsp;spectra<br>
 &nbsp;&nbsp;energy,intensity&nbsp;=&nbsp;<a href="#-read_conv">read_conv</a>(filename)</tt></dd></dl>
- <dl><dt><a name="-read_scan_conv"><strong>read_scan_conv</strong></a>(filename<font color="#909090">='out_scan_conv.txt'</font>)</dt><dd><tt>Read&nbsp;FDMNES&nbsp;_scan_conv.txt&nbsp;files,&nbsp;return&nbsp;simulated&nbsp;azimuthal&nbsp;and&nbsp;energy&nbsp;values<br>
+ <dl><dt><a name="-read_scan_conv"><strong>read_scan_conv</strong></a>(filename='out_scan_conv.txt')</dt><dd><tt>Read&nbsp;FDMNES&nbsp;_scan_conv.txt&nbsp;files,&nbsp;return&nbsp;simulated&nbsp;azimuthal&nbsp;and&nbsp;energy&nbsp;values<br>
 energy,angle,intensity&nbsp;=&nbsp;<a href="#-read_scan_conv">read_scan_conv</a>(filename)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;=&nbsp;directory&nbsp;and&nbsp;name&nbsp;of&nbsp;_scan_conv.txt&nbsp;file<br>
 &nbsp;&nbsp;&nbsp;&nbsp;energy&nbsp;=&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;energy&nbsp;values<br>
@@ -295,12 +423,5 @@ energy,angle,intensity&nbsp;=&nbsp;<a href="#-read_scan_conv">read_scan_conv</a>
 &nbsp;&nbsp;&nbsp;&nbsp;intensity&nbsp;=&nbsp;{'I(100)ss'}[nxm]&nbsp;dict&nbsp;of&nbsp;arrays&nbsp;of&nbsp;simulated&nbsp;intensities&nbsp;for&nbsp;each&nbsp;reflection<br>
 &nbsp;<br>
 You&nbsp;can&nbsp;see&nbsp;all&nbsp;the&nbsp;available&nbsp;reflections&nbsp;with&nbsp;intensity.keys()</tt></dd></dl>
-</td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#55aa55">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
-    
-<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>__version__</strong> = '1.1'</td></tr></table>
+</td></tr></table>
 </body></html>

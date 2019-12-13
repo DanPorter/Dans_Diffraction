@@ -1344,9 +1344,12 @@ class Scattering:
         return outstr
 
     def multiple_scattering(self, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], numsteps=60,
-                            full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False, plot=True):
+                            full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False):
         """
         Run multiple scattering code, plot result.
+
+        mslist = xtl.Scatter.multiple_scattering([h,k,l], energy_range=[7.8, 8.2])
+
         See multiple_scattering.py for more details.
         :param hkl: [h,k,l] principle reflection
         :param azir: [h,k,l] reference of azimuthal 0 angle
@@ -1358,10 +1361,61 @@ class Scattering:
         :param pv2: True/False: calculation type: pv2
         :param sfonly: True/False: calculation type: sfonly *default
         :param pv1xsf1: True/False: calculation type: pv1xsf1?
-        :param plot: True/False
         :return: array
         """
-        return ms.run_calcms(self.xtl, hkl, azir, pv, energy_range, numsteps, full, pv1, pv2, sfonly, pv1xsf1, plot)
+        return ms.run_calcms(self.xtl, hkl, azir, pv, energy_range, numsteps,
+                             full=full, pv1=pv1, pv2=pv2, sfonly=sfonly, pv1xsf1=pv1xsf1)
+
+    def ms_azimuth(self, hkl, energy_kev, azir=[0, 0, 1], pv=[1, 0], numsteps=3, peak_width=0.1,
+                   full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False):
+        """
+        Returns an azimuthal dependence at a particular energy
+
+        :param xtl: Crystal structure from Dans_Diffraction
+        :param hkl: [h,k,l] principle reflection
+        :param energy_kev: calculation energy
+        :param azir: [h,k,l] reference of azimuthal 0 angle
+        :param pv: [s,p] polarisation vector
+        :param numsteps: int: number of calculation steps from energy min to max
+        :param peak_width: convolution width
+        :param full: True/False: calculation type: full
+        :param pv1: True/False: calculation type: pv1
+        :param pv2: True/False: calculation type: pv2
+        :param sfonly: True/False: calculation type: sfonly *default
+        :param pv1xsf1: True/False: calculation type: pv1xsf1?
+        :return: None
+        """
+
+        energy_range = [energy_kev-0.001, energy_kev+0.001]
+        mslist = self.xtl.Scatter.multiple_scattering(hkl, azir, pv, energy_range, numsteps,
+                                                      full=full, pv1=pv1, pv2=pv2, sfonly=sfonly, pv1xsf1=pv1xsf1)
+
+        if pv1 + pv2 + sfonly + full + pv1xsf1 != 0:
+            azimuth = np.concatenate(mslist[:, [3, 4]])
+            intensity = np.concatenate(mslist[:, [-1, -1]])
+        else:
+            azimuth = np.concatenate(mslist[:, [3, 4]])
+            intensity = np.ones(azimuth)
+
+        # create plotting mesh
+        peak_width_pixels = 10
+        pixels = int(360*(peak_width_pixels/ peak_width))
+        mesh_azi = np.linspace(-180, 180, pixels)
+        mesh = np.zeros(mesh_azi.shape)
+
+        # add reflections to background
+        pixel_coord = (azimuth-180) / 360.
+        pixel_coord = (pixel_coord * pixels).astype(int)
+
+        for n in range(len(intensity)):
+            mesh[pixel_coord[n]] = mesh[pixel_coord[n]] + intensity[n]
+
+        # Convolve with a gaussian (if >0 or not None)
+        if peak_width:
+            gauss_x = np.arange(-3 * peak_width_pixels, 3 * peak_width_pixels + 1)  # gaussian width = 2*FWHM
+            G = fg.gauss(gauss_x, 0, height=1, cen=0, FWHM=peak_width_pixels, bkg=0)
+            mesh = np.convolve(mesh, G, mode='same')
+        return mesh_azi, mesh
 
 
 class ScatteringTypes:

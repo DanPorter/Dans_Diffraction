@@ -5,7 +5,7 @@ Python package for loading crystal structures from cif files and calculating dif
 Usage:
     ***From Terminal***
     cd /location/of/file
-    ipython -i -m -matplotlib tk Dans_Diffraction
+    ipython -i -m --matplotlib tk Dans_Diffraction
 
 By Dan Porter, PhD
 Diamond
@@ -18,6 +18,6 @@ if __name__ == '__main__':
     import Dans_Diffraction as dif
 
     print('\nDans_Diffraction version %s, %s\n By Dan Porter, Diamond Light Source Ltd.'%(dif.__version__, dif.__date__))
-    print('See help(dif.Crystal) for info, or dif.Startgui() to get started!')
+    print('See help(dif.Crystal) for info, or dif.start_gui() to get started!')
     xtl = dif.Crystal()
 

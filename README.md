@@ -31,7 +31,7 @@ For comments, queries or bugs - email dan.porter@diamond.ac.uk
 
 # Installation
 **Requirements:** 
-Python 2.8+/3+ with packages: *Numpy*, *Matplotlib*, *Scipy*, *Tkinter*
+Python 2.7+/3+ with packages: *Numpy*, *Matplotlib*, *Scipy*, *Tkinter*
 
 Stable version from PyPI:
 ```text
@@ -108,6 +108,15 @@ Magnetic scattering is also available for neutrons and x-rays (both resonant and
 Imag = xtl.Scatter.magnetic_neutron(HKL=[0,0,3])
 Ires = xtl.Scatter.xray_resonant_magnetic(HKL=[0,0,3], energy_kev=2.838, azim_zero=[1, 0, 0], psi=0, polarisation='s-p', F0=0, F1=1, F2=0)
 ```
+
+### Multiple Scattering
+Simulations of multiple scattering at different azimuths for a particular energy can be simulated. Based on code by Dr Gareth Nisbet.
+
+```python
+azimuth, intensity = xtl.Scatter.ms_azimuth([h,k,l], energy_kev=8)
+```
+
+![Multiple Scattering](Screenshots/ms_azimuth_silicon.png)
 
 ### Properties
 The Crystal class contains a lot of atomic properties that can be exposed in the Properties class:

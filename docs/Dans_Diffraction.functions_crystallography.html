@@ -1,15 +1,14 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head><title>Python: module Dans_Diffraction.functions_crystallography</title>
-<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head><body bgcolor="#f0f0f8">
 
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="index.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_crystallography</strong></big></big> (version 2.6)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_crystallography</strong></big></big> (version 2.7)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/dgpor/dropbox/python/dans_diffraction/dans_diffraction/functions_crystallography.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\functions_crystallography.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_crystallography.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\functions_crystallography.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;functions_crystallography.py<br>
 &nbsp;<br>
 By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
@@ -21,8 +20,8 @@ Usage:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;OR<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;from&nbsp;Dans_Diffraction&nbsp;import&nbsp;functions_crystallography&nbsp;as&nbsp;fc<br>
 &nbsp;<br>
-Version&nbsp;2.6<br>
-Last&nbsp;updated:&nbsp;06/03/19<br>
+Version&nbsp;2.7<br>
+Last&nbsp;updated:&nbsp;18/10/19<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 09/07/15&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
@@ -34,6 +33,7 @@ Version&nbsp;History:<br>
 04/06/18&nbsp;2.4&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;new&nbsp;checks&nbsp;to&nbsp;readcif,&nbsp;corrected&nbsp;atomic_properties&nbsp;for&nbsp;python3/numpy1.14<br>
 08/06/18&nbsp;2.5&nbsp;&nbsp;&nbsp;&nbsp;Corrected&nbsp;a&nbsp;few&nbsp;errors&nbsp;and&nbsp;added&nbsp;some&nbsp;more&nbsp;comments<br>
 06/03/19&nbsp;2.6&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;print_atom_properties<br>
+14/08/19&nbsp;2.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;new&nbsp;Dans&nbsp;Element&nbsp;Properties&nbsp;file&nbsp;with&nbsp;extra&nbsp;comment&nbsp;line,&nbsp;new&nbsp;functions&nbsp;added<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -66,7 +66,11 @@ UVs&nbsp;=&nbsp;<a href="#-RcSp">RcSp</a>(UV)<br>
 &nbsp;&nbsp;UV&nbsp;=&nbsp;[[3x3]]&nbsp;matrix&nbsp;of&nbsp;vectors&nbsp;[a,b,c]</tt></dd></dl>
  <dl><dt><a name="-UV2latpar"><strong>UV2latpar</strong></a>(UV)</dt><dd><tt>Convert&nbsp;UV=[a,b,c]&nbsp;to&nbsp;a,b,c,alpha,beta,gamma<br>
 &nbsp;a,b,c,alpha,beta,gamma&nbsp;=&nbsp;<a href="#-UV2latpar">UV2latpar</a>(UV)</tt></dd></dl>
- <dl><dt><a name="-atom_properties"><strong>atom_properties</strong></a>(elements<font color="#909090">=None</font>, fields<font color="#909090">=None</font>)</dt><dd><tt>Loads&nbsp;the&nbsp;atomic&nbsp;properties&nbsp;of&nbsp;a&nbsp;particular&nbsp;atom&nbsp;from&nbsp;a&nbsp;database<br>
+ <dl><dt><a name="-arrange_atom_order"><strong>arrange_atom_order</strong></a>(list_of_elements)</dt><dd><tt>Arrange&nbsp;a&nbsp;list&nbsp;of&nbsp;elements&nbsp;in&nbsp;the&nbsp;correct&nbsp;chemical&nbsp;order<br>
+&nbsp;&nbsp;['Li','Co','O']&nbsp;=&nbsp;<a href="#-arrange_atom_order">arrange_atom_order</a>(['Co',&nbsp;'O',&nbsp;'Li'])<br>
+:param&nbsp;list_of_elements:&nbsp;[list&nbsp;of&nbsp;str]<br>
+:return:&nbsp;[list&nbsp;of&nbsp;str]</tt></dd></dl>
+ <dl><dt><a name="-atom_properties"><strong>atom_properties</strong></a>(elements=None, fields=None)</dt><dd><tt>Loads&nbsp;the&nbsp;atomic&nbsp;properties&nbsp;of&nbsp;a&nbsp;particular&nbsp;atom&nbsp;from&nbsp;a&nbsp;database<br>
 &nbsp;<br>
 Usage:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;=&nbsp;atoms()&nbsp;&gt;&gt;&nbsp;returns&nbsp;structured&nbsp;array&nbsp;of&nbsp;all&nbsp;properties&nbsp;for&nbsp;all&nbsp;atoms&nbsp;A[0]['Element']='H'<br>
@@ -79,6 +83,13 @@ Usage:<br>
 Available&nbsp;information&nbsp;includes:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Element&nbsp;number<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Element&nbsp;Name&nbsp;&nbsp;=&nbsp;Element&nbsp;name<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Group&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Element&nbsp;Group&nbsp;on&nbsp;periodic&nbsp;table<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Period&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Element&nbsp;period&nbsp;on&nbsp;periodic&nbsp;table<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Block&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Element&nbsp;electronic&nbsp;block&nbsp;(s,p,d,f)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ValenceE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Number&nbsp;of&nbsp;valence&nbsp;electrons<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Config&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Element&nbsp;electronic&nbsp;orbital&nbsp;configuration<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Radii&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Atomic&nbsp;Radii&nbsp;(pm)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weight&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Standard&nbsp;atomic&nbsp;weight&nbsp;(g)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Coh_b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Bound&nbsp;coherent&nbsp;neutron&nbsp;scattering&nbsp;length<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Inc_b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Bound&nbsp;incoherent&nbsp;neutron&nbsp;scattering&nbsp;length<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Nabs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Neutron&nbsp;absorption&nbsp;coefficient<br>
@@ -98,23 +109,24 @@ Available&nbsp;information&nbsp;includes:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;j0_b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Magnetic&nbsp;Form&nbsp;factor<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;j0_C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Magnetic&nbsp;Form&nbsp;factor<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;j0_c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Magnetic&nbsp;Form&nbsp;factor<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;j0_D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Magnetic&nbsp;Form&nbsp;factor<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Radii&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Atomic&nbsp;Radii&nbsp;(pm)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ValenceE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Number&nbsp;of&nbsp;valence&nbsp;electrons<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weight&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Standard&nbsp;atomic&nbsp;weight&nbsp;(g)</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;j0_D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Magnetic&nbsp;Form&nbsp;factor</tt></dd></dl>
  <dl><dt><a name="-attenuation"><strong>attenuation</strong></a>(element_Z, energy_keV)</dt><dd><tt>Returns&nbsp;the&nbsp;x-ray&nbsp;mass&nbsp;attenuation,&nbsp;u/p,&nbsp;in&nbsp;cm^2/g<br>
 &nbsp;&nbsp;e.g.&nbsp;A&nbsp;=&nbsp;<a href="#-attenuation">attenuation</a>(23,np.arange(7,8,0.01))&nbsp;#&nbsp;Cu<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;=&nbsp;<a href="#-attenuation">attenuation</a>(19,4.5)&nbsp;#&nbsp;K</tt></dd></dl>
+ <dl><dt><a name="-balance_atom_charge"><strong>balance_atom_charge</strong></a>(list_of_elements, occupancy=None)</dt><dd><tt>Determine&nbsp;the&nbsp;default&nbsp;charges&nbsp;and&nbsp;assign&nbsp;remaining&nbsp;charge&nbsp;to<br>
+unspecified&nbsp;elements<br>
+:param&nbsp;list_of_elements:<br>
+:return:&nbsp;[list&nbsp;of&nbsp;charges]</tt></dd></dl>
  <dl><dt><a name="-biso2uiso"><strong>biso2uiso</strong></a>(biso)</dt><dd><tt>Convert&nbsp;B&nbsp;isotropic&nbsp;thermal&nbsp;parameters&nbsp;to&nbsp;U&nbsp;isotropic&nbsp;thermal&nbsp;parameters<br>
 :param&nbsp;biso:&nbsp;Biso&nbsp;value&nbsp;or&nbsp;array<br>
 :return:&nbsp;Uiso&nbsp;value&nbsp;or&nbsp;array</tt></dd></dl>
- <dl><dt><a name="-cal2theta"><strong>cal2theta</strong></a>(Qmag, energy_kev<font color="#909090">=17.794</font>)</dt><dd><tt>Calculate&nbsp;theta&nbsp;at&nbsp;particular&nbsp;energy&nbsp;in&nbsp;eV&nbsp;from&nbsp;|Q|<br>
-&nbsp;X2T&nbsp;=&nbsp;<a href="#-cal2theta">cal2theta</a>(Qmag,energy_kev=17794)</tt></dd></dl>
- <dl><dt><a name="-calQmag"><strong>calQmag</strong></a>(x2T, energy_kev<font color="#909090">=17.794</font>)</dt><dd><tt>Calculate&nbsp;|Q|&nbsp;at&nbsp;a&nbsp;particular&nbsp;2-theta&nbsp;(deg)&nbsp;for&nbsp;energy&nbsp;in&nbsp;eV<br>
-&nbsp;magQ&nbsp;=&nbsp;<a href="#-calQmag">calQmag</a>(X2T,energy_kev=17.794)</tt></dd></dl>
+ <dl><dt><a name="-cal2theta"><strong>cal2theta</strong></a>(qmag, energy_kev=17.794)</dt><dd><tt>Calculate&nbsp;theta&nbsp;at&nbsp;particular&nbsp;energy&nbsp;in&nbsp;keV&nbsp;from&nbsp;|Q|<br>
+&nbsp;twotheta&nbsp;=&nbsp;<a href="#-cal2theta">cal2theta</a>(Qmag,energy_kev=17.794)</tt></dd></dl>
  <dl><dt><a name="-calc_vol"><strong>calc_vol</strong></a>(UV)</dt><dd><tt>Calculate&nbsp;volume&nbsp;in&nbsp;Angstrom^3&nbsp;from&nbsp;unit&nbsp;vectors</tt></dd></dl>
- <dl><dt><a name="-caldspace"><strong>caldspace</strong></a>(twotheta, energy_kev<font color="#909090">=17.794</font>)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;two-theta<br>
+ <dl><dt><a name="-caldspace"><strong>caldspace</strong></a>(twotheta, energy_kev=17.794)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;two-theta<br>
 &nbsp;dspace&nbsp;=&nbsp;<a href="#-caldspace">caldspace</a>(tth,&nbsp;energy_kev)</tt></dd></dl>
+ <dl><dt><a name="-calqmag"><strong>calqmag</strong></a>(twotheta, energy_kev=17.794)</dt><dd><tt>Calculate&nbsp;|Q|&nbsp;at&nbsp;a&nbsp;particular&nbsp;2-theta&nbsp;(deg)&nbsp;for&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;magQ&nbsp;=&nbsp;<a href="#-calqmag">calqmag</a>(twotheta,&nbsp;energy_kev=17.794)</tt></dd></dl>
  <dl><dt><a name="-cif2dict"><strong>cif2dict</strong></a>(cifvals)</dt><dd><tt>From&nbsp;a&nbsp;dict&nbsp;of&nbsp;key:value&nbsp;pairs&nbsp;generated&nbsp;from&nbsp;a&nbsp;*.cif&nbsp;file&nbsp;(using&nbsp;readcif),<br>
 read&nbsp;standard&nbsp;crystallographic&nbsp;infromation&nbsp;into&nbsp;a&nbsp;crystal&nbsp;dictionary,&nbsp;with&nbsp;keys:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'filename'&nbsp;-&nbsp;cif&nbsp;filename<br>
@@ -137,12 +149,27 @@ read&nbsp;standard&nbsp;crystallographic&nbsp;infromation&nbsp;into&nbsp;a&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;'misc']&nbsp;=&nbsp;[element,&nbsp;label,&nbsp;cif_pos,&nbsp;occ,&nbsp;Uiso]<br>
 :param&nbsp;cifvals:&nbsp;dict&nbsp;from&nbsp;readcif<br>
 :return:&nbsp;dict</tt></dd></dl>
- <dl><dt><a name="-debyewaller"><strong>debyewaller</strong></a>(uiso, Qmag<font color="#909090">=[0]</font>)</dt><dd><tt>Calculate&nbsp;the&nbsp;debye&nbsp;waller&nbsp;factor&nbsp;for&nbsp;a&nbsp;particular&nbsp;Q<br>
+ <dl><dt><a name="-count_atoms"><strong>count_atoms</strong></a>(list_of_elements, occupancy=None, divideby=1, latex=False)</dt><dd><tt>Count&nbsp;atoms&nbsp;in&nbsp;a&nbsp;list&nbsp;of&nbsp;elements,&nbsp;returning&nbsp;condenced&nbsp;list&nbsp;of&nbsp;elements<br>
+:param&nbsp;list_of_elements:&nbsp;list&nbsp;of&nbsp;element&nbsp;symbols<br>
+:param&nbsp;occupancy:&nbsp;list&nbsp;of&nbsp;occupancies&nbsp;of&nbsp;each&nbsp;element&nbsp;(default=None)<br>
+:param&nbsp;divideby:&nbsp;divide&nbsp;each&nbsp;count&nbsp;by&nbsp;this&nbsp;(default=1)<br>
+:param&nbsp;latex:&nbsp;False*/True<br>
+:return:&nbsp;[list&nbsp;of&nbsp;str]</tt></dd></dl>
+ <dl><dt><a name="-count_charges"><strong>count_charges</strong></a>(list_of_elements, occupancy=None, divideby=1, latex=False)</dt><dd><tt>Count&nbsp;atoms&nbsp;in&nbsp;a&nbsp;list&nbsp;of&nbsp;elements,&nbsp;returning&nbsp;condenced&nbsp;list&nbsp;of&nbsp;elements&nbsp;with&nbsp;charges<br>
+:param&nbsp;list_of_elements:&nbsp;list&nbsp;of&nbsp;element&nbsp;symbols<br>
+:param&nbsp;occupancy:&nbsp;list&nbsp;of&nbsp;occupancies&nbsp;of&nbsp;each&nbsp;element&nbsp;(default=None)<br>
+:param&nbsp;divideby:&nbsp;divide&nbsp;each&nbsp;count&nbsp;by&nbsp;this&nbsp;(default=1)<br>
+:param&nbsp;latex:&nbsp;False*/True<br>
+:return:&nbsp;[list&nbsp;of&nbsp;str]</tt></dd></dl>
+ <dl><dt><a name="-debyewaller"><strong>debyewaller</strong></a>(uiso, Qmag=[0])</dt><dd><tt>Calculate&nbsp;the&nbsp;debye&nbsp;waller&nbsp;factor&nbsp;for&nbsp;a&nbsp;particular&nbsp;Q<br>
 &nbsp;T&nbsp;=&nbsp;<a href="#-debyewaller">debyewaller</a>(uiso,Qmag=[0])<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;T&nbsp;=&nbsp;exp(&nbsp;-2*pi^2*Uiso/d^2&nbsp;)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;T&nbsp;=&nbsp;exp(&nbsp;-Uiso/2Q^2&nbsp;)</tt></dd></dl>
- <dl><dt><a name="-diffractometer_Q"><strong>diffractometer_Q</strong></a>(eta, delta, energy_kev<font color="#909090">=8.0</font>)</dt><dd><tt>Calculate&nbsp;wavevector&nbsp;transfer,&nbsp;Q&nbsp;for&nbsp;diffractometer&nbsp;within&nbsp;the&nbsp;scattering&nbsp;plane.<br>
+ <dl><dt><a name="-default_atom_charge"><strong>default_atom_charge</strong></a>(element)</dt><dd><tt>Returns&nbsp;the&nbsp;default&nbsp;charge&nbsp;value&nbsp;for&nbsp;the&nbsp;element<br>
+:param&nbsp;element:&nbsp;str:&nbsp;'Fe'<br>
+:return:&nbsp;int&nbsp;or&nbsp;nan</tt></dd></dl>
+ <dl><dt><a name="-diffractometer_Q"><strong>diffractometer_Q</strong></a>(eta, delta, energy_kev=8.0)</dt><dd><tt>Calculate&nbsp;wavevector&nbsp;transfer,&nbsp;Q&nbsp;for&nbsp;diffractometer&nbsp;within&nbsp;the&nbsp;scattering&nbsp;plane.<br>
 &nbsp;&nbsp;&nbsp;Qx,Qy&nbsp;=&nbsp;<a href="#-diffractometer_Q">diffractometer_Q</a>(eta,delta,energy_kev)<br>
 &nbsp;&nbsp;&nbsp;eta&nbsp;=&nbsp;angle&nbsp;(deg)&nbsp;of&nbsp;sample<br>
 &nbsp;&nbsp;&nbsp;delta&nbsp;=&nbsp;angle&nbsp;(deg)&nbsp;of&nbsp;detector<br>
@@ -156,13 +183,19 @@ read&nbsp;standard&nbsp;crystallographic&nbsp;infromation&nbsp;into&nbsp;a&nbsp;
 &nbsp;&nbsp;&nbsp;Note:&nbsp;Currently&nbsp;only&nbsp;in&nbsp;the&nbsp;verticle&nbsp;geometry!</tt></dd></dl>
  <dl><dt><a name="-dspace2q"><strong>dspace2q</strong></a>(dspace)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;|Q|<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qmag&nbsp;=&nbsp;<a href="#-q2dspace">q2dspace</a>(dspace)</tt></dd></dl>
+ <dl><dt><a name="-element_symbol"><strong>element_symbol</strong></a>(element_Z)</dt><dd><tt>Returns&nbsp;the&nbsp;element&nbsp;sympol&nbsp;for&nbsp;element_Z<br>
+:param&nbsp;element_Z:&nbsp;int<br>
+:return:&nbsp;str</tt></dd></dl>
+ <dl><dt><a name="-element_z"><strong>element_z</strong></a>(element)</dt><dd><tt>Returns&nbsp;the&nbsp;element&nbsp;number&nbsp;Z<br>
+:param&nbsp;element:&nbsp;str<br>
+:return:&nbsp;int</tt></dd></dl>
  <dl><dt><a name="-energy2wave"><strong>energy2wave</strong></a>(energy_kev)</dt><dd><tt>Converts&nbsp;energy&nbsp;in&nbsp;keV&nbsp;to&nbsp;wavelength&nbsp;in&nbsp;A<br>
 &nbsp;wavelength&nbsp;=&nbsp;<a href="#-energy2wave">energy2wave</a>(energy)</tt></dd></dl>
  <dl><dt><a name="-fitincell"><strong>fitincell</strong></a>(uvw)</dt><dd><tt>Set&nbsp;all&nbsp;fractional&nbsp;coodinates&nbsp;between&nbsp;0&nbsp;and&nbsp;1<br>
 Usage:<br>
 &nbsp;&nbsp;uvw&nbsp;=&nbsp;<a href="#-fitincell">fitincell</a>(uvw)<br>
 &nbsp;&nbsp;uvw&nbsp;=&nbsp;[[nx3]]&nbsp;array&nbsp;of&nbsp;fractional&nbsp;vectors&nbsp;[u,v,w]</tt></dd></dl>
- <dl><dt><a name="-genHKL"><strong>genHKL</strong></a>(H, K<font color="#909090">=None</font>, L<font color="#909090">=None</font>)</dt><dd><tt>Generate&nbsp;HKL&nbsp;array&nbsp;with&nbsp;all&nbsp;combinations&nbsp;within&nbsp;range&nbsp;specified<br>
+ <dl><dt><a name="-genHKL"><strong>genHKL</strong></a>(H, K=None, L=None)</dt><dd><tt>Generate&nbsp;HKL&nbsp;array&nbsp;with&nbsp;all&nbsp;combinations&nbsp;within&nbsp;range&nbsp;specified<br>
 Usage:<br>
 &nbsp;&nbsp;HKL&nbsp;=&nbsp;<a href="#-genHKL">genHKL</a>(max)<br>
 &nbsp;&nbsp;&nbsp;int&nbsp;max&nbsp;=&nbsp;generates&nbsp;each&nbsp;h,k,l&nbsp;from&nbsp;-max&nbsp;to&nbsp;max<br>
@@ -250,15 +283,15 @@ Usage:<br>
 E.G.<br>
 &nbsp;&nbsp;new_op&nbsp;=&nbsp;<a href="#-invert_sym">invert_sym</a>('x,y,z')<br>
 &nbsp;&nbsp;&gt;&gt;&nbsp;new_op&nbsp;=&nbsp;'-x,-y,-z'</tt></dd></dl>
- <dl><dt><a name="-latpar2UV"><strong>latpar2UV</strong></a>(a, b, c, alpha<font color="#909090">=90.0</font>, beta<font color="#909090">=90.0</font>, gamma<font color="#909090">=120.0</font>)</dt><dd><tt>Convert&nbsp;a,b,c,alpha,beta,gamma&nbsp;to&nbsp;UV<br>
+ <dl><dt><a name="-latpar2UV"><strong>latpar2UV</strong></a>(a, b, c, alpha=90.0, beta=90.0, gamma=120.0)</dt><dd><tt>Convert&nbsp;a,b,c,alpha,beta,gamma&nbsp;to&nbsp;UV<br>
 &nbsp;UV&nbsp;=&nbsp;<a href="#-latpar2UV">latpar2UV</a>(a,b,c,alpha=90.,beta=90.,gamma=120.)<br>
 &nbsp;Vector&nbsp;c&nbsp;is&nbsp;defined&nbsp;along&nbsp;[0,0,1]<br>
 &nbsp;Vector&nbsp;a&nbsp;and&nbsp;b&nbsp;are&nbsp;defined&nbsp;by&nbsp;the&nbsp;angles</tt></dd></dl>
- <dl><dt><a name="-latpar2UV_rot"><strong>latpar2UV_rot</strong></a>(a, b, c, alpha<font color="#909090">=90.0</font>, beta<font color="#909090">=90.0</font>, gamma<font color="#909090">=120.0</font>)</dt><dd><tt>Convert&nbsp;a,b,c,alpha,beta,gamma&nbsp;to&nbsp;UV<br>
+ <dl><dt><a name="-latpar2UV_rot"><strong>latpar2UV_rot</strong></a>(a, b, c, alpha=90.0, beta=90.0, gamma=120.0)</dt><dd><tt>Convert&nbsp;a,b,c,alpha,beta,gamma&nbsp;to&nbsp;UV<br>
 &nbsp;UV&nbsp;=&nbsp;<a href="#-latpar2UV_rot">latpar2UV_rot</a>(a,b,c,alpha=90.,beta=90.,gamma=120.)<br>
 &nbsp;Vector&nbsp;b&nbsp;is&nbsp;defined&nbsp;along&nbsp;[0,1,0]<br>
 &nbsp;Vector&nbsp;a&nbsp;and&nbsp;c&nbsp;are&nbsp;defined&nbsp;by&nbsp;the&nbsp;angles</tt></dd></dl>
- <dl><dt><a name="-magnetic_form_factor"><strong>magnetic_form_factor</strong></a>(element, Qmag<font color="#909090">=0.0</font>)</dt><dd><tt>Read&nbsp;Magnetic&nbsp;form&nbsp;factor&nbsp;table,&nbsp;calculate&nbsp;&lt;j0(|Q|)&gt;<br>
+ <dl><dt><a name="-magnetic_form_factor"><strong>magnetic_form_factor</strong></a>(element, Qmag=0.0)</dt><dd><tt>Read&nbsp;Magnetic&nbsp;form&nbsp;factor&nbsp;table,&nbsp;calculate&nbsp;&lt;j0(|Q|)&gt;<br>
 Analytical&nbsp;approximation&nbsp;of&nbsp;the&nbsp;magnetic&nbsp;form&nbsp;factor:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;j0(|Q|)&gt;&nbsp;=&nbsp;A*exp(-a*s^2)&nbsp;+&nbsp;B*exp(-b*s^2)&nbsp;+&nbsp;C*exp(-c*s^2)&nbsp;+&nbsp;D,&nbsp;where&nbsp;s&nbsp;=&nbsp;sin(theta)/lambda&nbsp;in&nbsp;A-1<br>
 See&nbsp;more&nbsp;about&nbsp;the&nbsp;approximatio&nbsp;here:&nbsp;https://www.ill.eu/sites/ccsl/ffacts/ffactnode3.html<br>
@@ -277,7 +310,10 @@ e.g.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;max_hkl&nbsp;=&nbsp;<a href="#-maxHKL">maxHKL</a>(Qmax,UVstar)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;max_hkl&nbsp;=<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;[3,3,8]</tt></dd></dl>
- <dl><dt><a name="-orthogonal_axes"><strong>orthogonal_axes</strong></a>(x_axis<font color="#909090">=[1, 0, 0]</font>, y_axis<font color="#909090">=[0, 1, 0]</font>)</dt><dd><tt>Returns&nbsp;orthogonal&nbsp;right-handed&nbsp;cartesian&nbsp;axes&nbsp;based&nbsp;on&nbsp;the&nbsp;plane&nbsp;of&nbsp;two&nbsp;non-perpendicular&nbsp;vectors<br>
+ <dl><dt><a name="-orbital_configuration"><strong>orbital_configuration</strong></a>(element_Z)</dt><dd><tt>Returns&nbsp;the&nbsp;orbital&nbsp;configuration&nbsp;of&nbsp;an&nbsp;element&nbsp;as&nbsp;a&nbsp;list&nbsp;of&nbsp;strings<br>
+:param&nbsp;element_Z:&nbsp;int<br>
+:return:&nbsp;['1s2',&nbsp;'2s2',&nbsp;'2p6',&nbsp;...]</tt></dd></dl>
+ <dl><dt><a name="-orthogonal_axes"><strong>orthogonal_axes</strong></a>(x_axis=[1, 0, 0], y_axis=[0, 1, 0])</dt><dd><tt>Returns&nbsp;orthogonal&nbsp;right-handed&nbsp;cartesian&nbsp;axes&nbsp;based&nbsp;on&nbsp;the&nbsp;plane&nbsp;of&nbsp;two&nbsp;non-perpendicular&nbsp;vectors<br>
 E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;x,y,z&nbsp;=&nbsp;<a href="#-orthogonal_axes">orthogonal_axes</a>([1,0,0],[0.5,0.5,0])<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&nbsp;x&nbsp;=&nbsp;array([1,0,0])<br>
@@ -288,14 +324,20 @@ E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&nbsp;x&nbsp;=&nbsp;array([0,1,0])<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&nbsp;y&nbsp;=&nbsp;array([0,0,1])<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&nbsp;z&nbsp;=&nbsp;array([1,0,0])</tt></dd></dl>
- <dl><dt><a name="-print_atom_properties"><strong>print_atom_properties</strong></a>(elements<font color="#909090">=None</font>)</dt><dd><tt>Outputs&nbsp;string&nbsp;of&nbsp;stored&nbsp;atomic&nbsp;properties<br>
+ <dl><dt><a name="-print_atom_properties"><strong>print_atom_properties</strong></a>(elements=None)</dt><dd><tt>Outputs&nbsp;string&nbsp;of&nbsp;stored&nbsp;atomic&nbsp;properties<br>
 :param&nbsp;elements:&nbsp;str&nbsp;or&nbsp;list&nbsp;or&nbsp;None<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;'Co'<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list:&nbsp;['Co',&nbsp;'O']<br>
 :return:&nbsp;str</tt></dd></dl>
- <dl><dt><a name="-q2dspace"><strong>q2dspace</strong></a>(Qmag)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;|Q|<br>
+ <dl><dt><a name="-q2dspace"><strong>q2dspace</strong></a>(qmag)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;|Q|<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dspace&nbsp;=&nbsp;<a href="#-q2dspace">q2dspace</a>(Qmag)</tt></dd></dl>
- <dl><dt><a name="-readcif"><strong>readcif</strong></a>(filename<font color="#909090">=None</font>, debug<font color="#909090">=False</font>)</dt><dd><tt>Open&nbsp;a&nbsp;Crystallographic&nbsp;Information&nbsp;File&nbsp;(*.cif)&nbsp;file&nbsp;and&nbsp;store&nbsp;all&nbsp;entries&nbsp;in&nbsp;a&nbsp;key:value&nbsp;dictionary<br>
+ <dl><dt><a name="-read_atom_properties_file"><strong>read_atom_properties_file</strong></a>(filedir)</dt><dd><tt>Reads&nbsp;the&nbsp;text&nbsp;file&nbsp;"Dans&nbsp;Element&nbsp;Properties.txt"<br>
+Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;dicts&nbsp;containing&nbsp;atomic&nbsp;properites&nbsp;from&nbsp;multiple&nbsp;sources<br>
+&nbsp;&nbsp;data&nbsp;=&nbsp;<a href="#-read_atom_properties_file">read_atom_properties_file</a>(filedir)<br>
+&nbsp;&nbsp;data[22]['Element']<br>
+:param&nbsp;filedir:&nbsp;location&nbsp;of&nbsp;"Dans&nbsp;Element&nbsp;Properties.txt"<br>
+:return:&nbsp;[dict,&nbsp;...]</tt></dd></dl>
+ <dl><dt><a name="-readcif"><strong>readcif</strong></a>(filename=None, debug=False)</dt><dd><tt>Open&nbsp;a&nbsp;Crystallographic&nbsp;Information&nbsp;File&nbsp;(*.cif)&nbsp;file&nbsp;and&nbsp;store&nbsp;all&nbsp;entries&nbsp;in&nbsp;a&nbsp;key:value&nbsp;dictionary<br>
 &nbsp;Looped&nbsp;values&nbsp;are&nbsp;stored&nbsp;as&nbsp;lists&nbsp;under&nbsp;a&nbsp;single&nbsp;key&nbsp;entry<br>
 &nbsp;All&nbsp;values&nbsp;are&nbsp;stored&nbsp;as&nbsp;strings<br>
 E.G.<br>
@@ -323,6 +365,12 @@ Some&nbsp;useful&nbsp;standard&nbsp;CIF&nbsp;keywords:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_x<br>
 &nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_y<br>
 &nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_z</tt></dd></dl>
+ <dl><dt><a name="-split_element_symbol"><strong>split_element_symbol</strong></a>(element)</dt><dd><tt>From&nbsp;element&nbsp;symbol,&nbsp;split&nbsp;charge&nbsp;and&nbsp;occupancy<br>
+&nbsp;&nbsp;symbol,&nbsp;occupancy,&nbsp;charge&nbsp;=&nbsp;<a href="#-split_element_symbol">split_element_symbol</a>('Co3+')<br>
+:param&nbsp;element:&nbsp;str<br>
+:return:&nbsp;symbol:&nbsp;str<br>
+:return:&nbsp;occupancy:&nbsp;float<br>
+:return:&nbsp;charge:&nbsp;float</tt></dd></dl>
  <dl><dt><a name="-sum_sym_ref"><strong>sum_sym_ref</strong></a>(symhkl)</dt><dd><tt>Remove&nbsp;equivalent&nbsp;hkl&nbsp;positions&nbsp;and&nbsp;return&nbsp;the&nbsp;number&nbsp;of&nbsp;times&nbsp;each&nbsp;is&nbsp;generated.</tt></dd></dl>
  <dl><dt><a name="-symmetry_ops2magnetic"><strong>symmetry_ops2magnetic</strong></a>(operations)</dt><dd><tt>Convert&nbsp;list&nbsp;of&nbsp;string&nbsp;symmetry&nbsp;operations&nbsp;to&nbsp;magnetic&nbsp;symmetry&nbsp;operations<br>
 i.e.&nbsp;remove&nbsp;translations</tt></dd></dl>
@@ -331,7 +379,7 @@ i.e.&nbsp;remove&nbsp;translations</tt></dd></dl>
 :return:&nbsp;Biso&nbsp;value&nbsp;or&nbsp;array</tt></dd></dl>
  <dl><dt><a name="-wave2energy"><strong>wave2energy</strong></a>(wavelength)</dt><dd><tt>Converts&nbsp;wavelength&nbsp;in&nbsp;A&nbsp;to&nbsp;energy&nbsp;in&nbsp;keV<br>
 &nbsp;Energy&nbsp;=&nbsp;<a href="#-wave2energy">wave2energy</a>(wavelength)</tt></dd></dl>
- <dl><dt><a name="-xray_scattering_factor"><strong>xray_scattering_factor</strong></a>(element, Qmag<font color="#909090">=0</font>)</dt><dd><tt>Read&nbsp;X-ray&nbsp;scattering&nbsp;factor&nbsp;table,&nbsp;calculate&nbsp;f(|Q|)<br>
+ <dl><dt><a name="-xray_scattering_factor"><strong>xray_scattering_factor</strong></a>(element, Qmag=0)</dt><dd><tt>Read&nbsp;X-ray&nbsp;scattering&nbsp;factor&nbsp;table,&nbsp;calculate&nbsp;f(|Q|)<br>
 Uses&nbsp;the&nbsp;oefficients&nbsp;for&nbsp;analytical&nbsp;approximation&nbsp;to&nbsp;the&nbsp;scattering&nbsp;factors&nbsp;-&nbsp;ITC,&nbsp;p578<br>
 &nbsp;Qff&nbsp;=&nbsp;read_xsf(element,Qmag=[0])</tt></dd></dl>
 </td></tr></table><p>
@@ -341,6 +389,5 @@ Uses&nbsp;the&nbsp;oefficients&nbsp;for&nbsp;analytical&nbsp;approximation&nbsp;
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>__version__</strong> = '2.6'<br>
-<strong>datadir</strong> = r'C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\data'</td></tr></table>
+<td width="100%"><strong>datadir</strong> = r'C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\data'</td></tr></table>
 </body></html>
