@@ -27,6 +27,8 @@ plt.show()
 xtl.start_gui()
 ```
 
+Full code documentation available [here](https://danporter.github.io/Dans_Diffraction/).
+
 For comments, queries or bugs - email dan.porter@diamond.ac.uk
 
 # Installation
