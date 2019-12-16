@@ -8,7 +8,7 @@ Diamond
 2017
 
 Version 1.4
-Last updated: 12/12/19
+Last updated: 16/12/19
 
 Version History:
 10/09/17 0.1    Program created
@@ -16,7 +16,7 @@ Version History:
 06/01/18 1.1    Renamed classes_scattering.py
 31/10/18 1.2    Added print_symmetric_contributions
 21/01/19 1.3    Added non-resonant diffraction, corrected resonant diffraction
-12/12/19 1.4    Added multiple_scattering code
+16/12/19 1.4    Added multiple_scattering code, print_all_reflections updated with units
 
 @author: DGPorter
 """
@@ -51,9 +51,9 @@ class Scattering:
     
     #------Options-------
     # Standard Options
-    _scattering_type = 'xray' # 'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
-    _scattering_specular_direction = [0,0,1] # reflection
-    _scattering_parallel_direction = [0,0,1] # transmission
+    _scattering_type = 'xray'  # 'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
+    _scattering_specular_direction = [0,0,1]  # reflection
+    _scattering_parallel_direction = [0,0,1]  # transmission
     _scattering_theta_offset = 0.0
     _scattering_min_theta = -180.0
     _scattering_max_theta = 180.0
@@ -89,14 +89,14 @@ class Scattering:
     _resonant_approximation_e1e2 = False
     _resonant_approximation_m1m1 = False
     
-    def __init__(self,xtl):
+    def __init__(self, xtl):
         "initialise"
         self.xtl = xtl
 
         # Initialise the scattering type container
         self.Type = ScatteringTypes(self, __scattering_types__)
     
-    def x_ray(self,HKL):
+    def x_ray(self, HKL):
         """
         Calculate the squared structure factor for the given HKL, using x-ray scattering factors
           Scattering.x_ray([1,0,0])
@@ -124,7 +124,7 @@ class Scattering:
             dw = 1
         
         # Calculate dot product
-        dot_KR = np.dot(HKL,uvw.T)
+        dot_KR = np.dot(HKL, uvw.T)
         
         # Calculate structure factor
         # Broadcasting used on 2D ff
@@ -142,7 +142,7 @@ class Scattering:
         I = SF * np.conj(SF)
         return np.real(I)
     
-    def x_ray_fast(self,HKL):
+    def x_ray_fast(self, HKL):
         """
         Calculate the squared structure factor for the given HKL, using atomic number as scattering length
           Scattering.x_ray_fast([1,0,0])
@@ -182,7 +182,7 @@ class Scattering:
         I = SF * np.conj(SF)
         return np.real(I)
     
-    def neutron(self,HKL):
+    def neutron(self, HKL):
         """
         Calculate the squared structure factor for the given HKL, using neutron scattering length
           Scattering.neutron([1,0,0])
@@ -222,7 +222,7 @@ class Scattering:
         I = SF * np.conj(SF)
         return np.real(I)
     
-    def magnetic_neutron(self,HKL):
+    def magnetic_neutron(self, HKL):
         """
         Calculate the magnetic component of the structure factor for the given HKL, using neutron rules and form factor
           Scattering.magnetic_neutron([1,0,0])
@@ -244,7 +244,7 @@ class Scattering:
         if self._use_magnetic_form_factor:
             ff = fc.magnetic_form_factor(type,Qmag)
         else:
-            ff = np.ones([len(HKL),Nat])
+            ff = np.ones([len(HKL), Nat])
         
         # Calculate moment
         momentmag = fg.mag(mxmymz).reshape([-1,1])
@@ -272,8 +272,7 @@ class Scattering:
             else:
                 #SF[n] = np.dot(SFm,SFm) # maximum possible
                 SF[n] = (np.dot(SFm,[1,0,0]) + np.dot(SFm,[0,1,0]) + np.dot(SFm,[0,0,1]))/3 # average polarisation
-                
-        
+
         SF = SF/self.xtl.scale
         
         if self._return_structure_factor: return SF
@@ -282,7 +281,7 @@ class Scattering:
         I = SF * np.conj(SF)
         return np.real(I)
     
-    def xray_magnetic(self,HKL):
+    def xray_magnetic(self, HKL):
         """
         Calculate the non-resonant magnetic component of the structure factor 
         for the given HKL, using x-ray rules and form factor
@@ -1037,47 +1036,64 @@ class Scattering:
             mesh = mesh + bkg
         return mesh_q, mesh
 
-    def print_all_reflections(self,energy_kev=None,print_symmetric=False,min_intensity=0.01,max_intensity=None):
+    def print_all_reflections(self, energy_kev=None, print_symmetric=False,
+                              min_intensity=0.01, max_intensity=None, units=None):
         """
         Prints a list of all allowed reflections at this energy
             energy_kev = energy in keV
             print_symmetric = False*/True : omits reflections with the same intensity at the same angle
             min_intensity = None/ 0.01 : omits reflections less than this (remove extinctions)
             max_intensity = None/ 0.01 : omits reflections greater than this (show extinctions only)
+            units = None/ 'twotheta'/ q/ dspace : choose scattering angle units to display
         """
         
         if energy_kev is None:
             energy_kev = self._energy_kev
         
-        if min_intensity == None: min_intensity=-1
-        if max_intensity == None: max_intensity=np.inf
+        if min_intensity is None: min_intensity = -1
+        if max_intensity is None: max_intensity = np.inf
         
-        HKL = self.xtl.Cell.all_hkl(energy_kev, self._scattering_max_twotheta)
-        HKL = self.xtl.Cell.sort_hkl(HKL)
-        tth = self.xtl.Cell.tth(HKL,energy_kev)
-        HKL = HKL[tth>self._scattering_min_twotheta,:]
-        tth = tth[tth>self._scattering_min_twotheta]
-        #inten = np.sqrt(self.intensity(HKL)) # structure factor
-        inten = self.intensity(HKL)
+        hkl = self.xtl.Cell.all_hkl(energy_kev, self._scattering_max_twotheta)
+        if not print_symmetric:
+            hkl = self.xtl.Symmetry.remove_symmetric_reflections(hkl)
+        hkl = self.xtl.Cell.sort_hkl(hkl)
+
+        tth = self.xtl.Cell.tth(hkl, energy_kev)
+        hkl = hkl[tth > self._scattering_min_twotheta, :]
+        tth = tth[tth > self._scattering_min_twotheta]
+        #inten = np.sqrt(self.intensity(hkl)) # structure factor
+        inten = self.intensity(hkl)
+
+        if units is None:
+            units = self._powder_units
+        units = units.lower()
+        if units in ['d', 'dspc', 'dspace', 'd space', 'd-space', 'dspacing', 'd spacing', 'd-spacing']:
+            unit_str = 'd-spacing'
+            unit = fc.caldspace(tth, energy_kev)
+        elif units in ['q', 'wavevector']:
+            unit_str = 'Q'
+            unit = fc.calqmag(tth, energy_kev)
+        else:
+            unit_str = 'TwoTheta'
+            unit = tth
         
-        fmt = '(%3.0f,%3.0f,%3.0f) %8.2f  %9.2f\n' 
+        fmt = '(%3.0f,%3.0f,%3.0f) %10.2f  %9.2f\n'
         outstr = ''
         
-        outstr+= 'Energy = %6.3f keV\n' % energy_kev
-        outstr+= 'Radiation: %s\n' % self._scattering_type
-        outstr+= '( h, k, l)    TwoTheta  Intensity\n'
-        #outstr+= fmt % (HKL[0,0],HKL[0,1],HKL[0,2],tth[0],inten[0]) # hkl(0,0,0)
+        outstr += 'Energy = %6.3f keV\n' % energy_kev
+        outstr += 'Radiation: %s\n' % self._scattering_type
+        outstr += '( h, k, l)    %10s  Intensity\n' % unit_str
+        #outstr+= fmt % (hkl[0,0],hkl[0,1],hkl[0,2],tth[0],inten[0]) # hkl(0,0,0)
         count = 0
-        for n in range(1,len(tth)):
+        for n in range(1, len(tth)):
             if inten[n] < min_intensity: continue
             if inten[n] > max_intensity: continue
-            if not print_symmetric and np.abs(tth[n]-tth[n-1]) < 0.01 and count>0: continue # only works if sorted
             count += 1
-            outstr+= fmt % (HKL[n,0],HKL[n,1],HKL[n,2],tth[n],inten[n])
-        outstr+= 'Reflections: %1.0f\n'%count
+            outstr += fmt % (hkl[n,0], hkl[n,1], hkl[n,2],unit[n],inten[n])
+        outstr += 'Reflections: %1.0f\n' % count
         return outstr
     
-    def print_ref_reflections(self,energy_kev=None,min_intensity=0.01,max_intensity=None):
+    def print_ref_reflections(self, energy_kev=None, min_intensity=0.01, max_intensity=None):
         """
         Prints a list of all allowed reflections at this energy in the reflection geometry
             energy = energy in keV

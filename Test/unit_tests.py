@@ -44,10 +44,17 @@ print('  classes_scattering: %s'%dif.classes_scattering.__version__)
 print('  classes_properties: %s'%dif.classes_properties.__version__)
 print('  classes_structures: %s'%dif.classes_structures.__version__)
 print('  classes_fdmnes: %s'%dif.classes_fdmnes.__version__)
-#print('  classes_gui: %s'%dif.classes_gui.__version__)
 print('  functions_crystallography: %s'%dif.fc.__version__)
 print('  functions_plotting: %s'%dif.fp.__version__)
 print('  functions_general: %s'%dif.fg.__version__)
+
+# 2.1) Import GUI
+print('Graphical front end version:')
+try:
+    from Dans_Diffraction import tkgui
+    print('  tkgui: %s'%tkgui.__version__)
+except ImportError:
+    print('--- No tkinter available ---')
 
 # 3) Read atom properties
 weight = dif.fc.atom_properties('Co','Weight')
@@ -98,7 +105,10 @@ xtlm.Scatter.print_intensity([0,0,3])
 resi=xtlm.Scatter.xray_resonant([0,0,3], energy_kev=2.967, polarisation='sp', azim_zero=[0,1,0], PSI=[90], F0=1, F1=1, F2=1)
 print('\nResonant scattering RuL2 psi=90 sp = %6.2f'%resi)
 
-# 9) Generate superstructure
+# 9) Multiple scattering
+mslist = xtlm.Scatter.ms_azimuth([0,0,2], 2.967, [1,0,0])
+
+# 10) Generate superstructure
 P = [[3,0,0],[4,5,0],[0,0,1]] # Stripe Supercell
 xtl2.Atoms.occupancy[2]=0
 xtl2.Atoms.occupancy[3]=1
@@ -107,11 +117,10 @@ sup = xtl2.generate_superstructure(P)
 sup.Structure.occupancy[[6 ,16,26,77,87,107]] = 1 # Na1
 sup.Structure.occupancy[[8 ,18,38,28,48,58, 139, 119, 149, 109, 89,79]] = 0 # Na2
 
-# 10) Multicrystal
+# 11) Multicrystal
 xtls = dif.MultiCrystal([xtl2, dif.structure_list.Diamond.build()])
 
-
-# 11) Plotting
+# 12) Plotting
 print('\nStarting Plotting Tests...')
 print('  Plotting Powder')
 xtl2.Plot.simulate_powder(energy_kev=8, peak_width=0.01)
@@ -128,6 +137,9 @@ plt.show()
 print('  Plotting azimuthal scan')
 xtlm.Plot.simulate_azimuth([0,0,3])
 plt.show()
+print('  Plotting multiple scattering')
+xtlm.Plot.plot_multiple_scattering([0,0,2], [1,0,0], energy_range=[2.95, 2.98], numsteps=61)
+plt.show()
 print('  Plotting Superstructure hk0 plane')
 sup.Plot.simulate_hk0()
 plt.clim([0,10])
@@ -136,13 +148,12 @@ print('  Plotting multicrystal powder')
 xtls.simulate_powder(energy_kev = 5.0, peak_width=0.001)
 plt.show()
 
-
 # 12) FDMNES
 stop
 print('\nTest FDMNES code')
-fdm = dif.Fdmnes(xtl2) # this might take a while the first time as the fdmnes_win64.exe file is found
+fdm = dif.Fdmnes(xtl2)  # this might take a while the first time as the fdmnes_win64.exe file is found
 fdm.setup(
-    folder_name='Test', # this will create the directory /FDMNES/Sim/Test, but if it exists Test_2 will be used etc.
+    folder_name='Test',  # this will create the directory /FDMNES/Sim/Test, but if it exists Test_2 will be used etc.
     comment='A test run',
     radius=4.0,
     edge='K',
@@ -155,7 +166,7 @@ fdm.setup(
 print('Create Files')
 fdm.create_files()
 fdm.write_fdmfile()
-fdm.run_fdmnes() # This will take a few mins, output should be printed to the console
+fdm.run_fdmnes()  # This will take a few mins, output should be printed to the console
 
 # 13) Analysis FDMNES
 print('\nAnalyse FDMNES Results')

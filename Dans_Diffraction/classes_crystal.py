@@ -1413,6 +1413,24 @@ class Symmetry:
         difference = fg.mag(hkl1 - symm_hkl)
         return np.any(difference < tolerance)
 
+    def remove_symmetric_reflections(self, hkl_list, tolerance=0.01):
+        """
+        Return a list of reflections with symmetric reflections removed
+        :param hkl_list: list of [h,k,l] reflections
+        :param tolerance: tolerance for matching reflections
+        :return: array of [h,k,l]
+        """
+        hkl_list = np.asarray(hkl_list).reshape(-1, 3)
+        symmetric_idx = np.zeros(len(hkl_list), dtype=bool)
+        symmetric_hkl = np.empty([0, 3])
+        for n in range(len(hkl_list)):
+            difference = fg.mag(hkl_list[n] - symmetric_hkl)
+            if np.any(difference < tolerance): continue
+
+            symmetric_hkl = np.vstack([symmetric_hkl, self.symmetric_reflections(hkl_list[n])])
+            symmetric_idx[n] = True
+        return hkl_list[symmetric_idx]
+
     def print_symmetric_vectors(self, HKL):
         """
         Print symmetric vectors

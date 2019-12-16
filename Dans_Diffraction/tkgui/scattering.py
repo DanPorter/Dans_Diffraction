@@ -46,7 +46,7 @@ class ScatteringGui:
         self.energy_kev = tk.DoubleVar(frame, 8.0)
         self.edge = tk.StringVar(frame, 'Edge')
         self.type = tk.StringVar(frame, 'X-Ray')
-        self.orientation = tk.StringVar(frame, 'Reflection')
+        self.orientation = tk.StringVar(frame, 'None')
         self.direction_h = tk.IntVar(frame, 0)
         self.direction_k = tk.IntVar(frame, 0)
         self.direction_l = tk.IntVar(frame, 1)
@@ -367,6 +367,7 @@ class ScatteringGui:
         self.energy_kev.set(8.0)
         self.edge.set('Edge')
         self.powder_units.set('Two-Theta')
+        self.orientation.set('Reflection')
         self.theta_offset.set(0.0)
         self.theta_min.set(-20.0)
         self.theta_max.set(150.0)
@@ -380,6 +381,7 @@ class ScatteringGui:
         self.energy_kev.set(17.7)
         self.edge.set('Edge')
         self.powder_units.set('d-spacing')
+        self.orientation.set('None')
         self.theta_offset.set(0.0)
         self.theta_min.set(-180.0)
         self.theta_max.set(180.0)
@@ -394,6 +396,7 @@ class ScatteringGui:
         self.edge.set('Mo Ka')
         self.energy_kev.set(self.xr_energies[idx])
         self.powder_units.set('Two-Theta')
+        self.orientation.set('None')
         self.theta_offset.set(0.0)
         self.theta_min.set(-180.0)
         self.theta_max.set(180.0)
@@ -441,7 +444,8 @@ class ScatteringGui:
         elif self.orientation.get() == 'Transmission':
             string = self.xtl.Scatter.print_tran_reflections(min_intensity=-1, max_intensity=None)
         else:
-            string = self.xtl.Scatter.print_all_reflections(min_intensity=-1, max_intensity=None)
+            units = self.powder_units.get()
+            string = self.xtl.Scatter.print_all_reflections(min_intensity=-1, max_intensity=None, units=units)
         StringViewer(string, 'Intensities %s' % self.xtl.name)
 
     def fun_powder(self):

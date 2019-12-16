@@ -55,7 +55,7 @@ class MultipleScatteringGui:
         self.pv_y = tk.IntVar(frame, 0)
         self.energy_value = tk.DoubleVar(frame, 8)
         self.energy_range_width = tk.DoubleVar(frame, 0.1)
-        self.numsteps = tk.IntVar(frame, 60)
+        self.numsteps = tk.IntVar(frame, 101)
         self.run_modes = ["full", "pv1", "pv2", "sfonly", "pv1xsf1"]
         self.run_mode = tk.StringVar(frame, self.run_modes[3])
 
@@ -166,6 +166,7 @@ class MultipleScatteringGui:
         modes[mode] = True
 
         self.xtl.Plot.plot_multiple_scattering(hkl, azir, pv, erange, numsteps, **modes)
+        plt.show()
 
     def fun_azimuth(self):
         """Run multiple scattering code"""
@@ -185,3 +186,4 @@ class MultipleScatteringGui:
         modes[mode] = True
 
         self.xtl.Plot.plot_ms_azimuth(hkl, energy, azir, pv, **modes)
+        plt.show()

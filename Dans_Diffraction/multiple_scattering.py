@@ -151,6 +151,7 @@ def loadcif(xtl, energy_kev):
     lattice = xtl.Cell.lp()
     reflist = xtl.Cell.all_hkl(energy_kev)
     reflist = xtl.Cell.sort_hkl(reflist)
+    reflist = reflist[1:]
     old_sf = xtl.Scatter._return_structure_factor
     xtl.Scatter._return_structure_factor = True
     sf = xtl.Scatter.intensity(reflist)  # complex structure factor

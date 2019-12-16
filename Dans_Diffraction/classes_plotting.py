@@ -930,10 +930,12 @@ class Plotting:
         else:
             calcstr = 'Geometry Only'
 
+        cmap = plt.get_cmap('rainbow') # grey_r
+
         plt.figure(figsize=(10, 5), dpi=130)
         if pv1 + pv2 + sfonly + full + pv1xsf1 != 0:
-            plt.scatter(mslist[:, 3], mslist[:, 7], c=mslist[:, -1], s=2, cmap=plt.cm.gray_r, lw=0)
-            plt.scatter(mslist[:, 4], mslist[:, 7], c=mslist[:, -1], s=2, cmap=plt.cm.gray_r, lw=0)
+            plt.scatter(mslist[:, 3], mslist[:, 7], c=mslist[:, -1], s=2, cmap=cmap, lw=0)
+            plt.scatter(mslist[:, 4], mslist[:, 7], c=mslist[:, -1], s=2, cmap=cmap, lw=0)
             plt.colorbar()
         else:
             plt.scatter(mslist[:, 3], mslist[:, -1], s=2, lw=0)
@@ -946,8 +948,7 @@ class Plotting:
         plt.title(ttl, fontsize=12)
         plt.xlabel(r'$\psi$ (deg)', fontsize=10)
         plt.ylabel('Energy (keV)', fontsize=10)
-        plt.subplots_adjust(bottom=0.2)
-        plt.show()
+        plt.subplots_adjust(bottom=0.12, top=0.88)
 
     def plot_ms_azimuth(self, hkl, energy_kev, azir=[0, 0, 1], pv=[1, 0], numsteps=3, peak_width=0.1,
                         full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False, log=False):
@@ -994,8 +995,7 @@ class Plotting:
         ttl += 'Calculation: %s, E = %5.3f keV\n' % (calcstr, energy_kev)
         ttl += 'hkl = %s Incident polarisation vector = %s' % (hkl, str(pv))
         fp.labels(ttl, r'$\psi$ (deg)', 'Intensity')
-        plt.subplots_adjust(bottom=0.2)
-        plt.show()
+        #plt.subplots_adjust(bottom=0.2)
 
 
 class PlottingSuperstructure(Plotting):
@@ -1110,7 +1110,7 @@ class PlottingSuperstructure(Plotting):
         if background:
             bkg = np.random.normal(background,np.sqrt(background), [pixels,pixels])
             mesh = mesh+bkg
-        return X,Y,mesh
+        return X, Y, mesh
     
     def simulate_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],
                                     q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
