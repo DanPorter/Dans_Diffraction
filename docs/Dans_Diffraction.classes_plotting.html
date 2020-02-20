@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_plotting</strong></big></big> (version 1.6)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_plotting.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_plotting.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_plotting.py">c:\users\grp66007\dropbox\python\dans_diffraction\dans_diffraction\classes_plotting.py</a></font></td></tr></table>
     <p><tt><a href="#Plotting">Plotting</a>&nbsp;Class&nbsp;"classes_plotting.py"<br>
 &nbsp;functions&nbsp;to&nbsp;plot&nbsp;the&nbsp;crystal&nbsp;structure&nbsp;and&nbsp;simulated&nbsp;<br>
 &nbsp;diffraction&nbsp;patterns.<br>
@@ -280,6 +280,41 @@ E.G.&nbsp;hk&nbsp;plot&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
 
 <dl><dt><a name="Plotting-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev=None, peak_width=0.01, background=0)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern,&nbsp;plots&nbsp;in&nbsp;a&nbsp;new&nbsp;figure&nbsp;with&nbsp;labels</tt></dd></dl>
 
+<dl><dt><a name="Plotting-tensor_scattering_azimuth"><strong>tensor_scattering_azimuth</strong></a>(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None)</dt><dd><tt>Plot&nbsp;tensor&nbsp;scattering&nbsp;intensities<br>
+&nbsp;&nbsp;ss,&nbsp;sp,&nbsp;ps,&nbsp;pp&nbsp;=&nbsp;tensor_scattering('Ru1',&nbsp;[0,0,3],&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90)<br>
+Uses&nbsp;TensorScatteringClass.py&nbsp;by&nbsp;Prof.&nbsp;Steve&nbsp;Collins,&nbsp;Dimaond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
+:param&nbsp;atom_label:&nbsp;str&nbsp;atom&nbsp;site&nbsp;label,&nbsp;e.g.&nbsp;Ru1<br>
+:param&nbsp;hkl:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;reflection&nbsp;to&nbsp;calculate<br>
+:param&nbsp;energy_kev:&nbsp;float<br>
+:param&nbsp;azir:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;azimuthal&nbsp;reference<br>
+:param&nbsp;process:&nbsp;str:&nbsp;'Scalar',&nbsp;'E1E1',&nbsp;'E1E2',&nbsp;'E2E2',&nbsp;'E1E1mag',&nbsp;'NonResMag'<br>
+:param&nbsp;rank:&nbsp;int,&nbsp;1,2,3:&nbsp;tensor&nbsp;rank.&nbsp;Only&nbsp;required<br>
+:param&nbsp;time:&nbsp;+/-1&nbsp;time&nbsp;symmetry<br>
+:param&nbsp;parity:&nbsp;+/-1&nbsp;parity<br>
+:param&nbsp;mk:<br>
+:param&nbsp;lk:<br>
+:param&nbsp;sk:<br>
+:return:&nbsp;none</tt></dd></dl>
+
+<dl><dt><a name="Plotting-tensor_scattering_stokes"><strong>tensor_scattering_stokes</strong></a>(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], psideg=0, pol_theta=45, process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None)</dt><dd><tt>Return&nbsp;tensor&nbsp;scattering&nbsp;intensities&nbsp;for&nbsp;non-standard&nbsp;polarisation<br>
+&nbsp;&nbsp;pol&nbsp;=&nbsp;<a href="#Plotting-tensor_scattering_stokes">tensor_scattering_stokes</a>('Ru1',&nbsp;[0,0,3],&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90,&nbsp;stokes=45)<br>
+Uses&nbsp;TensorScatteringClass.py&nbsp;by&nbsp;Prof.&nbsp;Steve&nbsp;Collins,&nbsp;Dimaond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
+:param&nbsp;atom_label:&nbsp;str&nbsp;atom&nbsp;site&nbsp;label,&nbsp;e.g.&nbsp;Ru1<br>
+:param&nbsp;hkl:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;reflection&nbsp;to&nbsp;calculate<br>
+:param&nbsp;energy_kev:&nbsp;float<br>
+:param&nbsp;azir:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;azimuthal&nbsp;reference<br>
+:param&nbsp;psideg:&nbsp;float,&nbsp;azimuthal&nbsp;angle<br>
+:param&nbsp;pol_theeta:&nbsp;float,&nbsp;scattering&nbsp;angle&nbsp;of&nbsp;polarisation&nbsp;analyser,&nbsp;degrees<br>
+:param&nbsp;process:&nbsp;str:&nbsp;'Scalar',&nbsp;'E1E1',&nbsp;'E1E2',&nbsp;'E2E2',&nbsp;'E1E1mag',&nbsp;'NonResMag'<br>
+:param&nbsp;rank:&nbsp;int,&nbsp;1,2,3:&nbsp;tensor&nbsp;rank.&nbsp;Only&nbsp;required<br>
+:param&nbsp;time:&nbsp;+/-1&nbsp;time&nbsp;symmetry<br>
+:param&nbsp;parity:&nbsp;+/-1&nbsp;parity<br>
+:param&nbsp;mk:<br>
+:param&nbsp;lk:<br>
+:param&nbsp;sk:<br>
+:return:&nbsp;array&nbsp;of&nbsp;intensity&nbsp;values<br>
+:return:&nbsp;none</tt></dd></dl>
+
 <hr>
 Data descriptors defined here:<br>
 <dl><dt><strong>__dict__</strong></dt>
@@ -473,6 +508,41 @@ Plot&nbsp;ewald&nbsp;space&nbsp;coverage&nbsp;within&nbsp;a&nbsp;particular&nbsp
 &nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
 
 <dl><dt><a name="PlottingSuperstructure-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev=None, peak_width=0.01, background=0)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern,&nbsp;plots&nbsp;in&nbsp;a&nbsp;new&nbsp;figure&nbsp;with&nbsp;labels</tt></dd></dl>
+
+<dl><dt><a name="PlottingSuperstructure-tensor_scattering_azimuth"><strong>tensor_scattering_azimuth</strong></a>(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None)</dt><dd><tt>Plot&nbsp;tensor&nbsp;scattering&nbsp;intensities<br>
+&nbsp;&nbsp;ss,&nbsp;sp,&nbsp;ps,&nbsp;pp&nbsp;=&nbsp;tensor_scattering('Ru1',&nbsp;[0,0,3],&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90)<br>
+Uses&nbsp;TensorScatteringClass.py&nbsp;by&nbsp;Prof.&nbsp;Steve&nbsp;Collins,&nbsp;Dimaond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
+:param&nbsp;atom_label:&nbsp;str&nbsp;atom&nbsp;site&nbsp;label,&nbsp;e.g.&nbsp;Ru1<br>
+:param&nbsp;hkl:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;reflection&nbsp;to&nbsp;calculate<br>
+:param&nbsp;energy_kev:&nbsp;float<br>
+:param&nbsp;azir:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;azimuthal&nbsp;reference<br>
+:param&nbsp;process:&nbsp;str:&nbsp;'Scalar',&nbsp;'E1E1',&nbsp;'E1E2',&nbsp;'E2E2',&nbsp;'E1E1mag',&nbsp;'NonResMag'<br>
+:param&nbsp;rank:&nbsp;int,&nbsp;1,2,3:&nbsp;tensor&nbsp;rank.&nbsp;Only&nbsp;required<br>
+:param&nbsp;time:&nbsp;+/-1&nbsp;time&nbsp;symmetry<br>
+:param&nbsp;parity:&nbsp;+/-1&nbsp;parity<br>
+:param&nbsp;mk:<br>
+:param&nbsp;lk:<br>
+:param&nbsp;sk:<br>
+:return:&nbsp;none</tt></dd></dl>
+
+<dl><dt><a name="PlottingSuperstructure-tensor_scattering_stokes"><strong>tensor_scattering_stokes</strong></a>(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], psideg=0, pol_theta=45, process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None)</dt><dd><tt>Return&nbsp;tensor&nbsp;scattering&nbsp;intensities&nbsp;for&nbsp;non-standard&nbsp;polarisation<br>
+&nbsp;&nbsp;pol&nbsp;=&nbsp;<a href="#PlottingSuperstructure-tensor_scattering_stokes">tensor_scattering_stokes</a>('Ru1',&nbsp;[0,0,3],&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90,&nbsp;stokes=45)<br>
+Uses&nbsp;TensorScatteringClass.py&nbsp;by&nbsp;Prof.&nbsp;Steve&nbsp;Collins,&nbsp;Dimaond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
+:param&nbsp;atom_label:&nbsp;str&nbsp;atom&nbsp;site&nbsp;label,&nbsp;e.g.&nbsp;Ru1<br>
+:param&nbsp;hkl:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;reflection&nbsp;to&nbsp;calculate<br>
+:param&nbsp;energy_kev:&nbsp;float<br>
+:param&nbsp;azir:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;azimuthal&nbsp;reference<br>
+:param&nbsp;psideg:&nbsp;float,&nbsp;azimuthal&nbsp;angle<br>
+:param&nbsp;pol_theeta:&nbsp;float,&nbsp;scattering&nbsp;angle&nbsp;of&nbsp;polarisation&nbsp;analyser,&nbsp;degrees<br>
+:param&nbsp;process:&nbsp;str:&nbsp;'Scalar',&nbsp;'E1E1',&nbsp;'E1E2',&nbsp;'E2E2',&nbsp;'E1E1mag',&nbsp;'NonResMag'<br>
+:param&nbsp;rank:&nbsp;int,&nbsp;1,2,3:&nbsp;tensor&nbsp;rank.&nbsp;Only&nbsp;required<br>
+:param&nbsp;time:&nbsp;+/-1&nbsp;time&nbsp;symmetry<br>
+:param&nbsp;parity:&nbsp;+/-1&nbsp;parity<br>
+:param&nbsp;mk:<br>
+:param&nbsp;lk:<br>
+:param&nbsp;sk:<br>
+:return:&nbsp;array&nbsp;of&nbsp;intensity&nbsp;values<br>
+:return:&nbsp;none</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="Dans_Diffraction.classes_plotting.html#Plotting">Plotting</a>:<br>

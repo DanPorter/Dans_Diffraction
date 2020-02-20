@@ -574,6 +574,7 @@ def print_tensors(B, sitevec, sglist, hkl=np.array([0, 0, 0]), K=None, Parity=+1
     """return str of tensors"""
     Ts, Tc1, Tc_atom, Tc_crystal, Ts_atom, Ts_crystal, Fc, Fs = tensorcalc(B, sitevec, sglist,
                                                                            hkl, K, Parity, Time)
+    np.set_printoptions(precision=3, suppress=True)
     out = '\nTensor components\n'
     out += '%s %s\n' %(FMT % 'Crystal (spherical)', Ts_crystal)
     out += '%s %s\n' % (FMT % 'Atom (spherical)', Ts_atom)
@@ -581,6 +582,7 @@ def print_tensors(B, sitevec, sglist, hkl=np.array([0, 0, 0]), K=None, Parity=+1
     out += '\n\nCrystal (Cartesian):\n\n%s' % Tc_crystal
     out += '\n\nAtom (Cartesian):\n\n%s' % Tc_atom
     out += '\n\nStruct. factor (Cartesian):\n\n%s\n' % Fc
+    np.set_printoptions()
     return out
 
 

@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_crystal</strong></big></big> (version 2.6)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_crystal.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_crystal.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_crystal.py">c:\users\grp66007\dropbox\python\dans_diffraction\dans_diffraction\classes_crystal.py</a></font></td></tr></table>
     <p><tt>classes_crystal.py<br>
 A&nbsp;crystal&nbsp;<a href="builtins.html#object">object</a>&nbsp;that&nbsp;reads&nbsp;crystallogaphic&nbsp;data&nbsp;from&nbsp;cif&nbsp;files&nbsp;and<br>
 can&nbsp;generate&nbsp;useful&nbsp;information&nbsp;such&nbsp;as&nbsp;reflection&nbsp;intensities&nbsp;and&nbsp;<br>
@@ -720,6 +720,11 @@ E.G.<br>
 <dl><dt><a name="Symmetry-print_symmetric_vectors"><strong>print_symmetric_vectors</strong></a>(self, HKL)</dt><dd><tt>Print&nbsp;symmetric&nbsp;vectors<br>
 :param&nbsp;HKL:&nbsp;[h,k,l]&nbsp;reflection<br>
 :return:&nbsp;str</tt></dd></dl>
+
+<dl><dt><a name="Symmetry-remove_symmetric_reflections"><strong>remove_symmetric_reflections</strong></a>(self, hkl_list, tolerance=0.01)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;reflections&nbsp;with&nbsp;symmetric&nbsp;reflections&nbsp;removed<br>
+:param&nbsp;hkl_list:&nbsp;list&nbsp;of&nbsp;[h,k,l]&nbsp;reflections<br>
+:param&nbsp;tolerance:&nbsp;tolerance&nbsp;for&nbsp;matching&nbsp;reflections<br>
+:return:&nbsp;array&nbsp;of&nbsp;[h,k,l]</tt></dd></dl>
 
 <dl><dt><a name="Symmetry-symmetric_coordinate_operations"><strong>symmetric_coordinate_operations</strong></a>(self, UVW, MXMYMZ=None)</dt><dd><tt>Returns&nbsp;array&nbsp;of&nbsp;symmetric&nbsp;operations&nbsp;for&nbsp;given&nbsp;position<br>
 Uses&nbsp;fc.gen_sym_pos<br>
