@@ -121,7 +121,7 @@ azimuth, intensity = xtl.Scatter.ms_azimuth([h,k,l], energy_kev=8)
 ![Multiple Scattering](Screenshots/ms_azimuth_silicon.png)
 
 ### Tensor Scattering
-Simulations of resonant scattering using tensors. Resonant x-ray azimuths can be simulated. Based on code by Prof. Steven Collins.
+Simulations of resonant scattering using tensors. Resonant x-ray azimuths can be simulated. Based on code by Prof. Steve Collins.
 
 ```python
 ss, sp, ps, pp = xtl.Scatter.tensor_scattering('Ru1', [h,k,l], energy_kev=2.838, azir=[0,1,0], psideg=90)
