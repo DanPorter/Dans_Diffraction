@@ -120,7 +120,7 @@ class RunFDMNESgui:
         bline.pack(side=tk.TOP, fill=tk.X, pady=5)
         var = tk.Label(bline, text='Range (eV)', font=SF)
         var.pack(side=tk.LEFT, padx=5)
-        var = tk.Entry(bline, textvariable=self.calc_range, font=HF, width=8, bg=ety, fg=ety_txt)
+        var = tk.Entry(bline, textvariable=self.calc_range, font=HF, width=15, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT, padx=5)
 
         # ---Line B2---
@@ -128,7 +128,7 @@ class RunFDMNESgui:
         bline.pack(side=tk.TOP, fill=tk.X, pady=5)
         var = tk.Label(bline, text='Radius (A)', font=SF)
         var.pack(side=tk.LEFT, padx=5)
-        var = tk.Entry(bline, textvariable=self.calc_radius, font=HF, width=3, bg=ety, fg=ety_txt)
+        var = tk.Entry(bline, textvariable=self.calc_radius, font=HF, width=5, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT, padx=5)
 
         # ---Line B3---

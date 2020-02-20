@@ -1,10 +1,10 @@
 # Dans_Diffaction
 Reads crystallographic cif files and simulates diffraction
 
-**Version 1.x**
+**Version 1.6**
 
 By Dan Porter, Diamond Light Source
-2018
+2020
 
 #### TL;DR:
 ```text
@@ -120,6 +120,15 @@ azimuth, intensity = xtl.Scatter.ms_azimuth([h,k,l], energy_kev=8)
 
 ![Multiple Scattering](Screenshots/ms_azimuth_silicon.png)
 
+### Tensor Scattering
+Simulations of resonant scattering using tensors. Resonant x-ray azimuths can be simulated. Based on code by Prof. Steven Collins.
+
+```python
+ss, sp, ps, pp = xtl.Scatter.tensor_scattering('Ru1', [h,k,l], energy_kev=2.838, azir=[0,1,0], psideg=90)
+```
+
+![Tensor Scattering](Screenshots/ts_azimuth_ZnO.png)
+
 ### Properties
 The Crystal class contains a lot of atomic properties that can be exposed in the Properties class:
 ```python
@@ -131,7 +140,7 @@ All the properties are stored in the folder Dans_Diffraction/data.
 ### Superstructures
 Superstructures can be built using the Superstructure class, requring only a matrix to define the new phase:
 ```python
-su = xtl.generate_superstructrue([[2,0,0],[0,2,0],[0,0,1]])
+su = xtl.generate_superstructure([[2,0,0],[0,2,0],[0,0,1]])
 ```
 
 Superstucture classes behave like Crystal classes, but have an additional 'Parent' property that references the original 
