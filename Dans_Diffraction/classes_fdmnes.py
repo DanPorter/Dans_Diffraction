@@ -367,8 +367,7 @@ class Fdmnes:
         fdmstr += '! List of calculations here\n\n'
 
         fdmstr += ' %1.0f\n'%len(file_list)
-        for file in file_list:
-            fdmstr += file
+        fdmstr += '\n'.join(file_list)
 
         # Create/ overwrite file
         fdmfile = os.path.join(os.path.dirname(self.exe_path), 'fdmfile.txt')

@@ -17,8 +17,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.5
-Last updated: 13/12/19
+Version 1.6
+Last updated: 20/02/20
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -27,6 +27,7 @@ Version History:
 23/02/19 1.3    Graphical user intrface and magnetic x-ray scattering now implemented
 13/07/19 1.4    FDMNES GUI functionality added
 13/12/19 1.5    Multiple Scattering added, tkGUI refactored, Startgui changed to start_gui
+20/02/20 1.6    Tensor Scattering added
 """
 
 # Set TkAgg environment
@@ -46,8 +47,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '1.5'
-__date__ = '13/12/19'
+__version__ = '1.6'
+__date__ = '20/02/20'
 
 
 # Build

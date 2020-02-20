@@ -40,6 +40,10 @@ class Plotting:
     """
     Plotting functions for the Crystal Object
     """
+    # Plot options
+    _figure_size = [12, 10]
+    _figure_dpi = 60
+
     def __init__(self,xtl):
         "initialise"
         self.xtl = xtl
@@ -74,7 +78,7 @@ class Plotting:
         V = self.xtl.Cell.calculateR(mxmymz/np.asarray(self.xtl.Cell.lp()[:3]))
         
         # Create plot
-        fig = plt.figure(figsize=[12,12])
+        fig = plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         ax = fig.add_subplot(111, projection='3d')
         
         # Loop over each atom type
@@ -174,7 +178,7 @@ class Plotting:
             laysize = sizes[idx]
             
             # Create Figure
-            plt.figure(figsize=[12,10])
+            plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
             plt.scatter(layx,layy,laysize,laycol,marker='o')
             
             # Plot unoccupied atoms
@@ -356,7 +360,7 @@ class Plotting:
             mesh = mesh+bkg
         
         # create figure
-        plt.figure(figsize=[16,8])
+        plt.figure(figsize=[16,8], dpi=self._figure_dpi)
         plt.plot(mesh_x,mesh,'k-',lw=2)
         
         # Reflection labels
@@ -473,7 +477,7 @@ class Plotting:
         X, Y, mesh = self.generate_intensity_cut(x_axis, y_axis, centre, q_max, cut_width, background, peak_width)
         
         # create figure
-        plt.figure(figsize=[12,10])
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         cmap = plt.get_cmap('hot_r')
         plt.pcolormesh(X,Y,mesh,cmap=cmap)
         plt.axis('image')
@@ -652,7 +656,7 @@ class Plotting:
         forbidden = mesh_Q[ I < 0.01 ,:]
         
         # create figure
-        plt.figure(figsize=[12,10])
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         
         # Lattice points and vectors within the plot
         Q_vec_a = self.xtl.Cell.calculateQ(vec_a)
@@ -716,7 +720,7 @@ class Plotting:
         ttl = '%s %5.3f keV %s\n(%1.0f,%1.0f,%1.0f) aziref=(%1.0f,%1.0f,%1.0f)'
         ttl = ttl % (self.xtl.name,energy_kev,pol,hkl[0],hkl[1],hkl[2],azim_zero[0],azim_zero[1],azim_zero[2])
         
-        plt.figure(figsize=[12,10])
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         plt.plot(psi,IXR.T,'-',lw=2)
         plt.xlim([-180,180])
         plt.ylim([0,1.1*np.max(IXR)])
@@ -748,7 +752,7 @@ class Plotting:
         ttl = '%s %5.3f keV\n(%1.0f,%1.0f,%1.0f) aziref=(%1.0f,%1.0f,%1.0f) %s'
         ttl = ttl % (self.xtl.name, energy_kev, hkl[0], hkl[1], hkl[2], azim_zero[0], azim_zero[1], azim_zero[2], polarisation)
 
-        plt.figure(figsize=[12, 10])
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         plt.plot(azi, I, '-', lw=2)
         plt.xlim([-180, 180])
         plt.ylim([0, 1.1 * np.max(I)])
@@ -780,7 +784,7 @@ class Plotting:
         ttl = ttl % (
         self.xtl.name, energy_kev, hkl[0], hkl[1], hkl[2], azim_zero[0], azim_zero[1], azim_zero[2], polarisation)
 
-        plt.figure(figsize=[12, 10])
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         plt.plot(azi, I, '-', lw=2)
         plt.xlim([-180, 180])
         plt.ylim([0, 1.1 * np.max(I)])
@@ -812,7 +816,7 @@ class Plotting:
         ttl = '%s %5.3f keV\n(%1.0f,%1.0f,%1.0f) aziref=(%1.0f,%1.0f,%1.0f) psi = %1.3g'
         ttl = ttl % (self.xtl.name, energy_kev, hkl[0], hkl[1], hkl[2], azim_zero[0], azim_zero[1], azim_zero[2], psi)
 
-        plt.figure(figsize=[12, 10])
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         plt.plot(pol, I, '-', lw=2)
         plt.xlim([0, 360])
         plt.ylim([0, 1.1 * np.max(I)])
@@ -843,7 +847,7 @@ class Plotting:
         ttl = '%s %5.3f keV\n(%1.0f,%1.0f,%1.0f) aziref=(%1.0f,%1.0f,%1.0f) psi = %1.3g'
         ttl = ttl % (self.xtl.name, energy_kev, hkl[0], hkl[1], hkl[2], azim_zero[0], azim_zero[1], azim_zero[2], psi)
 
-        plt.figure(figsize=[12, 10])
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         plt.plot(pol, I, '-', lw=2)
         plt.xlim([0, 360])
         plt.ylim([0, 1.1 * np.max(I)])
@@ -863,7 +867,7 @@ class Plotting:
         U1, U2, U3 = self.xtl.Scatter.scatteringbasis(hkl, azim_zero, psi)
         kin, kout, ein, eout = self.xtl.Scatter.scatteringvectors(hkl, energy_kev, azim_zero, psi, polarisation)
 
-        fig = plt.figure(figsize=[12, 12])
+        fig = plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         ax = fig.add_subplot(111, projection='3d')
         ax.set_xlim([-1,1])
         ax.set_ylim([-1,1])
@@ -996,6 +1000,78 @@ class Plotting:
         ttl += 'hkl = %s Incident polarisation vector = %s' % (hkl, str(pv))
         fp.labels(ttl, r'$\psi$ (deg)', 'Intensity')
         #plt.subplots_adjust(bottom=0.2)
+
+    def tensor_scattering_azimuth(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], process='E1E1',
+                                  rank=2, time=+1, parity=+1, mk=None, lk=None, sk=None):
+        """
+        Plot tensor scattering intensities
+          ss, sp, ps, pp = tensor_scattering('Ru1', [0,0,3], 2.838, [0,1,0], psideg=90)
+        Uses TensorScatteringClass.py by Prof. Steve Collins, Dimaond Light Source Ltd.
+        :param atom_label: str atom site label, e.g. Ru1
+        :param hkl: list/array, [h,k,l] reflection to calculate
+        :param energy_kev: float
+        :param azir: list/array, [h,k,l] azimuthal reference
+        :param process: str: 'Scalar', 'E1E1', 'E1E2', 'E2E2', 'E1E1mag', 'NonResMag'
+        :param rank: int, 1,2,3: tensor rank. Only required
+        :param time: +/-1 time symmetry
+        :param parity: +/-1 parity
+        :param mk:
+        :param lk:
+        :param sk:
+        :return: none
+        """
+
+        psi = np.arange(-180, 181, 1)
+        ss, sp, ps, pp = self.xtl.Scatter.tensor_scattering(atom_label, hkl, energy_kev, azir, psi, process,
+                                                            rank, time, parity, mk, lk, sk)
+
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
+        plt.plot(psi, ss, '-', lw=4, label='$\sigma\sigma$')
+        plt.plot(psi, sp, '-', lw=4, label='$\sigma\pi$')
+        plt.plot(psi, ps, '-', lw=2, label='$\pi\sigma$')
+        plt.plot(psi, pp, '-', lw=2, label='$\pi\pi$')
+        ttl = '%s\n%s %s E = %5.3f keV\nhkl=(%1.3g, %1.3g, %1.3g)  $\psi_0$=(%1.3g, %1.3g, %.3g)' % (
+            self.xtl.name, process, atom_label, energy_kev, hkl[0], hkl[1], hkl[2], azir[0], azir[1], azir[2]
+        )
+        plt.xticks(np.arange(-180,181,45))
+        plt.grid('on')
+        fp.labels(ttl, '$\psi$ [Deg]', 'Intensity [arb. units]', legend=True)
+
+    def tensor_scattering_stokes(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], psideg=0, pol_theta=45,
+                                 process='E1E1', rank=2, time=+1, parity=+1, mk=None, lk=None, sk=None):
+        """
+        Return tensor scattering intensities for non-standard polarisation
+          pol = tensor_scattering_stokes('Ru1', [0,0,3], 2.838, [0,1,0], psideg=90, stokes=45)
+        Uses TensorScatteringClass.py by Prof. Steve Collins, Dimaond Light Source Ltd.
+        :param atom_label: str atom site label, e.g. Ru1
+        :param hkl: list/array, [h,k,l] reflection to calculate
+        :param energy_kev: float
+        :param azir: list/array, [h,k,l] azimuthal reference
+        :param psideg: float, azimuthal angle
+        :param pol_theeta: float, scattering angle of polarisation analyser, degrees
+        :param process: str: 'Scalar', 'E1E1', 'E1E2', 'E2E2', 'E1E1mag', 'NonResMag'
+        :param rank: int, 1,2,3: tensor rank. Only required
+        :param time: +/-1 time symmetry
+        :param parity: +/-1 parity
+        :param mk:
+        :param lk:
+        :param sk:
+        :return: array of intensity values
+        :return: none
+        """
+
+        stokes = np.arange(-180, 181, 1)
+        pol = self.xtl.Scatter.tensor_scattering_stokes(atom_label, hkl, energy_kev, azir, psideg, stokes,
+                                                                   pol_theta, process, rank, time, parity, mk, lk, sk)
+
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
+        plt.plot(stokes, pol, '-', lw=2)
+        ttl = '%s\n%s %s E = %5.3f keV\nhkl=(%1.3g, %1.3g, %1.3g)   $\psi$ = %3.0f  $\psi_0$=(%1.3g, %1.3g, %.3g)' % (
+            self.xtl.name, process, atom_label, energy_kev, hkl[0], hkl[1], hkl[2], psideg, azir[0], azir[1], azir[2]
+        )
+        plt.xticks(np.arange(-180,181,45))
+        plt.grid('on')
+        fp.labels(ttl, 'Stokes [Deg]', 'Intensity [arb. units]')
 
 
 class PlottingSuperstructure(Plotting):

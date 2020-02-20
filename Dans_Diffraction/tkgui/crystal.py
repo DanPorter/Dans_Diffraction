@@ -28,6 +28,7 @@ from .basic_widgets import (TF, BF, SF, LF, HF,
                             btn_txt, ety_txt, opt_txt)
 from .scattering import ScatteringGui
 from .multiple_scattering import MultipleScatteringGui
+from .tensor_scattering import TensorScatteringGui
 
 
 class CrystalGui:
@@ -119,6 +120,9 @@ class CrystalGui:
         var = tk.Button(f_but, text='Multiple\nScattering', bg=btn, activebackground=btn_active, font=BF,
                         command=self.fun_multiple_scattering)
         var.pack(side=tk.LEFT)
+        var = tk.Button(f_but, text='Tensor\nScattering', bg=btn, activebackground=btn_active, font=BF,
+                        command=self.fun_tensor_scattering)
+        var.pack(side=tk.LEFT)
         var = tk.Button(f_but, text='Properties\n& Conversions', bg=btn, activebackground=btn_active, font=BF,
                         command=self.fun_properties)
         var.pack(side=tk.LEFT)
@@ -207,6 +211,11 @@ class CrystalGui:
     def fun_multiple_scattering(self):
         self.fun_set()
         rt = MultipleScatteringGui(self.xtl)
+        rt.root.focus_force()
+
+    def fun_tensor_scattering(self):
+        self.fun_set()
+        rt = TensorScatteringGui(self.xtl)
         rt.root.focus_force()
 
     def fun_properties(self):

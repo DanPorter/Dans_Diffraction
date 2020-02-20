@@ -17,6 +17,6 @@ xtl = dif.Crystal(f)
 
 xtl.Scatter.setup_scatter(type='x-ray', energy_kev=8.0)
 print("Reflections")
-print(xtl.Scatter.print_all_reflections(print_symmetric=False, min_intensity=0.01, units='Q'))
+print(xtl.Scatter.print_all_reflections(print_symmetric=False, min_intensity=0.01, units='tth'))
 print("Extinctions")
-print(xtl.Scatter.print_all_reflections(print_symmetric=False, min_intensity=None, max_intensity=0.01, units='Q'))
+print(xtl.Scatter.print_all_reflections(print_symmetric=False, min_intensity=None, max_intensity=0.01, units='tth'))

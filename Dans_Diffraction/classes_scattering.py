@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.4
-Last updated: 16/12/19
+Version 1.5
+Last updated: 18/02/20
 
 Version History:
 10/09/17 0.1    Program created
@@ -17,6 +17,7 @@ Version History:
 31/10/18 1.2    Added print_symmetric_contributions
 21/01/19 1.3    Added non-resonant diffraction, corrected resonant diffraction
 16/12/19 1.4    Added multiple_scattering code, print_all_reflections updated with units
+18/02/20 1.5    Added tensor_scattering code
 
 @author: DGPorter
 """
@@ -27,8 +28,9 @@ import numpy as np
 from . import functions_general as fg
 from . import functions_crystallography as fc
 from . import multiple_scattering as ms
+from . import tensor_scattering as ts
 
-__version__ = '1.4'
+__version__ = '1.5'
 __scattering_types__ = {'xray': ['xray','x','x-ray','thomson','charge'],
                         'neutron': ['neutron','n','nuclear'],
                         'xray magnetic': ['xray magnetic','magnetic xray','spin xray','xray spin'],
@@ -1044,7 +1046,7 @@ class Scattering:
             print_symmetric = False*/True : omits reflections with the same intensity at the same angle
             min_intensity = None/ 0.01 : omits reflections less than this (remove extinctions)
             max_intensity = None/ 0.01 : omits reflections greater than this (show extinctions only)
-            units = None/ 'twotheta'/ q/ dspace : choose scattering angle units to display
+            units = None/ 'twotheta'/ 'q'/ 'dspace' : choose scattering angle units to display
         """
         
         if energy_kev is None:
@@ -1059,8 +1061,9 @@ class Scattering:
         hkl = self.xtl.Cell.sort_hkl(hkl)
 
         tth = self.xtl.Cell.tth(hkl, energy_kev)
-        hkl = hkl[tth > self._scattering_min_twotheta, :]
-        tth = tth[tth > self._scattering_min_twotheta]
+        inrange = np.all([tth < self._scattering_max_twotheta, tth > self._scattering_min_twotheta], axis=0)
+        hkl = hkl[inrange, :]
+        tth = tth[inrange]
         #inten = np.sqrt(self.intensity(hkl)) # structure factor
         inten = self.intensity(hkl)
 
@@ -1366,7 +1369,7 @@ class Scattering:
 
         mslist = xtl.Scatter.multiple_scattering([h,k,l], energy_range=[7.8, 8.2])
 
-        See multiple_scattering.py for more details.
+        See multiple_scattering.py for more details. Code created by Dr Gareth Nisbet, DLS
         :param hkl: [h,k,l] principle reflection
         :param azir: [h,k,l] reference of azimuthal 0 angle
         :param pv: [s,p] polarisation vector
@@ -1432,6 +1435,281 @@ class Scattering:
             G = fg.gauss(gauss_x, 0, height=1, cen=0, FWHM=peak_width_pixels, bkg=0)
             mesh = np.convolve(mesh, G, mode='same')
         return mesh_azi, mesh
+
+    def tensor_scattering(self, atom_label, hkl, energy_kev=None, azir=[0, 0, 1], psideg=0, process='E1E1',
+                          rank=2, time=+1, parity=+1, mk=None, lk=None, sk=None):
+        """
+        Return tensor scattering intensities
+          ss, sp, ps, pp = tensor_scattering('Ru1', [0,0,3], 2.838, [0,1,0], psideg=90)
+        Uses TensorScatteringClass.py by Prof. Steve Collins, Dimaond Light Source Ltd.
+        :param atom_label: str atom site label, e.g. Ru1
+        :param hkl: list/array, [h,k,l] reflection to calculate
+        :param energy_kev: float
+        :param azir: list/array, [h,k,l] azimuthal reference
+        :param psideg: float/array, azimuthal angle/ range
+        :param process: str: 'Scalar', 'E1E1', 'E1E2', 'E2E2', 'E1E1mag', 'NonResMag'
+        :param rank: int, 1,2,3: tensor rank. Only required
+        :param time: +/-1 time symmetry
+        :param parity: +/-1 parity
+        :param mk:
+        :param lk:
+        :param sk:
+        :return: ss, sp, ps, pp intensity values
+        """
+
+        if energy_kev is None:
+            energy_kev = self._energy_kev
+
+        # Structure data for input
+        B = ts.latt2b(self.xtl.Cell.lp())
+        sitevec = self.xtl.Atoms.uvw()[self.xtl.Atoms.label.index(atom_label)]
+        sglist = ts.spacegroup_list_from_genpos_list(self.xtl.Symmetry.symmetry_operations)
+        lam = fc.energy2wave(energy_kev)
+
+        # Calculate tensor scattering
+        ss, sp, ps, pp = ts.CalculateIntensityInPolarizationChannels(
+            process, B, sitevec, sglist, lam, hkl, azir, psideg,
+            K=rank, Time=time, Parity=parity, mk=mk, lk=lk, sk=sk
+        )
+        return ss, sp, ps, pp
+
+    def tensor_scattering_stokes(self, atom_label, hkl, energy_kev=None, azir=[0, 0, 1], psideg=0, stokes=0,
+                                 pol_theta=45, process='E1E1', rank=2, time=+1, parity=+1, mk=None, lk=None, sk=None):
+        """
+        Return tensor scattering intensities for non-standard polarisation
+          pol = tensor_scattering_stokes('Ru1', [0,0,3], 2.838, [0,1,0], psideg=90, stokes=45)
+        Uses TensorScatteringClass.py by Prof. Steve Collins, Dimaond Light Source Ltd.
+        :param atom_label: str atom site label, e.g. Ru1
+        :param hkl: list/array, [h,k,l] reflection to calculate
+        :param energy_kev: float
+        :param azir: list/array, [h,k,l] azimuthal reference
+        :param psideg: float, azimuthal angle
+        :param stokes: float/array, rotation of polarisation analyser (0=sigma), degrees
+        :param pol_theta: float, scattering angle of polarisation analyser, degrees
+        :param process: str: 'Scalar', 'E1E1', 'E1E2', 'E2E2', 'E1E1mag', 'NonResMag'
+        :param rank: int, 1,2,3: tensor rank. Only required
+        :param time: +/-1 time symmetry
+        :param parity: +/-1 parity
+        :param mk:
+        :param lk:
+        :param sk:
+        :return: array of intensity values
+        """
+
+        if energy_kev is None:
+            energy_kev = self._energy_kev
+
+        # Structure data for input
+        B = ts.latt2b(self.xtl.Cell.lp())
+        sitevec = self.xtl.Atoms.uvw()[self.xtl.Atoms.label.index(atom_label)]
+        sglist = ts.spacegroup_list_from_genpos_list(self.xtl.Symmetry.symmetry_operations)
+        lam = fc.energy2wave(energy_kev)
+
+        # Calculate tensor scattering
+        stokesvec_swl = [0, 0, 1]
+        pol = ts.CalculateIntensityFromPolarizationAnalyser(
+            process, B, sitevec, sglist, lam, hkl, azir, psideg, stokes, pol_theta,
+            stokesvec_swl, rank, time, parity, mk, lk, sk
+        )
+        return pol
+
+    def print_tensor_scattering(self, atom_label, hkl, energy_kev=None, azir=[0, 0, 1], psideg=0, process='E1E1',
+                                rank=2, time=+1, parity=+1, mk=None, lk=None, sk=None):
+        """
+        Return tensor scattering intensities
+          ss, sp, ps, pp = tensor_scattering('Ru1', [0,0,3], 2.838, [0,1,0], psideg=90)
+        Uses TensorScatteringClass.py by Prof. Steve Collins, Dimaond Light Source Ltd.
+        :param atom_label: str atom site label, e.g. Ru1
+        :param hkl: list/array, [h,k,l] reflection to calculate
+        :param energy_kev: float
+        :param azir: list/array, [h,k,l] azimuthal reference
+        :param psideg: float, azimuthal angle
+        :param process: str: 'Scalar', 'E1E1', 'E1E2', 'E2E2', 'E1E1mag', 'NonResMag'
+        :param rank: int, 1,2,3: tensor rank. Only required
+        :param time: +/-1 time symmetry
+        :param parity: +/-1 parity
+        :param mk:
+        :param lk:
+        :param sk:
+        :return: str
+        """
+
+        if energy_kev is None:
+            energy_kev = self._energy_kev
+
+        # Structure data for input
+        B = ts.latt2b(self.xtl.Cell.lp())
+        sitevec = self.xtl.Atoms.uvw()[self.xtl.Atoms.label.index(atom_label)]
+        sglist = ts.spacegroup_list_from_genpos_list(self.xtl.Symmetry.symmetry_operations)
+        lam = fc.energy2wave(energy_kev)
+
+        # Calculate tensor scattering
+        ss, sp, ps, pp = ts.CalculateIntensityInPolarizationChannels(
+            process, B, sitevec, sglist, lam, hkl, azir, psideg,
+            K=rank, Time=time, Parity=parity, mk=mk, lk=lk, sk=sk
+        )
+        outstr1 = ts.tensorproperties(sitevec, sglist, hkl, Parity=parity, Time=time)
+        outstr2 = ts.print_tensors(B, sitevec, sglist, hkl, K=rank, Parity=parity, Time=time)
+        outstr3 = "\nScattering Tensor:\n\n    [ss, sp] = [%5.2f, %5.2f]\n    [ps, pp]   [%5.2f, %5.2f]"
+        outstr3 = outstr3 % (ss, sp, ps, pp)
+        return outstr1 + outstr2 + outstr3
+
+    def print_tensor_scattering_refs(self, atom_label, energy_kev=None, azir=[0, 0, 1], psideg=0, process='E1E1',
+                                     rank=2, time=+1, parity=+1, mk=None, lk=None, sk=None,
+                                     print_symmetric=False, units=None):
+        """
+        Return tensor scattering intensities for all reflections at given azimuth and energy
+          ss, sp, ps, pp = tensor_scattering('Ru1', 2.838, [0,1,0], psideg=90)
+        Uses TensorScatteringClass.py by Prof. Steve Collins, Dimaond Light Source Ltd.
+        :param atom_label: str atom site label, e.g. Ru1
+        :param energy_kev: float
+        :param azir: list/array, [h,k,l] azimuthal reference
+        :param psideg: float, azimuthal angle
+        :param process: str: 'Scalar', 'E1E1', 'E1E2', 'E2E2', 'E1E1mag', 'NonResMag'
+        :param rank: int, 1,2,3: tensor rank. Only required
+        :param time: +/-1 time symmetry
+        :param parity: +/-1 parity
+        :param mk:
+        :param lk:
+        :param sk:
+        :param print_symmetric: False*/True : omits reflections with the same intensity at the same angle
+        :param units: None/ 'twotheta'/ 'q'/ 'dspace' : choose scattering angle units to display
+        :return: str
+        """
+
+        if energy_kev is None:
+            energy_kev = self._energy_kev
+
+        hkl = self.xtl.Cell.all_hkl(energy_kev, self._scattering_max_twotheta)
+        if not print_symmetric:
+            hkl = self.xtl.Symmetry.remove_symmetric_reflections(hkl)
+        hkl = self.xtl.Cell.sort_hkl(hkl)
+
+        tth = self.xtl.Cell.tth(hkl, energy_kev)
+        inrange = np.all([tth < self._scattering_max_twotheta, tth > self._scattering_min_twotheta], axis=0)
+        hkl = hkl[inrange, :]
+        tth = tth[inrange]
+
+        if units is None:
+            units = self._powder_units
+        units = units.lower()
+        if units in ['d', 'dspc', 'dspace', 'd space', 'd-space', 'dspacing', 'd spacing', 'd-spacing']:
+            unit_str = 'd-spacing'
+            unit = fc.caldspace(tth, energy_kev)
+        elif units in ['q', 'wavevector']:
+            unit_str = 'Q'
+            unit = fc.calqmag(tth, energy_kev)
+        else:
+            unit_str = 'TwoTheta'
+            unit = tth
+
+        fmt = '(%3.0f,%3.0f,%3.0f) %10.2f  %11.2f %11.2f %11.2f %11.2f\n'
+        outstr = 'Tensor Scattering %s\n' % self.xtl.name
+        outstr += 'Process: %s, site: %s\n' % (process, atom_label)
+        outstr += 'Energy = %6.3f keV\n' % energy_kev
+        outstr += 'Psi_0 = (%.2g,%.2g,%.2g)  Psi = %3.3g\n' % (azir[0], azir[1], azir[2], psideg)
+        outstr += '( h, k, l)    %10s  Sigma-Sigma    Sigma-Pi    Pi-Sigma       Pi-Pi\n' % unit_str
+
+        # Structure data for input
+        B = ts.latt2b(self.xtl.Cell.lp())
+        sitevec = self.xtl.Atoms.uvw()[self.xtl.Atoms.label.index(atom_label)]
+        sglist = ts.spacegroup_list_from_genpos_list(self.xtl.Symmetry.symmetry_operations)
+        lam = fc.energy2wave(energy_kev)
+
+        for n in range(1, len(tth)):
+            ss, sp, ps, pp = ts.CalculateIntensityInPolarizationChannels(
+                process, B, sitevec, sglist, lam, hkl[n, :], azir, psideg,
+                K=rank, Time=time, Parity=parity, mk=mk, lk=lk, sk=sk
+            )
+            outstr += fmt % (hkl[n, 0], hkl[n, 1], hkl[n, 2], unit[n], ss, sp, ps, pp)
+        outstr += 'Reflections: %1.0f\n' % len(tth)
+        return outstr
+
+    def print_tensor_scattering_refs_max(self, atom_label, energy_kev=None, azir=[0, 0, 1], process='E1E1',
+                                     rank=2, time=+1, parity=+1, mk=None, lk=None, sk=None,
+                                     print_symmetric=False, units=None):
+        """
+        Return tensor scattering intensities for all reflections at given energy at maximum intensity psi
+          ss, sp, ps, pp = tensor_scattering('Ru1', 2.838, [0,1,0], psideg=90)
+        Uses TensorScatteringClass.py by Prof. Steve Collins, Dimaond Light Source Ltd.
+        :param atom_label: str atom site label, e.g. Ru1
+        :param energy_kev: float
+        :param azir: list/array, [h,k,l] azimuthal reference
+        :param process: str: 'Scalar', 'E1E1', 'E1E2', 'E2E2', 'E1E1mag', 'NonResMag'
+        :param rank: int, 1,2,3: tensor rank. Only required
+        :param time: +/-1 time symmetry
+        :param parity: +/-1 parity
+        :param mk:
+        :param lk:
+        :param sk:
+        :param print_symmetric: False*/True : omits reflections with the same intensity at the same angle
+        :param units: None/ 'twotheta'/ 'q'/ 'dspace' : choose scattering angle units to display
+        :return: str
+        """
+
+        if energy_kev is None:
+            energy_kev = self._energy_kev
+
+        hkl = self.xtl.Cell.all_hkl(energy_kev, self._scattering_max_twotheta)
+        if not print_symmetric:
+            hkl = self.xtl.Symmetry.remove_symmetric_reflections(hkl)
+        hkl = self.xtl.Cell.sort_hkl(hkl)
+
+        tth = self.xtl.Cell.tth(hkl, energy_kev)
+        inrange = np.all([tth < self._scattering_max_twotheta, tth > self._scattering_min_twotheta], axis=0)
+        hkl = hkl[inrange, :]
+        tth = tth[inrange]
+        # Caluclate structure factor **2
+        inten = self.intensity(hkl)
+
+        if units is None:
+            units = self._powder_units
+        units = units.lower()
+        if units in ['d', 'dspc', 'dspace', 'd space', 'd-space', 'dspacing', 'd spacing', 'd-spacing']:
+            unit_str = 'd-spacing'
+            unit = fc.caldspace(tth, energy_kev)
+        elif units in ['q', 'wavevector']:
+            unit_str = 'Q'
+            unit = fc.calqmag(tth, energy_kev)
+        else:
+            unit_str = 'TwoTheta'
+            unit = tth
+
+        fmt = '(%3.0f,%3.0f,%3.0f) %10.2f %10.2f  %5.2f (%3.0f) %5.2f (%3.0f) %5.2f (%3.0f) %5.2f (%3.0f)\n'
+        outstr = 'Tensor Scattering %s\n' % self.xtl.name
+        outstr += 'Process: %s, site: %s\n' % (process, atom_label)
+        outstr += 'Energy = %6.3f keV\n' % energy_kev
+        outstr += 'Psi_0 = (%.2g,%.2g,%.2g)\n' % (azir[0], azir[1], azir[2])
+        outstr += '( h, k, l)    %10s         I0  Sigma-Sigma    Sigma-Pi    Pi-Sigma       Pi-Pi\n' % unit_str
+
+        # Structure data for input
+        B = ts.latt2b(self.xtl.Cell.lp())
+        sitevec = self.xtl.Atoms.uvw()[self.xtl.Atoms.label.index(atom_label)]
+        sglist = ts.spacegroup_list_from_genpos_list(self.xtl.Symmetry.symmetry_operations)
+        lam = fc.energy2wave(energy_kev)
+
+        psideg = np.arange(0, 361, 5)
+        for n in range(1, len(tth)):
+            ss, sp, ps, pp = ts.CalculateIntensityInPolarizationChannels(
+                process, B, sitevec, sglist, lam, hkl[n, :], azir, psideg,
+                K=rank, Time=time, Parity=parity, mk=mk, lk=lk, sk=sk
+            )
+            iss = np.argmax(ss)
+            isp = np.argmax(sp)
+            ips = np.argmax(ps)
+            ipp = np.argmax(pp)
+            ss = ss[iss]
+            sp = sp[isp]
+            ps = ps[ips]
+            pp = pp[ipp]
+            psi_ss = psideg[iss]
+            psi_sp = psideg[isp]
+            psi_ps = psideg[ips]
+            psi_pp = psideg[ipp]
+            outstr += fmt % (hkl[n, 0], hkl[n, 1], hkl[n, 2], unit[n], inten[n],
+                             ss, psi_ss, sp, psi_sp, ps, psi_ps, pp, psi_pp)
+        outstr += 'Reflections: %1.0f\n' % len(tth)
+        return outstr
 
 
 class ScatteringTypes:
