@@ -9,7 +9,7 @@ Diamond
 2017
 
 Version 1.6
-Last updated: 08/11/19
+Last updated: 09/03/20
 
 Version History:
 18/08/17 0.1    Program created
@@ -41,8 +41,8 @@ class Plotting:
     Plotting functions for the Crystal Object
     """
     # Plot options
-    _figure_size = [12, 10]
-    _figure_dpi = 60
+    _figure_size = fp.FIGURE_SIZE
+    _figure_dpi = fp.FIGURE_DPI
 
     def __init__(self,xtl):
         "initialise"
@@ -368,7 +368,7 @@ class Plotting:
         for n in range(len(ref_x)):
             #print ref_x[n],ref_int[n],ref_txt[n]
             plt.text(ref_x[n], 1.01 * ref_int[n], ref_txt[n],
-                     fontname=fp.default_font, fontsize=8, color='b',
+                     fontname=fp.DEFAULT_FONT, fontsize=8, color='b',
                      rotation='vertical', ha='center', va='bottom')
         # Extinction labels
         #print 'Extinctions'
@@ -376,7 +376,7 @@ class Plotting:
         for n in range(len(ext_x)):
             #print ext_x[n],ext_int[n],ext_txt[n]
             plt.text(ext_x[n], 0.01 * ymax, ext_txt[n],
-                     fontname=fp.default_font, fontsize=8, color='r',
+                     fontname=fp.DEFAULT_FONT, fontsize=8, color='r',
                      rotation='vertical', ha='center', va='bottom')
         
         # Plot labels
@@ -503,7 +503,7 @@ class Plotting:
         fp.plot_vector_arrows(mesh_vec_a, mesh_vec_b, vec_a_lab, vec_b_lab)
         #fp.plot_vector_lines(Q_vec_a, Q_vec_b)
         #fp.plot_vector_arrows(Q_vec_a, Q_vec_b, vec_a_lab, vec_b_lab)
-        plt.text(0-(0.2*q_max),0-(0.1*q_max),cen_lab,fontname=fp.default_font,weight='bold',size=18)
+        plt.text(0 - (0.2*q_max), 0 - (0.1*q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18)
         
         # Plot labels
         xlab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0],x_axis[1],x_axis[2])
@@ -669,12 +669,12 @@ class Plotting:
         vec_a_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_a[0]+centre[0],vec_a[1]+centre[1],vec_a[2]+centre[2])
         vec_b_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_b[0]+centre[0],vec_b[1]+centre[1],vec_b[2]+centre[2])
         
-        plt.text(0.4,0.46,cen_lab,fontname=fp.default_font,weight='bold',size=18,transform=plt.gca().transAxes)
+        plt.text(0.4, 0.46, cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18, transform=plt.gca().transAxes)
         fp.plot_lattice_lines(mesh_Q,mesh_vec_a,mesh_vec_b)
         fp.plot_arrow([0,mesh_vec_a[0,0]],[0,mesh_vec_a[0,1]],arrow_size=40,col='b')
-        plt.text(mesh_vec_a[0,0],mesh_vec_a[0,1],vec_a_lab,fontname=fp.default_font,weight='bold',size=18)
+        plt.text(mesh_vec_a[0,0], mesh_vec_a[0,1], vec_a_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18)
         fp.plot_arrow([0,mesh_vec_b[0,0]],[0,mesh_vec_b[0,1]],arrow_size=40,col='b')
-        plt.text(mesh_vec_b[0,0],mesh_vec_b[0,1],vec_b_lab,fontname=fp.default_font,weight='bold',size=18)
+        plt.text(mesh_vec_b[0,0], mesh_vec_b[0,1], vec_b_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18)
         
         # Mark forbidden reflections
         plt.plot(forbidden[:,0],forbidden[:,1],'rx',markersize=12,markeredgewidth=2)
@@ -1251,7 +1251,7 @@ class PlottingSuperstructure(Plotting):
         lattQ = fp.axis_lattice_points(mesh_vec_a, mesh_vec_b, plt.axis())
         fp.plot_lattice_lines(lattQ, mesh_vec_a, mesh_vec_b, lw=0.5, c='grey')
         fp.plot_vector_arrows(mesh_vec_a, mesh_vec_b, vec_a_lab, vec_b_lab)
-        plt.text(0-(0.2*q_max),0-(0.1*q_max), cen_lab, fontname=fp.default_font, weight='bold', size=18)
+        plt.text(0 - (0.2*q_max), 0 - (0.1*q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18)
         
         # Plot labels
         xlab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0], x_axis[1], x_axis[2])
@@ -1344,17 +1344,17 @@ class MultiPlotting:
             #print 'Refelctions'
             for n in range(len(ref_tth)):
                 #print ref_tth[n],ref_int[n],ref_txt[n]
-                plt.text(ref_tth[n],1.01*ref_int[n],ref_txt[n],
-                         fontname=fp.default_font,fontsize=8,color=col,
-                         rotation='vertical',ha='center',va='bottom')
+                plt.text(ref_tth[n], 1.01 * ref_int[n], ref_txt[n],
+                         fontname=fp.DEFAULT_FONT, fontsize=8, color=col,
+                         rotation='vertical', ha='center', va='bottom')
             # Extinction labels
             #print 'Extinctions'
             ymax=plt.ylim()[1]
             for n in range(len(ext_tth)):
                 #print ext_tth[n],ext_int[n],ext_txt[n]
-                plt.text(ext_tth[n],0.01*ymax,ext_txt[n],
-                         fontname=fp.default_font,fontsize=8,color=col,fontweight='bold',
-                         rotation='vertical',ha='center',va='bottom')
+                plt.text(ext_tth[n], 0.01 * ymax, ext_txt[n],
+                         fontname=fp.DEFAULT_FONT, fontsize=8, color=col, fontweight='bold',
+                         rotation='vertical', ha='center', va='bottom')
             
         # Plot labels
         xlab = u'2-Theta [Deg]'
@@ -1455,7 +1455,7 @@ class MultiPlotting:
             if n == 0:
                 # 1st crystal only - plot lines and centre
                 cen_lab = '(%1.3g,%1.3g,%1.3g)$_1$' % (centre[0],centre[1],centre[2])
-                plt.text(0-(0.2*q_max),0-(0.1*q_max),cen_lab,fontname=fp.default_font,weight='bold',size=18,color=col)
+                plt.text(0 - (0.2*q_max), 0 - (0.1*q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18, color=col)
                 fp.plot_lattice_lines(mesh_Q,mesh_vec_a,mesh_vec_b)
                 plt.clim([background-(np.mean(I)/20),background+(np.mean(I)/5)])
             else:
@@ -1467,9 +1467,9 @@ class MultiPlotting:
             vec_b_lab = '(%1.3g,%1.3g,%1.3g)$_%d$' % (vec_b[0]+xtl_centre[0],vec_b[1]+xtl_centre[1],vec_b[2]+xtl_centre[2],n)
             
             fp.plot_arrow([0,mesh_vec_a[0,0]],[0,mesh_vec_a[0,1]],arrow_size=40,col=col)
-            plt.text(mesh_vec_a[0,0],mesh_vec_a[0,1],vec_a_lab,fontname=fp.default_font,weight='bold',size=18,color=col)
+            plt.text(mesh_vec_a[0,0], mesh_vec_a[0,1], vec_a_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18, color=col)
             fp.plot_arrow([0,mesh_vec_b[0,0]],[0,mesh_vec_b[0,1]],arrow_size=40,col=col)
-            plt.text(mesh_vec_b[0,0],mesh_vec_b[0,1],vec_b_lab,fontname=fp.default_font,weight='bold',size=18,color=col)
+            plt.text(mesh_vec_b[0,0], mesh_vec_b[0,1], vec_b_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18, color=col)
         
         # Convolve with a gaussian
         peak_width_pixels = peak_width/pixel_size
@@ -1567,7 +1567,7 @@ class MultiPlotting:
             if n == 0:
                 # 1st crystal only - plot lines and centre
                 cen_lab = '(%1.3g,%1.3g,%1.3g)$_1$' % (centre[0],centre[1],centre[2])
-                plt.text(0-(0.2*q_max),0-(0.1*q_max),cen_lab,fontname=fp.default_font,weight='bold',size=18,color=col)
+                plt.text(0 - (0.2*q_max), 0 - (0.1*q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18, color=col)
                 fp.plot_lattice_lines(mesh_Q,mesh_vec_a,mesh_vec_b)
             n += 1
             

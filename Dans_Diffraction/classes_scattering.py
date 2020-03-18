@@ -1294,8 +1294,8 @@ class Scattering:
         ff = fc.xray_scattering_factor(type,Qmag)
         dw = fc.debyewaller(uiso,Qmag)
         dot_KR = np.dot(HKL,uvw.T)
-        phase =  np.exp(1j*2*np.pi*dot_KR)
-        sf =  ff*dw*occ*phase
+        phase = np.exp(1j*2*np.pi*dot_KR)
+        sf = ff*dw*occ*phase
         
         # Generate the results
         outstr = ''
@@ -1313,13 +1313,13 @@ class Scattering:
                     phstr = fg.complex2str(phase[n,a])
                     sfstr = fg.complex2str(sf[n,a])
                     val= (a,uvwstr,operations[a[0]],rotations[a[0]],phstr,sfstr)
-                    ss += '    %3d %s %15s %10s  %s  %s\n'%val
+                    ss += '    %3d %s %25s %20s  %s  %s\n'%val
                     tot_phase += phase[n,a]
                     tot_sf += sf[n,a]
-                ss += '%54sTotal:  %s  %s\n'%(' ',fg.complex2str(tot_phase),fg.complex2str(tot_sf))
+                ss += '%74sTotal:  %s  %s\n'%(' ',fg.complex2str(tot_phase),fg.complex2str(tot_sf))
                 all_phase += tot_phase
                 all_sf += tot_sf
-            ss += '%42s Reflection Total:  %s  %s\n'%(' ',fg.complex2str(all_phase),fg.complex2str(all_sf))
+            ss += '%62s Reflection Total:  %s  %s\n'%(' ',fg.complex2str(all_phase),fg.complex2str(all_sf))
             outstr+= '(%2.0f,%2.0f,%2.0f) I = %9.2f    %s\n' % (HKL[n,0],HKL[n,1],HKL[n,2],I[n],ss)
         return outstr
     

@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2018
 
-Version 1.4
-Last updated: 16/08/19
+Version 1.5
+Last updated: 18/03/20
 
 Version History:
 17/04/18 0.9    Program created
@@ -17,6 +17,7 @@ Version History:
 13/07/19 1.2    Small updates for gui functionality
 07/08/19 1.3    Changed reflist in FdmnesAnalysis to list of hkl
 16/08/19 1.4    Added BavFile to read parts of .bav file
+18/03/20 1.5    Corrected density file for new headers
 
 @author: DGPorter
 """
@@ -29,7 +30,7 @@ from mpl_toolkits.mplot3d import Axes3D  # 3D plotting
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.4'
+__version__ = '1.5'
 
 
 class Fdmnes:
@@ -454,7 +455,6 @@ class FdmnesAnalysis:
             self.bavfile = BavFile(bavfile.read())
             #self.output_text = bavfile.read()
 
-
         # Read XANES file (_conv.txt)
         if os.path.isfile(convname):
             enxanes, Ixanes = read_conv(convname)
@@ -687,10 +687,23 @@ class Density:
         self.data = np.genfromtxt(file, skip_header=0, names=True)
 
         self.energy = self.data['Energy']
+        self.s = np.zeros(len(self.energy))
+        self.s_total = np.zeros(len(self.energy))
+        self.px = np.zeros(len(self.energy))
+        self.py = np.zeros(len(self.energy))
+        self.pz = np.zeros(len(self.energy))
+        self.p_total = np.zeros(len(self.energy))
+        self.dxy = np.zeros(len(self.energy))
+        self.dxz = np.zeros(len(self.energy))
+        self.dyz = np.zeros(len(self.energy))
+        self.dx2y2 = np.zeros(len(self.energy))
+        self.dz2r2 = np.zeros(len(self.energy))
+        self.d_total = np.zeros(len(self.energy))
 
-        # Calculate real harmonics
-        self.s = self.data['n00']
-        self.s_total = self.data['n_l0']
+        # Calculate real harmonics - old field names
+        if 'n11' in self.data.dtype.fields.keys():
+            self.s = self.data['n00']
+            self.s_total = self.data['n_l0']
         if 'n11' in self.data.dtype.fields.keys():
             self.px = self.data['n11_1']
             self.py = self.data['n11']
@@ -703,6 +716,23 @@ class Density:
             self.dx2y2 = self.data['n22']
             self.dz2r2 = self.data['n20']
             self.d_total = self.data['n_l2']
+
+        # Calculate real harmonics - new field names fdmnes version 2020+
+        if 's' in self.data.dtype.fields.keys():
+            self.s = self.data['s']
+            self.s_total = self.data['Ints']
+        if 'px' in self.data.dtype.fields.keys():
+            self.px = self.data['px']
+            self.py = self.data['py']
+            self.pz = self.data['pz']
+            self.p_total = self.data['Intp']
+        if 'dxy' in self.data.dtype.fields.keys():
+            self.dxy = self.data['dxy']
+            self.dxz = self.data['dxz']
+            self.dyz = self.data['dyz']
+            self.dx2y2 = self.data['dx2y2']
+            self.dz2r2 = self.data['dz2']
+            self.d_total = self.data['Intd']
 
     def plot(self):
         """

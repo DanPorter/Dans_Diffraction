@@ -16,8 +16,8 @@ Usage:
 All plots generated require plt.show() call, unless using interactive mode
 
 
-Version 1.7
-Last updated: 18/10/19
+Version 1.8
+Last updated: 09/03/20
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -28,6 +28,7 @@ Version History:
 07/03/19 1.5    Added plot_attenuation and others
 22/03/19 1.6    Added plot_circle, updated vecplot and plot_lattice_lines
 03/05/19 1.7    Added legend to labels function
+09/03/20 1.8    Added default figure size
 
 @author: DGPorter
 """
@@ -42,9 +43,11 @@ from mpl_toolkits.mplot3d import proj3d
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.7'
+__version__ = '1.8'
 
-default_font = 'Times New Roman'
+DEFAULT_FONT = 'Times New Roman'
+FIGURE_SIZE = [12, 10]
+FIGURE_DPI = 60
 
 '----------------------------Plot manipulation--------------------------'
 
@@ -146,8 +149,8 @@ def newplot(*args, **kwargs):
 
     if 'linewidth' and 'lw' not in kwargs.keys():
         kwargs['linewidth'] = 2
-
-    plt.figure(figsize=[12, 12])
+    print(FIGURE_SIZE, FIGURE_DPI)
+    plt.figure(figsize=FIGURE_SIZE, dpi=FIGURE_DPI)
     plt.plot(*args, **kwargs)
 
     plt.setp(plt.gca().spines.values(), linewidth=2)
@@ -189,7 +192,7 @@ def multiplot(xvals, yvals=None, datarange=None, cmap='jet', labels=None, marker
         marker = ''
     linearg = '-' + marker
 
-    plt.figure(figsize=[12, 12])
+    plt.figure(figsize=FIGURE_SIZE, dpi=FIGURE_DPI)
     for n in range(len(datarange)):
         col = cm(colrange[n])
         if len(xvals) == 0:
@@ -229,7 +232,7 @@ def newplot3(*args, **kwargs):
     if 'linewidth' and 'lw' not in kwargs.keys():
         kwargs['linewidth'] = 2
 
-    fig = plt.figure(figsize=[12, 12])
+    fig = plt.figure(figsize=FIGURE_SIZE, dpi=FIGURE_DPI)
     ax = fig.add_subplot(111, projection='3d')
 
     x = np.asarray(args[0], dtype=np.float)
@@ -263,7 +266,7 @@ def sliderplot(YY, X=None, slidervals=None, *args, **kwargs):
     if 'linewidth' and 'lw' not in kwargs.keys():
         kwargs['linewidth'] = 2
 
-    fig = plt.figure(figsize=[12, 12])
+    fig = plt.figure(figsize=FIGURE_SIZE, dpi=FIGURE_DPI)
 
     X = np.asarray(X, dtype=np.float)
     Y = np.asarray(YY, dtype=np.float)
@@ -319,7 +322,7 @@ def sliderplot2D(ZZZ, XX=None, YY=None, slidervals=None, *args, **kwargs):
     if 'linewidth' and 'lw' not in kwargs.keys():
         kwargs['linewidth'] = 2
 
-    fig = plt.figure(figsize=[12, 12])
+    fig = plt.figure(figsize=FIGURE_SIZE, dpi=FIGURE_DPI)
 
     ZZZ = np.asarray(ZZZ, dtype=np.float)
 
@@ -624,9 +627,9 @@ def plot_vector_arrows(vec_a=[1, 0, 0], vec_b=[1, 0, 0], vec_a_lab=None, vec_b_l
         vec_b_lab = 'b*'
 
     plot_arrow([0, vec_a[0, 0]], [0, vec_a[0, 1]], arrow_size=arrow_size, col=color)
-    plt.text(vec_a[0, 0], vec_a[0, 1], vec_a_lab, fontname=default_font, weight='bold', size=fontsize)
+    plt.text(vec_a[0, 0], vec_a[0, 1], vec_a_lab, fontname=DEFAULT_FONT, weight='bold', size=fontsize)
     plot_arrow([0, vec_b[0, 0]], [0, vec_b[0, 1]], arrow_size=arrow_size, col=color)
-    plt.text(vec_b[0, 0], vec_b[0, 1], vec_b_lab, fontname=default_font, weight='bold', size=fontsize)
+    plt.text(vec_b[0, 0], vec_b[0, 1], vec_b_lab, fontname=DEFAULT_FONT, weight='bold', size=fontsize)
     ax.axis(axsize)
 
 

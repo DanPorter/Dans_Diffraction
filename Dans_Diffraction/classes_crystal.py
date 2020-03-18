@@ -25,7 +25,7 @@ Diamond
 2017
 
 Version 2.6
-Last updated: 12/12/19
+Last updated: 08/03/20
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -560,6 +560,35 @@ class Cell:
         Qm = self.Qmag(HKL)
         idx = np.argsort(Qm)
         return HKL[idx, :]
+
+    def find_close_reflections(self, hkl, energy_kev, max_twotheta=2, max_angle=10):
+        """
+        Find reflections near to given HKL for a given two-theta or reflection angle
+        :param hkl: [h,k,l] indices of reflection to start from
+        :param energy_kev: energy in keV
+        :param max_twotheta: matches reflections within two-theta of hkl
+        :param max_angle: matches reflections within max_angle of hkl
+        :return: list of matching [[h,k,l]] reflections
+        """
+
+        if max_twotheta is None:
+            max_twotheta = 180.
+        if max_angle is None:
+            max_angle = 180.
+
+        all_hkl = self.all_hkl(energy_kev, 180.)
+        all_hkl = self.sort_hkl(all_hkl)
+
+        all_tth = self.tth(all_hkl, energy_kev)
+        tth1 = self.tth(hkl, energy_kev)
+        tth_dif = np.abs(all_tth - tth1)
+
+        all_Q = self.calculateQ(all_hkl)
+        Q1 = self.calculateQ(hkl)
+        all_angles = np.abs([fg.ang(Q1, Q2, 'deg') for Q2 in all_Q])
+
+        selected = (tth_dif < max_twotheta) * (all_angles < max_angle)
+        return all_hkl[selected, :]
 
     def reciprocal_space_plane(self, x_axis=[1, 0, 0], y_axis=[0, 1, 0], centre=[0, 0, 0], q_max=4.0, cut_width=0.05):
         """
