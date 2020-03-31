@@ -7,15 +7,16 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.3
-Last updated: 15/08/19
+Version 1.4
+Last updated: 26/03/20
 
 Version History:
 10/11/17 0.1    Program created
 06/01/18 1.0    Program renamed
 11/03/18 1.1    Added properties.info(), element.info()
 23/02/19 1.2    Added xray_edges
-15/08019 1.3    Added molcharge
+15/08/19 1.3    Added molcharge
+26/03/20 1.4    Added latex_table, info returns str, removed getattr from xray_edges
 
 
 @author: DGPorter
@@ -26,7 +27,7 @@ import numpy as np
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.3'
+__version__ = '1.4'
 
 
 class Properties:
@@ -70,11 +71,10 @@ class Properties:
         out_str = []
         out_eng = []
         for element in types:
-            atom = getattr(self, element)
             for edge in edges:
-                energy = getattr(atom, edge)
+                energy = fc.atom_properties(element, edge)[0]
                 if energy > 0.1:
-                    out_str += ['%s %s'%(element, edge)]
+                    out_str += ['%s %s' % (element, edge)]
                     out_eng += [energy]
         return out_str, out_eng
 
@@ -263,23 +263,32 @@ class Properties:
         if disp:
             for i in ii:
                 print('{:3.0f} {:4s} {:6.3f} {:6.3f} {:6.3f} dist = {:6.3f}'.format(i,label[i],diff[i,0],diff[i,1],diff[i,2],mag[i]))
-        return diff[ii,:],label[ii]
+        return diff[ii,:], label[ii]
+
+    def latex_table(self):
+        """Return latex table of structure properties from CIF"""
+        return fc.cif2table(self.xtl.cif)
 
     def info(self):
         """Prints various properties of the crystal"""
 
-        print('-----------%s-----------'%self.xtl.name)
-        print(' Weight: %5.2f g/mol' %(self.weight()))
-        print(' Volume: %5.2f A^3' %(self.volume()))
-        print('Density: %5.2f g/cm' %(self.density()))
-        print('\nAtoms:')
+        out = ''
+        out += '-----------%s-----------'%self.xtl.name
+        out += ' Weight: %5.2f g/mol' %(self.weight())
+        out += ' Volume: %5.2f A^3' %(self.volume())
+        out += 'Density: %5.2f g/cm' %(self.density())
+        out += '\nAtoms:'
         types = np.unique(self.xtl.Structure.type)
         props = fc.atom_properties(types) # returns a numpy structured array
         prop_names = props.dtype.names
         for key in prop_names:
-            out = '%20s :' %(key)
-            out += ''.join([' %10s :' %(item) for item in props[key]])
-            print(out)
+            ele = '%20s :' % key
+            ele += ''.join([' %10s :' %(item) for item in props[key]])
+            out += ele
+        return out
+
+    def __repr__(self):
+        return self.info()
 
 
 class Element:
@@ -299,5 +308,10 @@ class Element:
         """Display atomic properties"""
 
         prop_names = self.properties.dtype.names
+        out = ''
         for key in prop_names:
-            print('%20s : %s' %(key,self.properties[key][0]))
+            out += '%20s : %s\n' % (key, self.properties[key][0])
+        return out
+
+    def __repr__(self):
+        return self.info()

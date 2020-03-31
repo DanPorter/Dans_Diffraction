@@ -463,12 +463,16 @@ def atom_properties(elements=None, fields=None):
     Loads the atomic properties of a particular atom from a database
 
     Usage:
-            A = atoms() >> returns structured array of all properties for all atoms A[0]['Element']='H'
-            A = atoms('Co') >> returns structured array of all properties for 1 element
-            B = atoms('Co','Weight') >> returns regular 1x1 array
-            B = atoms(['Co','O'],'Weight') >> retruns regular 2x1 array
-            A = atoms('Co',['a1','b1','a2','b2','a3','b3','a4','b4','c']) >> returns structured array of requested properties
-            A = atoms(['Co','O'],['Z','Weight']) >> returns 2x2 structured array
+            A = atom_properties() >> returns structured array of all properties for all atoms A[0]['Element']='H'
+            A = atom_properties('Co') >> returns structured array of all properties for 1 element
+            B = atom_properties('Co','Weight') >> returns regular 1x1 array
+            B = atom_properties(['Co','O'],'Weight') >> retruns regular 2x1 array
+            A = atom_properties('Co',['a1','b1','a2','b2','a3','b3','a4','b4','c']) >> returns structured array of requested properties
+            A = atom_properties(['Co','O'],['Z','Weight']) >> returns 2x2 structured array
+
+    Available properties:
+        A = atom_properties()
+        print(A.dtype.names)
 
     Available information includes:
           Z             = Element number
@@ -500,6 +504,11 @@ def atom_properties(elements=None, fields=None):
           j0_C          = Magnetic Form factor
           j0_c          = Magnetic Form factor
           j0_D          = Magnetic Form factor
+          K             = x-ray absorption edge
+          L1            = x-ray absorption edge
+          L2            = x-ray absorption edge
+          L3            = x-ray absorption edge
+          M1...         = x-ray absorption edge
     """
 
     atomfile = os.path.join(datadir, 'Dans Element Properties.txt')
@@ -656,6 +665,9 @@ def attenuation(element_Z, energy_keV):
 
     energies = xma_data[:, 0] / 1000.
     return np.interp(energy_keV, energies, xma_data[:, element_Z])
+
+
+'--------------Element Properties & Charge----------------------'
 
 
 def element_symbol(element_Z):
@@ -1487,3 +1499,96 @@ def calc_vol(UV):
     a, b, c = UV
     return np.dot(a, np.cross(b, c))
 
+
+def cif2table(cif):
+    """
+    Generate Latex table of atomic positions from cif dictionary
+    :param cif: cif dict from readcif
+    :return: str
+    """
+
+    keys = cif.keys()
+
+    # Generate unit vectors
+    a = cif['_cell_length_a']
+    b = cif['_cell_length_b']
+    c = cif['_cell_length_c']
+    alpha = cif['_cell_angle_alpha']
+    beta = cif['_cell_angle_beta']
+    gamma = cif['_cell_angle_gamma']
+    lp = r'a=%s\AA, b=%s\AA, c=%s\AA, $\alpha$=%s, $\beta$=%s, $\gamma$=%s' % (a, b, c, alpha, beta, gamma)
+
+    # Get atom names & labels
+    label = cif['_atom_site_label']
+
+    # Thermal parameters
+    if '_atom_site_U_iso_or_equiv' in keys:
+        u_or_b = 'U$_{iso}$'
+        uiso = cif['_atom_site_U_iso_or_equiv']
+    elif '_atom_site_B_iso_or_equiv' in keys:
+        u_or_b = 'B$_{iso}$'
+        uiso = cif['_atom_site_B_iso_or_equiv']
+    else:
+        u_or_b = 'U$_{iso}$'
+        uiso = ['0.000']*len(label)
+    # Occupancy
+    if '_atom_site_occupancy' in keys:
+        occ = cif['_atom_site_occupancy']
+    else:
+        occ = ['1.0']*len(label)
+    # Multiplicity
+    if '_atom_site_site_symmetry_multiplicity' in keys:
+        mult = [s+'a' for s in cif['_atom_site_site_symmetry_multiplicity']]
+    else:
+        mult = ['1a']*len(label)
+
+    # Get coordinates
+    u = cif['_atom_site_fract_x']
+    v = cif['_atom_site_fract_y']
+    w = cif['_atom_site_fract_z']
+
+    # Get space group
+    if '_symmetry_space_group_name_H-M' in keys:
+        spacegroup = cif['_symmetry_space_group_name_H-M']
+    elif '_space_group_name_H-M_alt' in keys:
+        spacegroup = cif['_space_group_name_H-M_alt']
+    else:
+        spacegroup = ''
+    if '_symmetry_Int_Tables_number' in keys:
+        sgn = float(cif['_symmetry_Int_Tables_number'])
+    elif '_space_group_IT_number' in keys:
+        sgn = float(cif['_space_group_IT_number'])
+    elif spacegroup == 'P1':
+        sgn = 1
+    else:
+        sgn = 0
+
+    # Aditional details:
+    if 'FileTitle' in keys:
+        name = cif['FileTitle']
+    else:
+        name = 'sample'
+
+    extra = []
+    if '_cell_measurement_temperature' in keys:
+        extra += ['T = %s' % cif['_cell_measurement_temperature']]
+    if '_diffrn_reflns_number' in keys:
+        extra += ['%s reflections' % cif['_diffrn_reflns_number']]
+    if '_refine_ls_wR_factor_ref' in keys:
+        extra += ['R$_w$ = %4.2f\\%%' % (float(cif['_refine_ls_wR_factor_ref'])*100)]
+    extra = ', '.join(extra)
+
+    # Create table str
+    out = '%% %s\n' % cif['Filename']
+    out += '\\begin{table}[htp]\n'
+    out += '    \\centering\n'
+    out += '       \\begin{tabular}{c|c|ccccc}\n'
+    out += '             & Site & x & y & z & Occ. & %s \\\\ \hline\n' % u_or_b
+    fmt = '        %4s & %5s & %s & %s & %s & %s & %s \\\\\n'
+    for n in range(len(label)):
+        out += fmt % (label[n], mult[n], u[n], v[n], w[n], occ[n], uiso[n])
+    out += '        \\end{tabular}\n'
+    out += '    \\caption{%s with %s. %s}\n' % (name, lp, extra)
+    out += '    \\label{tab:}\n'
+    out += '\\end{table}\n'
+    return out

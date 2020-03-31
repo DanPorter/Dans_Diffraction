@@ -17,8 +17,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.6
-Last updated: 20/02/20
+Version 1.7
+Last updated: 31/03/20
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -28,6 +28,7 @@ Version History:
 13/07/19 1.4    FDMNES GUI functionality added
 13/12/19 1.5    Multiple Scattering added, tkGUI refactored, Startgui changed to start_gui
 20/02/20 1.6    Tensor Scattering added
+31/03/20 1.7    Refactored multicrystal methods, other minor changes
 """
 
 # Set TkAgg environment
@@ -38,7 +39,8 @@ Version History:
 from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
-from .classes_crystal import Crystal, MultiCrystal
+from .classes_crystal import Crystal
+from .classes_multicrystal import MultiCrystal
 from .classes_structures import Structures
 
 # FDMNES
@@ -47,8 +49,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '1.6'
-__date__ = '20/02/20'
+__version__ = '1.7'
+__date__ = '31/03/20'
 
 
 # Build

@@ -3,6 +3,7 @@ SuperDuper Set of Tests of Dans_Diffraction
 """
 
 import sys, os
+
 cf = os.path.dirname(os.path.abspath(__file__))
 # Location of Dans_Diffraction
 ddf = os.path.split(cf)[0]
@@ -108,6 +109,9 @@ print('\nResonant scattering RuL2 psi=90 sp = %6.2f'%resi)
 # 9) Multiple scattering
 mslist = xtlm.Scatter.ms_azimuth([0,0,2], 2.967, [1,0,0])
 
+# 10) Tensor scattering
+ss, sp, ps, pp = xtlm.Scatter.tensor_scattering('Ru1_1', [0,0,3], 2.838, [0,1,0], psideg=np.arange(-180, 180, 1))
+
 # 10) Generate superstructure
 P = [[3,0,0],[4,5,0],[0,0,1]] # Stripe Supercell
 xtl2.Atoms.occupancy[2]=0
@@ -118,7 +122,7 @@ sup.Structure.occupancy[[6 ,16,26,77,87,107]] = 1 # Na1
 sup.Structure.occupancy[[8 ,18,38,28,48,58, 139, 119, 149, 109, 89,79]] = 0 # Na2
 
 # 11) Multicrystal
-xtls = dif.MultiCrystal([xtl2, dif.structure_list.Diamond.build()])
+xtls = xtl2 + dif.structure_list.Diamond() + dif.structure_list.Aluminium()
 
 # 12) Plotting
 print('\nStarting Plotting Tests...')
@@ -140,12 +144,15 @@ plt.show()
 print('  Plotting multiple scattering')
 xtlm.Plot.plot_multiple_scattering([0,0,2], [1,0,0], energy_range=[2.95, 2.98], numsteps=61)
 plt.show()
+print('  Plotting tensor scattering')
+xtlm.Plot.tensor_scattering_azimuth('Ru1_1', [0,0,3], 2.838, [0,1,0])
+plt.show()
 print('  Plotting Superstructure hk0 plane')
 sup.Plot.simulate_hk0()
 plt.clim([0,10])
 plt.show()
 print('  Plotting multicrystal powder')
-xtls.simulate_powder(energy_kev = 5.0, peak_width=0.001)
+xtls.Plot.simulate_powder(energy_kev = 5.0, peak_width=0.001)
 plt.show()
 
 # 12) FDMNES

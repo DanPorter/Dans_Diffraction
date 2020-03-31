@@ -27,6 +27,7 @@ from .basic_widgets import (TF, BF, SF, LF, HF,
                             btn_active, opt_active, txtcol,
                             btn_txt, ety_txt, opt_txt)
 from .scattering import ScatteringGui
+from .multi_crystal import MultiCrystalGui
 from .multiple_scattering import MultipleScatteringGui
 from .tensor_scattering import TensorScatteringGui
 
@@ -92,6 +93,9 @@ class CrystalGui:
         # Buttons 1
         f_but = tk.Frame(frame)
         f_but.pack(side=tk.TOP)
+        var = tk.Button(f_but, text='Crystal\nInfo', font=BF, bg=btn, activebackground=btn_active,
+                        command=self.fun_info)
+        var.pack(side=tk.LEFT)
         var = tk.Button(f_but, text='Lattice\nParameters', font=BF, bg=btn, activebackground=btn_active,
                         command=self.fun_latpar)
         var.pack(side=tk.LEFT)
@@ -114,6 +118,19 @@ class CrystalGui:
         var = tk.Button(f_but, text='Plot\nLayers', font=BF, bg=btn, activebackground=btn_active,
                         command=self.fun_plotlayers)
         var.pack(side=tk.LEFT)
+        var = tk.Button(f_but, text='Properties\n& Conversions', bg=btn, activebackground=btn_active, font=BF,
+                        command=self.fun_properties)
+        var.pack(side=tk.LEFT)
+        var = tk.Button(f_but, text='Multi\nCrystal', bg=btn, activebackground=btn_active, font=BF,
+                        command=self.fun_multicrystal)
+        var.pack(side=tk.LEFT)
+        var = tk.Button(f_but, text='Super\nStructure', bg=btn, activebackground=btn_active, font=BF,
+                        command=self.fun_superstructure)
+        var.pack(side=tk.LEFT)
+
+        # Buttons 3
+        f_but = tk.Frame(frame)
+        f_but.pack(side=tk.TOP)
         var = tk.Button(f_but, text='Simulate\nStructure Factors', bg=btn, activebackground=btn_active, font=BF,
                         command=self.fun_simulate)
         var.pack(side=tk.LEFT)
@@ -122,12 +139,6 @@ class CrystalGui:
         var.pack(side=tk.LEFT)
         var = tk.Button(f_but, text='Tensor\nScattering', bg=btn, activebackground=btn_active, font=BF,
                         command=self.fun_tensor_scattering)
-        var.pack(side=tk.LEFT)
-        var = tk.Button(f_but, text='Properties\n& Conversions', bg=btn, activebackground=btn_active, font=BF,
-                        command=self.fun_properties)
-        var.pack(side=tk.LEFT)
-        var = tk.Button(f_but, text='Super\nStructure', bg=btn, activebackground=btn_active, font=BF,
-                        command=self.fun_superstructure)
         var.pack(side=tk.LEFT)
         if fdmnes_checker():
             var = tk.Button(f_but, text='Run\nFDMNES', bg=btn, activebackground=btn_active, font=BF,
@@ -194,6 +205,11 @@ class CrystalGui:
         self.fun_set()
         SymmetryGui(self.xtl)
 
+    def fun_info(self):
+        """Display Crystal info"""
+        string = self.xtl.info()
+        StringViewer(string, self.xtl.name)
+
     def fun_plotxtl(self):
         self.fun_set()
         self.xtl.Plot.plot_crystal()
@@ -207,6 +223,11 @@ class CrystalGui:
     def fun_simulate(self):
         self.fun_set()
         ScatteringGui(self.xtl)
+
+    def fun_multicrystal(self):
+        self.fun_set()
+        rt = MultiCrystalGui([self.xtl])
+        rt.root.focus_force()
 
     def fun_multiple_scattering(self):
         self.fun_set()

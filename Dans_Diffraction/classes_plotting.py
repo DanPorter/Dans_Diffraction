@@ -263,7 +263,7 @@ class Plotting:
         # Convolve with a gaussian (if >0 or not None)
         if peak_width:
             gauss_x = np.arange(-3*peak_width_pixels,3*peak_width_pixels+1) # gaussian width = 2*FWHM
-            G = fg.gauss(gauss_x,0,height=1,cen=0,FWHM=peak_width_pixels,bkg=0)
+            G = fg.gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
             mesh = np.convolve(mesh,G, mode='same') 
         
         # Add background (if >0 or not None)
@@ -281,7 +281,7 @@ class Plotting:
             energy_kev = self.xtl.Scatter._energy_kev
         
         # Get reflections
-        angle_max = 180
+        angle_max = self.xtl.Scatter._scattering_max_twotheta
         q_max = fc.calqmag(angle_max, energy_kev)
         HKL = self.xtl.Cell.all_hkl(energy_kev, angle_max)
         HKL = self.xtl.Cell.sort_hkl(HKL) # required for labels
@@ -351,7 +351,7 @@ class Plotting:
         # Convolve with a gaussian (if >0 or not None)
         if peak_width:
             gauss_x = np.arange(-3*peak_width_pixels,3*peak_width_pixels+1) # gaussian width = 2*FWHM
-            G = fg.gauss(gauss_x,0,height=1,cen=0,FWHM=peak_width_pixels,bkg=0)
+            G = fg.gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
             mesh = np.convolve(mesh,G, mode='same') 
         
         # Add background (if >0 or not None)
@@ -360,7 +360,7 @@ class Plotting:
             mesh = mesh+bkg
         
         # create figure
-        plt.figure(figsize=[16,8], dpi=self._figure_dpi)
+        plt.figure(figsize=[2*self._figure_size[0],self._figure_size[1]], dpi=self._figure_dpi)
         plt.plot(mesh_x,mesh,'k-',lw=2)
         
         # Reflection labels
@@ -368,7 +368,7 @@ class Plotting:
         for n in range(len(ref_x)):
             #print ref_x[n],ref_int[n],ref_txt[n]
             plt.text(ref_x[n], 1.01 * ref_int[n], ref_txt[n],
-                     fontname=fp.DEFAULT_FONT, fontsize=8, color='b',
+                     fontname=fp.DEFAULT_FONT, fontsize=18, color='b',
                      rotation='vertical', ha='center', va='bottom')
         # Extinction labels
         #print 'Extinctions'
@@ -376,7 +376,7 @@ class Plotting:
         for n in range(len(ext_x)):
             #print ext_x[n],ext_int[n],ext_txt[n]
             plt.text(ext_x[n], 0.01 * ymax, ext_txt[n],
-                     fontname=fp.DEFAULT_FONT, fontsize=8, color='r',
+                     fontname=fp.DEFAULT_FONT, fontsize=18, color='r',
                      rotation='vertical', ha='center', va='bottom')
         
         # Plot labels
@@ -429,7 +429,7 @@ class Plotting:
         if peak_width:
             peak_width_pixels = peak_width/pixel_size
             gauss_x = np.arange(-2*peak_width_pixels,2*peak_width_pixels+1)
-            G = fg.gauss(gauss_x,gauss_x,height=1,cen=0,FWHM=peak_width_pixels,bkg=0)
+            G = fg.gauss(gauss_x, gauss_x, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
             mesh = convolve2d(mesh,G, mode='same') # this is the slowest part
         
         # Add background (if not None or 0)
@@ -1179,7 +1179,7 @@ class PlottingSuperstructure(Plotting):
         if peak_width:
             peak_width_pixels = peak_width/pixel_size
             gauss_x = np.arange(-2*peak_width_pixels,2*peak_width_pixels+1)
-            G = fg.gauss(gauss_x,gauss_x,height=1,cen=0,FWHM=peak_width_pixels,bkg=0)
+            G = fg.gauss(gauss_x, gauss_x, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
             mesh = convolve2d(mesh,G, mode='same') # this is the slowest part
         
         # Add background (if not None or 0)
@@ -1266,23 +1266,24 @@ class MultiPlotting:
     """
     Plotting functions for the Multi-Crystal Object
     """
+    def __init__(self, crystal_list):
+        self.crystal_list = crystal_list
+
     def simulate_powder(self, energy_kev=8.0, peak_width=0.05, background=0):
         """
         Generates a powder pattern for multiple phases
         """
         
-        # Get reflections
-        angle_max = 180
-        q_max = fc.calqmag(angle_max, energy_kev)
-        
         plt.figure(figsize=[16,8])
         colours = iter(['b','g','r','c','m','y','k'])
         
         for xtl in self.crystal_list:
+            # Get reflections
+            angle_max = xtl.Scatter._scattering_max_twotheta
+            q_max = fc.calqmag(angle_max, energy_kev)
             HKL = xtl.Cell.all_hkl(energy_kev, angle_max)
             HKL = xtl.Cell.sort_hkl(HKL) # required for labels
             Qmag = xtl.Cell.Qmag(HKL)
-            tth = xtl.Cell.tth(HKL,energy_kev)
             I = xtl.Scatter.intensity(HKL)
             col = next(colours)
             
@@ -1291,14 +1292,25 @@ class MultiPlotting:
             pixel_size = q_max/pixels
             peak_width_pixels = peak_width/(1.0*pixel_size)
             mesh = np.zeros([int(pixels)])
-            mesh_q = np.linspace(0,q_max,pixels)
-            mesh_tth = fc.cal2theta(mesh_q, energy_kev)
-            #mesh_d = fc.caldspace(mesh_q)
-            
+
+            if xtl.Scatter._powder_units.lower() in ['tth', 'angle', 'two-theta', 'twotheta', 'theta']:
+                xx = xtl.Cell.tth(HKL, energy_kev)
+                max_x = angle_max
+                xlab = u'Two-Theta [Deg]'
+            elif xtl.Scatter._powder_units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
+                xx = xtl.Cell.dspace(HKL)
+                max_x = 10.0
+                xlab = u'd-spacing [$\AA$]'
+            else:
+                xx = Qmag
+                max_x = q_max
+                xlab = u'Q [$\AA^{-1}]$'
+
             # add reflections to background
             # scipy.interpolate.griddata?
-            pixel_coord = Qmag/q_max
-            pixel_coord = (pixel_coord*(pixels-1)).astype(int)
+            mesh_x = np.linspace(0, max_x, pixels)
+            pixel_coord = xx / max_x
+            pixel_coord = (pixel_coord * (pixels - 1)).astype(int)
 
             ref_tth = [0]
             ref_int = [0]
@@ -1313,24 +1325,24 @@ class MultiPlotting:
                 if np.abs(pixel_coord[n]-pixel_coord[n-1]) > peak_width_pixels/2:
                     #print 'A: ',HKL[n,:],tth[n],pixel_coord[n],pixel_coord[n-1],I[n]
                     if I[n] > 0.1:
-                        ref_tth += [tth[n]]
+                        ref_tth += [xx[n]]
                         ref_int += [I[n]]
                         ref_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])]
                     else:
-                        ext_tth += [tth[n]]
+                        ext_tth += [xx[n]]
                         ext_int += [I[n]]
                         ext_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])]
                 elif mesh[pixel_coord[n]] > I[n-1] and mesh[pixel_coord[n]] > 0.1:
                     #print 'B: ',HKL[n,:],tth[n],pixel_coord[n],pixel_coord[n-1],I[n],mesh[pixel_coord[n]]
-                    ref_tth[-1] = tth[n]
+                    ref_tth[-1] = xx[n]
                     ref_int[-1] = mesh[pixel_coord[n]]
                     ref_txt[-1] = '(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])
             
             # Convolve with a gaussian
             if peak_width:
                 gauss_x = np.arange(-3*peak_width_pixels,3*peak_width_pixels+1) # gaussian width = 2*FWHM
-                G = fg.gauss(gauss_x,0,height=1,cen=0,FWHM=peak_width_pixels,bkg=0)
-                mesh = np.convolve(mesh,G, mode='same') 
+                G = fg.gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
+                mesh = np.convolve(mesh, G, mode='same')
             
             # Add background
             if background:
@@ -1338,7 +1350,7 @@ class MultiPlotting:
                 mesh = mesh+bkg
             
             # create figure
-            plt.plot(mesh_tth,mesh,'-',lw=2, label=xtl.name,c=col)
+            plt.plot(mesh_x, mesh, '-', lw=2, label=xtl.name, c=col)
             
             # Reflection labels
             #print 'Refelctions'
@@ -1357,11 +1369,11 @@ class MultiPlotting:
                          rotation='vertical', ha='center', va='bottom')
             
         # Plot labels
-        xlab = u'2-Theta [Deg]'
+        #xlab = u'2-Theta [Deg]'
         ylab = u'Intensity'
         ttl = 'E = %1.3f keV' % (energy_kev)
-        plt.legend(loc=0,fontsize=18,frameon=False)
-        fp.labels(ttl,xlab,ylab)
+        plt.legend(loc=0, fontsize=18, frameon=False)
+        fp.labels(ttl, xlab, ylab)
     
     def simulate_intensity_cut(self,x_axis_crystal=[[1,0,0]],y_axis_crystal=[[0,1,0]],centre=[0,0,0],
                                     q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
@@ -1474,7 +1486,7 @@ class MultiPlotting:
         # Convolve with a gaussian
         peak_width_pixels = peak_width/pixel_size
         gauss_x = np.arange(-2*peak_width_pixels,2*peak_width_pixels+1)
-        G = fg.gauss(gauss_x,gauss_x,height=1,cen=0,FWHM=peak_width_pixels,bkg=0)
+        G = fg.gauss(gauss_x,gauss_x,height=1,cen=0,fwhm=peak_width_pixels,bkg=0)
         mesh = convolve2d(mesh,G, mode='same') # this is the slowest part
         
         # Add background

@@ -1,7 +1,7 @@
 # Dans_Diffaction
 Reads crystallographic cif files and simulates diffraction
 
-**Version 1.6**
+**Version 1.7**
 
 By Dan Porter, Diamond Light Source
 2020
@@ -149,6 +149,14 @@ crystal structure and additional behaviours partiular to superstructures.
 ```python
 su.parent.info() # Parent structure
 su.P # superstructure matrix 
+```
+
+### Multi-phase
+Scattering from different crystal structures can be compared using the MultiCrystal class:
+```python
+xtls = xtl1 + xtl2
+xtls.simulate_powder()
+plt.show()
 ```
 
 ### Graphical Front End

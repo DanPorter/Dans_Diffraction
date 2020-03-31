@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.5
-Last updated: 18/02/20
+Version 1.6
+Last updated: 20/03/20
 
 Version History:
 10/09/17 0.1    Program created
@@ -18,6 +18,7 @@ Version History:
 21/01/19 1.3    Added non-resonant diffraction, corrected resonant diffraction
 16/12/19 1.4    Added multiple_scattering code, print_all_reflections updated with units
 18/02/20 1.5    Added tensor_scattering code
+20/03/20 1.6    Increased powder gauss width from 2fwhm to 6fwhm
 
 @author: DGPorter
 """
@@ -30,7 +31,7 @@ from . import functions_crystallography as fc
 from . import multiple_scattering as ms
 from . import tensor_scattering as ts
 
-__version__ = '1.5'
+__version__ = '1.6'
 __scattering_types__ = {'xray': ['xray','x','x-ray','thomson','charge'],
                         'neutron': ['neutron','n','nuclear'],
                         'xray magnetic': ['xray magnetic','magnetic xray','spin xray','xray spin'],
@@ -925,15 +926,17 @@ class Scattering:
         for n in range(len(tth)):
             print('(%2.0f,%2.0f,%2.0f) %8.2f %8.2f  %9.2f' % (HKL[n,0],HKL[n,1],HKL[n,2],theta[n],tth[n],inten[n]))
     
-    def setup_scatter(self,type=None,energy_kev=None,wavelength_a=None,
+    def setup_scatter(self,type=None,energy_kev=None,wavelength_a=None, powder_units=None,
                       specular=None,parallel=None,theta_offset=None,
                       min_theta=None,max_theta=None,min_twotheta=None,max_twotheta=None):
         """
         Simple way to set scattering parameters, each parameter is internal to xtl (self)
         
-        type        : self._scattering type               : 'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
-        energy_kev  : self._energy_kev                    : radiation energy in keV
-        wavelength_a: self._wavelength_a                  : radiation wavelength in Angstrom
+        type        : self._scattering type               :  'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
+        energy_kev  : self._energy_kev                    :  radiation energy in keV
+        wavelength_a: self._wavelength_a                  :  radiation wavelength in Angstrom
+        powder_units: self._powder_units                  :  units to use when displaying/ plotting ['twotheta', 'd',' 'q']
+        min_twotheta: self._scattering_min_two_theta      :  minimum detector (two-theta) angle
         max_twotheta: self._scattering_max_two_theta      :  maximum detector (two-theta) angle
         min_theta   : self._scattering_min_theta          :  minimum sample angle = -opening angle
         max_theta   : self._scattering_max_theta          :  maximum sample angle = opening angle
@@ -950,12 +953,15 @@ class Scattering:
         
         if wavelength_a is not None:
             self._energy_kev = fc.wave2energy(wavelength_a)
+
+        if powder_units is not None:
+            self._powder_units = powder_units
         
         if specular is not None:
             self._scattering_specular_direction = specular
         
         if parallel is not None:
-            self._scattering_parallel_direction
+            self._scattering_parallel_direction = parallel
         
         if theta_offset is not None:
             self._scattering_theta_offset = theta_offset
@@ -1028,8 +1034,8 @@ class Scattering:
 
         # Convolve with a gaussian (if >0 or not None)
         if peak_width:
-            gauss_x = np.arange(-peak_width_pixels, peak_width_pixels + 1)  # gaussian width = 2*FWHM
-            G = fg.gauss(gauss_x, 0, height=1, cen=0, FWHM=peak_width_pixels, bkg=0)
+            gauss_x = np.arange(-3*peak_width_pixels, 3*peak_width_pixels + 1)  # gaussian width = 2*FWHM
+            G = fg.gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
             mesh = np.convolve(mesh, G, mode='same')
 
             # Add background (if >0 or not None)
@@ -1432,7 +1438,7 @@ class Scattering:
         # Convolve with a gaussian (if >0 or not None)
         if peak_width:
             gauss_x = np.arange(-3 * peak_width_pixels, 3 * peak_width_pixels + 1)  # gaussian width = 2*FWHM
-            G = fg.gauss(gauss_x, 0, height=1, cen=0, FWHM=peak_width_pixels, bkg=0)
+            G = fg.gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
             mesh = np.convolve(mesh, G, mode='same')
         return mesh_azi, mesh
 

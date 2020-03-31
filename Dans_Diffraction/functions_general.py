@@ -15,8 +15,8 @@ Usage:
     - from Dans_Diffraction import functions_general as fg
 
 
-Version 1.4
-Last updated: 18/10/19
+Version 1.5
+Last updated: 27/03/20
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -24,6 +24,7 @@ Version History:
 24/05/18 1.2    Corrected 'quad' for the case (1,-2,1)=1
 31/10/18 1.3    Added complex2str
 20/08/19 1.4    Added search_dict_lists
+27/03/20 1.5    Corrected error in gauss for 1d case when centre /= 0
 
 @author: DGPorter
 """
@@ -31,7 +32,7 @@ Version History:
 import sys, os, re
 import numpy as np
 
-__version__ = '1.4'
+__version__ = '1.5'
 
 # File directory
 directory = os.path.abspath(os.path.dirname(__file__))
@@ -667,25 +668,29 @@ def nice_print(precision=4, linewidth=300):
 '----------------------------------Others-------------------------------'
 
 
-def gauss(x, y=0, height=1, cen=0, FWHM=0.5, bkg=0):
+def gauss(x, y=None, height=1, cen=0, fwhm=0.5, bkg=0):
     """
     Define Gaussian distribution in 1 or 2 dimensions
     From http://fityk.nieto.pl/model.html
         x = [1xn] array of values, defines size of gaussian in dimension 1
-        y = 0 or [1xm] array of values, defines size of gaussian in dimension 2
+        y = None* or [1xm] array of values, defines size of gaussian in dimension 2
         height = peak height
         cen = peak centre
-        FWHM = peak full width at half-max
+        fwhm = peak full width at half-max
         bkg = background
     """
+
+    if y is None:
+        y = cen
+
     x = np.asarray(x, dtype=np.float).reshape([-1])
     y = np.asarray(y, dtype=np.float).reshape([-1])
     X, Y = np.meshgrid(x, y)
-    gauss = height * np.exp(-np.log(2) * (((X - cen) ** 2 + (Y - cen) ** 2) / (FWHM / 2) ** 2)) + bkg
+    g = height * np.exp(-np.log(2) * (((X - cen) ** 2 + (Y - cen) ** 2) / (fwhm / 2) ** 2)) + bkg
 
     if len(y) == 1:
-        gauss = gauss.reshape([-1])
-    return gauss
+        g = g.reshape([-1])
+    return g
 
 
 def frange(start, stop=None, step=1):
@@ -700,3 +705,47 @@ def frange(start, stop=None, step=1):
         start = 0
 
     return list(np.arange(start, stop + 0.00001, step, dtype=np.float))
+
+
+def grid_intensity(points, values, resolution=0.01, peak_width=0.1, background=0):
+    """
+    Generates array of intensities along a spaced grid, equivalent to a powder pattern.
+      grid, values = generate_powder(points, values, resolution=0.01, peak_width=0.1, background=0)
+    :param points: [nx1] position of values to place on grid
+    :param values: [nx1] values to place at points
+    :param resolution: grid spacing size, with same units as points
+    :param peak_width: width of convolved gaussian, with same units as points
+    :param background: add a normal (random) background with width sqrt(background)
+    :return: points, values
+    """
+
+    points = np.asarray(points, dtype=np.float)
+    values = np.asarray(values, dtype=np.float)
+
+    # create plotting mesh
+    grid_points = np.arange(np.min(points)-50*resolution, np.max(points)+50*resolution, resolution)
+    pixels = len(grid_points)
+    grid_values = np.zeros([pixels])
+
+    # add reflections to background
+    pixel_size = (grid_points.max() - grid_points.min()) / pixels
+    peak_width_pixels = peak_width / (1.0 * pixel_size)
+
+    pixel_coord = (points-grid_points.min()) / (grid_points-grid_points.min()).max()
+    pixel_coord = (pixel_coord * (pixels - 1)).astype(int)
+    pixel_coord = pixel_coord.astype(int)
+
+    for n in range(0, len(values)):
+        grid_values[pixel_coord[n]] = grid_values[pixel_coord[n]] + values[n]
+
+    # Convolve with a gaussian (if >0 or not None)
+    if peak_width:
+        gauss_x = np.arange(-3*peak_width_pixels, 3*peak_width_pixels + 1)  # gaussian width = 2*FWHM
+        g = gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
+        grid_values = np.convolve(grid_values, g, mode='same')
+
+    # Add background (if >0 or not None)
+    if background:
+        bkg = np.random.normal(background, np.sqrt(background), [pixels])
+        grid_values = grid_values + bkg
+    return grid_points, grid_values

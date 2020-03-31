@@ -24,8 +24,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.6
-Last updated: 08/03/20
+Version 2.7
+Last updated: 30/03/20
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -38,6 +38,7 @@ Version History:
 09/03/19 2.4    Add print functions to Symmetry
 12/08/19 2.5    self.info outputs string, __repr__ methods added
 12/12/19 2.6    Added Symmetry.is_symmetric_reflection(ref1, ref2), added multiple scattering code
+30/03/20 2.7    Moved Multicrystal class to separate file, other minor tweaks
 
 @author: DGPorter
 """
@@ -45,13 +46,14 @@ Version History:
 import numpy as np
 
 # Internal functions
-from . import functions_general as fg
+from . import functions_general as fg, functions_crystallography as fc
 from . import functions_crystallography as fc
 from .classes_properties import Properties
 from .classes_scattering import Scattering
-from .classes_plotting import Plotting, MultiPlotting, PlottingSuperstructure
+from .classes_multicrystal import MultiCrystal
+from .classes_plotting import Plotting, PlottingSuperstructure
 
-__version__ = '2.6'
+__version__ = '2.7'
 
 
 class Crystal:
@@ -262,6 +264,9 @@ class Crystal:
             CrystalGui(self)
         except ImportError:
             print('Sorry, you need to install tkinter!')
+
+    def __add__(self, other):
+        return MultiCrystal([self, other])
 
     def info(self):
         """
@@ -859,6 +864,28 @@ class Atoms:
         self.mx = np.delete(self.mx, idx)
         self.my = np.delete(self.my, idx)
         self.mz = np.delete(self.mz, idx)
+
+    def remove_duplicates(self, min_distance=0.01, all_types=False):
+        """
+        Remove atoms of the same type that are too close to each other
+        :param min_distance: remove atoms within this distance, in fractional units
+        :param all_types: if True, also remove atoms of different types
+        :return: None
+        """
+
+        uvw = self.uvw()
+        type = self.type
+        rem_atom_idx = []
+        for n in range(0, len(type)-1):
+            match_position = fg.mag(uvw[n, :] - uvw[n+1:, :]) < min_distance
+            match_type = type[n] == type[n+1:]
+            if all_types:
+                rem_atom_idx += list(1+n+np.where(match_position)[0])
+            else:
+                rem_atom_idx += list(1+n+np.where(match_position * match_type)[0])
+        # remove atoms
+        print('Removing %d atoms' % len(rem_atom_idx))
+        self.removeatom(rem_atom_idx)
 
     def check(self):
         """
@@ -1549,7 +1576,7 @@ class Superstructure(Crystal):
     Returns a superstructure Crystal class:
         xtl = Crystal()
         su = Superstructure(xtl,[[2,0,0],[0,2,0],[0,0,1]])
-    
+
     Superstructure Crystal classes have additional attributes compared with Crystal classes:
         su.P = P as given
         su.Parent = the parent Crystal Class
@@ -1557,7 +1584,7 @@ class Superstructure(Crystal):
         su.calculateQ_parent >> indexes (h,k,l) coordinates in the frame same cartesian frame as the Parent structure
         su.superhkl2parent >> indexes (h,k,l) coordinates in the frame of the Parent structure
         su.parenthkl2super >> indexes parent (h,k,l) coordinates in the frame of superstructure
-    
+
     Use >>hasattr(su,'Parent') to check is the current object is a
     superstructure Crystal class
     """
@@ -1665,7 +1692,7 @@ class Superstructure(Crystal):
         Indexes (h,k,l) coordinates in the frame same cartesian frame as the Parent structure
             Q = h'*a'* + k'*b'* + l'*c'*
         Where a'*, b'*, c'* are defined relative to the parent lattice, a*,b*,c*
-            
+
             [qx,qy,qz] = calculateQ_parent([h',k',l'])
         """
         return np.dot(super_hkl, self.superUVstar())
@@ -1675,7 +1702,7 @@ class Superstructure(Crystal):
         Indexes (h,k,l) coordinates in the frame of the Parent structure
             Q = h*a* + k*b* + l*c* = h'*a'* + k'*b'* + l'*c'*
             [h',k',l'] = Q/[a'*,b'*,c'*]
-            
+
             [h,k,l] = superhkl2parent([h',k',l'])
         """
 
@@ -1687,129 +1714,12 @@ class Superstructure(Crystal):
         Indexes (h,k,l) coordinates in the frame of the Parent structure
             Q = h*a* + k*b* + l*c* = h'*a'* + k'*b'* + l'*c'*
             [h',k',l'] = Q/[a'*,b'*,c'*]
-            
+
             [h',k',l'] = parenthkl2super([h,k,l])
         """
 
         Q = self.Parent.Cell.calculateQ(parent_HKL)
         return fc.indx(Q, self.superUVstar())
-
-
-class MultiCrystal(MultiPlotting):
-    """
-    Multi_Crystal class for combining multiple phases
-    """
-    _scattering_type = 'xray'
-
-    def __init__(self, crystal_list):
-        """
-        Multi-crystal class
-        """
-        self.crystal_list = crystal_list
-
-    def print_all_reflections(self, energy_kev=None, max_angle=180.0, print_symmetric=False):
-        """Prints a list of all allowed of all crystal reflections at this energy"""
-
-        if energy_kev is None:
-            energy_kev = fc.getenergy()
-
-        HKL_list = np.empty([0, 3])
-        TTH_list = np.empty([0])
-        I_list = np.empty([0])
-        NAMES_list = np.empty([0])
-        for xtl in self.crystal_list:
-            xtl._scattering_type = self._scattering_type
-            HKL = xtl.Cell.all_hkl(energy_kev, max_angle)
-            TTH = xtl.Cell.tth(HKL, energy_kev)
-            I = xtl.Scatter.intensity(HKL)
-            NAMES = np.asarray(xtl.name).repeat(len(I))
-
-            HKL_list = np.append(HKL_list, HKL, axis=0)
-            TTH_list = np.append(TTH_list, TTH)
-            I_list = np.append(I_list, I)
-            NAMES_list = np.append(NAMES_list, NAMES)
-
-        # Sort by TTH
-        index = np.argsort(TTH_list)
-        HKL_list = HKL_list[index, :]
-        TTH_list = TTH_list[index]
-        I_list = I_list[index]
-        NAMES_list = NAMES_list[index]
-
-        fmt = '(%3.0f,%3.0f,%3.0f) %8.2f  %9.2f %s'
-
-        print('Energy = %6.3f keV' % energy_kev)
-        print('( h, k, l) TwoTheta  Intensity Crystal')
-        # print(fmt % (HKL[0,0],HKL[0,1],HKL[0,2],tth[0],inten[0],)) # hkl(0,0,0)
-        for n in range(1, len(TTH_list)):
-            if I_list[n] < 0.01: continue
-            if not print_symmetric and np.abs(TTH_list[n] - TTH_list[n - 1]) < 0.01 and NAMES_list[n] == NAMES_list[
-                        n - 1]: continue  # only works if sorted
-            print(fmt % (HKL_list[n, 0], HKL_list[n, 1], HKL_list[n, 2], TTH_list[n], I_list[n], NAMES_list[n]))
-
-    def find_close_reflections(self, HKL, energy_kev=None, max_twotheta=2, max_angle=10):
-        """
-        Find and print list of reflections close to the given one
-        """
-
-        if energy_kev is None:
-            energy_kev = fc.getenergy()
-
-        HKL_tth = self.crystal_list[0].Cell.tth(HKL, energy_kev)
-        HKL_Q = self.crystal_list[0].Cell.calculateQ(HKL)
-
-        HKL_list = np.empty([0, 3])
-        TTH_list = np.empty([0])
-        ANGLE_list = np.empty([0])
-        I_list = np.empty([0])
-        NAMES_list = np.empty([0])
-        for xtl in self.crystal_list:
-            # xtl._scattering_type = self._scattering_type
-            all_HKL = xtl.Cell.all_hkl(energy_kev, xtl._scattering_max_twotheta)
-            all_TTH = xtl.Cell.tth(all_HKL, energy_kev)
-            dif_TTH = np.abs(all_TTH - HKL_tth)
-            all_Q = xtl.Cell.calculateQ(all_HKL)
-            all_ANG = np.abs([fg.ang(HKL_Q, Q, 'deg') for Q in all_Q])
-            selected = (dif_TTH < max_twotheta) * (all_ANG < max_angle)
-            sel_HKL = all_HKL[selected, :]
-            sel_TTH = all_TTH[selected]
-            sel_ANG = all_ANG[selected]
-            sel_INT = xtl.Scatter.intensity(sel_HKL)
-            NAMES = np.asarray(xtl.name).repeat(len(sel_INT))
-
-            HKL_list = np.append(HKL_list, sel_HKL, axis=0)
-            TTH_list = np.append(TTH_list, sel_TTH)
-            ANGLE_list = np.append(ANGLE_list, sel_ANG)
-            I_list = np.append(I_list, sel_INT)
-            NAMES_list = np.append(NAMES_list, NAMES)
-
-        # Sort by TTH
-        index = np.argsort(TTH_list)
-        HKL_list = HKL_list[index, :]
-        TTH_list = TTH_list[index]
-        ANGLE_list = ANGLE_list[index]
-        I_list = I_list[index]
-        NAMES_list = NAMES_list[index]
-
-        fmt = '(%3.0f,%3.0f,%3.0f) %8.2f %8.2f %9.2f %s'
-
-        print('Energy = %6.3f keV' % energy_kev())
-        print('%s Reflection: (%3.0f,%3.0f,%3.0f)' % (self.crystal_list[0].name, HKL[0], HKL[1], HKL[2]))
-        print('( h, k, l) TwoTheta Angle    Intensity Crystal')
-        for n in range(0, len(TTH_list)):
-            print(fmt % (
-                HKL_list[n, 0], HKL_list[n, 1], HKL_list[n, 2], TTH_list[n], ANGLE_list[n], I_list[n], NAMES_list[n]))
-
-    def info(self):
-        """Display information about the contained crystals"""
-
-        out = "Crystals: %d\n" % len(self.crystal_list)
-        for n, xtl in enumerate(self.crystal_list):
-            out += "%1.0f %s\n" % (n, xtl.name)
-        return out
-
-    def __repr__(self):
-        return self.info()
 
 
 if __name__ == '__main__':
