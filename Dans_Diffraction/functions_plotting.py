@@ -17,7 +17,7 @@ All plots generated require plt.show() call, unless using interactive mode
 
 
 Version 1.8
-Last updated: 09/03/20
+Last updated: 03/04/20
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -697,7 +697,7 @@ def plot_xray_attenuation(elements, min_energy=0, max_energy=20):
     Zarray = fc.atom_properties(elements, 'Z')
     ene = np.arange(min_energy, max_energy+0.01, 0.01)
 
-    Aarray = np.array([fc.attenuation(Z, ene) for Z in Zarray]).T
+    Aarray = fc.attenuation(Zarray, ene)
     newplot(ene, Aarray)
     plt.yscale('log')
     plt.xlim([min_energy, max_energy])

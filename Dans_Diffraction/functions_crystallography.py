@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 2.7
-Last updated: 18/10/19
+Version 2.8
+Last updated: 03/04/20
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -25,6 +25,7 @@ Version History:
 08/06/18 2.5    Corrected a few errors and added some more comments
 06/03/19 2.6    Added print_atom_properties
 14/08/19 2.7    Added new Dans Element Properties file with extra comment line, new functions added
+03/04/20 2.8    Updated attenuation to work with arrays of elements
 
 @author: DGPorter
 """
@@ -654,17 +655,26 @@ def debyewaller(uiso, Qmag=[0]):
     return Tall
 
 
-def attenuation(element_Z, energy_keV):
+def attenuation(element_z, energy_keV):
     """
      Returns the x-ray mass attenuation, u/p, in cm^2/g
        e.g. A = attenuation(23,np.arange(7,8,0.01)) # Cu
+            A = attenuation([23,24,25], 5.6)
             a = attenuation(19,4.5) # K
     """
+    element_z = np.asarray(element_z).reshape(-1)
+    energy_keV = np.asarray(energy_keV).reshape(-1)
+
     xma_file = os.path.join(datadir, 'XRayMassAtten_mup.dat')
     xma_data = np.loadtxt(xma_file)
 
     energies = xma_data[:, 0] / 1000.
-    return np.interp(energy_keV, energies, xma_data[:, element_Z])
+    out = np.zeros([len(energy_keV), len(element_z)])
+    for n, z in enumerate(element_z):
+        out[:, n] = np.interp(energy_keV, energies, xma_data[:, z])
+    if len(element_z) == 1:
+        return out[:, 0]
+    return out
 
 
 '--------------Element Properties & Charge----------------------'

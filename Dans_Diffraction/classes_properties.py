@@ -183,8 +183,8 @@ class Properties:
         # determine u/p = sum(wi*(u/p)i) http://physics.nist.gov/PhysRefData/XrayMassCoef/chap2.html
         wi = self.xtl.Structure.mass_fraction()
         Z = fc.atom_properties(self.xtl.Structure.type ,'Z')
-        upi = np.array([fc.attenuation(Zn, energy_kev) for Zn in Z])
-        up = np.sum(wi*upi)
+        upi = fc.attenuation(Z, energy_kev)
+        up = np.sum(wi*upi, axis=1)
 
         u = up*self.density()/10000
         return u
