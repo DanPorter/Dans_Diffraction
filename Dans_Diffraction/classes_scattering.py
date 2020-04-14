@@ -8,7 +8,7 @@ Diamond
 2017
 
 Version 1.6
-Last updated: 20/03/20
+Last updated: 14/04/20
 
 Version History:
 10/09/17 0.1    Program created
@@ -18,7 +18,8 @@ Version History:
 21/01/19 1.3    Added non-resonant diffraction, corrected resonant diffraction
 16/12/19 1.4    Added multiple_scattering code, print_all_reflections updated with units
 18/02/20 1.5    Added tensor_scattering code
-20/03/20 1.6    Increased powder gauss width from 2fwhm to 6fwhm
+20/03/20 1.6    Increased powder gauss width from 2fwhm to 6fwhm, added powder averaging
+14/04/20 1.6    Added powder_correction
 
 @author: DGPorter
 """
@@ -981,6 +982,7 @@ class Scattering:
         print('Scattering Options:')
         print('                            Type : %s'%(self._scattering_type))
         print('                  Default Energy : %6.3f keV'%(self._energy_kev))
+        print('                    Powder Units : %s'%(self._powder_units))
         print('  Specular Direction (reflection): (%2.0f,%2.0f,%2.0f)'%(self._scattering_specular_direction[0],self._scattering_specular_direction[1],self._scattering_specular_direction[2]))
         print('Parallel Direction (transmission): (%2.0f,%2.0f,%2.0f)'%(self._scattering_parallel_direction[0],self._scattering_parallel_direction[1],self._scattering_parallel_direction[2]))
         print('                   Sample Offset : %5.2f'%(self._scattering_theta_offset))
@@ -989,13 +991,14 @@ class Scattering:
         print('         Minimum Two-Theta angle : %5.2f'%(self._scattering_min_twotheta))
         print('         Maximum Two-Theta angle : %5.2f'%(self._scattering_max_twotheta))
 
-    def generate_powder(self, q_max=8, peak_width=0.01, background=0):
+    def generate_powder(self, q_max=8, peak_width=0.01, background=0, powder_average=True):
         """
         Generates array of intensities along a spaced grid, equivalent to a powder pattern.
           Q,I = generate_powder(energy_kev=8.0,peak_width=0.05,background=0)
             q_max = maximum Q, in A-1
             peak_width = width of convolution, in A-1
             background = average of normal background
+            powder_average = True*/False, apply the powder averaging correction
           Returns:
             Q = [1000x1] array of wave-vector values
             I = [1000x1] array of intensity values
@@ -1018,8 +1021,12 @@ class Scattering:
         # Calculate intensities
         I = self.intensity(HKL)
 
+        if powder_average:
+            # Apply powder averging correction, I0/|Q|**2
+            I = I/(Qmag+0.001)**2
+
         # create plotting mesh
-        pixels = 2000 * q_max  # reduce this to make convolution faster
+        pixels = int(2000 * q_max)  # reduce this to make convolution faster
         pixel_size = q_max / (1.0 * pixels)
         peak_width_pixels = peak_width / (1.0 * pixel_size)
         mesh = np.zeros([pixels])
@@ -1043,6 +1050,27 @@ class Scattering:
             bkg = np.random.normal(background, np.sqrt(background), [pixels])
             mesh = mesh + bkg
         return mesh_q, mesh
+
+    def powder_correction(self, HKL, intensities, symmetric_multiplyer=True, powder_average=True):
+        """
+        Averages symmetric reflections and applies symmetry multipliers and 1/q^2 correction
+        Ic = I0*C
+        :param HKL: [nx3] array of [h,k,l] reflections
+        :param intensities: [nx1] array of reflection intensities
+        :return: [mx3], [mx1] arrays of averaged, corrected reflections + intensity
+        """
+        # Average symmetric reflections
+        rhkl, rinten = self.xtl.Symmetry.average_symmetric_intensity(HKL, intensities)
+
+        if symmetric_multiplyer:
+            multiplyer = self.xtl.Symmetry.reflection_multiplyer(rhkl)
+            rinten = rinten*multiplyer
+
+        if powder_average:
+            q = self.xtl.Cell.Qmag(rhkl)
+            rinten = rinten/(q+0.001)**2
+
+        return rhkl, rinten
 
     def print_all_reflections(self, energy_kev=None, print_symmetric=False,
                               min_intensity=0.01, max_intensity=None, units=None):

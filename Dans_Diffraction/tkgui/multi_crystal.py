@@ -256,4 +256,5 @@ class MultiCrystalGui:
         self.set_scatter()
         energy_kev = self.energy_kev.get()
         self.xtls.Plot.simulate_powder(energy_kev)
+        plt.show()
 

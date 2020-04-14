@@ -1501,7 +1501,32 @@ def hkl2str(hkl):
     return '\n'.join([out % (x[0], x[1], x[2]) for x in hkl])
 
 
+def cut2powder(qx, qy, qz, cut):
+    """
+    Convert 2D reciprocal space cut to powder pattern
+    :param qx: [n,m] array of Q coordinates in x
+    :param qy: [n,m] array of Q coordinates in y
+    :param qz: [n,m] array or float of Q coordinates in z
+    :param cut: [n,m] array of intensities
+    :return: qm[o], pow[o]
+    """
+    qq = np.sqrt(qx**2 + qy**2 + qz**2)
+    return fg.grid_intensity(qq.ravel(), cut.ravel())
+
+
 '--------------------------Misc Crystal Programs------------------------'
+
+
+def powder_average(tth, energy_kev):
+    """
+    Return the powder average correction for intensities at a given two-theta
+        Ip = I0*PA,    PA = 1/|Q|^2
+    :param tth: two-theta in deg
+    :param energy_kev: energy in keV
+    :return: PA
+    """
+    q = calqmag(tth, energy_kev)
+    return 1/q**2
 
 
 def calc_vol(UV):

@@ -56,6 +56,8 @@ class ScatteringGui:
         self.twotheta_min = tk.DoubleVar(frame, -180.0)
         self.twotheta_max = tk.DoubleVar(frame, 180.0)
         self.powder_units = tk.StringVar(frame, 'Two-Theta')
+        self.powderaverage = tk.BooleanVar(frame, True)
+        self.powder_width = tk.DoubleVar(frame, 0.01)
         self.hkl_check = tk.StringVar(frame, '0 0 1')
         self.hkl_result = tk.StringVar(frame, 'I:%10.0f TTH:%8.2f' % (0, 0))
         self.val_i = tk.IntVar(frame, 0)
@@ -76,117 +78,143 @@ class ScatteringGui:
         self.xr_energies.insert(0, fg.Cu)
         self.xr_energies.insert(1, fg.Mo)
 
-        # ---Line 1---
-        line1 = tk.Frame(frame)
-        line1.pack(side=tk.TOP, fill=tk.X, pady=5)
 
-        var = tk.Label(line1, text='Scattering', font=LF)
+        line = tk.Frame(frame)
+        line.pack(side=tk.TOP, fill=tk.X, pady=5)
+
+        var = tk.Label(line, text='Scattering', font=LF)
         var.pack(side=tk.LEFT)
 
-        var = tk.Button(line1, text='Supernova', font=BF, command=self.fun_supernova, bg=btn,
+        var = tk.Button(line, text='Supernova', font=BF, command=self.fun_supernova, bg=btn,
                         activebackground=btn_active)
         var.pack(side=tk.RIGHT)
-        var = tk.Button(line1, text='Wish', font=BF, command=self.fun_wish, bg=btn, activebackground=btn_active)
+        var = tk.Button(line, text='Wish', font=BF, command=self.fun_wish, bg=btn, activebackground=btn_active)
         var.pack(side=tk.RIGHT)
-        var = tk.Button(line1, text='I16', font=BF, command=self.fun_i16, bg=btn, activebackground=btn_active)
+        var = tk.Button(line, text='I16', font=BF, command=self.fun_i16, bg=btn, activebackground=btn_active)
         var.pack(side=tk.RIGHT)
 
-        # ---Line 2---
-        line2 = tk.Frame(frame)
-        line2.pack(side=tk.TOP, fill=tk.X, pady=5)
+        # ---Settings---
+        box = tk.LabelFrame(frame, text='Settings')
+        box.pack(side=tk.TOP, fill=tk.BOTH, padx=5, pady=5)
 
         # Energy
-        var = tk.Label(line2, text='Energy (keV):', font=SF)
+        line = tk.Frame(box)
+        line.pack(side=tk.TOP, fill=tk.X, pady=5)
+        var = tk.Label(line, text='Energy (keV):', font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.OptionMenu(line2, self.edge, *self.xr_edges, command=self.fun_edge)
+        var = tk.OptionMenu(line, self.edge, *self.xr_edges, command=self.fun_edge)
         var.config(font=SF, width=5, bg=opt, activebackground=opt_active)
         var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line2, textvariable=self.energy_kev, font=TF, width=8, bg=ety, fg=ety_txt)
+        var = tk.Entry(line, textvariable=self.energy_kev, font=TF, width=8, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
 
         # Type
+        line = tk.Frame(box)
+        line.pack(side=tk.TOP, fill=tk.X, pady=5)
         types = ['X-Ray', 'Neutron', 'XRay Magnetic', 'Neutron Magnetic', 'XRay Resonant']
-        var = tk.Label(line2, text='Type:', font=SF)
+        var = tk.Label(line, text='Type:', font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.OptionMenu(line2, self.type, *types)
+        var = tk.OptionMenu(line, self.type, *types)
+        var.config(font=SF, width=10, bg=opt, activebackground=opt_active)
+        var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
+        var.pack(side=tk.LEFT)
+
+        # Units
+        xaxistypes = ['two-theta', 'd-spacing', 'Q']
+        var = tk.Label(line, text='Units:', font=SF)
+        var.pack(side=tk.LEFT)
+        var = tk.OptionMenu(line, self.powder_units, *xaxistypes)
         var.config(font=SF, width=10, bg=opt, activebackground=opt_active)
         var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
         var.pack(side=tk.LEFT)
 
         # Orientation
+        line = tk.Frame(box)
+        line.pack(side=tk.TOP, fill=tk.X, pady=5)
+        var = tk.Label(line, text='Geometry:', font=SF)
+        var.pack(side=tk.LEFT)
         orients = ['None', 'Reflection', 'Transmission']
-        var = tk.OptionMenu(line2, self.orientation, *orients)
+        var = tk.OptionMenu(line, self.orientation, *orients)
         var.config(font=SF, width=10, bg=opt, activebackground=opt_active)
         var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
         var.pack(side=tk.LEFT)
 
         # Direction
-        var = tk.Label(line2, text='Direction:', font=SF)
+        var = tk.Label(line, text='Direction:', font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line2, textvariable=self.direction_h, font=TF, width=2, bg=ety, fg=ety_txt)
+        var = tk.Entry(line, textvariable=self.direction_h, font=TF, width=2, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line2, textvariable=self.direction_k, font=TF, width=2, bg=ety, fg=ety_txt)
+        var = tk.Entry(line, textvariable=self.direction_k, font=TF, width=2, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line2, textvariable=self.direction_l, font=TF, width=2, bg=ety, fg=ety_txt)
+        var = tk.Entry(line, textvariable=self.direction_l, font=TF, width=2, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
-
-        # --- Line 3 ---
-        line3 = tk.Frame(frame)
-        line3.pack(side=tk.TOP, fill=tk.X, pady=5)
 
         # Theta offset
-        var = tk.Label(line3, text='Offset:', font=SF)
+        line = tk.Frame(box)
+        line.pack(side=tk.TOP, fill=tk.X, pady=5)
+        var = tk.Label(line, text='Offset:', font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line3, textvariable=self.theta_offset, font=TF, width=5, bg=ety, fg=ety_txt)
+        var = tk.Entry(line, textvariable=self.theta_offset, font=TF, width=5, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
 
         # Theta min
-        var = tk.Label(line3, text='Min Theta:', font=SF)
+        var = tk.Label(line, text='Min Theta:', font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line3, textvariable=self.theta_min, font=TF, width=5, bg=ety, fg=ety_txt)
+        var = tk.Entry(line, textvariable=self.theta_min, font=TF, width=5, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
 
         # Theta max
-        var = tk.Label(line3, text='Max Theta:', font=SF)
+        var = tk.Label(line, text='Max Theta:', font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line3, textvariable=self.theta_max, font=TF, width=5, bg=ety, fg=ety_txt)
+        var = tk.Entry(line, textvariable=self.theta_max, font=TF, width=5, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
 
         # TwoTheta min
-        var = tk.Label(line3, text='Min TwoTheta:', font=SF)
+        line = tk.Frame(box)
+        line.pack(side=tk.TOP, fill=tk.X, pady=5)
+        var = tk.Label(line, text='Min TwoTheta:', font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line3, textvariable=self.twotheta_min, font=TF, width=5, bg=ety, fg=ety_txt)
+        var = tk.Entry(line, textvariable=self.twotheta_min, font=TF, width=5, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
 
         # TwoTheta max
-        var = tk.Label(line3, text='Max TwoTheta:', font=SF)
-        var.pack(side=tk.LEFT)
-        var = tk.Entry(line3, textvariable=self.twotheta_max, font=TF, width=5, bg=ety, fg=ety_txt)
+        var = tk.Entry(line, textvariable=self.twotheta_max, font=TF, width=5, bg=ety, fg=ety_txt)
+        var.pack(side=tk.RIGHT)
+        var = tk.Label(line, text='Max TwoTheta:', font=SF)
+        var.pack(side=tk.RIGHT)
+
+        # Powder width
+        line = tk.Frame(box)
+        line.pack(side=tk.TOP, fill=tk.X, pady=5)
+        var = tk.Label(line, text='Powder peak width:', font=SF)
+        var.pack(side=tk.LEFT, padx=3)
+        var = tk.Entry(line, textvariable=self.powder_width, font=TF, width=5, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
 
-        # --- Line 4 ---
-        line4 = tk.Frame(frame)
-        line4.pack(side=tk.TOP, fill=tk.X, pady=5)
+        # Powder average tickbox
+        var = tk.Checkbutton(line, text='Powder average', variable=self.powderaverage, font=SF)
+        var.pack(side=tk.LEFT, padx=6)
 
-        var = tk.Button(line4, text='Display Intensities', font=BF, command=self.fun_intensities, bg=btn2,
+        # ---Intensities---
+        box = tk.LabelFrame(frame, text='Intensities')
+        box.pack(side=tk.TOP, fill=tk.BOTH, padx=5, pady=5)
+
+        line = tk.Frame(box)
+        line.pack(side=tk.TOP, fill=tk.X, pady=5)
+
+        var = tk.Button(line, text='Display Intensities', font=BF, command=self.fun_intensities, bg=btn2,
                         activebackground=btn_active)
         var.pack(side=tk.LEFT)
 
-        var = tk.Button(line4, text='Plot Powder', font=BF, command=self.fun_powder, bg=btn,
+        var = tk.Button(line, text='Plot Powder', font=BF, command=self.fun_powder, bg=btn,
                         activebackground=btn_active)
-        var.pack(side=tk.LEFT)
-
-        xaxistypes = ['two-theta', 'd-spacing', 'Q']
-        var = tk.Label(line4, text='Units:', font=SF)
-        var.pack(side=tk.LEFT)
-        var = tk.OptionMenu(line4, self.powder_units, *xaxistypes)
-        var.config(font=SF, width=10, bg=opt, activebackground=opt_active)
-        var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
         var.pack(side=tk.LEFT)
 
         # hkl check
-        hklbox = tk.LabelFrame(line4, text='Quick Check')
+        line = tk.Frame(box)
+        line.pack(side=tk.TOP, fill=tk.X, pady=5)
+        hklbox = tk.LabelFrame(line, text='Quick Check')
         hklbox.pack(side=tk.RIGHT)
         var = tk.Entry(hklbox, textvariable=self.hkl_check, font=TF, width=6, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
@@ -194,30 +222,33 @@ class ScatteringGui:
         var.bind('<KP_Enter>', self.fun_hklcheck)
         var = tk.Label(hklbox, textvariable=self.hkl_result, font=TF, width=22)
         var.pack(side=tk.LEFT)
-        # var = tk.Button(hklbox, text='Check HKL', font=BF, command=self.fun_hklcheck, bg=btn,
-        #                activebackground=btn_active)
-        # var.pack(side=tk.LEFT, pady=2)
+        var = tk.Button(hklbox, text='Check HKL', font=BF, command=self.fun_hklcheck, bg=btn,
+                       activebackground=btn_active)
+        var.pack(side=tk.LEFT, pady=2)
 
-        # --- Line 5 ---
-        line5 = tk.Frame(frame)
-        line5.pack(side=tk.TOP, pady=5)
+        # ---Planes---
+        box = tk.LabelFrame(frame, text='Reciprocal Space Planes')
+        box.pack(side=tk.TOP, fill=tk.BOTH, padx=5, pady=5)
+
+        line = tk.Frame(box)
+        line.pack(side=tk.TOP, pady=5)
 
         # ---HKL Planes---
         # i value
-        var = tk.Label(line5, text='i:', font=SF)
+        var = tk.Label(line, text='i:', font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Entry(line5, textvariable=self.val_i, font=TF, width=3, bg=ety, fg=ety_txt)
+        var = tk.Entry(line, textvariable=self.val_i, font=TF, width=3, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
 
         # directions
-        vframe = tk.Frame(line5)
+        vframe = tk.Frame(line)
         vframe.pack(side=tk.LEFT, padx=3)
         var = tk.Button(vframe, text='HKi', font=BF, command=self.fun_hki, width=5, bg=btn, activebackground=btn_active)
         var.pack()
         var = tk.Button(vframe, text='HiL', font=BF, command=self.fun_hil, width=5, bg=btn, activebackground=btn_active)
         var.pack()
 
-        vframe = tk.Frame(line5)
+        vframe = tk.Frame(line)
         vframe.pack(side=tk.LEFT)
         var = tk.Button(vframe, text='iKL', font=BF, command=self.fun_ikl, width=5, bg=btn, activebackground=btn_active)
         var.pack()
@@ -226,11 +257,14 @@ class ScatteringGui:
 
         # ---X-ray Magnetic scattering----
         if np.any(self.xtl.Structure.mxmymz()):
-            resbox = tk.LabelFrame(line5, text='X-Ray Magnetic Scattering')
-            resbox.pack(side=tk.LEFT, fill=tk.Y, padx=3)
+            box = tk.LabelFrame(frame, text='X-Ray Magnetic Scattering')
+            box.pack(side=tk.TOP, fill=tk.BOTH, padx=3)
+
+            line = tk.Frame(box)
+            line.pack(side=tk.TOP, fill=tk.BOTH, pady=5)
 
             # Resonant HKL, azimuthal reference
-            vframe = tk.Frame(resbox)
+            vframe = tk.Frame(line)
             vframe.pack(side=tk.LEFT, fill=tk.Y, padx=3)
 
             hframe = tk.Frame(vframe)
@@ -250,7 +284,7 @@ class ScatteringGui:
             var.pack(side=tk.LEFT)
 
             # Resonant value
-            vframe = tk.Frame(resbox)
+            vframe = tk.Frame(line)
             vframe.pack(side=tk.LEFT, fill=tk.Y, padx=3)
 
             hframe = tk.Frame(vframe)
@@ -274,7 +308,7 @@ class ScatteringGui:
             var = tk.Entry(hframe, textvariable=self.resF2, font=TF, width=3, bg=ety, fg=ety_txt)
             var.pack(side=tk.LEFT)
 
-            vframe = tk.Frame(resbox)
+            vframe = tk.Frame(line)
             vframe.pack(side=tk.LEFT, fill=tk.Y, padx=3)
 
             # Polarisation
@@ -302,21 +336,24 @@ class ScatteringGui:
             var.bind('<Return>', self.fun_hklmag)
             var.bind('<KP_Enter>', self.fun_hklmag)
 
-            vframe = tk.Frame(resbox)
+            line = tk.Frame(box)
+            line.pack(side=tk.TOP, fill=tk.BOTH, pady=5)
+
+            vframe = tk.Frame(line)
             vframe.pack(side=tk.LEFT, fill=tk.Y, padx=3)
 
-            # Azimuth Button
+            # Mag. Inten button
             var = tk.Button(vframe, text='Calc. Mag. Inten.', font=BF, command=self.fun_hklmag, bg=btn,
                             activebackground=btn_active)
-            var.pack()
+            var.pack(side=tk.LEFT, padx=5)
             # Magnetic Result
             var = tk.Label(vframe, textvariable=self.magresult, font=SF, width=12)
-            var.pack(fill=tk.Y)
+            var.pack(side=tk.LEFT, fill=tk.Y)
 
             # Azimuth Button
-            var = tk.Button(resbox, text='Simulate\n Azimuth', font=BF, command=self.fun_azimuth, width=7, bg=btn,
+            var = tk.Button(line, text='Simulate\n Azimuth', font=BF, command=self.fun_azimuth, width=7, bg=btn,
                             activebackground=btn_active)
-            var.pack(side=tk.LEFT)
+            var.pack(side=tk.RIGHT)
 
     def fun_set(self):
         """"Set gui parameters from crystal"""
@@ -347,8 +384,8 @@ class ScatteringGui:
         scat._scattering_theta_offset = self.theta_offset.get()
         scat._scattering_min_theta = self.theta_min.get()
         scat._scattering_max_theta = self.theta_max.get()
-        scat._scattering_min_two_theta = self.twotheta_min.get()
-        scat._scattering_max_two_theta = self.twotheta_max.get()
+        scat._scattering_min_twotheta = self.twotheta_min.get()
+        scat._scattering_max_twotheta = self.twotheta_max.get()
         scat._powder_units = self.powder_units.get()
 
         if self.orientation.get() == 'Reflection':
@@ -367,6 +404,7 @@ class ScatteringGui:
         self.energy_kev.set(8.0)
         self.edge.set('Edge')
         self.powder_units.set('Two-Theta')
+        self.powderaverage.set(False)
         self.orientation.set('Reflection')
         self.theta_offset.set(0.0)
         self.theta_min.set(-20.0)
@@ -430,10 +468,10 @@ class ScatteringGui:
         elif unit.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
             q = fc.calqmag(tth, energy)
             d = fc.q2dspace(q)
-            self.hkl_result.set('I:%10.0f   d:%8.2f A' % (I, d))
+            self.hkl_result.set(u'I:%10.0f   d:%8.2f \u00c5' % (I, d))
         else:
             q = fc.calqmag(tth, energy)
-            self.hkl_result.set('I:%8.0f   Q:%8.2f A^-1' % (I, q))
+            self.hkl_result.set(u'I:%8.0f   Q:%8.2f \u00c5\u207B\u00B9' % (I, q))
 
     def fun_intensities(self):
         """Display intensities"""
@@ -454,21 +492,11 @@ class ScatteringGui:
         energy = self.energy_kev.get()
         min_q = fc.calqmag(self.twotheta_min.get(), energy)
         max_q = fc.calqmag(self.twotheta_max.get(), energy)
-        if min_q < 0: min_q = 0.0
+        pow_avg = self.powderaverage.get()
+        pow_wid = self.powder_width.get()
+        #if min_q < 0: min_q = 0.0
 
-        if self.xtl.Scatter._powder_units.lower() in ['tth', 'angle', 'twotheta', 'theta', 'two-theta']:
-            minx = fc.cal2theta(min_q, energy)
-            maxx = fc.cal2theta(max_q, energy)
-        elif self.xtl.Scatter._powder_units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
-            if min_q < 0.01: min_q = 0.5
-            minx = 0
-            maxx = fc.q2dspace(min_q)
-        else:
-            minx = min_q
-            maxx = max_q
-
-        self.xtl.Plot.simulate_powder(energy)
-        plt.xlim(minx, maxx)
+        self.xtl.Plot.simulate_powder(energy, peak_width=pow_wid, powder_average=pow_avg)
         plt.show()
 
     def fun_hki(self):

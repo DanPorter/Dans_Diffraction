@@ -749,3 +749,36 @@ def grid_intensity(points, values, resolution=0.01, peak_width=0.1, background=0
         bkg = np.random.normal(background, np.sqrt(background), [pixels])
         grid_values = grid_values + bkg
     return grid_points, grid_values
+
+
+def map2grid(grid, points, values, widths=None, background=0):
+    """
+    Generates array of intensities along a spaced grid, equivalent to a powder pattern.
+      grid, values = generate_powder(points, values, resolution=0.01, peak_width=0.1, background=0)
+    :param grid: [mx1] grid of positions
+    :param points: [nx1] position of values to place on grid
+    :param values: [nx1] values to place at points
+    :param widths: width of convolved gaussian, with same units as points
+    :param background: add a normal (random) background with width sqrt(background)
+    :return: points, values
+    """
+    grid = np.asarray(grid, dtype=np.float)
+    points = np.asarray(points, dtype=np.float)
+    values = np.asarray(values, dtype=np.float)
+    widths = np.asarray(widths, dtype=np.float)
+
+    if widths.size == 1:
+        widths = widths*np.ones(len(points))
+
+    pixels = len(grid)
+    grid_values = np.zeros([pixels])
+
+    for point, value, width in zip(points, values, widths):
+        g = gauss(grid, None, height=value, cen=point, fwhm=width, bkg=0)
+        grid_values += g
+
+    # Add background (if >0 or not None)
+    if background:
+        bkg = np.random.normal(background, np.sqrt(background), [pixels])
+        grid_values = grid_values + bkg
+    return grid_values

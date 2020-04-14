@@ -284,7 +284,8 @@ class Crystal:
         return out
 
     def __repr__(self):
-        return self.info()
+        fmt = "%s with %d atomic positions, %d symmetries"
+        return fmt % (self.name, len(self.Atoms.type), len(self.Symmetry.symmetry_operations))
 
 
 class Cell:
@@ -391,7 +392,7 @@ class Cell:
         return out
 
     def __repr__(self):
-        return self.info()
+        return 'a = %1.5g A,  b = %1.5f A,  c = %1.5g A,  A = %1.5g,  B = %1.5g,  G = %1.5g' % self.lp()
 
     def generate_lattice(self, U, V, W):
         """
@@ -565,6 +566,15 @@ class Cell:
         Qm = self.Qmag(HKL)
         idx = np.argsort(Qm)
         return HKL[idx, :]
+
+    def powder_average(self, HKL):
+        """
+        Returns the powder average correction for the given hkl
+        :param HKL: array : list of reflections
+        :return: correction
+        """
+        q = self.Qmag(HKL)
+        return 1/(q+0.001)**2
 
     def find_close_reflections(self, hkl, energy_kev, max_twotheta=2, max_angle=10):
         """
@@ -1047,7 +1057,7 @@ class Atoms:
         return out
 
     def __repr__(self):
-        return self.info()
+        return "%d sites, elements: %s" % (len(self.type), np.unique(self.type))
 
 
 class Symmetry:
@@ -1413,6 +1423,7 @@ class Symmetry:
     def symmetric_intensity(self, HKL, I, dI=None):
         """
         Returns symmetric reflections with summed intensities of repeated reflections
+        Assumes HKL reflections are unique, repeated reflections will be incorrectly added together.
         Uses fc.gen_sym_mat
         E.G.
             Symmetry.symmetry_operations = ['x,y,z','-x,-y,-z','y,x,z']
@@ -1487,6 +1498,33 @@ class Symmetry:
             symmetric_idx[n] = True
         return hkl_list[symmetric_idx]
 
+    def average_symmetric_intensity(self, hkl_list, intensity_list, tolerance=0.01):
+        """
+        Return a list of reflections with symmetric reflections removed, matching reflections will be averaged
+        :param hkl_list: list of [h,k,l] reflections
+        :param intensity_list: list of intensities
+        :param tolerance: tolerance for matching reflections
+        :return: array of [h,k,l]
+        """
+        hkl_list = np.asarray(hkl_list).reshape(-1, 3)
+        intensity_list = np.asarray(intensity_list).reshape(-1)
+        intensity_tot = np.ones(len(intensity_list))
+        symmetric_idx = np.zeros(len(hkl_list), dtype=bool)
+        symmetric_hkl = np.empty([0, 3])
+        hkl_idx = np.empty([0], dtype=int)
+        for n in range(len(hkl_list)):
+            difference = fg.mag(hkl_list[n] - symmetric_hkl)
+            close = difference < tolerance
+            if np.any(close):
+                intensity_list[hkl_idx[close]] += intensity_list[n]
+                intensity_tot[hkl_idx[close]] += 1
+                continue
+            symref = self.symmetric_reflections(hkl_list[n])
+            symmetric_hkl = np.vstack([symmetric_hkl, symref])
+            hkl_idx = np.append(hkl_idx, [n]*len(symref))
+            symmetric_idx[n] = True
+        return hkl_list[symmetric_idx], intensity_list[symmetric_idx]/intensity_tot[symmetric_idx]
+
     def print_symmetric_vectors(self, HKL):
         """
         Print symmetric vectors
@@ -1535,6 +1573,21 @@ class Symmetry:
             # mag_uvw = fc.gen_symcen_pos(S,mx,my,mz)
             pass
 
+    def reflection_multiplyer(self, HKL):
+        """
+        Returns the number of symmetric reflections for each hkl
+        :param HKL: [nx3] array of [h,k,l]
+        :return: [n] array of multiplyers
+        """
+        HKL = np.asarray(HKL, dtype=np.float).reshape((-1, 3))
+        multiplyers = np.zeros(len(HKL))
+        for n, hkl in enumerate(HKL):
+            sym_hkl = self.symmetric_reflections_unique(hkl)
+            multiplyers[n] = len(sym_hkl)
+        if len(multiplyers) == 1:
+            return multiplyers[0]
+        return multiplyers
+
     def info(self):
         """
         Prints the symmetry information
@@ -1558,7 +1611,7 @@ class Symmetry:
         return out
 
     def __repr__(self):
-        return self.info()
+        return "%d symmetry operations" % len(self.symmetry_operations)
 
 
 class Superstructure(Crystal):

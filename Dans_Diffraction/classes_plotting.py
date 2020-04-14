@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.6
-Last updated: 09/03/20
+Version 1.7
+Last updated: 14/04/20
 
 Version History:
 18/08/17 0.1    Program created
@@ -20,6 +20,7 @@ Version History:
 08/06/18 1.4    Corrected call to simulate_lattice_lines in simulate_reciprocal_plane
 21/01/19 1.5    Added simulate_polarisation_resonant and _nonresonant
 08/11/19 1.6    Increased pixel width on powder plots, improved superstructure recriprocal space planes
+14/04/20 1.7    Added powder avereging to simulate_powder
 
 @author: DGPorter
 """
@@ -33,7 +34,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.6'
+__version__ = '1.7'
 
 
 class Plotting:
@@ -44,7 +45,7 @@ class Plotting:
     _figure_size = fp.FIGURE_SIZE
     _figure_dpi = fp.FIGURE_DPI
 
-    def __init__(self,xtl):
+    def __init__(self, xtl):
         "initialise"
         self.xtl = xtl
     
@@ -221,60 +222,11 @@ class Plotting:
             
             ttl = '%s\nLayer %2.0f = %5.3f' %(self.xtl.name,L,layer)
             plt.title(ttl,fontsize=20,fontweight='bold')
-    
-    def generate_powder(self, q_max=8, peak_width=0.01, background=0):
-        """
-        Generates a powder pattern and returns the results
-          tth,I = generate_powder(energy_kev=8.0,peak_width=0.05,background=0)
-            q_max = maximum Q, in A-1
-            peak_width = width of convolution, in A-1
-            background = average of normal background
-          Returns:
-            Q = [1000x1] array of wave-vector values
-            I = [1000x1] array of intensity values
-        """
-        
-        # Get reflections
-        hmax,kmax,lmax  = fc.maxHKL(q_max, self.xtl.Cell.UVstar())
-        HKL = fc.genHKL([hmax,-hmax],[kmax,-kmax],[lmax,-lmax])
-        HKL = self.xtl.Cell.sort_hkl(HKL) # required for labels
-        Qmag = self.xtl.Cell.Qmag(HKL)
-        HKL = HKL[Qmag<q_max,:]
-        Qmag = self.xtl.Cell.Qmag(HKL)
-        #Qmag = Qmag[Qmag<q_max]
-        
-        # Calculate intensities
-        I = self.xtl.Scatter.intensity(HKL)
-        
-        # create plotting mesh
-        pixels = 2000*q_max # reduce this to make convolution faster
-        pixel_size = q_max/(1.0*pixels)
-        peak_width_pixels = peak_width/(1.0*pixel_size)
-        mesh = np.zeros([pixels])
-        mesh_q = np.linspace(0,q_max,pixels)
-        
-        # add reflections to background
-        pixel_coord = Qmag/(1.0*q_max)
-        pixel_coord = (pixel_coord*(pixels-1)).astype(int)
-        
-        for n in range(1,len(I)):
-            mesh[pixel_coord[n]] = mesh[pixel_coord[n]] + I[n]
-        
-        # Convolve with a gaussian (if >0 or not None)
-        if peak_width:
-            gauss_x = np.arange(-3*peak_width_pixels,3*peak_width_pixels+1) # gaussian width = 2*FWHM
-            G = fg.gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
-            mesh = np.convolve(mesh,G, mode='same') 
-        
-        # Add background (if >0 or not None)
-        if background:
-            bkg = np.random.normal(background,np.sqrt(background), [pixels])
-            mesh = mesh+bkg
-        return mesh_q, mesh
-    
-    def simulate_powder(self, energy_kev=None, peak_width=0.01, background=0):
+
+    def simulate_powder(self, energy_kev=None, peak_width=0.01, background=0, powder_average=True):
         """
         Generates a powder pattern, plots in a new figure with labels
+            see classes_scattering.generate_powder
         """
 
         if energy_kev is None:
@@ -285,10 +237,15 @@ class Plotting:
         q_max = fc.calqmag(angle_max, energy_kev)
         HKL = self.xtl.Cell.all_hkl(energy_kev, angle_max)
         HKL = self.xtl.Cell.sort_hkl(HKL) # required for labels
+        HKL = np.vstack((HKL, HKL[-1,:])) # add extra reflection at end to be ignored
         Qmag = self.xtl.Cell.Qmag(HKL)
         
         # Calculate intensities
         I = self.xtl.Scatter.intensity(HKL)
+
+        if powder_average:
+            # Apply powder averging correction, I0/|Q|**2
+            I = I/(Qmag+0.001)**2
         
         # create plotting mesh
         pixels = 2000*q_max # reduce this to make convolution faster
@@ -303,50 +260,38 @@ class Plotting:
         elif self.xtl.Scatter._powder_units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
             xx = self.xtl.Cell.dspace(HKL)
             max_x = 10.0
-            xlab = u'd-spacing [$\AA$]'
+            xlab = u'd-spacing [\u00C5]'
         else:
             xx = Qmag
             max_x = q_max
-            xlab = u'Q [$\AA^{-1}]$'
+            xlab = u'Q [\u00C5$^{-1}]$'
         
         # add reflections to background
         # scipy.interpolate.griddata?
         mesh_x = np.linspace(0, max_x, pixels)
         pixel_coord = xx/ max_x
         pixel_coord = (pixel_coord*(pixels-1)).astype(int)
-        
-        ref_x =  [0]
-        ref_int = [0]
+
+        ref_n = [0]
         ref_txt = ['']
-        ext_x = []
-        ext_int = []
+        ext_n = []
         ext_txt = []
-        for n in range(1,len(I)):
+        for n in range(1, len(I)-1):
             if xx[n] > max_x:
                 continue
             mesh[pixel_coord[n]] = mesh[pixel_coord[n]] + I[n]
+
+            close_ref = np.abs(pixel_coord[n]-pixel_coord) < peak_width_pixels
+            close_lab = np.all(np.abs(pixel_coord[n] - np.array(ref_n+ext_n)) > peak_width_pixels)
             
-            if np.abs(pixel_coord[n]-pixel_coord[n-1]) > peak_width_pixels/2:
+            if np.all(I[n] >= I[close_ref]) and close_lab:
                 # generate label if not too close to another reflection
-                # Note taht at high angle with many close reflections, it may end in 
-                # a situation where new peaks are never added
-                #print 'A: ',HKL[n,:],x[n],pixel_coord[n],pixel_coord[n-1],I[n]
                 if I[n] > 0.1:
-                    ref_x += [xx[n]]
-                    ref_int += [I[n]]
+                    ref_n += [pixel_coord[n]]
                     ref_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])]
                 else:
-                    ext_x += [xx[n]]
-                    ext_int += [I[n]]
+                    ext_n += [pixel_coord[n]]
                     ext_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])]
-            elif mesh[pixel_coord[n]] > I[n-1] and mesh[pixel_coord[n]] > 0.1:
-                # Replace the label if next reflection is larger
-                # Note for multiple equivalent reflections, mesh[pixel_coord[n]] will get larger 
-                # each time as more intensity is added, so this will always take the last reflection
-                #print 'B: ',HKL[n,:],xx[n],pixel_coord[n],pixel_coord[n-1],I[n],mesh[pixel_coord[n]]
-                ref_x[-1] = xx[n]
-                ref_int[-1] = mesh[pixel_coord[n]]
-                ref_txt[-1] = '(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])
         
         # Convolve with a gaussian (if >0 or not None)
         if peak_width:
@@ -356,31 +301,29 @@ class Plotting:
         
         # Add background (if >0 or not None)
         if background:
-            bkg = np.random.normal(background,np.sqrt(background), [pixels])
+            bkg = np.random.normal(background,np.sqrt(background), [int(pixels)])
             mesh = mesh+bkg
         
         # create figure
-        plt.figure(figsize=[2*self._figure_size[0],self._figure_size[1]], dpi=self._figure_dpi)
-        plt.plot(mesh_x,mesh,'k-',lw=2)
+        plt.figure(figsize=[2*self._figure_size[0], self._figure_size[1]], dpi=self._figure_dpi)
+        plt.plot(mesh_x, mesh, 'k-', lw=2)
+        maxy = np.max(mesh)
+        plt.ylim([background-(maxy*0.05), maxy*1.15])
         
         # Reflection labels
-        #print 'Refelctions'
-        for n in range(len(ref_x)):
-            #print ref_x[n],ref_int[n],ref_txt[n]
-            plt.text(ref_x[n], 1.01 * ref_int[n], ref_txt[n],
+        for n in range(len(ref_n)):
+            plt.text(mesh_x[ref_n[n]], 1.01 * mesh[ref_n[n]], ref_txt[n],
                      fontname=fp.DEFAULT_FONT, fontsize=18, color='b',
                      rotation='vertical', ha='center', va='bottom')
         # Extinction labels
-        #print 'Extinctions'
-        ymax=plt.ylim()[1]
-        for n in range(len(ext_x)):
-            #print ext_x[n],ext_int[n],ext_txt[n]
-            plt.text(ext_x[n], 0.01 * ymax, ext_txt[n],
+        ext_y = background + 0.01 * plt.ylim()[1]
+        for n in range(len(ext_n)):
+            plt.text(mesh_x[ext_n[n]], ext_y, ext_txt[n],
                      fontname=fp.DEFAULT_FONT, fontsize=18, color='r',
                      rotation='vertical', ha='center', va='bottom')
         
         # Plot labels
-        ylab = u'Intensity'
+        ylab = u'Intensity [a. u.]'
         ttl = '%s\nE = %1.3f keV' % (self.xtl.name, energy_kev)
         fp.labels(ttl, xlab, ylab)
     
@@ -1266,15 +1209,19 @@ class MultiPlotting:
     """
     Plotting functions for the Multi-Crystal Object
     """
+    _figure_size = fp.FIGURE_SIZE
+    _figure_dpi = fp.FIGURE_DPI
+
     def __init__(self, crystal_list):
         self.crystal_list = crystal_list
 
-    def simulate_powder(self, energy_kev=8.0, peak_width=0.05, background=0):
+    def simulate_powder(self, energy_kev=8.0, peak_width=0.05, background=0, powder_average=True):
         """
         Generates a powder pattern for multiple phases
+            see classes_scattering.generate_powder
         """
         
-        plt.figure(figsize=[16,8])
+        plt.figure(figsize=[2*self._figure_size[0], self._figure_size[1]], dpi=self._figure_dpi)
         colours = iter(['b','g','r','c','m','y','k'])
         
         for xtl in self.crystal_list:
@@ -1286,6 +1233,10 @@ class MultiPlotting:
             Qmag = xtl.Cell.Qmag(HKL)
             I = xtl.Scatter.intensity(HKL)
             col = next(colours)
+
+            if powder_average:
+                # Apply powder averging correction, I0/|Q|**2
+                I = I / Qmag ** 2
             
             # create plotting mesh
             pixels = 2000*q_max # reduce this to make convolution faster
@@ -1312,31 +1263,26 @@ class MultiPlotting:
             pixel_coord = xx / max_x
             pixel_coord = (pixel_coord * (pixels - 1)).astype(int)
 
-            ref_tth = [0]
-            ref_int = [0]
+            ref_n = [0]
             ref_txt = ['']
-            ext_tth = []
-            ext_int = []
+            ext_n = []
             ext_txt = []
-            for n in range(1,len(I)):
+            for n in range(1, len(I) - 1):
+                if xx[n] > max_x:
+                    continue
                 mesh[pixel_coord[n]] = mesh[pixel_coord[n]] + I[n]
-                
-                # generate label if not too close to another reflection
-                if np.abs(pixel_coord[n]-pixel_coord[n-1]) > peak_width_pixels/2:
-                    #print 'A: ',HKL[n,:],tth[n],pixel_coord[n],pixel_coord[n-1],I[n]
+
+                close_ref = np.abs(pixel_coord[n] - pixel_coord) < peak_width_pixels / 2
+                close_lab = np.all(np.abs(pixel_coord[n] - np.array(ref_n + ext_n)) > peak_width_pixels / 2)
+
+                if np.all(I[n] >= I[close_ref]) and close_lab:
+                    # generate label if not too close to another reflection
                     if I[n] > 0.1:
-                        ref_tth += [xx[n]]
-                        ref_int += [I[n]]
-                        ref_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])]
+                        ref_n += [pixel_coord[n]]
+                        ref_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n, 0], HKL[n, 1], HKL[n, 2])]
                     else:
-                        ext_tth += [xx[n]]
-                        ext_int += [I[n]]
-                        ext_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])]
-                elif mesh[pixel_coord[n]] > I[n-1] and mesh[pixel_coord[n]] > 0.1:
-                    #print 'B: ',HKL[n,:],tth[n],pixel_coord[n],pixel_coord[n-1],I[n],mesh[pixel_coord[n]]
-                    ref_tth[-1] = xx[n]
-                    ref_int[-1] = mesh[pixel_coord[n]]
-                    ref_txt[-1] = '(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])
+                        ext_n += [pixel_coord[n]]
+                        ext_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n, 0], HKL[n, 1], HKL[n, 2])]
             
             # Convolve with a gaussian
             if peak_width:
@@ -1346,32 +1292,26 @@ class MultiPlotting:
             
             # Add background
             if background:
-                bkg = np.random.normal(background,np.sqrt(background), [pixels])
+                bkg = np.random.normal(background, np.sqrt(background), [int(pixels)])
                 mesh = mesh+bkg
             
             # create figure
             plt.plot(mesh_x, mesh, '-', lw=2, label=xtl.name, c=col)
-            
+
             # Reflection labels
-            #print 'Refelctions'
-            for n in range(len(ref_tth)):
-                #print ref_tth[n],ref_int[n],ref_txt[n]
-                plt.text(ref_tth[n], 1.01 * ref_int[n], ref_txt[n],
-                         fontname=fp.DEFAULT_FONT, fontsize=8, color=col,
+            for n in range(len(ref_n)):
+                plt.text(mesh_x[ref_n[n]], 1.01 * mesh[ref_n[n]], ref_txt[n],
+                         fontname=fp.DEFAULT_FONT, fontsize=12, color=col, fontweight='bold',
                          rotation='vertical', ha='center', va='bottom')
             # Extinction labels
-            #print 'Extinctions'
-            ymax=plt.ylim()[1]
-            for n in range(len(ext_tth)):
-                #print ext_tth[n],ext_int[n],ext_txt[n]
-                plt.text(ext_tth[n], 0.01 * ymax, ext_txt[n],
-                         fontname=fp.DEFAULT_FONT, fontsize=8, color=col, fontweight='bold',
+            ext_y = background + 0.01 * plt.ylim()[1]
+            for n in range(len(ext_n)):
+                plt.text(mesh_x[ext_n[n]], ext_y, ext_txt[n],
+                         fontname=fp.DEFAULT_FONT, fontsize=12, color=col,
                          rotation='vertical', ha='center', va='bottom')
-            
-        # Plot labels
-        #xlab = u'2-Theta [Deg]'
-        ylab = u'Intensity'
-        ttl = 'E = %1.3f keV' % (energy_kev)
+
+        ylab = u'Intensity [a. u.]'
+        ttl = 'E = %1.3f keV' % energy_kev
         plt.legend(loc=0, fontsize=18, frameon=False)
         fp.labels(ttl, xlab, ylab)
     

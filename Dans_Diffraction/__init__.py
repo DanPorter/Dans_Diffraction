@@ -18,7 +18,7 @@ Diamond
 2017
 
 Version 1.7
-Last updated: 31/03/20
+Last updated: 14/04/20
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -50,7 +50,7 @@ if fdmnes_checker():
 
 
 __version__ = '1.7'
-__date__ = '31/03/20'
+__date__ = '14/04/20'
 
 
 # Build

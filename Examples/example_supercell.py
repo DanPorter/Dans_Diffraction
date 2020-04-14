@@ -1,6 +1,6 @@
 """
 Dans_Diffraction Examples
-Calculate list of reflections
+Build a supercell from multiple unit cells and simulate the diffraction pattern
 """
 
 import sys,os

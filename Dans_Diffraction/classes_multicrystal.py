@@ -209,7 +209,7 @@ class MultiCrystal:
 
         out = "Crystals: %d\n" % len(self.crystal_list)
         for n, xtl in enumerate(self.crystal_list):
-            out += "%1.0f %s\n" % (n, xtl.name)
+            out += "%1.0f %s\n" % (n, xtl)
         return out
 
     def __repr__(self):

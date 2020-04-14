@@ -149,7 +149,7 @@ def newplot(*args, **kwargs):
 
     if 'linewidth' and 'lw' not in kwargs.keys():
         kwargs['linewidth'] = 2
-    print(FIGURE_SIZE, FIGURE_DPI)
+
     plt.figure(figsize=FIGURE_SIZE, dpi=FIGURE_DPI)
     plt.plot(*args, **kwargs)
 
