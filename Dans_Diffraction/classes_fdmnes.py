@@ -438,7 +438,9 @@ class FdmnesAnalysis:
         """
         output_path = output_path.replace('\\', '/')  # convert windows directories
         if output_path[-4:].lower() == '.txt':
-            output_path, _ = os.path.split(output_path[:-4])
+            output_path, filename = os.path.split(output_path)
+            filename = filename.replace('_', '.')
+            output_name = filename.split('.')[0]
         calc_name = output_path.split('/')[-1]  # calculation name
         bav_name = os.path.join(output_path,output_name+'_bav.txt')
         scan_conv_name = os.path.join(output_path,output_name+'_scan_conv.txt')
@@ -504,7 +506,12 @@ class FdmnesAnalysis:
         Returns header of calculation output fipe (*_bav.txt)
         :return: str
         """
-        return self.bavfile.header()
+        out = 'FDMNES Analysis: %s' % os.path.join(self.output_path, self.output_name+'.txt')
+        out += self.bavfile.header()
+        return out
+
+    def __repr__(self):
+        return 'FDMNES Analysis: %s' % os.path.join(self.output_path, self.output_name+'.txt')
 
 
 class BavFile:

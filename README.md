@@ -163,8 +163,12 @@ plt.show()
 ![All GUI elements](Screenshots/GUI_all.png)
 
 Start a new GUI, then select a cif file:
+```text
+$ ipython -i -m Dans_Diffraction gui
+```
+Or start the GUI from within the interactive console:
 ```python
-dif.Startgui()
+dif.start_gui()
 ```
 Using an already generated crystal:
 ```python

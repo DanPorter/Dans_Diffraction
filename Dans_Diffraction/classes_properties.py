@@ -42,6 +42,17 @@ class Properties:
         for element in types:
             setattr(self,str(element),Element(str(element)))
 
+    def update_cif(self, cifvals):
+        """
+        Update cif dict with new values
+        :param cifvals: cif dict from readcif
+        :return: cifvals
+        """
+
+        cifvals['_chemical_formula_sum'] = self.molname()
+        cifvals['_chemical_formula_weight'] = self.weight()
+        return cifvals
+
     def volume(self):
         """Returns the volume in A^3"""
         return self.xtl.Cell.volume()

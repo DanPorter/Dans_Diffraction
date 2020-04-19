@@ -12,7 +12,7 @@ if sys.version_info[0] < 3:
 else:
     import tkinter as tk
     from tkinter import filedialog
-    #from tkinter import messagebox
+    from tkinter import messagebox
 
 # Internal functions
 from ..classes_crystal import Crystal
@@ -127,6 +127,9 @@ class CrystalGui:
         var = tk.Button(f_but, text='Super\nStructure', bg=btn, activebackground=btn_active, font=BF,
                         command=self.fun_superstructure)
         var.pack(side=tk.LEFT)
+        var = tk.Button(f_but, text='Write\nCIF', bg=btn, activebackground=btn_active, font=BF,
+                        command=self.fun_writecif)
+        var.pack(side=tk.LEFT)
 
         # Buttons 3
         f_but = tk.Frame(frame)
@@ -166,12 +169,34 @@ class CrystalGui:
         # root = Tk().withdraw() # from Tkinter
         defdir = os.path.join(os.path.dirname(__file__), 'Structures')
         # defdir = os.path.expanduser('~')
-        filename = filedialog.askopenfilename(initialdir=defdir,
-                                              filetypes=[('cif file', '.cif'), ('magnetic cif', '.mcif'),
-                                                         ('All files', '.*')])  # from tkFileDialog
+        filename = filedialog.askopenfilename(
+            title='Select CIF to open',
+            initialdir=defdir,
+            filetypes=[('cif file', '.cif'), ('magnetic cif', '.mcif'), ('All files', '.*')],
+            parent=self.root
+        )
         if filename:
             self.xtl = Crystal(filename)
             self.fun_set()
+
+    def fun_writecif(self, inifile=None):
+        if inifile is None:
+            inifile = '%s.cif' % self.xtl.name
+        defdir = os.path.join(os.path.dirname(__file__), 'Structures')
+        filename = filedialog.asksaveasfilename(
+            title='Save structure as CIF',
+            initialfile=inifile,
+            initialdir=defdir,
+            filetypes=[('cif file', '.cif'), ('magnetic cif', '.mcif'), ('All files', '.*')],
+            parent=self.root
+        )
+        if filename:
+            self.xtl.write_cif(filename)
+            messagebox.showinfo(
+                title='Dans_Diffraction',
+                message='Structure saved as:\n"%s"' % filename,
+                parent=self.root
+            )
 
     def fun_loadstruct(self, event=None):
         """Load from structure_list"""
@@ -179,7 +204,7 @@ class CrystalGui:
             self.xtl = getattr(self.structure_list, self.struct_list.get()).build()
             self.fun_set()
 
-    def update_name(self):
+    def update_name(self, event=None):
         newname = self.name.get()
         self.xtl.name = newname
 

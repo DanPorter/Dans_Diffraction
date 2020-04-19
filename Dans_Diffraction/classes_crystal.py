@@ -39,6 +39,7 @@ Version History:
 12/08/19 2.5    self.info outputs string, __repr__ methods added
 12/12/19 2.6    Added Symmetry.is_symmetric_reflection(ref1, ref2), added multiple scattering code
 30/03/20 2.7    Moved Multicrystal class to separate file, other minor tweaks
+19/04/20 2.8    Added update_cif and write_cif funcitons
 
 @author: DGPorter
 """
@@ -53,7 +54,7 @@ from .classes_scattering import Scattering
 from .classes_multicrystal import MultiCrystal
 from .classes_plotting import Plotting, PlottingSuperstructure
 
-__version__ = '2.7'
+__version__ = '2.8'
 
 
 class Crystal:
@@ -71,6 +72,7 @@ class Crystal:
       xtl.Structure.uvw() >> give the full, unsymmetrised structure
       xtl.Scatter.hkl([1,0,0],8.00) >> prints the intensity and two-theta of this reflection at this energy
       xtl.Scatter.print_all_reflections(8.00) >> print all allowed reflections, with intensities, at this energy
+      xtl.write_cif('Diamond2.cif') >> write updated structure to file
     
     To create your own crystal (BCC example):
       xtl = Crystal()
@@ -163,6 +165,44 @@ class Crystal:
         new_uiso = np.array(new_uiso)
 
         self.Structure = Atoms(u, v, w, new_type, new_label, new_occupancy, new_uiso, new_mxmymz)
+
+    def update_cif(self, cifvals=None):
+        """
+        Update self.cif dict with current values
+        :param cifvals: cif dict from readcif (None to use self.cif)
+        :return: cifvals
+        """
+
+        if cifvals is None:
+            cifvals = self.cif
+
+        # Update name
+        cifvals['_pd_phase_name'] = self.name
+        cifvals = self.Cell.update_cif(cifvals)
+        cifvals = self.Symmetry.update_cif(cifvals)
+        cifvals = self.Atoms.update_cif(cifvals)
+        cifvals = self.Properties.update_cif(cifvals)
+
+        self.cif = cifvals
+        return cifvals
+
+    def write_cif(self, filename=None, comments=None):
+        """
+        Write crystal structure to file
+        :param filename: name to write too, if None, use writes to self.name (.cif/.mcif)
+        :param comments: str comments to add to file header
+        :return: None
+        """
+
+        cifvals = self.update_cif()
+
+        if filename is None:
+            if self.Atoms.ismagnetic():
+                filename = '%s.mcif' % fg.saveable(self.name)
+            else:
+                filename = '%s.cif' % fg.saveable(self.name)
+
+        fc.writecif(cifvals, filename, comments)
 
     def new_cell(self, latt=[1.0]):
         """
@@ -275,7 +315,8 @@ class Crystal:
         """
         out = '\n###########################################\n'
         out += '{}'.format(self.name)
-        out += '\nFormula: {}\n'.format(self.Properties.molname())
+        out += 'Formula: {}\n'.format(self.Properties.molname())
+        out += 'Magnetic: {}\n'.format(self.Structure.ismagnetic())
         out += self.Cell.info()
         out += '\nDensity: %6.3f g/cm\n' % self.Properties.density()
         out += self.Structure.info()
@@ -284,6 +325,10 @@ class Crystal:
         return out
 
     def __repr__(self):
+        if self.Structure.ismagnetic():
+            nmom = np.sum(np.any(np.abs(self.Structure.mxmymz()) > 0, axis=1))
+            fmt = "%s with %d atomic positions (%d magnetic), %d symmetries"
+            return fmt % (self.name, len(self.Atoms.type), nmom, len(self.Symmetry.symmetry_operations))
         fmt = "%s with %d atomic positions, %d symmetries"
         return fmt % (self.name, len(self.Atoms.type), len(self.Symmetry.symmetry_operations))
 
@@ -347,6 +392,23 @@ class Cell:
         gamma, dgamma = fg.readstfm(cifvals['_cell_angle_gamma'])
 
         self.latt([a, b, c, alpha, beta, gamma])
+
+    def update_cif(self, cifvals):
+        """
+        Update cif dict with current values
+        :param cifvals: dict from readcif
+        :return: cifvals
+        """
+
+        cifvals['_cell_length_a'] = self.a
+        cifvals['_cell_length_b'] = self.b
+        cifvals['_cell_length_c'] = self.c
+        cifvals['_cell_angle_alpha'] = self.alpha
+        cifvals['_cell_angle_beta'] = self.beta
+        cifvals['_cell_angle_gamma'] = self.gamma
+
+        cifvals['_cell_volume'] = self.volume()
+        return cifvals
 
     def lp(self):
         """
@@ -698,7 +760,7 @@ class Atoms:
 
     def __call__(self, u=[0], v=[0], w=[0], type=None,
                  label=None, occupancy=None, uiso=None, mxmymz=None):
-        "Re-initialises the class, generating new atomic positions"
+        """Re-initialises the class, generating new atomic positions"""
         self.__init__(u, v, w, type, label, occupancy, uiso, mxmymz=None)
 
     def fromcif(self, cifvals):
@@ -762,6 +824,31 @@ class Atoms:
         self.mx = mx
         self.my = my
         self.mz = mz
+
+    def update_cif(self, cifvals):
+        """
+        Update cif dict with stored values
+        :param cifvals: cif dict from readcif
+        :return: cifvals
+        """
+
+        keys = cifvals.keys()
+
+        cifvals['_atom_site_label'] = self.label
+        cifvals['_atom_site_type_symbol'] = self.type
+        cifvals['_atom_site_U_iso_or_equiv'] = self.uiso
+        cifvals['_atom_site_occupancy'] = self.occupancy
+        cifvals['_atom_site_fract_x'] = self.u
+        cifvals['_atom_site_fract_y'] = self.v
+        cifvals['_atom_site_fract_z'] = self.w
+
+        # Magnetic moments
+        if '_atom_site_moment_label' in keys:
+            cifvals['_atom_site_moment_label'] = self.label
+            cifvals['_atom_site_moment_crystalaxis_x'] = self.mx
+            cifvals['_atom_site_moment_crystalaxis_y'] = self.my
+            cifvals['_atom_site_moment_crystalaxis_z'] = self.mz
+        return cifvals
 
     def changeatom(self, idx, u=None, v=None, w=None, type=None,
                    label=None, occupancy=None, uiso=None, mxmymz=None):
@@ -958,6 +1045,10 @@ class Atoms:
         :return: np.array([nx3])
         """
         return np.asarray([self.mx, self.my, self.mz], dtype=np.float).T
+
+    def ismagnetic(self):
+        """ Returns True if any ions have magnetic moments assigned"""
+        return np.any(np.abs(self.mxmymz())>0)
 
     def get(self):
         """
@@ -1183,6 +1274,43 @@ class Symmetry:
         self.spacegroup_number = sgn
 
         self.generate_matrices()
+
+    def update_cif(self, cifvals):
+        """
+        Update cifvals dict with current symmetry operations
+        :param cifvals: cif dict from functions_crystallography.readcif
+        :return: cifvals
+        """
+        keys = cifvals.keys()
+
+        if '_symmetry_equiv_pos_as_xyz' in keys:
+            cifvals['_symmetry_equiv_pos_as_xyz'] = self.symmetry_operations
+        elif '_space_group_symop_operation_xyz' in keys:
+            cifvals['_space_group_symop_operation_xyz'] = self.symmetry_operations
+        elif '_space_group_symop_magn_operation_xyz' in keys:
+            cifvals['_space_group_symop_magn_operation_xyz'] = self.symmetry_operations_magnetic
+        else:
+            cifvals['_symmetry_equiv_pos_as_xyz'] = self.symmetry_operations
+
+        # Get space group
+        if '_symmetry_space_group_name_H-M' in keys:
+            cifvals['_symmetry_space_group_name_H-M'] = self.spacegroup
+        elif '_space_group_name_H-M_alt' in keys:
+            cifvals['_space_group_name_H-M_alt'] = self.spacegroup
+        elif '_space_group_magn_name_BNS' in keys:
+            cifvals['_space_group_magn_name_BNS'] = self.spacegroup
+        else:
+            cifvals['_symmetry_space_group_name_H-M'] = self.spacegroup
+
+        if '_symmetry_Int_Tables_number' in keys:
+            cifvals['_symmetry_Int_Tables_number'] = self.spacegroup_number
+        elif '_space_group_IT_number' in keys:
+            cifvals['_space_group_IT_number'] = self.spacegroup_number
+        elif '_space_group_magn_number_BNS' in keys:
+            cifvals['_space_group_magn_number_BNS'] = self.spacegroup_number
+        else:
+            cifvals['_symmetry_Int_Tables_number'] = self.spacegroup_number
+        return cifvals
 
     def changesym(self, idx, operation):
         """

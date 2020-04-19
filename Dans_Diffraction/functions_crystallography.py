@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 2.8
-Last updated: 03/04/20
+Version 2.9
+Last updated: 19/04/20
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -26,6 +26,7 @@ Version History:
 06/03/19 2.6    Added print_atom_properties
 14/08/19 2.7    Added new Dans Element Properties file with extra comment line, new functions added
 03/04/20 2.8    Updated attenuation to work with arrays of elements
+19/04/20 2.9    Added writecif, made alterations to readcif for speed and readability
 
 @author: DGPorter
 """
@@ -35,7 +36,7 @@ import numpy as np
 
 from . import functions_general as fg
 
-__version__ = '2.7'
+__version__ = '2.9'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -46,7 +47,7 @@ def getenergy():
     return 8.048  # Cu Kalpha energy, keV
 
 
-'--------------Functions to Load crystal Structures----------------------'
+'--------------Functions to Read & Write CIF files----------------------'
 
 
 def readcif(filename=None, debug=False):
@@ -139,22 +140,22 @@ def readcif(filename=None, debug=False):
             loopvals = []
             # Step 1: Assign loop columns
             # looped columns are given by "_column_name"
-            while n < len(lines) and len(lines[n].strip()) > 0 and lines[n].strip()[
-                0] == '_':  # 21/5/18 split()[0][0] == '_':
+            while n < len(lines) and len(lines[n].strip()) > 0 and lines[n].strip()[0] == '_':
                 loopvals += [lines[n].split()[0]]
                 cifvals[loopvals[-1]] = []
                 n += 1
 
-            # Skip blank line after column names, e.g. 1000175.cif 21/5/18
-            # if len(lines[n].strip()) == 0: n += 1
-
             # Step 2: Assign data to columns
             # loops until line has less segments than columns
-            while n < len(lines) and len(lines[n].split()) >= len(loopvals):
-                cols = lines[n].split()
-                cols = cols[:len(loopvals) - 1] + [
-                    ''.join(cols[len(loopvals) - 1:])]  # fixes error on symmetry arguments having spaces
+            while n < len(lines):
+                #cols = lines[n].split()
+                # this fixes error on symmetry arguments having spaces
+                # this will only work if the last argument in the loop is split by spaces (in quotes)
+                #cols = cols[:len(loopvals) - 1] + [''.join(cols[len(loopvals) - 1:])]
+                cols = [col for col in re.split("( |\\\".*?\\\"|'.*?')", lines[n]) if col.strip()]
+                if len(cols) != len(loopvals): break
                 if cols[0][0] == '_' or cols[0] == 'loop_': break  # catches error if loop is only 1 iteration
+                if cols[0][0] == '#': n += 1; continue  # catches comented out lines
                 if len(loopvals) == 1:
                     cifvals[loopvals[0]] += [lines[n].strip()]
                 else:
@@ -425,6 +426,103 @@ def cif2dict(cifvals):
     return crys
 
 
+def writecif(cifvals, filename=None, comments=None):
+    """
+    Write .cif file
+    :param cifvals: dict from readcif
+    :param filename: filename to write (use None to return string)
+    :param comments: str comments to write to the file top matter
+    :return: None
+    """
+
+    keys = cifvals.keys()
+
+    def cif_value(name):
+        if name in keys:
+            return '%-40s %-12s\n' % (name, cifvals[name])
+        else:
+            print('%s not in cif dict' % name)
+            return '%-40s %-12s\n' % (name, '?')
+
+    def cif_loop(names):
+        names = [name for name in names if name in keys]
+        if len(names) == 0:
+            print('Loop Items not in cif dict')
+            return ''
+        out = 'loop_\n'
+        out += ''.join(['%s\n' % name for name in names])
+        vals = [cifvals[name] for name in names]
+        for val_line in zip(*vals):
+            out += ' '.join(['%-12s' % val for val in val_line])
+            out += '\n'
+        return out
+
+    # Top Matter
+    c = '#----------------------------------------------------------------------\n'
+    c += '#   Crystal Structure: %s\n' % (cifvals['FileTitle'] if 'FileTitle' in keys else '')
+    c += '#----------------------------------------------------------------------\n'
+    c += '# CIF created in Dans_Diffraction\n'
+    c += '# Original cif:\n# %s\n' % (cifvals['Filename'] if 'Filename' in keys else 'None')
+
+    # Comments
+    c += '# Comments:\n'
+    if comments:
+        comments = comments.split('\n')
+        c += ''.join(['# %s\n' % comment for comment in comments])
+
+    # Crystal Data
+    c += '\ndata_WRITECIF\n'
+    c += cif_value('_chemical_name_mineral')
+    c += cif_value('_chemical_name_common')
+    c += cif_value('_pd_phase_name')
+    c += cif_value('_chemical_formula_sum')
+    c += cif_value('_chemical_formula_weight')
+    c += cif_value('_cell_formula_units_Z')
+
+    # Cell info
+    c += '\n# Cell info\n'
+    c += cif_value('_cell_length_a')
+    c += cif_value('_cell_length_b')
+    c += cif_value('_cell_length_c')
+    c += cif_value('_cell_angle_alpha')
+    c += cif_value('_cell_angle_beta')
+    c += cif_value('_cell_angle_gamma')
+    c += cif_value('_cell_volume')
+
+    # Symmetry info
+    c += '\n# Symmetry info\n'
+    c += cif_value('_symmetry_cell_setting')
+    c += cif_value('_symmetry_space_group_name_H-M')
+    c += cif_value('_symmetry_space_group_name_Hall')
+    c += cif_value('_symmetry_Int_Tables_number')
+    c += '\n'
+    c += cif_loop(['_space_group_symop_operation_xyz', '_symmetry_equiv_pos_as_xyz'])
+
+    # Atom info
+    c += '\n# Atom info\n'
+    c += cif_loop([
+        '_atom_site_label',
+        '_atom_site_type_symbol',
+        '_atom_site_symmetry_multiplicity',
+        '_atom_site_Wyckoff_symbol',
+        '_atom_site_fract_x',
+        '_atom_site_fract_y',
+        '_atom_site_fract_z',
+        '_atom_site_U_iso_or_equiv',
+        '_atom_site_occupancy',
+    ])
+
+    if filename is None:
+        return c
+
+    with open(filename, 'wt') as f:
+        f.write(c)
+    print('CIF written to: %s' % filename)
+
+
+'--------------Functions to Read Database files----------------------'
+
+
 def read_atom_properties_file(filedir):
     """
     Reads the text file "Dans Element Properties.txt"
@@ -557,11 +655,27 @@ def print_atom_properties(elements=None):
     return out
 
 
+def neutron_scattering_length(element):
+    """
+    Return neutron scattering length, b, in fm
+    Uses bound coherent scattering length from NIST
+    https://www.ncnr.nist.gov/resources/n-lengths/
+     b = neutron_scattering_length('Co')
+    :param element: [n*str] list or array of elements
+    :return: [n] array of scattering lengths
+    """
+    b = atom_properties(element, ['Coh_b'])
+    return b
+
+
 def xray_scattering_factor(element, Qmag=0):
     """
     Read X-ray scattering factor table, calculate f(|Q|)
     Uses the oefficients for analytical approximation to the scattering factors - ITC, p578
      Qff = read_xsf(element,Qmag=[0])
+    :param element: [n*str] list or array of elements
+    :param Qmag: [m] array of wavevector distance, in A^-1
+    :return: [m*n] array of scattering factors
     """
 
     # Qmag should be a 1D array
@@ -631,7 +745,7 @@ def magnetic_form_factor(element, Qmag=0.):
     return Qff
 
 
-def debyewaller(uiso, Qmag=[0]):
+def debyewaller(uiso, Qmag=0):
     """
     Calculate the debye waller factor for a particular Q
      T = debyewaller(uiso,Qmag=[0])

@@ -9,7 +9,7 @@ Diamond
 2017
 
 Version 1.7
-Last updated: 14/04/20
+Last updated: 15/04/20
 
 Version History:
 18/08/17 0.1    Program created
@@ -21,6 +21,7 @@ Version History:
 21/01/19 1.5    Added simulate_polarisation_resonant and _nonresonant
 08/11/19 1.6    Increased pixel width on powder plots, improved superstructure recriprocal space planes
 14/04/20 1.7    Added powder avereging to simulate_powder
+15/04/20 1.7    Added minimum angle to simulate_powder
 
 @author: DGPorter
 """
@@ -237,8 +238,12 @@ class Plotting:
         q_max = fc.calqmag(angle_max, energy_kev)
         HKL = self.xtl.Cell.all_hkl(energy_kev, angle_max)
         HKL = self.xtl.Cell.sort_hkl(HKL) # required for labels
-        HKL = np.vstack((HKL, HKL[-1,:])) # add extra reflection at end to be ignored
         Qmag = self.xtl.Cell.Qmag(HKL)
+
+        # Min angle
+        angle_min = self.xtl.Scatter._scattering_min_twotheta
+        if angle_min < 0.01: angle_min = 0.01
+        q_min = fc.calqmag(angle_min, energy_kev)
         
         # Calculate intensities
         I = self.xtl.Scatter.intensity(HKL)
@@ -255,14 +260,18 @@ class Plotting:
 
         if self.xtl.Scatter._powder_units.lower() in ['tth', 'angle', 'two-theta', 'twotheta', 'theta']:
             xx = self.xtl.Cell.tth(HKL, energy_kev)
+            min_x = angle_min
             max_x = angle_max
             xlab = u'Two-Theta [Deg]'
         elif self.xtl.Scatter._powder_units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
             xx = self.xtl.Cell.dspace(HKL)
-            max_x = 10.0
+            min_x = fc.q2dspace(q_max)
+            max_x = fc.q2dspace(q_min)
+            if max_x > 10: max_x = 10.0
             xlab = u'd-spacing [\u00C5]'
         else:
             xx = Qmag
+            min_x = q_min
             max_x = q_max
             xlab = u'Q [\u00C5$^{-1}]$'
         
@@ -276,8 +285,8 @@ class Plotting:
         ref_txt = ['']
         ext_n = []
         ext_txt = []
-        for n in range(1, len(I)-1):
-            if xx[n] > max_x:
+        for n in range(1, len(I)):
+            if xx[n] > max_x or xx[n] < min_x:
                 continue
             mesh[pixel_coord[n]] = mesh[pixel_coord[n]] + I[n]
 
@@ -309,6 +318,7 @@ class Plotting:
         plt.plot(mesh_x, mesh, 'k-', lw=2)
         maxy = np.max(mesh)
         plt.ylim([background-(maxy*0.05), maxy*1.15])
+        plt.xlim([min_x, max_x])
         
         # Reflection labels
         for n in range(len(ref_n)):
@@ -971,8 +981,8 @@ class Plotting:
         plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         plt.plot(psi, ss, '-', lw=4, label='$\sigma\sigma$')
         plt.plot(psi, sp, '-', lw=4, label='$\sigma\pi$')
-        plt.plot(psi, ps, '-', lw=2, label='$\pi\sigma$')
-        plt.plot(psi, pp, '-', lw=2, label='$\pi\pi$')
+        plt.plot(psi, ps, '--', lw=4, label='$\pi\sigma$')
+        plt.plot(psi, pp, '--', lw=4, label='$\pi\pi$')
         ttl = '%s\n%s %s E = %5.3f keV\nhkl=(%1.3g, %1.3g, %1.3g)  $\psi_0$=(%1.3g, %1.3g, %.3g)' % (
             self.xtl.name, process, atom_label, energy_kev, hkl[0], hkl[1], hkl[2], azir[0], azir[1], azir[2]
         )

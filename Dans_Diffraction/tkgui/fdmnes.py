@@ -10,7 +10,7 @@ if sys.version_info[0] < 3:
 else:
     import tkinter as tk
     from tkinter import filedialog
-from ..classes_fdmnes import Fdmnes, FdmnesAnalysis
+from ..classes_fdmnes import Fdmnes, FdmnesAnalysis, find_fdmnes
 from .basic_widgets import (TF, BF, SF, LF, HF, TTF, TTFG, TTBG,
                             bkg, ety, btn, opt, btn2,
                             btn_active, opt_active, txtcol,
@@ -338,7 +338,7 @@ class AnaFDMNESgui:
         self.fdm = FdmnesAnalysis(output_path, output_name)
 
         frame = tk.Frame(self.root)
-        frame.pack(side=tk.LEFT, anchor=tk.N)
+        frame.pack(side=tk.LEFT, anchor=tk.N, fill=tk.BOTH, expand=tk.YES)
 
         # ---Line 1---
         line = tk.Frame(frame)
@@ -467,12 +467,16 @@ class AnaFDMNESgui:
 
     def fun_loadpath(self, event=None):
         """Button Select - Open new folder"""
-        filename = filedialog.askopenfilename(filetypes=[('FDMNES output file', '.txt'),
-                                                         ('All files', '.*')])  # from tkFileDialog
+        ini_dir = find_fdmnes()
+        title = 'Select FDMNES output file, e.g. name_bav.txt'
+        filetypes = [('FDMNES output file', '.txt'), ('All files', '.*')]
+        filename = filedialog.askopenfilename(initialdir=ini_dir, title=title, filetypes=filetypes)
         if filename:
             filepath, filename = os.path.split(filename)
+            filename = filename.replace('_', '.')
+            calc_name = filename.split('.')[0]
             self.root.destroy()
-            AnaFDMNESgui(filepath)
+            AnaFDMNESgui(filepath, calc_name)
 
     def fun_xanes(self, event=None):
         """Button XANES"""

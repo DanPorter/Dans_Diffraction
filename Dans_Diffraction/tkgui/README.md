@@ -10,9 +10,9 @@ For comments, queries or bugs - email dan.porter@diamond.ac.uk
 
 ### Instructions
 ```text
-$ ipython -i -m Dans_Diffraction
+$ ipython -i -m Dans_Diffraction gui
 ```
-
+Or start the GUI from inside the interactive console:
 ```python
 >> dif.start_gui()
 ```
