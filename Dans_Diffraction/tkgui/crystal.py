@@ -21,8 +21,8 @@ from ..classes_fdmnes import fdmnes_checker
 from .. import functions_general as fg
 from .. import functions_plotting as fp
 from .. import functions_crystallography as fc
-from .basic_widgets import StringViewer
-from .basic_widgets import (TF, BF, SF, LF, HF,
+from .basic_widgets import StringViewer, SelectionBox
+from .basic_widgets import (TF, BF, SF, LF, HF, TTF,
                             bkg, ety, btn, opt, btn2,
                             btn_active, opt_active, txtcol,
                             btn_txt, ety_txt, opt_txt)
@@ -176,8 +176,19 @@ class CrystalGui:
             parent=self.root
         )
         if filename:
-            self.xtl = Crystal(filename)
-            self.fun_set()
+            # Check cif
+            cifvals = fc.readcif(filename)
+            if fc.cif_check(cifvals):
+                self.xtl = Crystal(filename)
+                self.fun_set()
+            else:
+                messagebox.showinfo(
+                    title='Dans_Diffraction',
+                    message='This cif file is missing a key parameter',
+                    parent=self.root
+                )
+                self.xtl = Crystal(filename)
+                self.fun_set()
 
     def fun_writecif(self, inifile=None):
         if inifile is None:
@@ -607,7 +618,27 @@ class SymmetryGui:
         self.text_3.config(yscrollcommand=self.fun_move)
         # scany.config(command=self.text1.yview)
 
-        self.fun_set()
+        frm1 = tk.Frame(self.root)
+        frm1.pack(side=tk.TOP)
+
+        # Spacegroup entry
+        var = tk.Label(frm1, text='Spacegroup: ', font=TTF)
+        var.pack(side=tk.LEFT)
+        self.spacegroup = tk.StringVar(frm1, 'P1')
+        self.spacegroup_number = tk.DoubleVar(frm1, '1')
+        var = tk.Entry(frm1, textvariable=self.spacegroup_number, font=TF, width=8, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_spacegroup)
+        var.bind('<KP_Enter>', self.fun_spacegroup)
+        var = tk.Label(frm1, textvariable=self.spacegroup, width=20)
+        var.pack(side=tk.LEFT, padx=5)
+        # Button
+        var = tk.Button(frm1, text='Choose\nSpacegroup', command=self.fun_ch_spacegroup, height=2, font=BF, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT, padx=5, pady=5)
+        var = tk.Button(frm1, text='Choose Magnetic\nSpacegroup', command=self.fun_ch_maggroup, height=2,
+                        font=BF, bg=btn,activebackground=btn_active)
+        var.pack(side=tk.LEFT, padx=5, pady=5)
 
         frm1 = tk.Frame(self.root)
         frm1.pack(side=tk.TOP)
@@ -640,6 +671,8 @@ class SymmetryGui:
         var = tk.Button(frm1, text='Symmetric\nReflections', font=BF, bg=btn, activebackground=btn_active,
                         command=self.fun_symhkl)
         var.pack(side=tk.LEFT)
+
+        self.fun_set()
 
     def update(self):
         """Update crystal"""
@@ -694,6 +727,10 @@ class SymmetryGui:
 
     def fun_set(self):
         """Generate the text box"""
+        # Clear boxes
+        self.text_1.delete('1.0', tk.END)
+        self.text_2.delete('1.0', tk.END)
+        self.text_3.delete('1.0', tk.END)
         # Build string
         Nops = len(self.Symmetry.symmetry_operations)
         symstr = ''
@@ -709,6 +746,37 @@ class SymmetryGui:
         # Insert string in text box
         self.text_2.insert(tk.END, symstr)
         self.text_3.insert(tk.END, magstr)
+
+        # Update spacegroup name + number
+        self.spacegroup.set(self.Symmetry.spacegroup)
+        self.spacegroup_number.set(self.Symmetry.spacegroup_number)
+
+    def fun_spacegroup(self, event=None):
+        """Load spacegroup symmetry"""
+        sgn = int(self.spacegroup_number.get())
+        self.Symmetry.load_spacegroup(sgn)
+        self.fun_set()
+
+    def fun_ch_spacegroup(self):
+        """Button Select Spacegroup"""
+        current = int(self.spacegroup_number.get())
+        sg_list = fc.spacegroup_list().split('\n')
+        current_selection = [sg_list[current-1]]
+        selection = SelectionBox(self.root, sg_list, current_selection, 'Select SpaceGroup', False).show()
+        if len(selection) > 0:
+            new_sg = int(selection[0].split()[0])
+            self.Symmetry.load_spacegroup(new_sg)
+            self.fun_set()
+
+    def fun_ch_maggroup(self):
+        """Button Select Magnetic Spacegroup"""
+        current = int(self.spacegroup_number.get())
+        msg_list = fc.spacegroup_magnetic_list(current).split('\n')
+        selection = SelectionBox(self.root, msg_list, [], 'Select Magnetic SpaceGroup', False).show()
+        if len(selection) > 0:
+            new_sg = selection[0].split()[3]
+            self.Symmetry.load_magnetic_spacegroup(new_sg)
+            self.fun_set()
 
     def fun_symuvw(self, event=None):
         """create symmetric uvw position"""

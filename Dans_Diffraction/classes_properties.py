@@ -8,7 +8,7 @@ Diamond
 2017
 
 Version 1.4
-Last updated: 26/03/20
+Last updated: 30/03/20
 
 Version History:
 10/11/17 0.1    Program created
@@ -16,7 +16,7 @@ Version History:
 11/03/18 1.1    Added properties.info(), element.info()
 23/02/19 1.2    Added xray_edges
 15/08/19 1.3    Added molcharge
-26/03/20 1.4    Added latex_table, info returns str, removed getattr from xray_edges
+30/03/20 1.4    Added latex_table, info returns str, removed getattr from xray_edges, check if element exists
 
 
 @author: DGPorter
@@ -39,8 +39,10 @@ class Properties:
         self.xtl = xtl
 
         types = np.unique(self.xtl.Structure.type)
+        all_elements = fc.atom_properties(None, 'Element')
         for element in types:
-            setattr(self,str(element),Element(str(element)))
+            if str(element) in all_elements:
+                setattr(self, str(element), Element(str(element)))
 
     def update_cif(self, cifvals):
         """
@@ -306,14 +308,14 @@ class Element:
     """
     Element Class
     """
-    def __init__(self,element='Co'):
+    def __init__(self, element='Co'):
         """Initialise properties"""
 
         props = fc.atom_properties(element) # returns a numpy structured array
         prop_names = props.dtype.names
         self.properties = props
         for key in prop_names:
-            setattr(self,key,props[key][0])
+            setattr(self, key, props[key][0])
 
     def info(self):
         """Display atomic properties"""

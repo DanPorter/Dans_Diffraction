@@ -10,8 +10,8 @@ By Dan Porter, PhD
 Diamond
 2019
 
-Version 2.1
-Last updated: 19/04/20
+Version 2.2
+Last updated: 27/04/20
 
 Version History:
 10/11/17 0.1    Program created
@@ -20,11 +20,12 @@ Version History:
 13/07/19 1.2    Added FDMNES windows
 13/12/19 2.0    Changed to internal tkgui package
 19/04/20 2.1    Added multi-crystal, write-cif buttons, changed layout of scattering gui
+27/04/20 2.2    Added SelectionBox to basic_widgets and spacegroup entry to SymmetryGui
 
 @author: DGPorter
 """
 
 from .crystal import CrystalGui
 
-__version__ = '2.1'
-__date__ = '19/04/20'
+__version__ = '2.2'
+__date__ = '27/04/20'

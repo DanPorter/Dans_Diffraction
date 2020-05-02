@@ -45,6 +45,7 @@ Version History:
 """
 
 import numpy as np
+from warnings import warn
 
 # Internal functions
 from . import functions_general as fg, functions_crystallography as fc
@@ -314,7 +315,7 @@ class Crystal:
         :return: str
         """
         out = '\n###########################################\n'
-        out += '{}'.format(self.name)
+        out += '{}\n'.format(self.name)
         out += 'Formula: {}\n'.format(self.Properties.molname())
         out += 'Magnetic: {}\n'.format(self.Structure.ismagnetic())
         out += self.Cell.info()
@@ -344,6 +345,14 @@ class Cell:
         UC.tth([0,0,12],energy_kev=8.0) # Calculate the two-theta of a reflection
         UC.lp() # Returns the current lattice parameters
     """
+    _required_cif = [
+        "_cell_length_a",
+        "_cell_length_b",
+        "_cell_length_c",
+        "_cell_angle_alpha",
+        "_cell_angle_beta",
+        "_cell_angle_gamma"
+    ]
 
     def __init__(self, a=1.0, b=1.0, c=1.0, alpha=90., beta=90.0, gamma=90.0):
         self.latt([a, b, c, alpha, beta, gamma])
@@ -379,10 +388,20 @@ class Cell:
 
     def fromcif(self, cifvals):
         """
-        Import lattice parameters from a cif dictionary"
+        Import lattice parameters from a cif dictionary
+        Required CIF keys:
+            _cell_length_a
+            _cell_length_b
+            _cell_length_c
+            _cell_angle_alpha
+            _cell_angle_beta
+            _cell_angle_gamma
         :param cifvals: dict from readcif
         :return: None
         """
+        if not fc.cif_check(cifvals, self._required_cif):
+            warn('Lattice parameters cannot be read from cif')
+            return
 
         a, da = fg.readstfm(cifvals['_cell_length_a'])
         b, db = fg.readstfm(cifvals['_cell_length_b'])
@@ -718,6 +737,13 @@ class Atoms:
     _default_atom = 'Fe'
     _default_uiso = 1.0 / (8 * np.pi ** 2)  # B=1
 
+    _required_cif = [
+        "_atom_site_label",
+        "_atom_site_fract_x",
+        "_atom_site_fract_y",
+        "_atom_site_fract_z",
+    ]
+
     def __init__(self, u=[0], v=[0], w=[0], type=None,
                  label=None, occupancy=None, uiso=None, mxmymz=None):
         " Initialisation, defines Atoms defaults"
@@ -766,9 +792,26 @@ class Atoms:
     def fromcif(self, cifvals):
         """
         Import atom parameters from a cif dictionary
+        Required cif keys:
+            _atom_site_label
+            _atom_site_fract_x
+            _atom_site_fract_y
+            _atom_site_fract_z
+        Optional cif keys:
+            _atom_site_type_symbol
+            _atom_site_U_iso_or_equiv
+            _atom_site_B_iso_or_equiv
+            _atom_site_occupancy
+            _atom_site_moment_label
+            _atom_site_moment_crystalaxis_x
+            _atom_site_moment_crystalaxis_y
+            _atom_site_moment_crystalaxis_z
         :param cifvals: dict
         :return: none
         """
+        if not fc.cif_check(cifvals, self._required_cif):
+            warn('Atom site parameters cannot be read from cif')
+            return
 
         keys = cifvals.keys()
 
@@ -776,11 +819,11 @@ class Atoms:
         label = cifvals['_atom_site_label']
 
         if '_atom_site_type_symbol' in keys:
-            element = [x.strip('+-0123456789') for x in cifvals['_atom_site_type_symbol']]
+            element = [x.strip('+-.0123456789') for x in cifvals['_atom_site_type_symbol']]
         else:
-            element = [x.strip('+-0123456789') for x in cifvals['_atom_site_label']]
+            element = [x.strip('+-.0123456789') for x in cifvals['_atom_site_label']]
 
-        # Get other properties
+        # Thermal parameters
         if '_atom_site_U_iso_or_equiv' in keys:
             uiso = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_U_iso_or_equiv']])
         elif '_atom_site_B_iso_or_equiv' in keys:
@@ -788,15 +831,16 @@ class Atoms:
             uiso = fc.biso2uiso(biso)
         else:
             uiso = np.zeros(len(element))
+        # Occupancy
         if '_atom_site_occupancy' in keys:
             occ = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_occupancy']])
         else:
             occ = np.ones(len(element))
 
         # Get coordinates
-        u = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_fract_x']])
-        v = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_fract_y']])
-        w = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_fract_z']])
+        u = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_fract_x']], dtype=np.float)
+        v = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_fract_y']], dtype=np.float)
+        w = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_fract_z']], dtype=np.float)
 
         # Get magnetic vectors
         mx = np.zeros(len(u))
@@ -1164,7 +1208,7 @@ class Symmetry:
     # symmetry_operations_time = [1]
 
     def __init__(self, symmetry_operations=None, symmetry_operations_magnetic=None):
-        "Initialises the symmetry group"
+        """Initialises the symmetry group"""
 
         if symmetry_operations is not None:
             self.addsym(symmetry_operations, symmetry_operations_magnetic)
@@ -1174,6 +1218,21 @@ class Symmetry:
     def fromcif(self, cifvals):
         """
         Import symmetry information from a cif dictionary
+        Required cif keys:
+            None
+        Optional cif keys:
+            _symmetry_equiv_pos_as_xyz
+            _space_group_symop_operation_xyz
+            _space_group_symop_magn_operation_xyz
+            _space_group_symop_magn_operation_mxmymz
+            _space_group_symop_magn_centering_xyz
+            _space_group_symop_magn_centering_mxmymz
+            _symmetry_space_group_name_H-M
+            _space_group_name_H-M_alt
+            _space_group_magn_name_BNS
+            _symmetry_Int_Tables_number
+            _space_group_IT_number
+            _space_group_magn_number_BNS
         :param cifvals: dict of values from cif
         :return:
         """
@@ -1181,10 +1240,7 @@ class Symmetry:
         keys = cifvals.keys()
 
         # Get symmetry operations
-        ops = ['+1/2', '+1/3', '+2/3', '+1/4', '+3/4', '+1/6', '+5/6', \
-               '1/2+', '1/3+', '2/3+', '1/4+', '3/4+', '1/6+', '5/6+', \
-               '-1/2', '-1/3', '-2/3', '-1/4', '-3/4', '-1/6', '-5/6', \
-               '1/2-', '1/3-', '2/3-', '1/4-', '3/4-', '1/6-', '5/6-']  # replace these in magnetic symmetry operations
+        ops = fc.TRANSLATIONS
         if '_symmetry_equiv_pos_as_xyz' in keys:
             symops = cifvals['_symmetry_equiv_pos_as_xyz']
             symcen = ['x,y,z']
@@ -1312,6 +1368,39 @@ class Symmetry:
             cifvals['_symmetry_Int_Tables_number'] = self.spacegroup_number
         return cifvals
 
+    def load_spacegroup(self, sg_number):
+        """
+        Load symmetry operations from a spacegroup from the International Tables of Crystallogrphy
+        See functions_crystallography.spacegroup for more details
+        :param sg_number: space group number (1-230)
+        :return: None
+        """
+        spacegroup = fc.spacegroup(sg_number)
+        self.spacegroup_number = int(spacegroup['space group number'])
+        self.spacegroup = spacegroup['space group name']
+
+        symops = spacegroup['general positions']
+        self.symmetry_operations = symops
+        self.symmetry_operations_magnetic = fc.symmetry_ops2magnetic(symops)
+
+    def load_magnetic_spacegroup(self, msg_number):
+        """
+        Load symmetry operations from a magnetic spacegroup from Bilbao crystallographic server
+        Replaces the current symmetry operators and the magnetic symmetry operators.
+        See functions_crystallography.spacegroup_magnetic for more details
+        :param msg_number: magnetic space group number e.g. 61.433
+        :return:
+        """
+
+        maggroup = fc.spacegroup_magnetic(msg_number)
+        self.spacegroup_number = float(maggroup['space group number'])
+        self.spacegroup = maggroup['space group name']
+        symops = maggroup['operators general']
+        symmag = maggroup['operators magnetic']
+        symmag = [op.replace('m', '') for op in symmag]
+        self.symmetry_operations = symops
+        self.symmetry_operations_magnetic = symmag
+
     def changesym(self, idx, operation):
         """
         Change a symmetry operation
@@ -1376,6 +1465,26 @@ class Symmetry:
         """
 
         self.symmetry_matrices = fc.gen_sym_mat(self.symmetry_operations)
+
+    def print_subgroups(self, sg_number=None):
+        """
+        Return str of subgroups of this spacegroup
+        :param sg_number: spacegroup number, None to use current one
+        :return: str
+        """
+        if sg_number is None:
+            sg_number = self.spacegroup_number
+        return fc.spacegroup_subgroups_list(sg_number)
+
+    def print_magnetic_spacegroups(self, sg_number=None):
+        """
+        Return str of available magnetic spacegroups for this spacegroup
+        :param sg_number: spacegroup number, None to use current one
+        :return: str
+        """
+        if sg_number is None:
+            sg_number = self.spacegroup_number
+        return fc.spacegroup_magnetic_list(sg_number)
 
     def symmetric_coordinates(self, UVW, MXMYMZ=None, remove_identical=True):
         """

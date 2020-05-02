@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2018
 
-Version 1.5
-Last updated: 18/03/20
+Version 1.6
+Last updated: 22/04/20
 
 Version History:
 17/04/18 0.9    Program created
@@ -18,6 +18,7 @@ Version History:
 07/08/19 1.3    Changed reflist in FdmnesAnalysis to list of hkl
 16/08/19 1.4    Added BavFile to read parts of .bav file
 18/03/20 1.5    Corrected density file for new headers
+22/04/20 1.6    Added FdmnesCompare and __add__ method for FdmnesAnalysis
 
 @author: DGPorter
 """
@@ -30,7 +31,7 @@ from mpl_toolkits.mplot3d import Axes3D  # 3D plotting
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.5'
+__version__ = '1.6'
 
 
 class Fdmnes:
@@ -425,6 +426,13 @@ class FdmnesAnalysis:
         fdm.sph_I100sp.plot()
     """
 
+    energy = np.array([0])
+    angle = np.array([0])
+    reflections = {}
+    reflist = []
+    refkeys = []
+    sphkeys = []
+
     def __init__(self, output_path, output_name='out'):
         """
         Loads data from an FDMNES calculation, allowing plotting and data cuts
@@ -461,6 +469,7 @@ class FdmnesAnalysis:
         if os.path.isfile(convname):
             enxanes, Ixanes = read_conv(convname)
             self.xanes = Xanes(enxanes, Ixanes, calc_name)
+            self.energy = enxanes
 
         # Read density of states file
         # sometimes this is _sd0.txt and sometimes _sd1.txt
@@ -511,7 +520,174 @@ class FdmnesAnalysis:
         return out
 
     def __repr__(self):
-        return 'FDMNES Analysis: %s' % os.path.join(self.output_path, self.output_name+'.txt')
+        name = '%s/%s' % (self.calc_name, self.output_name)
+        filename = os.path.join(self.output_path, self.output_name+'.txt')
+        cycles = self.bavfile.cycles()
+        edge = self.bavfile.edge()
+        radius = self.bavfile.radius()
+        return 'FDMNES Analysis: %30s, Edge: %20s, Radius: %10s, Cycles: %10s' % (name, edge, radius, cycles)
+
+    def __add__(self, other):
+        return FdmnesCompare([self, other])
+
+
+class FdmnesCompare:
+    """
+    Compare FDMNES Calculations
+    Method of joining sevearl FdmnesAnalysis objects to plot spectra on the same plot for comparison.
+    Usage:
+        fd1 = FdmnesAnalysis('calc_dir/calc1')
+        fd2 = FdmnesAnalysis('calc_dir/calc2')
+        fd3 = FdmnesAnalysis('calc_dir/calc3')
+        fdms = FdmnesCompare([fd1, fd2, fd3])
+        *or*
+        fdms = fd1 + fd2 + fd3
+        *or*
+        fdms = load_fdmnes_files('calc_dir') # loads all calculations ind calc_dir
+
+        fdms.plot_xanes()
+        fdms.plot_reflection_spectra('I003sp', 0) # specify azimuthal angle in deg
+        fdms.plot_reflection_azimuth('I003sp', 2838) # specify energy in eV
+    """
+
+    def __init__(self, fdm_objects):
+        self.fdm_objects = fdm_objects
+        self._gen_refkeys()
+
+    def load(self, bav_files=[]):
+        """Load a series of calculation files"""
+        bav_files = np.array(bav_files).reshape(-1)
+        for file in bav_files:
+            self.fdm_objects += [FdmnesAnalysis(file)]
+            print(self.fdm_objects[-1])
+        self._gen_refkeys()
+
+    def _gen_refkeys(self):
+        """Generate unique reflection keys"""
+        all_refs = []
+        for fdm in self.fdm_objects:
+            all_refs += fdm.refkeys
+        # unique reflections
+        self.refkeys = list(np.unique(all_refs))
+
+    def info(self):
+        out = ''
+        for fdm in self.fdm_objects:
+            out += '%s\n' % fdm
+        return out
+
+    def __repr__(self):
+        return self.info()
+
+    def __add__(self, other):
+        if type(other) is FdmnesCompare:
+            return FdmnesCompare(self.fdm_objects+other.fdm_objects)
+        return FdmnesCompare(self.fdm_objects + [other])
+
+    def plot_xanes(self, normalise=False, new_figure=True):
+        """
+        Plot XANES spectra for each calculation
+        :param normalise: normalise each spectra by max point
+        :param new_figure: create a new figure if True, otherwise plot on the current axis
+        :return: None
+        """
+
+        if new_figure:
+            plt.figure(figsize=[12, 10], dpi=80)
+        for fdm in self.fdm_objects:
+            inten = fdm.xanes.intensity
+            if normalise:
+                inten = inten/ inten.max()
+            plt.plot(fdm.xanes.energy, inten, '-', lw=3, label=fdm.calc_name)
+        plt.legend(loc=0, frameon=False, fontsize=20)
+        plt.xlabel('Energy [eV]', fontsize=28, fontname='Times New Roman')
+        plt.ylabel('Intensity [arb. units]', fontsize=28, fontname='Times New Roman')
+        plt.xticks(fontsize=25, fontname='Times New Roman')
+        plt.yticks(fontsize=25, fontname='Times New Roman')
+
+    def plot_reflection_spectra(self, refkey, psi=0, normalise=False, new_figure=True):
+        """
+        Plot all energy spectra for a reflection
+        :param refkey: str, reflection key as in name_conv.txt
+        :param psi: float, azimuthal angle
+        :param normalise: normalise each spectra by max point
+        :param new_figure: create a new figure if True, otherwise plot on the current axis
+        :return: None
+        """
+
+        refkey = refkey.replace('(', '').replace(')', '').replace('-', '_')
+
+        if new_figure:
+            plt.figure(figsize=[12, 10], dpi=80)
+        for fdm in self.fdm_objects:
+            try:
+                ref = getattr(fdm, refkey)
+            except AttributeError:
+                print('No %s in %s' % (refkey, fdm))
+                continue
+            en = ref.energy
+            inten = ref.eng_cut(psi)
+            if normalise:
+                inten = inten/inten.max()
+            plt.plot(en, inten, '-', lw=3, label=fdm.calc_name)
+        plt.title('%s $\Psi$ = %s Deg' % (refkey, psi), fontsize=32, fontname='Times New Roman')
+        plt.legend(loc=0, frameon=False, fontsize=20)
+        plt.xlabel('Energy [eV]', fontsize=28, fontname='Times New Roman')
+        plt.ylabel('Intensity [arb. units]', fontsize=28, fontname='Times New Roman')
+        plt.xticks(fontsize=25, fontname='Times New Roman')
+        plt.yticks(fontsize=25, fontname='Times New Roman')
+
+    def plot_reflection_azimuth(self, refkey, energy=0, normalise=False, new_figure=True):
+        """
+        Plot all energy spectra for a reflection
+        :param refkey: str, reflection key as in name_conv.txt
+        :param energy: float, energy [eV]
+        :param normalise: normalise each spectra by max point
+        :param new_figure: create a new figure if True, otherwise plot on the current axis
+        :return: None
+        """
+
+        refkey = refkey.replace('(', '').replace(')', '').replace('-', '_')
+
+        if new_figure:
+            plt.figure(figsize=[12, 10], dpi=80)
+        for fdm in self.fdm_objects:
+            try:
+                ref = getattr(fdm, refkey)
+            except AttributeError:
+                print('No %s in %s' % (refkey, fdm))
+                continue
+            psi = ref.angle
+            inten = ref.azi_cut(energy)
+            if normalise:
+                inten = inten/inten.max()
+            plt.plot(psi, inten, '-', lw=3, label=fdm.calc_name)
+        plt.title('%s E = %s eV' % (refkey, energy), fontsize=32, fontname='Times New Roman')
+        plt.legend(loc=0, frameon=False, fontsize=20)
+        plt.xlabel('$\Psi$ [Deg]', fontsize=28, fontname='Times New Roman')
+        plt.ylabel('Intensity [arb. units]', fontsize=28, fontname='Times New Roman')
+        plt.xticks(fontsize=25, fontname='Times New Roman')
+        plt.yticks(fontsize=25, fontname='Times New Roman')
+
+    def plot_all_spectra(self, psi=0, normalise=False):
+        """
+        Plot all available spectra across calculations
+        :param psi: azimuthal angle [Deg]
+        :param normalise: normalise each spectra by max point
+        :return:
+        """
+        for refkey in self.refkeys:
+            self.plot_reflection_spectra(refkey, psi, normalise)
+
+    def plot_all_azimuth(self, energy=0, normalise=False, new_figure=True):
+        """
+        Plot all available azimuths across calculations
+        :param energy: point at which to cut energy
+        :param normalise: normalise each spectra by max point
+        :return:
+        """
+        for refkey in self.refkeys:
+            self.plot_reflection_azimuth(refkey, energy, normalise)
 
 
 class BavFile:
@@ -551,6 +727,43 @@ class BavFile:
         """
         return self.text.count('Cycle')
 
+    def fdmnes_version(self):
+        """
+        Returns the version date of FDMNES used in the calculation
+        :return: str
+        """
+        return self.text.split('\n')[0].strip()
+
+    def time(self):
+        """
+        Returns the date and time the calculation was run on
+        :return: str
+        """
+        day, month, year = re.findall('Date =.+?\n', self.text)[0][6:].split()
+        time = re.findall('Time =.+?\n', self.text)[0][6:].strip()
+        time = time.replace('h',':').replace('mn',':').replace(' s','')
+        return '%s/%s/%s  %s' % (day, month, year, time)
+
+    def edge(self):
+        """
+        Returns the resoant edge used in calculation
+        :return: str
+        """
+        fnd = re.findall('Threshold: .+\n', self.header())
+        if len(fnd) < 1:
+            return ''
+        return fnd[0].strip('Threshold:').strip()
+
+    def radius(self):
+        """
+        Returns the radius used for the calculation
+        :return: float
+        """
+        fnd = re.findall('Radius = .+\n', self.header())
+        if len(fnd) < 1:
+            return ''
+        return float(fnd[0].strip('Radius =').strip())
+
     def charge_str(self):
         """
         returns final cycle ion charge
@@ -572,6 +785,32 @@ class BavFile:
         for n in range(len(self.potrmt[keys[0]])):
             outstr += ' '.join(['%8s' % self.potrmt[key][n] for key in keys]) + '\n'
         return outstr
+
+    def cycle_energy(self):
+        """Return array of total energy per atom for each cycle"""
+        # Find Delta_ener nad Total energy
+        fnd_delta = re.findall('Delta_energ = .+? eV', self.text)
+        fnd_energ = re.findall('Total: .+?\n|Total =.+?\n', self.text)
+
+        delta = np.array([fn.split()[-2] for fn in fnd_delta], dtype=float)
+        energ = np.array([fn.replace('Total =', '').replace('Total:', '').split()[0] for fn in fnd_energ], dtype=float)
+        return energ, delta
+
+    def plot_cycle_energy(self):
+        """Plot progress of energy during SCF cycles"""
+
+        energ, delta = self.cycle_energy()
+
+        plt.figure(figsize=[12, 10], dpi=80)
+        p1, = plt.plot(energ, 'r-', lw=2, label='Total Energy/Atom')
+
+        plt.xlabel('Cycle', fontsize=28)
+        plt.ylabel('Energy [eV]', fontsize=28)
+
+        plt.gca().twinx()
+        p2, = plt.plot(range(1, len(delta)+1), delta, 'bo:', lw=2, label='Delta Energy')
+
+        plt.legend([p1, p2], ['Total Energy/Atom', 'Delta Energy'], loc='upper center', frameon=False, fontsize=24)
 
 
 class Reflection:
@@ -896,6 +1135,46 @@ def find_fdmnes(fdmnes_filename='fdmnes_win64.exe', reset=False):
             return location
     print('%s not found, please enter location manually' % fdmnes_filename)
     return os.path.abspath(os.sep)
+
+
+def find_fdmnes_files(parent_directory=None, output_name='out'):
+    """
+    Finds all fdmnes calculations below a parent directory
+    Assumes all files have the same output name
+    :param parent_directory: top directory, searches lower directories recursivley
+    :param output_name: e.g. 'out.txt'
+    :return: list of filenames ['dir/out.txt']
+    """
+
+    if parent_directory is None:
+        parent_directory = fdmnes_location()
+
+    if '.txt' not in output_name:
+        output_name = output_name + '.txt'
+
+    calc_dirs = []
+    for dirpath, dirnames, filenames in os.walk(parent_directory):
+        if output_name in filenames:
+            print(dirpath)
+            calc_dirs += [dirpath]
+            # print(os.path.join(dirpath, filenames[0]))
+        else:
+            print('')
+    return calc_dirs
+
+
+def load_fdmnes_files(parent_directory=None, output_name='out'):
+    """
+    Finds all fdmnes calculations below a parent directory, loads each file
+    Assumes all files have the same output name
+    :param parent_directory: top directory, searches lower directories recursivley
+    :param output_name: e.g. 'out.txt'
+    :return: FdmnesCompare
+    """
+    calc_dirs = find_fdmnes_files(parent_directory, output_name)
+    fdms = FdmnesCompare()
+    fdms.load(calc_dirs)
+    return fdms
 
 
 def read_conv(filename='out_conv.txt', plot=False):

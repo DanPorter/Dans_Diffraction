@@ -1,7 +1,7 @@
 # Dans_Diffaction
 Reads crystallographic cif files and simulates diffraction
 
-**Version 1.7**
+**Version 1.8**
 
 By Dan Porter, Diamond Light Source
 2020
@@ -84,8 +84,14 @@ xtl.Plot.plot_layers() # 2D plot for layered materials
 xtl.Symmetry.info() # print symmetry arguments
 xtl.Symmetry.addsym('x,y,z+1/2') # adds single symmetry operation
 xtl.Symmetry.changesym(0, 'x,y,z+1/4')
+xtl.Symmetry.load_spacegroup(194) # replaces current symmetry operations
 # After adding or changing symmetry operations, regengerate the symmetry matrices
 xtl.Symmetry.generate_matrices()
+```
+
+### Save structure as CIF
+```python
+xtl.writecif('edited file.cif')
 ```
 
 ### Calculate Structure Factors
@@ -105,6 +111,18 @@ xtl.Plot.simulate_hk0() # Reciprocal space plane
 ![Powder Pattern](Screenshots/powder_diamond.png)
 ![HK0 Simulation](Screenshots/supercell_diffraction.png)
 
+
+### Magnetic Structrues
+Simple magnetic structures can be loaded from magnetic cif (*.mcif) files. Magnetic moments are stored for each atom as
+a vector. The crystal object has a seperate set of magnetic symmetry operations. Symmetry operations from the 
+tables of magnetic spacegroups can also be loaded.
+```python
+xtl = dif.Crystal('some_file.mcif')
+xtl.Atoms.mxmymz() # return magnetic moment vectors on each ion
+xtl.Symmetry.symmetry_operations_magnetic # magnetic symmetry operations (list of strings)
+xtl.Symmetry.print_magnetic_spacegroups() # return str of available magnetic spacegroups, given crystal's spacegroup
+xtl.Symmetry.load_magnetic_spacegroup(mag_spg_number) # loads mag. operations given mag. spacegroup number
+```
 Magnetic scattering is also available for neutrons and x-rays (both resonant and non-resonant), using the appropriate magnetic form-factors.
 ```python
 Imag = xtl.Scatter.magnetic_neutron(HKL=[0,0,3])
@@ -156,7 +174,6 @@ Scattering from different crystal structures can be compared using the MultiCrys
 ```python
 xtls = xtl1 + xtl2
 xtls.simulate_powder()
-plt.show()
 ```
 
 ### Graphical Front End

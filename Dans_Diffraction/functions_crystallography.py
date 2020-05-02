@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 2.9
-Last updated: 19/04/20
+Version 3.0
+Last updated: 01/05/20
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -26,21 +26,50 @@ Version History:
 06/03/19 2.6    Added print_atom_properties
 14/08/19 2.7    Added new Dans Element Properties file with extra comment line, new functions added
 03/04/20 2.8    Updated attenuation to work with arrays of elements
-19/04/20 2.9    Added writecif, made alterations to readcif for speed and readability
+19/04/20 2.9    Added writecif, made alterations to readcif for speed and readability, added spacegroup
+01/05/20 3.0    Updated atom_properties, now have atomic properties above 92 with warning. Some changes to readcif.
+
+Acknoledgements:
+    April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
 
 @author: DGPorter
 """
 
 import sys, os, re
+import json
 import numpy as np
+from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '2.9'
+__version__ = '3.0'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
 datadir = os.path.join(datadir, 'data')
+ATOMFILE = os.path.join(datadir, 'Dans Element Properties.txt')
+
+# Symmetry translations (remove these to turn symmetry operations into magnetic one)
+TRANSLATIONS = [
+    '+1/2', '+1/3', '+2/3', '+1/4', '+3/4', '+1/6', '+5/6',
+    '1/2+', '1/3+', '2/3+', '1/4+', '3/4+', '1/6+', '5/6+',
+    '-1/2', '-1/3', '-2/3', '-1/4', '-3/4', '-1/6', '-5/6',
+    '1/2-', '1/3-', '2/3-', '1/4-', '3/4-', '1/6-', '5/6-'
+]
+
+# Required CIF keys, must be available and not '?'
+CIF_REQUIRES = [
+    "_cell_length_a",
+    "_cell_length_b",
+    "_cell_length_c",
+    "_cell_angle_alpha",
+    "_cell_angle_beta",
+    "_cell_angle_gamma",
+    "_atom_site_label",
+    "_atom_site_fract_x",
+    "_atom_site_fract_y",
+    "_atom_site_fract_z",
+]
 
 
 def getenergy():
@@ -114,24 +143,22 @@ def readcif(filename=None, debug=False):
 
         # Search for stored value lines
         if vals[0][0] == '_':
-            if len(vals) > 2 and ('\'' in vals[1] or '"' in vals[1]):
-                # catch strings with spaces
-                cifvals[vals[0]] = ' '.join(vals[1:]).strip('\'"')
-            elif len(vals) == 1 and ';' in lines[n + 1]:
-                # Catch multi-line arguments
-                n += 1
-                cifvals[vals[0]] = [lines[n].strip().replace(';', '')]
-                n += 1
-                while ';' not in lines[n]:
-                    cifvals[vals[0]] += [lines[n].strip()]
+            chk = ''
+            if len(vals) == 1:
+                # Record next lines that are not keys as string
+                if lines[n+1][0] == ';': n += 1
+                strarg = []
+                while lines[n+1][0] not in ['_', ';']:
+                    strarg += [lines[n+1].strip('\'"')]
                     n += 1
-                cifvals[vals[0]] = ' '.join(cifvals[vals[0]])
-            elif len(vals) > 1:
-                cifvals[vals[0]] = vals[1]
+                cifvals[vals[0]] = '\n'.join(strarg)
+                chk = 'a'
+            else:
+                cifvals[vals[0]] = ' '.join(vals[1:]).strip(' \'"\n')
+                chk = 'b'
             n += 1
-
             if debug:
-                print('%5d %s = %s' % (n, vals[0], cifvals[vals[0]]))
+                print('%5d %s %s = %s' % (n, chk, vals[0], cifvals[vals[0]]))
             continue
 
         # Search for loops
@@ -157,7 +184,7 @@ def readcif(filename=None, debug=False):
                 if cols[0][0] == '_' or cols[0] == 'loop_': break  # catches error if loop is only 1 iteration
                 if cols[0][0] == '#': n += 1; continue  # catches comented out lines
                 if len(loopvals) == 1:
-                    cifvals[loopvals[0]] += [lines[n].strip()]
+                    cifvals[loopvals[0]] += [lines[n].strip(' \"\'\n')]
                 else:
                     for c, ll in enumerate(loopvals):
                         cifvals[ll] += [cols[c]]
@@ -165,11 +192,13 @@ def readcif(filename=None, debug=False):
 
             if debug:
                 for ll in loopvals:
-                    print('%5d %s = %s' % (n, ll, str(cifvals[ll])))
+                    print('%5d L %s = %s' % (n, ll, str(cifvals[ll])))
             continue
 
         else:
             # Skip anything else
+            if debug:
+                print('%5d SKIPPED: %s' % (n, lines[n]))
             n += 1
 
     # Replace '.' in keys - fix bug from isodistort cif files
@@ -180,6 +209,29 @@ def readcif(filename=None, debug=False):
             newkey = key.replace('.', '_')
             cifvals[newkey] = cifvals[key]
     return cifvals
+
+
+def cif_check(cifvals, required_keys=None, bad_value='?'):
+    """
+    Returns True if all basic required cif parameter are available and real.
+    E.G.:
+        cifvals = readcif(file.cif)
+        if cif_check(cifvals):
+            print('File OK')
+    :param cifvals: dict of cif keys form readcif
+    :param required_keys: list of key strings, or None for default
+    :param bad_value: if this value is in the cif key item, return False
+    :return: bool
+    """
+    if required_keys is None:
+        required_keys = CIF_REQUIRES
+    keys = cifvals.keys()
+    for key in required_keys:
+        if key not in keys:
+            return False
+        if bad_value in cifvals[key]:
+            return False
+    return True
 
 
 def cif2dict(cifvals):
@@ -428,7 +480,8 @@ def cif2dict(cifvals):
 
 def writecif(cifvals, filename=None, comments=None):
     """
-    Write .cif file
+    Write .cif file with values from a cif dict,
+    Only basic items are saved, rather than returning the orginal file
     :param cifvals: dict from readcif
     :param filename: filename to write (use None to return string)
     :param comments: str comments to write to the file top matter
@@ -503,8 +556,8 @@ def writecif(cifvals, filename=None, comments=None):
     c += cif_loop([
         '_atom_site_label',
         '_atom_site_type_symbol',
-        '_atom_site_symmetry_multiplicity',
-        '_atom_site_Wyckoff_symbol',
+        #'_atom_site_symmetry_multiplicity',
+        #'_atom_site_Wyckoff_symbol',
         '_atom_site_fract_x',
         '_atom_site_fract_y',
         '_atom_site_fract_z',
@@ -560,6 +613,8 @@ def read_atom_properties_file(filedir):
 def atom_properties(elements=None, fields=None):
     """
     Loads the atomic properties of a particular atom from a database
+    Atomic properties, scattering lengths, form factors and absorption edges for elements upto and including Uranium.
+    Values are taken from various online sources, see data/README.md for more details.
 
     Usage:
             A = atom_properties() >> returns structured array of all properties for all atoms A[0]['Element']='H'
@@ -572,10 +627,13 @@ def atom_properties(elements=None, fields=None):
     Available properties:
         A = atom_properties()
         print(A.dtype.names)
+        print(a[25]['Element'])
+        >> 'Fe'
 
     Available information includes:
           Z             = Element number
-          Element Name  = Element name
+          Element       = Element symbol
+          Name          = Element name
           Group         = Element Group on periodic table
           Period        = Element period on periodic table
           Block         = Element electronic block (s,p,d,f)
@@ -610,25 +668,26 @@ def atom_properties(elements=None, fields=None):
           M1...         = x-ray absorption edge
     """
 
-    atomfile = os.path.join(datadir, 'Dans Element Properties.txt')
     try:
-        data = np.genfromtxt(atomfile, skip_header=6, dtype=None, names=True, encoding='ascii')
+        data = np.genfromtxt(ATOMFILE, skip_header=6, dtype=None, names=True, encoding='ascii')
     except TypeError:
         # Numpy version < 1.14
-        data = np.genfromtxt(atomfile, skip_header=6, dtype=None, names=True)
+        data = np.genfromtxt(ATOMFILE, skip_header=6, dtype=None, names=True)
 
     if elements is not None:
         # elements must be a list e.g. ['Co','O']
         elements = np.char.lower(np.asarray(elements).reshape(-1))
-        indx = [None] * len(elements)
-        for n in range(len(data)):
-            d = data[n]
-            fileelement = d['Element'].lower()
-            if fileelement in elements:
-                for m in range(len(elements)):
-                    if fileelement == elements[m]:
-                        indx[m] = n
-        data = data[indx]
+        all_elements = [el.lower() for el in data['Element']]
+        # This will error if the required element doesn't exist
+        try:
+            index = [all_elements.index(el) for el in elements]
+        except ValueError as ve:
+            raise Exception('Element not available: %s' % ve)
+        data = data[index]
+        if np.any(data['Z'] > 92):
+            msg = 'Element %s does not have complete atomic properties, scattering calculations will be inaccurate.'
+            for el in data[data['Z'] > 92]:
+                warn(msg % el['Element'])
 
     if fields is None:
         return data
@@ -745,30 +804,6 @@ def magnetic_form_factor(element, Qmag=0.):
     return Qff
 
 
-def debyewaller(uiso, Qmag=0):
-    """
-    Calculate the debye waller factor for a particular Q
-     T = debyewaller(uiso,Qmag=[0])
-
-        T = exp( -2*pi^2*Uiso/d^2 )
-        T = exp( -Uiso/2Q^2 )
-    """
-
-    # Qmag should be a 1D array
-    Qmag = np.asarray(Qmag).reshape(-1)
-
-    uiso = np.asarray(uiso, dtype=np.float).reshape(1, -1)
-    Qmag = np.asarray(Qmag, dtype=np.float).reshape(-1, 1)
-    Tall = np.exp(-0.5 * np.dot(Qmag, uiso))
-    # Tall = np.zeros([len(Qmag),len(uiso)])
-    # Generate the approximation for each atom
-    # for n in range(len(uiso)):
-    #    for m in range(len(Qmag)):
-    #        # Definition of Debye-Waller factor from Vesta user manual p45
-    #        Tall[m,n] = dnp.exp(-0.5*uiso[n]*Qmag[m])
-    return Tall
-
-
 def attenuation(element_z, energy_keV):
     """
      Returns the x-ray mass attenuation, u/p, in cm^2/g
@@ -788,6 +823,167 @@ def attenuation(element_z, energy_keV):
         out[:, n] = np.interp(energy_keV, energies, xma_data[:, z])
     if len(element_z) == 1:
         return out[:, 0]
+    return out
+
+
+def spacegroups():
+    """
+    Return a dict of all space groups
+    Loaded from json file created from the Bilbao crystallographic server: https://www.cryst.ehu.es/
+    :return: dict with keys:
+        'space group number'
+        'space group name html'
+        'space group name'
+        'web address generator'
+        'web address wyckoff'
+        'web address site check'     # address % (u, v, w),
+        'general positions'
+        'magnetic space groups',
+        'positions centring'
+        'positions multiplicity'
+        'positions wyckoff letter'
+        'positions symmetry'
+        'positions coordinates'
+        'subgroup number',
+        'subgroup name',
+        'subgroup index',
+        'subgroup type'
+    """
+    sg_file = os.path.join(datadir, 'SpaceGroups.json')
+    with open(sg_file, 'r') as fp:
+        sg_dict = json.load(fp)
+    return sg_dict
+
+
+def spacegroup(sg_number):
+    """
+    Return a dict of information for a space group
+    :param sg_number: int space group number, as in the international tables of Crystallography
+    :return: dict
+    """
+    sg_number = str(int(sg_number))
+    sg_dict = spacegroups()
+    return sg_dict[sg_number]
+
+
+def spacegroup_list(sg_numbers=None):
+    """
+    Return a structured list of space groups with general operations
+    :param sg_numbers: list of space group numbers (None for whole list)
+    :return: str
+    """
+    if sg_numbers is None:
+        sg_numbers = range(1,231)
+    sg_numbers = np.asarray(sg_numbers, dtype=str).reshape(-1)
+
+    sg_dict = spacegroups()
+
+    out = ''
+    fmt = '%3d %-10s : %3d : %s\n'
+    for sgn in sg_numbers:
+        sg = sg_dict[sgn]
+        num = sg['space group number']
+        name = sg['space group name']
+        sym = ', '.join(sg['general positions'])
+        nsym = len(sg['general positions'])
+        out += fmt % (num, name, nsym, sym)
+    return out
+
+
+def spacegroup_subgroups(sg_number):
+    """
+    Return dict of maximal subgroups for spacegroup
+    :param sg_number: space group number (1-230)
+    :return: dict
+    """
+    all_sg = spacegroups()
+    sg_number = str(int(sg_number))
+    sg_dict = all_sg[sg_number]
+    subgroups = sg_dict["subgroup number"]
+    return [all_sg[num] for num in subgroups]
+
+
+def spacegroup_subgroups_list(sg_number):
+    """
+    Return str of maximal subgroups for spacegroup
+    :param sg_number: space group number (1-230)
+    :return: str
+    """
+    sg_dict = spacegroup(sg_number)
+    sub_num = sg_dict["subgroup number"]
+    sub_name = sg_dict["subgroup name"]
+    sub_index = sg_dict["subgroup index"]
+    sub_type = sg_dict["subgroup type"]
+    out = ''
+    fmt = 'Parent: %3s Subgroup: %3s  %-10s  Index: %3s  Type: %2s\n'
+    for num, name, index, stype in zip(sub_num, sub_name, sub_index, sub_type):
+        out += fmt % (sg_number, num, name, index, stype)
+    return out
+
+
+def spacegroups_magnetic(sg_number):
+    """
+    Returns dict of magnetic space groups for required space group
+    :param sg_number: space group number (1-230)
+    :return: dict
+    """
+    sg_dict = spacegroup(sg_number)
+    msg_numbers = sg_dict['magnetic space groups']
+
+    msg_file = os.path.join(datadir, 'SpaceGroupsMagnetic.json')
+    with open(msg_file, 'r') as fp:
+        msg_dict = json.load(fp)
+    return [msg_dict[num] for num in msg_numbers]
+
+
+def spacegroup_magnetic(msg_number):
+    """
+    Return dict of magnetic spacegroup, given magnetic spacegroup number
+    :param msg_number: magnetic space group number e.g. 61.433
+    :return: dict with keys:
+        'parent number': sg,
+        'space group number': number,
+        'space group name': label,
+        'setting': setting,
+        'type name': type_name,
+        'related group': rel_number,
+        'related name': rel_name,
+        'related setting': rel_setting,
+        'operators general': xyz_op,
+        'operators magnetic': mxmymz_op,
+        'operators time': time,
+    """
+    msg_number = np.asarray(msg_number, dtype=str).reshape(-1)
+
+    msg_file = os.path.join(datadir, 'SpaceGroupsMagnetic.json')
+    with open(msg_file, 'r') as fp:
+        msg_dict = json.load(fp)
+
+    if None in msg_number:
+        return msg_dict
+    elif len(msg_number) == 1:
+        return msg_dict[msg_number[0]]
+    else:
+        return [msg_dict[num] for num in msg_number]
+
+
+def spacegroup_magnetic_list(sg_number):
+    """
+    Return str list of magnetic space groups
+    :param sg_number: space group number (1-230)
+    :return: str
+    """
+    mag_spacegroups = spacegroups_magnetic(sg_number)
+    out = ''
+    fmt = 'Parent: %3s Magnetic: %-10s  %-10s  Setting: %3s %30s  Operators: %s\n'
+    for sg in mag_spacegroups:
+        parent = sg['parent number']
+        number = sg['space group number']
+        name = sg['space group name']
+        setting = sg['setting']
+        typename = sg['type name']
+        ops = sg['operators magnetic']
+        out += fmt % (parent, number, name, setting, typename, ops)
     return out
 
 
@@ -1597,9 +1793,7 @@ def symmetry_ops2magnetic(operations):
     # convert string to list
     if type(operations) is str:
         operations = [operations]
-
-    rem = ['+1/2', '+1/3', '+2/3', '+1/6', '+5/6']
-    return [fg.multi_replace(sp, rem, '') for sp in operations]
+    return [fg.multi_replace(sp, TRANSLATIONS, '') for sp in operations]
 
 
 def hkl2str(hkl):
@@ -1629,6 +1823,22 @@ def cut2powder(qx, qy, qz, cut):
 
 
 '--------------------------Misc Crystal Programs------------------------'
+
+
+def debyewaller(uiso, Qmag=0):
+    """
+    Calculate the debye waller factor for a particular Q
+     T = debyewaller(uiso,Qmag=[0])
+
+        T = exp( -2*pi^2*Uiso/d^2 )
+        T = exp( -Uiso/2Q^2 )
+    """
+
+    uiso = np.asarray(uiso, dtype=np.float).reshape(1, -1)
+    Qmag = np.asarray(Qmag, dtype=np.float).reshape(-1, 1)
+
+    Tall = np.exp(-0.5 * np.dot(Qmag, uiso))
+    return Tall
 
 
 def powder_average(tth, energy_kev):

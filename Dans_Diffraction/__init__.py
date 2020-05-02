@@ -18,7 +18,7 @@ Diamond
 2017
 
 Version 1.7.1
-Last updated: 19/04/20
+Last updated: 21/04/20
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -29,7 +29,8 @@ Version History:
 13/12/19 1.5    Multiple Scattering added, tkGUI refactored, Startgui changed to start_gui
 20/02/20 1.6    Tensor Scattering added
 31/03/20 1.7    Refactored multicrystal methods, other minor changes, improved powder diffraction
-19/04/20 1.7.1  Added writecif
+19/04/20 1.7.1  Added writecif + spacegroup file + functions
+02/05/20 1.8    Updated readcif, added heavy atom properties, added magnetic spacegroups
 """
 
 # Set TkAgg environment
@@ -50,8 +51,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '1.7.1'
-__date__ = '19/04/20'
+__version__ = '1.8'
+__date__ = '02/05/20'
 
 
 # Build

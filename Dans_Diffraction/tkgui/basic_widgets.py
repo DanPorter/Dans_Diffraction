@@ -14,6 +14,7 @@ TF = ["Times", 12]
 BF = ["Times", 14]
 SF = ["Times New Roman", 14]
 LF = ["Times", 14]
+MF = ["Courier", 8]  # fixed distance format
 HF = ['Courier',12]
 TTF = ("Helvetica", 10, "bold italic")
 # Colours - background
@@ -94,3 +95,106 @@ class StringViewer:
     def fun_close(self):
         """close window"""
         self.root.destroy()
+
+
+"------------------------------------------------------------------------"
+"----------------------------Selection Box-------------------------------"
+"------------------------------------------------------------------------"
+
+
+class SelectionBox:
+    """
+    Displays all data fields and returns a selection
+    Making a selection returns a list of field strings
+
+    out = SelectionBox(['field1','field2','field3'], current_selection=['field2'], title='', multiselect=False)
+    # Make selection and press "Select" > box disappears
+    out.output = ['list','of','strings']
+
+    """
+    "------------------------------------------------------------------------"
+    "--------------------------GUI Initilisation-----------------------------"
+    "------------------------------------------------------------------------"
+
+    def __init__(self, parent, data_fields, current_selection=[], title='Make a selection', multiselect=True):
+        self.data_fields = data_fields
+        self.initial_selection = current_selection
+
+        # Create Tk inter instance
+        self.root = tk.Toplevel(parent)
+        self.root.wm_title(title)
+        self.root.minsize(width=100, height=300)
+        self.root.maxsize(width=1200, height=1200)
+        self.root.tk_setPalette(
+            background=bkg,
+            foreground=txtcol,
+            activeBackground=opt_active,
+            activeForeground=txtcol)
+        self.output = []
+
+        # Frame
+        frame = tk.Frame(self.root)
+        frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=tk.YES, anchor=tk.N)
+
+        "---------------------------ListBox---------------------------"
+        # Eval box with scroll bar
+        frm = tk.Frame(frame)
+        frm.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
+
+        sclx = tk.Scrollbar(frm, orient=tk.HORIZONTAL)
+        sclx.pack(side=tk.BOTTOM, fill=tk.BOTH)
+
+        scly = tk.Scrollbar(frm)
+        scly.pack(side=tk.RIGHT, fill=tk.BOTH)
+
+        self.lst_data = tk.Listbox(frm, font=MF, selectmode=tk.SINGLE, width=60, height=20, bg=ety,
+                                   xscrollcommand=sclx.set, yscrollcommand=scly.set)
+        self.lst_data.configure(exportselection=True)
+        if multiselect:
+            self.lst_data.configure(selectmode=tk.EXTENDED)
+
+        # Populate list box
+        for k in self.data_fields:
+            # if k[0] == '_': continue # Omit _OrderedDict__root/map
+            strval = '{}'.format(k)
+            self.lst_data.insert(tk.END, strval)
+
+        self.lst_data.pack(side=tk.LEFT, fill=tk.BOTH, expand=tk.YES)
+        for select in current_selection:
+            if select in data_fields:
+                idx = data_fields.index(select)
+                self.lst_data.select_set(idx)
+
+        sclx.config(command=self.lst_data.xview)
+        scly.config(command=self.lst_data.yview)
+
+        # self.txt_data.config(xscrollcommand=scl_datax.set,yscrollcommand=scl_datay.set)
+
+        "----------------------------Exit Button------------------------------"
+        frm_btn = tk.Frame(frame)
+        frm_btn.pack()
+
+        btn_exit = tk.Button(frm_btn, text='Select', font=BF, command=self.f_exit, bg=btn, activebackground=btn_active)
+        btn_exit.pack()
+
+        "-------------------------Start Mainloop------------------------------"
+        self.root.protocol("WM_DELETE_WINDOW", self.f_exit)
+        #self.root.mainloop()
+
+    "------------------------------------------------------------------------"
+    "--------------------------General Functions-----------------------------"
+    "------------------------------------------------------------------------"
+
+    def show(self):
+        """Run the selection box, wait for response"""
+
+        #self.root.deiconify()  # show window
+        self.root.wait_window()  # wait for window
+        return self.output
+
+    def f_exit(self):
+        """Closes the current data window"""
+        selection = self.lst_data.curselection()
+        self.output = [self.data_fields[n] for n in selection]
+        self.root.destroy()
+
