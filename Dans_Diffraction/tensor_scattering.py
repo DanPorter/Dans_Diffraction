@@ -1,5 +1,6 @@
 """
 Tensor Scattering code, By Prof. Steve Collins
+Based on code available at: https://github.com/spc93/tensor-scattering-calculation
 
 Example:
     xtl = dif.Crystal('ZnO.cif')

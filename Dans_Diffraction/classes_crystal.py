@@ -233,8 +233,12 @@ class Crystal:
 
     def generate_lattice(self, U=1, V=1, W=0):
         """
-        Generate lattice of a cell
-         latt = genlatt(crys,U=1,V=1,W=0)
+        Generate a repeated lattice of the crystal structure
+            latt = xtl.generate_lattice(2,0,0)
+        :param U: Repeat of the cell along the a axis
+        :param V: Repeat of the cell along the b axis
+        :param W: Repeat of the cell along the c axis
+        :return: Crystal object
         """
 
         uvw, type, label, occ, uiso, mxmymz = self.Structure.generate_lattice(U, V, W, centred=False)

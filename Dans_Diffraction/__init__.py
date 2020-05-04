@@ -17,8 +17,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.7.1
-Last updated: 21/04/20
+Version 1.8
+Last updated: 02/05/20
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -31,6 +31,37 @@ Version History:
 31/03/20 1.7    Refactored multicrystal methods, other minor changes, improved powder diffraction
 19/04/20 1.7.1  Added writecif + spacegroup file + functions
 02/05/20 1.8    Updated readcif, added heavy atom properties, added magnetic spacegroups
+
+-----------------------------------------------------------------------------
+   Copyright 2020 Diamond Light Source Ltd.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+Files in this package covered by this licence:
+    classes_crystal.py
+    classes_scattering.py
+    classes_plotting.py
+    classes_properties.py
+    classes_multicrystal.py
+    functions_general.py
+    functions_plotting.py
+    functions_crystallography.py
+    tkgui/*.py
+Other files are either covered by their own licence or not licenced for other use.
+
+ Dr Daniel G Porter, dan.porter@diamond.ac.uk
+ www.diamond.ac.uk
+ Diamond Light Source, Chilton, Didcot, Oxon, OX11 0DE, U.K.
 """
 
 # Set TkAgg environment

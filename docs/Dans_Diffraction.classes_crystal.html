@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_crystal</strong></big></big> (version 2.6)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_crystal</strong></big></big> (version 2.8)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_crystal.py">c:\users\grp66007\dropbox\python\dans_diffraction\dans_diffraction\classes_crystal.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_crystal.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_crystal.py</a></font></td></tr></table>
     <p><tt>classes_crystal.py<br>
 A&nbsp;crystal&nbsp;<a href="builtins.html#object">object</a>&nbsp;that&nbsp;reads&nbsp;crystallogaphic&nbsp;data&nbsp;from&nbsp;cif&nbsp;files&nbsp;and<br>
 can&nbsp;generate&nbsp;useful&nbsp;information&nbsp;such&nbsp;as&nbsp;reflection&nbsp;intensities&nbsp;and&nbsp;<br>
@@ -34,8 +34,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;2.6<br>
-Last&nbsp;updated:&nbsp;12/12/19<br>
+Version&nbsp;2.7<br>
+Last&nbsp;updated:&nbsp;30/03/20<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 27/07/17&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
@@ -48,6 +48,8 @@ Version&nbsp;History:<br>
 09/03/19&nbsp;2.4&nbsp;&nbsp;&nbsp;&nbsp;Add&nbsp;print&nbsp;functions&nbsp;to&nbsp;<a href="#Symmetry">Symmetry</a><br>
 12/08/19&nbsp;2.5&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>info</strong>&nbsp;outputs&nbsp;string,&nbsp;__repr__&nbsp;methods&nbsp;added<br>
 12/12/19&nbsp;2.6&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;<a href="#Symmetry">Symmetry</a>.is_symmetric_reflection(ref1,&nbsp;ref2),&nbsp;added&nbsp;multiple&nbsp;scattering&nbsp;code<br>
+30/03/20&nbsp;2.7&nbsp;&nbsp;&nbsp;&nbsp;Moved&nbsp;Multicrystal&nbsp;class&nbsp;to&nbsp;separate&nbsp;file,&nbsp;other&nbsp;minor&nbsp;tweaks<br>
+19/04/20&nbsp;2.8&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;update_cif&nbsp;and&nbsp;write_cif&nbsp;funcitons<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -68,12 +70,6 @@ Version&nbsp;History:<br>
     
 <tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl>
-<dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_plotting.html#MultiPlotting">Dans_Diffraction.classes_plotting.MultiPlotting</a>(<a href="builtins.html#object">builtins.object</a>)
-</font></dt><dd>
-<dl>
-<dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_crystal.html#MultiCrystal">MultiCrystal</a>
-</font></dt></dl>
-</dd>
 <dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
 </font></dt><dd>
 <dl>
@@ -141,6 +137,20 @@ Each&nbsp;atom&nbsp;has&nbsp;properties:<br>
 :return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Atoms-fromcif"><strong>fromcif</strong></a>(self, cifvals)</dt><dd><tt>Import&nbsp;atom&nbsp;parameters&nbsp;from&nbsp;a&nbsp;cif&nbsp;dictionary<br>
+Required&nbsp;cif&nbsp;keys:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_label<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_z<br>
+Optional&nbsp;cif&nbsp;keys:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_type_symbol<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_U_iso_or_equiv<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_B_iso_or_equiv<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_occupancy<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_moment_label<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_moment_crystalaxis_x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_moment_crystalaxis_y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_atom_site_moment_crystalaxis_z<br>
 :param&nbsp;cifvals:&nbsp;dict<br>
 :return:&nbsp;none</tt></dd></dl>
 
@@ -159,15 +169,26 @@ Each&nbsp;atom&nbsp;has&nbsp;properties:<br>
 :param&nbsp;type:&nbsp;None&nbsp;or&nbsp;str&nbsp;type&nbsp;of&nbsp;atom&nbsp;to&nbsp;dispaly<br>
 :return:&nbsp;str</tt></dd></dl>
 
+<dl><dt><a name="Atoms-ismagnetic"><strong>ismagnetic</strong></a>(self)</dt><dd><tt>Returns&nbsp;True&nbsp;if&nbsp;any&nbsp;ions&nbsp;have&nbsp;magnetic&nbsp;moments&nbsp;assigned</tt></dd></dl>
+
 <dl><dt><a name="Atoms-mass_fraction"><strong>mass_fraction</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;mass&nbsp;fraction&nbsp;per&nbsp;element<br>
 :return:&nbsp;float</tt></dd></dl>
 
 <dl><dt><a name="Atoms-mxmymz"><strong>mxmymz</strong></a>(self)</dt><dd><tt>Returns&nbsp;a&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;vectors<br>
 :return:&nbsp;np.array([nx3])</tt></dd></dl>
 
+<dl><dt><a name="Atoms-remove_duplicates"><strong>remove_duplicates</strong></a>(self, min_distance=0.01, all_types=False)</dt><dd><tt>Remove&nbsp;atoms&nbsp;of&nbsp;the&nbsp;same&nbsp;type&nbsp;that&nbsp;are&nbsp;too&nbsp;close&nbsp;to&nbsp;each&nbsp;other<br>
+:param&nbsp;min_distance:&nbsp;remove&nbsp;atoms&nbsp;within&nbsp;this&nbsp;distance,&nbsp;in&nbsp;fractional&nbsp;units<br>
+:param&nbsp;all_types:&nbsp;if&nbsp;True,&nbsp;also&nbsp;remove&nbsp;atoms&nbsp;of&nbsp;different&nbsp;types<br>
+:return:&nbsp;None</tt></dd></dl>
+
 <dl><dt><a name="Atoms-removeatom"><strong>removeatom</strong></a>(self, idx)</dt><dd><tt>Removes&nbsp;atom&nbsp;number&nbsp;idx&nbsp;from&nbsp;the&nbsp;list<br>
 :param&nbsp;idx:&nbsp;int,&nbsp;atom&nbsp;index<br>
 :return:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Atoms-update_cif"><strong>update_cif</strong></a>(self, cifvals)</dt><dd><tt>Update&nbsp;cif&nbsp;dict&nbsp;with&nbsp;stored&nbsp;values<br>
+:param&nbsp;cifvals:&nbsp;cif&nbsp;dict&nbsp;from&nbsp;readcif<br>
+:return:&nbsp;cifvals</tt></dd></dl>
 
 <dl><dt><a name="Atoms-uvw"><strong>uvw</strong></a>(self)</dt><dd><tt>Returns&nbsp;a&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;current&nbsp;positions<br>
 :return:&nbsp;np.array([nx3])</tt></dd></dl>
@@ -248,7 +269,21 @@ E.G.<br>
 :param&nbsp;HKL:&nbsp;array&nbsp;:&nbsp;list&nbsp;of&nbsp;reflections<br>
 :return:&nbsp;d-spacing</tt></dd></dl>
 
-<dl><dt><a name="Cell-fromcif"><strong>fromcif</strong></a>(self, cifvals)</dt><dd><tt>Import&nbsp;lattice&nbsp;parameters&nbsp;from&nbsp;a&nbsp;cif&nbsp;dictionary"<br>
+<dl><dt><a name="Cell-find_close_reflections"><strong>find_close_reflections</strong></a>(self, hkl, energy_kev, max_twotheta=2, max_angle=10)</dt><dd><tt>Find&nbsp;reflections&nbsp;near&nbsp;to&nbsp;given&nbsp;HKL&nbsp;for&nbsp;a&nbsp;given&nbsp;two-theta&nbsp;or&nbsp;reflection&nbsp;angle<br>
+:param&nbsp;hkl:&nbsp;[h,k,l]&nbsp;indices&nbsp;of&nbsp;reflection&nbsp;to&nbsp;start&nbsp;from<br>
+:param&nbsp;energy_kev:&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;max_twotheta:&nbsp;matches&nbsp;reflections&nbsp;within&nbsp;two-theta&nbsp;of&nbsp;hkl<br>
+:param&nbsp;max_angle:&nbsp;matches&nbsp;reflections&nbsp;within&nbsp;max_angle&nbsp;of&nbsp;hkl<br>
+:return:&nbsp;list&nbsp;of&nbsp;matching&nbsp;[[h,k,l]]&nbsp;reflections</tt></dd></dl>
+
+<dl><dt><a name="Cell-fromcif"><strong>fromcif</strong></a>(self, cifvals)</dt><dd><tt>Import&nbsp;lattice&nbsp;parameters&nbsp;from&nbsp;a&nbsp;cif&nbsp;dictionary<br>
+Required&nbsp;CIF&nbsp;keys:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_cell_length_a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_cell_length_b<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_cell_length_c<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_cell_angle_alpha<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_cell_angle_beta<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_cell_angle_gamma<br>
 :param&nbsp;cifvals:&nbsp;dict&nbsp;from&nbsp;readcif<br>
 :return:&nbsp;None</tt></dd></dl>
 
@@ -287,6 +322,10 @@ E.G.<br>
 :param&nbsp;max_angle:&nbsp;maximum&nbsp;two-theta&nbsp;at&nbsp;this&nbsp;energy<br>
 :return:&nbsp;maxh,&nbsp;maxk,&nbsp;maxl</tt></dd></dl>
 
+<dl><dt><a name="Cell-powder_average"><strong>powder_average</strong></a>(self, HKL)</dt><dd><tt>Returns&nbsp;the&nbsp;powder&nbsp;average&nbsp;correction&nbsp;for&nbsp;the&nbsp;given&nbsp;hkl<br>
+:param&nbsp;HKL:&nbsp;array&nbsp;:&nbsp;list&nbsp;of&nbsp;reflections<br>
+:return:&nbsp;correction</tt></dd></dl>
+
 <dl><dt><a name="Cell-reciprocal_space_plane"><strong>reciprocal_space_plane</strong></a>(self, x_axis=[1, 0, 0], y_axis=[0, 1, 0], centre=[0, 0, 0], q_max=4.0, cut_width=0.05)</dt><dd><tt>Returns&nbsp;positions&nbsp;within&nbsp;a&nbsp;reciprocal&nbsp;space&nbsp;plane<br>
 &nbsp;&nbsp;x_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
 &nbsp;&nbsp;y_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
@@ -312,6 +351,10 @@ a&nbsp;particular&nbsp;direction&nbsp;parallel&nbsp;to&nbsp;the&nbsp;beam</tt></
 :param&nbsp;HKL:&nbsp;list&nbsp;of&nbsp;hkl&nbsp;reflections<br>
 :param&nbsp;energy_kev:&nbsp;energy&nbsp;in&nbsp;keV<br>
 :return:&nbsp;two-theta&nbsp;angles</tt></dd></dl>
+
+<dl><dt><a name="Cell-update_cif"><strong>update_cif</strong></a>(self, cifvals)</dt><dd><tt>Update&nbsp;cif&nbsp;dict&nbsp;with&nbsp;current&nbsp;values<br>
+:param&nbsp;cifvals:&nbsp;dict&nbsp;from&nbsp;readcif<br>
+:return:&nbsp;cifvals</tt></dd></dl>
 
 <dl><dt><a name="Cell-volume"><strong>volume</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;volume&nbsp;of&nbsp;the&nbsp;unit&nbsp;cell,&nbsp;in&nbsp;A^3<br>
 :return:&nbsp;volume</tt></dd></dl>
@@ -346,6 +389,7 @@ E.G.<br>
 &nbsp;&nbsp;xtl.Structure.uvw()&nbsp;&gt;&gt;&nbsp;give&nbsp;the&nbsp;full,&nbsp;unsymmetrised&nbsp;structure<br>
 &nbsp;&nbsp;xtl.Scatter.hkl([1,0,0],8.00)&nbsp;&gt;&gt;&nbsp;prints&nbsp;the&nbsp;intensity&nbsp;and&nbsp;two-theta&nbsp;of&nbsp;this&nbsp;reflection&nbsp;at&nbsp;this&nbsp;energy<br>
 &nbsp;&nbsp;xtl.Scatter.print_all_reflections(8.00)&nbsp;&gt;&gt;&nbsp;print&nbsp;all&nbsp;allowed&nbsp;reflections,&nbsp;with&nbsp;intensities,&nbsp;at&nbsp;this&nbsp;energy<br>
+&nbsp;&nbsp;xtl.<a href="#Crystal-write_cif">write_cif</a>('Diamond2.cif')&nbsp;&gt;&gt;&nbsp;write&nbsp;updated&nbsp;structure&nbsp;to&nbsp;file<br>
 &nbsp;<br>
 To&nbsp;create&nbsp;your&nbsp;own&nbsp;crystal&nbsp;(BCC&nbsp;example):<br>
 &nbsp;&nbsp;xtl&nbsp;=&nbsp;<a href="#Crystal-name">Crystal</a>()<br>
@@ -363,6 +407,8 @@ Also,&nbsp;see:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;help(xtl.Scatter)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
+<dl><dt><a name="Crystal-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+
 <dl><dt><a name="Crystal-__init__"><strong>__init__</strong></a>(self, filename=None)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <dl><dt><a name="Crystal-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
@@ -372,8 +418,12 @@ Also,&nbsp;see:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;xtl&nbsp;=&nbsp;<a href="#Crystal-name">Crystal</a>(cif_superstructure)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;su&nbsp;=&nbsp;xtl.<a href="#Crystal-add_parent">add_parent</a>(parent,&nbsp;[[1,1,0],[0,2,0],[0,0,1]])</tt></dd></dl>
 
-<dl><dt><a name="Crystal-generate_lattice"><strong>generate_lattice</strong></a>(self, U=1, V=1, W=0)</dt><dd><tt>Generate&nbsp;lattice&nbsp;of&nbsp;a&nbsp;cell<br>
-&nbsp;latt&nbsp;=&nbsp;genlatt(crys,U=1,V=1,W=0)</tt></dd></dl>
+<dl><dt><a name="Crystal-generate_lattice"><strong>generate_lattice</strong></a>(self, U=1, V=1, W=0)</dt><dd><tt>Generate&nbsp;a&nbsp;repeated&nbsp;lattice&nbsp;of&nbsp;the&nbsp;crystal&nbsp;structure<br>
+&nbsp;&nbsp;&nbsp;&nbsp;latt&nbsp;=&nbsp;xtl.<a href="#Crystal-generate_lattice">generate_lattice</a>(2,0,0)<br>
+:param&nbsp;U:&nbsp;Repeat&nbsp;of&nbsp;the&nbsp;cell&nbsp;along&nbsp;the&nbsp;a&nbsp;axis<br>
+:param&nbsp;V:&nbsp;Repeat&nbsp;of&nbsp;the&nbsp;cell&nbsp;along&nbsp;the&nbsp;b&nbsp;axis<br>
+:param&nbsp;W:&nbsp;Repeat&nbsp;of&nbsp;the&nbsp;cell&nbsp;along&nbsp;the&nbsp;c&nbsp;axis<br>
+:return:&nbsp;<a href="#Crystal">Crystal</a>&nbsp;<a href="builtins.html#object">object</a></tt></dd></dl>
 
 <dl><dt><a name="Crystal-generate_structure"><strong>generate_structure</strong></a>(self)</dt><dd><tt>Combines&nbsp;the&nbsp;atomic&nbsp;positions&nbsp;with&nbsp;symmetry&nbsp;operations,&nbsp;returning&nbsp;the&nbsp;full&nbsp;structure&nbsp;as&nbsp;an&nbsp;<a href="#Atoms">Atoms</a>&nbsp;class<br>
 :return:&nbsp;None</tt></dd></dl>
@@ -419,6 +469,15 @@ superstructure&nbsp;<a href="#Crystal">Crystal</a>&nbsp;class</tt></dd></dl>
 <dl><dt><a name="Crystal-start_gui"><strong>start_gui</strong></a>(self)</dt><dd><tt>Start&nbsp;<a href="#Crystal">Crystal</a>&nbsp;GUI<br>
 :return:&nbsp;None</tt></dd></dl>
 
+<dl><dt><a name="Crystal-update_cif"><strong>update_cif</strong></a>(self, cifvals=None)</dt><dd><tt>Update&nbsp;self.<strong>cif</strong>&nbsp;dict&nbsp;with&nbsp;current&nbsp;values<br>
+:param&nbsp;cifvals:&nbsp;cif&nbsp;dict&nbsp;from&nbsp;readcif&nbsp;(None&nbsp;to&nbsp;use&nbsp;self.<strong>cif</strong>)<br>
+:return:&nbsp;cifvals</tt></dd></dl>
+
+<dl><dt><a name="Crystal-write_cif"><strong>write_cif</strong></a>(self, filename=None, comments=None)</dt><dd><tt>Write&nbsp;crystal&nbsp;structure&nbsp;to&nbsp;file<br>
+:param&nbsp;filename:&nbsp;name&nbsp;to&nbsp;write&nbsp;too,&nbsp;if&nbsp;None,&nbsp;use&nbsp;writes&nbsp;to&nbsp;self.<strong>name</strong>&nbsp;(.cif/.mcif)<br>
+:param&nbsp;comments:&nbsp;str&nbsp;comments&nbsp;to&nbsp;add&nbsp;to&nbsp;file&nbsp;header<br>
+:return:&nbsp;None</tt></dd></dl>
+
 <hr>
 Data descriptors defined here:<br>
 <dl><dt><strong>__dict__</strong></dt>
@@ -437,71 +496,6 @@ Data and other attributes defined here:<br>
 
 <dl><dt><strong>scale</strong> = 1.0</dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="MultiCrystal">class <strong>MultiCrystal</strong></a>(<a href="Dans_Diffraction.classes_plotting.html#MultiPlotting">Dans_Diffraction.classes_plotting.MultiPlotting</a>)</font></td></tr>
-    
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#MultiCrystal">MultiCrystal</a>(crystal_list)<br>
-&nbsp;<br>
-Multi_Crystal&nbsp;class&nbsp;for&nbsp;combining&nbsp;multiple&nbsp;phases<br>&nbsp;</tt></td></tr>
-<tr><td>&nbsp;</td>
-<td width="100%"><dl><dt>Method resolution order:</dt>
-<dd><a href="Dans_Diffraction.classes_crystal.html#MultiCrystal">MultiCrystal</a></dd>
-<dd><a href="Dans_Diffraction.classes_plotting.html#MultiPlotting">Dans_Diffraction.classes_plotting.MultiPlotting</a></dd>
-<dd><a href="builtins.html#object">builtins.object</a></dd>
-</dl>
-<hr>
-Methods defined here:<br>
-<dl><dt><a name="MultiCrystal-__init__"><strong>__init__</strong></a>(self, crystal_list)</dt><dd><tt>Multi-crystal&nbsp;class</tt></dd></dl>
-
-<dl><dt><a name="MultiCrystal-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
-
-<dl><dt><a name="MultiCrystal-find_close_reflections"><strong>find_close_reflections</strong></a>(self, HKL, energy_kev=None, max_twotheta=2, max_angle=10)</dt><dd><tt>Find&nbsp;and&nbsp;print&nbsp;list&nbsp;of&nbsp;reflections&nbsp;close&nbsp;to&nbsp;the&nbsp;given&nbsp;one</tt></dd></dl>
-
-<dl><dt><a name="MultiCrystal-info"><strong>info</strong></a>(self)</dt><dd><tt>Display&nbsp;information&nbsp;about&nbsp;the&nbsp;contained&nbsp;crystals</tt></dd></dl>
-
-<dl><dt><a name="MultiCrystal-print_all_reflections"><strong>print_all_reflections</strong></a>(self, energy_kev=None, max_angle=180.0, print_symmetric=False)</dt><dd><tt>Prints&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;allowed&nbsp;of&nbsp;all&nbsp;crystal&nbsp;reflections&nbsp;at&nbsp;this&nbsp;energy</tt></dd></dl>
-
-<hr>
-Methods inherited from <a href="Dans_Diffraction.classes_plotting.html#MultiPlotting">Dans_Diffraction.classes_plotting.MultiPlotting</a>:<br>
-<dl><dt><a name="MultiCrystal-quick_intensity_cut"><strong>quick_intensity_cut</strong></a>(self, x_axis_crystal=[[1, 0, 0]], y_axis_crystal=[[0, 1, 0]], centre=[0, 0, 0], q_max=4.0, cut_width=0.05)</dt><dd><tt>Plot&nbsp;a&nbsp;cut&nbsp;through&nbsp;reciprocal&nbsp;space,&nbsp;visualising&nbsp;the&nbsp;intensity&nbsp;as&nbsp;different&nbsp;sized&nbsp;markers<br>
-&nbsp;&nbsp;x_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
-&nbsp;&nbsp;y_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
-&nbsp;&nbsp;centre&nbsp;=&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
-&nbsp;&nbsp;q_max&nbsp;=&nbsp;maximum&nbsp;distance&nbsp;to&nbsp;plot&nbsp;to&nbsp;-&nbsp;in&nbsp;A-1<br>
-&nbsp;&nbsp;cut_width&nbsp;=&nbsp;width&nbsp;in&nbsp;height&nbsp;that&nbsp;will&nbsp;be&nbsp;included,&nbsp;in&nbsp;A-1<br>
-&nbsp;<br>
-E.G.&nbsp;hk&nbsp;plot&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;xtl.<a href="#MultiCrystal-quick_intensity_cut">quick_intensity_cut</a>([1,0,0],[0,1,0],[0,0,3])<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hhl&nbsp;plot:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;xtl.<a href="#MultiCrystal-quick_intensity_cut">quick_intensity_cut</a>([1,1,0],[0,0,1],[0,0,0])</tt></dd></dl>
-
-<dl><dt><a name="MultiCrystal-simulate_intensity_cut"><strong>simulate_intensity_cut</strong></a>(self, x_axis_crystal=[[1, 0, 0]], y_axis_crystal=[[0, 1, 0]], centre=[0, 0, 0], q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05)</dt><dd><tt>Plot&nbsp;a&nbsp;cut&nbsp;through&nbsp;reciprocal&nbsp;space,&nbsp;visualising&nbsp;the&nbsp;intensity<br>
-&nbsp;&nbsp;x_axis_crystal&nbsp;=&nbsp;list&nbsp;of&nbsp;crytal&nbsp;x-directions&nbsp;in&nbsp;(hkl),&nbsp;for&nbsp;each&nbsp;crystal<br>
-&nbsp;&nbsp;y_axis_crystal&nbsp;=&nbsp;list&nbsp;of&nbsp;crytal&nbsp;y-directions&nbsp;in&nbsp;(hkl),&nbsp;for&nbsp;each&nbsp;crystal<br>
-&nbsp;&nbsp;centre&nbsp;=&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)&nbsp;of&nbsp;crystal&nbsp;1<br>
-&nbsp;&nbsp;q_max&nbsp;=&nbsp;maximum&nbsp;distance&nbsp;to&nbsp;plot&nbsp;to&nbsp;-&nbsp;in&nbsp;A-1<br>
-&nbsp;&nbsp;cut_width&nbsp;=&nbsp;width&nbsp;in&nbsp;height&nbsp;that&nbsp;will&nbsp;be&nbsp;included,&nbsp;in&nbsp;A-1<br>
-&nbsp;&nbsp;background&nbsp;=&nbsp;average&nbsp;background&nbsp;value<br>
-&nbsp;&nbsp;peak_width&nbsp;=&nbsp;reflection&nbsp;width&nbsp;in&nbsp;A-1<br>
-&nbsp;<br>
-E.G.&nbsp;hk&nbsp;plot&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system&nbsp;(xtl1)&nbsp;with&nbsp;xtl2&nbsp;oriented&nbsp;with&nbsp;the&nbsp;(110)&nbsp;alond&nbsp;xtl1's&nbsp;(100):<br>
-&nbsp;&nbsp;&nbsp;&nbsp;xtls&nbsp;=&nbsp;multi_crystal([xtl1,xtl2])<br>
-&nbsp;&nbsp;&nbsp;&nbsp;xtl.<a href="#MultiCrystal-simulate_intensity_cut">simulate_intensity_cut</a>([[1,0,0],[1,1,0]],[[0,1,0],[0,0,1]],[0,0,3])</tt></dd></dl>
-
-<dl><dt><a name="MultiCrystal-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev=8.0, peak_width=0.05, background=0)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern&nbsp;for&nbsp;multiple&nbsp;phases</tt></dd></dl>
-
-<hr>
-Data descriptors inherited from <a href="Dans_Diffraction.classes_plotting.html#MultiPlotting">Dans_Diffraction.classes_plotting.MultiPlotting</a>:<br>
-<dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
-<dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -548,7 +542,7 @@ Methods defined here:<br>
 <dl><dt><a name="Superstructure-calculateQ_parent"><strong>calculateQ_parent</strong></a>(self, super_hkl)</dt><dd><tt>Indexes&nbsp;(h,k,l)&nbsp;coordinates&nbsp;in&nbsp;the&nbsp;frame&nbsp;same&nbsp;cartesian&nbsp;frame&nbsp;as&nbsp;the&nbsp;Parent&nbsp;structure<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Q&nbsp;=&nbsp;h'*a'*&nbsp;+&nbsp;k'*b'*&nbsp;+&nbsp;l'*c'*<br>
 Where&nbsp;a'*,&nbsp;b'*,&nbsp;c'*&nbsp;are&nbsp;defined&nbsp;relative&nbsp;to&nbsp;the&nbsp;parent&nbsp;lattice,&nbsp;a*,b*,c*<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[qx,qy,qz]&nbsp;=&nbsp;<a href="#Superstructure-calculateQ_parent">calculateQ_parent</a>([h',k',l'])</tt></dd></dl>
 
 <dl><dt><a name="Superstructure-parentUV"><strong>parentUV</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;parent&nbsp;unit&nbsp;vectors&nbsp;defined&nbsp;relative&nbsp;to&nbsp;the&nbsp;supercell</tt></dd></dl>
@@ -558,7 +552,7 @@ Where&nbsp;a'*,&nbsp;b'*,&nbsp;c'*&nbsp;are&nbsp;defined&nbsp;relative&nbsp;to&n
 <dl><dt><a name="Superstructure-parenthkl2super"><strong>parenthkl2super</strong></a>(self, parent_HKL)</dt><dd><tt>Indexes&nbsp;(h,k,l)&nbsp;coordinates&nbsp;in&nbsp;the&nbsp;frame&nbsp;of&nbsp;the&nbsp;Parent&nbsp;structure<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Q&nbsp;=&nbsp;h*a*&nbsp;+&nbsp;k*b*&nbsp;+&nbsp;l*c*&nbsp;=&nbsp;h'*a'*&nbsp;+&nbsp;k'*b'*&nbsp;+&nbsp;l'*c'*<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[h',k',l']&nbsp;=&nbsp;Q/[a'*,b'*,c'*]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[h',k',l']&nbsp;=&nbsp;<a href="#Superstructure-parenthkl2super">parenthkl2super</a>([h,k,l])</tt></dd></dl>
 
 <dl><dt><a name="Superstructure-set_scale"><strong>set_scale</strong></a>(self)</dt><dd><tt>Set&nbsp;scale&nbsp;parameter&nbsp;automatically<br>
@@ -571,22 +565,19 @@ Based&nbsp;on&nbsp;ratio&nbsp;of&nbsp;parent&nbsp;-&nbsp;to&nbsp;superstructure&
 <dl><dt><a name="Superstructure-superhkl2parent"><strong>superhkl2parent</strong></a>(self, super_HKL)</dt><dd><tt>Indexes&nbsp;(h,k,l)&nbsp;coordinates&nbsp;in&nbsp;the&nbsp;frame&nbsp;of&nbsp;the&nbsp;Parent&nbsp;structure<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Q&nbsp;=&nbsp;h*a*&nbsp;+&nbsp;k*b*&nbsp;+&nbsp;l*c*&nbsp;=&nbsp;h'*a'*&nbsp;+&nbsp;k'*b'*&nbsp;+&nbsp;l'*c'*<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[h',k',l']&nbsp;=&nbsp;Q/[a'*,b'*,c'*]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[h,k,l]&nbsp;=&nbsp;<a href="#Superstructure-superhkl2parent">superhkl2parent</a>([h',k',l'])</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
 <dl><dt><strong>P</strong> = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]</dl>
 
-<dl><dt><strong>Parent</strong> = 
-###########################################
-Cry...
-  0   Fe  0.0000  0.0000  0.0000   1.00 0.0127
-
-</dl>
+<dl><dt><strong>Parent</strong> = Crystal with 1 atomic positions, 1 symmetries</dl>
 
 <hr>
 Methods inherited from <a href="Dans_Diffraction.classes_crystal.html#Crystal">Crystal</a>:<br>
+<dl><dt><a name="Superstructure-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+
 <dl><dt><a name="Superstructure-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
 
 <dl><dt><a name="Superstructure-add_parent"><strong>add_parent</strong></a>(self, parent, P)</dt><dd><tt>Add&nbsp;parent&nbsp;structure,&nbsp;returning&nbsp;<a href="#Crystal">Crystal</a>&nbsp;as&nbsp;superstructure<br>
@@ -594,8 +585,12 @@ Methods inherited from <a href="Dans_Diffraction.classes_crystal.html#Crystal">C
 &nbsp;&nbsp;&nbsp;&nbsp;xtl&nbsp;=&nbsp;<a href="#Superstructure-name">Crystal</a>(cif_superstructure)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;su&nbsp;=&nbsp;xtl.<a href="#Superstructure-add_parent">add_parent</a>(parent,&nbsp;[[1,1,0],[0,2,0],[0,0,1]])</tt></dd></dl>
 
-<dl><dt><a name="Superstructure-generate_lattice"><strong>generate_lattice</strong></a>(self, U=1, V=1, W=0)</dt><dd><tt>Generate&nbsp;lattice&nbsp;of&nbsp;a&nbsp;cell<br>
-&nbsp;latt&nbsp;=&nbsp;genlatt(crys,U=1,V=1,W=0)</tt></dd></dl>
+<dl><dt><a name="Superstructure-generate_lattice"><strong>generate_lattice</strong></a>(self, U=1, V=1, W=0)</dt><dd><tt>Generate&nbsp;a&nbsp;repeated&nbsp;lattice&nbsp;of&nbsp;the&nbsp;crystal&nbsp;structure<br>
+&nbsp;&nbsp;&nbsp;&nbsp;latt&nbsp;=&nbsp;xtl.<a href="#Superstructure-generate_lattice">generate_lattice</a>(2,0,0)<br>
+:param&nbsp;U:&nbsp;Repeat&nbsp;of&nbsp;the&nbsp;cell&nbsp;along&nbsp;the&nbsp;a&nbsp;axis<br>
+:param&nbsp;V:&nbsp;Repeat&nbsp;of&nbsp;the&nbsp;cell&nbsp;along&nbsp;the&nbsp;b&nbsp;axis<br>
+:param&nbsp;W:&nbsp;Repeat&nbsp;of&nbsp;the&nbsp;cell&nbsp;along&nbsp;the&nbsp;c&nbsp;axis<br>
+:return:&nbsp;<a href="#Crystal">Crystal</a>&nbsp;<a href="builtins.html#object">object</a></tt></dd></dl>
 
 <dl><dt><a name="Superstructure-generate_structure"><strong>generate_structure</strong></a>(self)</dt><dd><tt>Combines&nbsp;the&nbsp;atomic&nbsp;positions&nbsp;with&nbsp;symmetry&nbsp;operations,&nbsp;returning&nbsp;the&nbsp;full&nbsp;structure&nbsp;as&nbsp;an&nbsp;<a href="#Atoms">Atoms</a>&nbsp;class<br>
 :return:&nbsp;None</tt></dd></dl>
@@ -641,6 +636,15 @@ superstructure&nbsp;<a href="#Crystal">Crystal</a>&nbsp;class</tt></dd></dl>
 <dl><dt><a name="Superstructure-start_gui"><strong>start_gui</strong></a>(self)</dt><dd><tt>Start&nbsp;<a href="#Crystal">Crystal</a>&nbsp;GUI<br>
 :return:&nbsp;None</tt></dd></dl>
 
+<dl><dt><a name="Superstructure-update_cif"><strong>update_cif</strong></a>(self, cifvals=None)</dt><dd><tt>Update&nbsp;self.<strong>cif</strong>&nbsp;dict&nbsp;with&nbsp;current&nbsp;values<br>
+:param&nbsp;cifvals:&nbsp;cif&nbsp;dict&nbsp;from&nbsp;readcif&nbsp;(None&nbsp;to&nbsp;use&nbsp;self.<strong>cif</strong>)<br>
+:return:&nbsp;cifvals</tt></dd></dl>
+
+<dl><dt><a name="Superstructure-write_cif"><strong>write_cif</strong></a>(self, filename=None, comments=None)</dt><dd><tt>Write&nbsp;crystal&nbsp;structure&nbsp;to&nbsp;file<br>
+:param&nbsp;filename:&nbsp;name&nbsp;to&nbsp;write&nbsp;too,&nbsp;if&nbsp;None,&nbsp;use&nbsp;writes&nbsp;to&nbsp;self.<strong>name</strong>&nbsp;(.cif/.mcif)<br>
+:param&nbsp;comments:&nbsp;str&nbsp;comments&nbsp;to&nbsp;add&nbsp;to&nbsp;file&nbsp;header<br>
+:return:&nbsp;None</tt></dd></dl>
+
 <hr>
 Data descriptors inherited from <a href="Dans_Diffraction.classes_crystal.html#Crystal">Crystal</a>:<br>
 <dl><dt><strong>__dict__</strong></dt>
@@ -682,11 +686,32 @@ Contains&nbsp;symmetry&nbsp;information&nbsp;about&nbsp;the&nbsp;crystal,&nbsp;i
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.<a href="#Symmetry-addsym">addsym</a>(['x,y,z+1/2','z,x,y'])&nbsp;&gt;&gt;&nbsp;adds&nbsp;multiple&nbsp;symmetry&nbsp;operation,&nbsp;magnetic&nbsp;operations&nbsp;are&nbsp;infered<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.<a href="#Symmetry-addsym">addsym</a>('x,y,z+1/2','x,y,-z')&nbsp;&gt;&gt;&nbsp;adds&nbsp;single&nbsp;symmetry&nbsp;operation&nbsp;+&nbsp;magnetic&nbsp;operation</tt></dd></dl>
 
+<dl><dt><a name="Symmetry-average_symmetric_intensity"><strong>average_symmetric_intensity</strong></a>(self, hkl_list, intensity_list, tolerance=0.01)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;reflections&nbsp;with&nbsp;symmetric&nbsp;reflections&nbsp;removed,&nbsp;matching&nbsp;reflections&nbsp;will&nbsp;be&nbsp;averaged<br>
+:param&nbsp;hkl_list:&nbsp;list&nbsp;of&nbsp;[h,k,l]&nbsp;reflections<br>
+:param&nbsp;intensity_list:&nbsp;list&nbsp;of&nbsp;intensities<br>
+:param&nbsp;tolerance:&nbsp;tolerance&nbsp;for&nbsp;matching&nbsp;reflections<br>
+:return:&nbsp;array&nbsp;of&nbsp;[h,k,l]</tt></dd></dl>
+
 <dl><dt><a name="Symmetry-changesym"><strong>changesym</strong></a>(self, idx, operation)</dt><dd><tt>Change&nbsp;a&nbsp;symmetry&nbsp;operation<br>
 :param&nbsp;idx:&nbsp;symmetry&nbsp;index<br>
 :param&nbsp;operation:&nbsp;str&nbsp;e.g.&nbsp;'x,-y,z'</tt></dd></dl>
 
 <dl><dt><a name="Symmetry-fromcif"><strong>fromcif</strong></a>(self, cifvals)</dt><dd><tt>Import&nbsp;symmetry&nbsp;information&nbsp;from&nbsp;a&nbsp;cif&nbsp;dictionary<br>
+Required&nbsp;cif&nbsp;keys:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;None<br>
+Optional&nbsp;cif&nbsp;keys:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_symmetry_equiv_pos_as_xyz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_space_group_symop_operation_xyz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_space_group_symop_magn_operation_xyz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_space_group_symop_magn_operation_mxmymz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_space_group_symop_magn_centering_xyz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_space_group_symop_magn_centering_mxmymz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_symmetry_space_group_name_H-M<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_space_group_name_H-M_alt<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_space_group_magn_name_BNS<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_symmetry_Int_Tables_number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_space_group_IT_number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_space_group_magn_number_BNS<br>
 :param&nbsp;cifvals:&nbsp;dict&nbsp;of&nbsp;values&nbsp;from&nbsp;cif<br>
 :return:</tt></dd></dl>
 
@@ -705,6 +730,25 @@ Contains&nbsp;symmetry&nbsp;information&nbsp;about&nbsp;the&nbsp;crystal,&nbsp;i
 :param&nbsp;tolerance:&nbsp;tolerance&nbsp;for&nbsp;matching&nbsp;reflections<br>
 :return:&nbsp;True/&nbsp;False</tt></dd></dl>
 
+<dl><dt><a name="Symmetry-load_magnetic_spacegroup"><strong>load_magnetic_spacegroup</strong></a>(self, msg_number)</dt><dd><tt>Load&nbsp;symmetry&nbsp;operations&nbsp;from&nbsp;a&nbsp;magnetic&nbsp;spacegroup&nbsp;from&nbsp;Bilbao&nbsp;crystallographic&nbsp;server<br>
+Replaces&nbsp;the&nbsp;current&nbsp;symmetry&nbsp;operators&nbsp;and&nbsp;the&nbsp;magnetic&nbsp;symmetry&nbsp;operators.<br>
+See&nbsp;functions_crystallography.spacegroup_magnetic&nbsp;for&nbsp;more&nbsp;details<br>
+:param&nbsp;msg_number:&nbsp;magnetic&nbsp;space&nbsp;group&nbsp;number&nbsp;e.g.&nbsp;61.433<br>
+:return:</tt></dd></dl>
+
+<dl><dt><a name="Symmetry-load_spacegroup"><strong>load_spacegroup</strong></a>(self, sg_number)</dt><dd><tt>Load&nbsp;symmetry&nbsp;operations&nbsp;from&nbsp;a&nbsp;spacegroup&nbsp;from&nbsp;the&nbsp;International&nbsp;Tables&nbsp;of&nbsp;Crystallogrphy<br>
+See&nbsp;functions_crystallography.spacegroup&nbsp;for&nbsp;more&nbsp;details<br>
+:param&nbsp;sg_number:&nbsp;space&nbsp;group&nbsp;number&nbsp;(1-230)<br>
+:return:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Symmetry-print_magnetic_spacegroups"><strong>print_magnetic_spacegroups</strong></a>(self, sg_number=None)</dt><dd><tt>Return&nbsp;str&nbsp;of&nbsp;available&nbsp;magnetic&nbsp;spacegroups&nbsp;for&nbsp;this&nbsp;spacegroup<br>
+:param&nbsp;sg_number:&nbsp;spacegroup&nbsp;number,&nbsp;None&nbsp;to&nbsp;use&nbsp;current&nbsp;one<br>
+:return:&nbsp;str</tt></dd></dl>
+
+<dl><dt><a name="Symmetry-print_subgroups"><strong>print_subgroups</strong></a>(self, sg_number=None)</dt><dd><tt>Return&nbsp;str&nbsp;of&nbsp;subgroups&nbsp;of&nbsp;this&nbsp;spacegroup<br>
+:param&nbsp;sg_number:&nbsp;spacegroup&nbsp;number,&nbsp;None&nbsp;to&nbsp;use&nbsp;current&nbsp;one<br>
+:return:&nbsp;str</tt></dd></dl>
+
 <dl><dt><a name="Symmetry-print_symmetric_coordinate_operations"><strong>print_symmetric_coordinate_operations</strong></a>(self, UVW, remove_identical=True)</dt><dd><tt>Returns&nbsp;array&nbsp;of&nbsp;symmetric&nbsp;operations&nbsp;for&nbsp;given&nbsp;position<br>
 Uses&nbsp;fc.gen_sym_pos<br>
 Returns&nbsp;list&nbsp;of&nbsp;identical&nbsp;symmetry&nbsp;operations,&nbsp;with&nbsp;identical&nbsp;positions&nbsp;removed<br>
@@ -720,6 +764,10 @@ E.G.<br>
 <dl><dt><a name="Symmetry-print_symmetric_vectors"><strong>print_symmetric_vectors</strong></a>(self, HKL)</dt><dd><tt>Print&nbsp;symmetric&nbsp;vectors<br>
 :param&nbsp;HKL:&nbsp;[h,k,l]&nbsp;reflection<br>
 :return:&nbsp;str</tt></dd></dl>
+
+<dl><dt><a name="Symmetry-reflection_multiplyer"><strong>reflection_multiplyer</strong></a>(self, HKL)</dt><dd><tt>Returns&nbsp;the&nbsp;number&nbsp;of&nbsp;symmetric&nbsp;reflections&nbsp;for&nbsp;each&nbsp;hkl<br>
+:param&nbsp;HKL:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;[h,k,l]<br>
+:return:&nbsp;[n]&nbsp;array&nbsp;of&nbsp;multiplyers</tt></dd></dl>
 
 <dl><dt><a name="Symmetry-remove_symmetric_reflections"><strong>remove_symmetric_reflections</strong></a>(self, hkl_list, tolerance=0.01)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;reflections&nbsp;with&nbsp;symmetric&nbsp;reflections&nbsp;removed<br>
 :param&nbsp;hkl_list:&nbsp;list&nbsp;of&nbsp;[h,k,l]&nbsp;reflections<br>
@@ -746,6 +794,7 @@ E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0.0,&nbsp;0.1,&nbsp;0.0]])</tt></dd></dl>
 
 <dl><dt><a name="Symmetry-symmetric_intensity"><strong>symmetric_intensity</strong></a>(self, HKL, I, dI=None)</dt><dd><tt>Returns&nbsp;symmetric&nbsp;reflections&nbsp;with&nbsp;summed&nbsp;intensities&nbsp;of&nbsp;repeated&nbsp;reflections<br>
+Assumes&nbsp;HKL&nbsp;reflections&nbsp;are&nbsp;unique,&nbsp;repeated&nbsp;reflections&nbsp;will&nbsp;be&nbsp;incorrectly&nbsp;added&nbsp;together.<br>
 Uses&nbsp;fc.gen_sym_mat<br>
 E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Symmetry">Symmetry</a>.symmetry_operations&nbsp;=&nbsp;['x,y,z','-x,-y,-z','y,x,z']<br>
@@ -793,6 +842,10 @@ E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;&nbsp;array([[1,&nbsp;&nbsp;1,&nbsp;0],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-1,-1,&nbsp;0]])</tt></dd></dl>
 
+<dl><dt><a name="Symmetry-update_cif"><strong>update_cif</strong></a>(self, cifvals)</dt><dd><tt>Update&nbsp;cifvals&nbsp;dict&nbsp;with&nbsp;current&nbsp;symmetry&nbsp;operations<br>
+:param&nbsp;cifvals:&nbsp;cif&nbsp;dict&nbsp;from&nbsp;functions_crystallography.readcif<br>
+:return:&nbsp;cifvals</tt></dd></dl>
+
 <hr>
 Data descriptors defined here:<br>
 <dl><dt><strong>__dict__</strong></dt>
@@ -811,5 +864,13 @@ Data and other attributes defined here:<br>
 
 <dl><dt><strong>symmetry_operations_magnetic</strong> = ['x,y,z']</dl>
 
-</td></tr></table></td></tr></table>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-warn"><strong>warn</strong></a>(message, category=None, stacklevel=1, source=None)</dt><dd><tt>Issue&nbsp;a&nbsp;warning,&nbsp;or&nbsp;maybe&nbsp;ignore&nbsp;it&nbsp;or&nbsp;raise&nbsp;an&nbsp;exception.</tt></dd></dl>
+</td></tr></table>
 </body></html>

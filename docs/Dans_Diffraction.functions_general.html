@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_general</strong></big></big> (version 1.4)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_general</strong></big></big> (version 1.5)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_general.py">c:\users\grp66007\dropbox\python\dans_diffraction\dans_diffraction\functions_general.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_general.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\functions_general.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;Generally&nbsp;useful&nbsp;functions&nbsp;"functions_general.py"<br>
 &nbsp;<br>
 Contains&nbsp;various&nbsp;useful&nbsp;shortcuts&nbsp;for&nbsp;manipulating&nbsp;strings&nbsp;and&nbsp;arrays,&nbsp;<br>
@@ -24,8 +24,8 @@ Usage:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;from&nbsp;Dans_Diffraction&nbsp;import&nbsp;functions_general&nbsp;as&nbsp;fg<br>
 &nbsp;<br>
 &nbsp;<br>
-Version&nbsp;1.4<br>
-Last&nbsp;updated:&nbsp;18/10/19<br>
+Version&nbsp;1.5<br>
+Last&nbsp;updated:&nbsp;27/03/20<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 06/01/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created&nbsp;from&nbsp;DansGeneralProgs.py&nbsp;V2.3<br>
@@ -33,6 +33,7 @@ Version&nbsp;History:<br>
 24/05/18&nbsp;1.2&nbsp;&nbsp;&nbsp;&nbsp;Corrected&nbsp;'quad'&nbsp;for&nbsp;the&nbsp;case&nbsp;(1,-2,1)=1<br>
 31/10/18&nbsp;1.3&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;complex2str<br>
 20/08/19&nbsp;1.4&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;search_dict_lists<br>
+27/03/20&nbsp;1.5&nbsp;&nbsp;&nbsp;&nbsp;Corrected&nbsp;error&nbsp;in&nbsp;gauss&nbsp;for&nbsp;1d&nbsp;case&nbsp;when&nbsp;centre&nbsp;/=&nbsp;0<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -102,14 +103,22 @@ E.G.<br>
 Like&nbsp;np.arange&nbsp;but&nbsp;ends&nbsp;at&nbsp;stop,&nbsp;rather&nbsp;than&nbsp;at&nbsp;stop-step<br>
 E.G.<br>
 A&nbsp;=&nbsp;<a href="#-frange">frange</a>(0,5,1)&nbsp;=&nbsp;[0.,1.,2.,3.,4.,5.]</tt></dd></dl>
- <dl><dt><a name="-gauss"><strong>gauss</strong></a>(x, y=0, height=1, cen=0, FWHM=0.5, bkg=0)</dt><dd><tt>Define&nbsp;Gaussian&nbsp;distribution&nbsp;in&nbsp;1&nbsp;or&nbsp;2&nbsp;dimensions<br>
+ <dl><dt><a name="-gauss"><strong>gauss</strong></a>(x, y=None, height=1, cen=0, fwhm=0.5, bkg=0)</dt><dd><tt>Define&nbsp;Gaussian&nbsp;distribution&nbsp;in&nbsp;1&nbsp;or&nbsp;2&nbsp;dimensions<br>
 From&nbsp;<a href="http://fityk.nieto.pl/model.html">http://fityk.nieto.pl/model.html</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;=&nbsp;[1xn]&nbsp;array&nbsp;of&nbsp;values,&nbsp;defines&nbsp;size&nbsp;of&nbsp;gaussian&nbsp;in&nbsp;dimension&nbsp;1<br>
-&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;=&nbsp;0&nbsp;or&nbsp;[1xm]&nbsp;array&nbsp;of&nbsp;values,&nbsp;defines&nbsp;size&nbsp;of&nbsp;gaussian&nbsp;in&nbsp;dimension&nbsp;2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;=&nbsp;None*&nbsp;or&nbsp;[1xm]&nbsp;array&nbsp;of&nbsp;values,&nbsp;defines&nbsp;size&nbsp;of&nbsp;gaussian&nbsp;in&nbsp;dimension&nbsp;2<br>
 &nbsp;&nbsp;&nbsp;&nbsp;height&nbsp;=&nbsp;peak&nbsp;height<br>
 &nbsp;&nbsp;&nbsp;&nbsp;cen&nbsp;=&nbsp;peak&nbsp;centre<br>
-&nbsp;&nbsp;&nbsp;&nbsp;FWHM&nbsp;=&nbsp;peak&nbsp;full&nbsp;width&nbsp;at&nbsp;half-max<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fwhm&nbsp;=&nbsp;peak&nbsp;full&nbsp;width&nbsp;at&nbsp;half-max<br>
 &nbsp;&nbsp;&nbsp;&nbsp;bkg&nbsp;=&nbsp;background</tt></dd></dl>
+ <dl><dt><a name="-grid_intensity"><strong>grid_intensity</strong></a>(points, values, resolution=0.01, peak_width=0.1, background=0)</dt><dd><tt>Generates&nbsp;array&nbsp;of&nbsp;intensities&nbsp;along&nbsp;a&nbsp;spaced&nbsp;grid,&nbsp;equivalent&nbsp;to&nbsp;a&nbsp;powder&nbsp;pattern.<br>
+&nbsp;&nbsp;grid,&nbsp;values&nbsp;=&nbsp;generate_powder(points,&nbsp;values,&nbsp;resolution=0.01,&nbsp;peak_width=0.1,&nbsp;background=0)<br>
+:param&nbsp;points:&nbsp;[nx1]&nbsp;position&nbsp;of&nbsp;values&nbsp;to&nbsp;place&nbsp;on&nbsp;grid<br>
+:param&nbsp;values:&nbsp;[nx1]&nbsp;values&nbsp;to&nbsp;place&nbsp;at&nbsp;points<br>
+:param&nbsp;resolution:&nbsp;grid&nbsp;spacing&nbsp;size,&nbsp;with&nbsp;same&nbsp;units&nbsp;as&nbsp;points<br>
+:param&nbsp;peak_width:&nbsp;width&nbsp;of&nbsp;convolved&nbsp;gaussian,&nbsp;with&nbsp;same&nbsp;units&nbsp;as&nbsp;points<br>
+:param&nbsp;background:&nbsp;add&nbsp;a&nbsp;normal&nbsp;(random)&nbsp;background&nbsp;with&nbsp;width&nbsp;sqrt(background)<br>
+:return:&nbsp;points,&nbsp;values</tt></dd></dl>
  <dl><dt><a name="-index_coordinates"><strong>index_coordinates</strong></a>(A, CELL)</dt><dd><tt>Index&nbsp;A(x1,y1,1)&nbsp;on&nbsp;new&nbsp;coordinate&nbsp;system&nbsp;B(x2,y2,z2),&nbsp;defined&nbsp;by&nbsp;unit&nbsp;vectors&nbsp;CELL&nbsp;=&nbsp;[A,B,C]<br>
 &nbsp;&nbsp;A&nbsp;=&nbsp;[[nx3]]&nbsp;array&nbsp;of&nbsp;vectors<br>
 &nbsp;&nbsp;CELL&nbsp;=&nbsp;[[3x3]]&nbsp;matrix&nbsp;of&nbsp;vectors&nbsp;[a,b,c]</tt></dd></dl>
@@ -132,6 +141,14 @@ If&nbsp;A&nbsp;has&nbsp;2&nbsp;dimensions,&nbsp;returns&nbsp;an&nbsp;array&nbsp;
 E.G.<br>
 &nbsp;<a href="#-mag">mag</a>([1,1,1])&nbsp;=&nbsp;1.732<br>
 &nbsp;<a href="#-mag">mag</a>(array([[1,1,1],[2,2,2]])&nbsp;=&nbsp;[1.732,&nbsp;3.464]</tt></dd></dl>
+ <dl><dt><a name="-map2grid"><strong>map2grid</strong></a>(grid, points, values, widths=None, background=0)</dt><dd><tt>Generates&nbsp;array&nbsp;of&nbsp;intensities&nbsp;along&nbsp;a&nbsp;spaced&nbsp;grid,&nbsp;equivalent&nbsp;to&nbsp;a&nbsp;powder&nbsp;pattern.<br>
+&nbsp;&nbsp;grid,&nbsp;values&nbsp;=&nbsp;generate_powder(points,&nbsp;values,&nbsp;resolution=0.01,&nbsp;peak_width=0.1,&nbsp;background=0)<br>
+:param&nbsp;grid:&nbsp;[mx1]&nbsp;grid&nbsp;of&nbsp;positions<br>
+:param&nbsp;points:&nbsp;[nx1]&nbsp;position&nbsp;of&nbsp;values&nbsp;to&nbsp;place&nbsp;on&nbsp;grid<br>
+:param&nbsp;values:&nbsp;[nx1]&nbsp;values&nbsp;to&nbsp;place&nbsp;at&nbsp;points<br>
+:param&nbsp;widths:&nbsp;width&nbsp;of&nbsp;convolved&nbsp;gaussian,&nbsp;with&nbsp;same&nbsp;units&nbsp;as&nbsp;points<br>
+:param&nbsp;background:&nbsp;add&nbsp;a&nbsp;normal&nbsp;(random)&nbsp;background&nbsp;with&nbsp;width&nbsp;sqrt(background)<br>
+:return:&nbsp;points,&nbsp;values</tt></dd></dl>
  <dl><dt><a name="-multi_replace"><strong>multi_replace</strong></a>(string, old=[], new=[])</dt><dd><tt>Replace&nbsp;multiple&nbsp;strings&nbsp;at&nbsp;once<br>
 :param&nbsp;string:<br>
 :param&nbsp;old:<br>
@@ -277,7 +294,7 @@ newarray,uniqueidx,matchidx&nbsp;=&nbsp;<a href="#-unique_vector">unique_vector<
 <strong>Mo</strong> = 17.4808<br>
 <strong>Na</strong> = 6.022e+23<br>
 <strong>c</strong> = 299792458<br>
-<strong>directory</strong> = r'C:\Users\grp66007\Dropbox\Python\Dans_Diffraction\Dans_Diffraction'<br>
+<strong>directory</strong> = r'C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction'<br>
 <strong>e</strong> = 1.6021733e-19<br>
 <strong>h</strong> = 6.62606868e-34<br>
 <strong>me</strong> = 9.109e-31<br>

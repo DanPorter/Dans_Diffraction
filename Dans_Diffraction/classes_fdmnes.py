@@ -250,7 +250,7 @@ class Fdmnes:
         param_string += ' Convolution                  ! Performs the convolution\n\n'
 
         param_string += ' Zero_azim                    ! Define basis vector for zero psi angle\n'
-        param_string += '  {:8.6f} {:8.6f} {:8.6f}  '.format(fdm_ar[0],fdm_ar[1],fdm_ar[2])
+        param_string += '  {:6.3f} {:6.3f} {:6.3f}  '.format(fdm_ar[0],fdm_ar[1],fdm_ar[2])
         param_string += '! Same as I16, Reciprocal ({} {} {}) in units of real SL. \n'.format(self.azi_ref[0],self.azi_ref[1],self.azi_ref[2])
 
         param_string += ' rxs                          ! Resonant x-ray scattering at various peaks, peak given by: h k l sigma pi azimuth.\n'
@@ -334,7 +334,7 @@ class Fdmnes:
         """
 
         if not os.path.isdir(self.output_path):
-            os.mkdir(self.output_path)
+            os.makedirs(self.output_path)
 
     def create_files(self, folder_name=None, param_string=None):
         """
@@ -1150,7 +1150,7 @@ def find_fdmnes_files(parent_directory=None, output_name='out'):
         parent_directory = fdmnes_location()
 
     if '.txt' not in output_name:
-        output_name = output_name + '.txt'
+        output_name = output_name + '_bav.txt'
 
     calc_dirs = []
     for dirpath, dirnames, filenames in os.walk(parent_directory):
@@ -1172,7 +1172,7 @@ def load_fdmnes_files(parent_directory=None, output_name='out'):
     :return: FdmnesCompare
     """
     calc_dirs = find_fdmnes_files(parent_directory, output_name)
-    fdms = FdmnesCompare()
+    fdms = FdmnesCompare([])
     fdms.load(calc_dirs)
     return fdms
 

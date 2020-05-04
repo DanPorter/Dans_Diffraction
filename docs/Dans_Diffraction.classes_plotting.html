@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_plotting</strong></big></big> (version 1.6)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_plotting</strong></big></big> (version 1.7)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_plotting.py">c:\users\grp66007\dropbox\python\dans_diffraction\dans_diffraction\classes_plotting.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_plotting.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_plotting.py</a></font></td></tr></table>
     <p><tt><a href="#Plotting">Plotting</a>&nbsp;Class&nbsp;"classes_plotting.py"<br>
 &nbsp;functions&nbsp;to&nbsp;plot&nbsp;the&nbsp;crystal&nbsp;structure&nbsp;and&nbsp;simulated&nbsp;<br>
 &nbsp;diffraction&nbsp;patterns.<br>
@@ -17,8 +17,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;1.6<br>
-Last&nbsp;updated:&nbsp;08/11/19<br>
+Version&nbsp;1.7<br>
+Last&nbsp;updated:&nbsp;15/04/20<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 18/08/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -29,6 +29,8 @@ Version&nbsp;History:<br>
 08/06/18&nbsp;1.4&nbsp;&nbsp;&nbsp;&nbsp;Corrected&nbsp;call&nbsp;to&nbsp;simulate_lattice_lines&nbsp;in&nbsp;simulate_reciprocal_plane<br>
 21/01/19&nbsp;1.5&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;simulate_polarisation_resonant&nbsp;and&nbsp;_nonresonant<br>
 08/11/19&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;Increased&nbsp;pixel&nbsp;width&nbsp;on&nbsp;powder&nbsp;plots,&nbsp;improved&nbsp;superstructure&nbsp;recriprocal&nbsp;space&nbsp;planes<br>
+14/04/20&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;powder&nbsp;avereging&nbsp;to&nbsp;simulate_powder<br>
+15/04/20&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;minimum&nbsp;angle&nbsp;to&nbsp;simulate_powder<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -71,9 +73,13 @@ Version&nbsp;History:<br>
 <font color="#000000" face="helvetica, arial"><a name="MultiPlotting">class <strong>MultiPlotting</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Plotting">Plotting</a>&nbsp;functions&nbsp;for&nbsp;the&nbsp;Multi-Crystal&nbsp;Object<br>&nbsp;</tt></td></tr>
+<td colspan=2><tt><a href="#MultiPlotting">MultiPlotting</a>(crystal_list)<br>
+&nbsp;<br>
+<a href="#Plotting">Plotting</a>&nbsp;functions&nbsp;for&nbsp;the&nbsp;Multi-Crystal&nbsp;Object<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
+<dl><dt><a name="MultiPlotting-__init__"><strong>__init__</strong></a>(self, crystal_list)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
 <dl><dt><a name="MultiPlotting-quick_intensity_cut"><strong>quick_intensity_cut</strong></a>(self, x_axis_crystal=[[1, 0, 0]], y_axis_crystal=[[0, 1, 0]], centre=[0, 0, 0], q_max=4.0, cut_width=0.05)</dt><dd><tt>Plot&nbsp;a&nbsp;cut&nbsp;through&nbsp;reciprocal&nbsp;space,&nbsp;visualising&nbsp;the&nbsp;intensity&nbsp;as&nbsp;different&nbsp;sized&nbsp;markers<br>
 &nbsp;&nbsp;x_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
 &nbsp;&nbsp;y_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
@@ -99,7 +105,8 @@ E.G.&nbsp;hk&nbsp;plot&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system&nbsp
 &nbsp;&nbsp;&nbsp;&nbsp;xtls&nbsp;=&nbsp;multi_crystal([xtl1,xtl2])<br>
 &nbsp;&nbsp;&nbsp;&nbsp;xtl.<a href="#MultiPlotting-simulate_intensity_cut">simulate_intensity_cut</a>([[1,0,0],[1,1,0]],[[0,1,0],[0,0,1]],[0,0,3])</tt></dd></dl>
 
-<dl><dt><a name="MultiPlotting-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev=8.0, peak_width=0.05, background=0)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern&nbsp;for&nbsp;multiple&nbsp;phases</tt></dd></dl>
+<dl><dt><a name="MultiPlotting-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev=8.0, peak_width=0.05, background=0, powder_average=True)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern&nbsp;for&nbsp;multiple&nbsp;phases<br>
+&nbsp;&nbsp;&nbsp;&nbsp;see&nbsp;classes_scattering.generate_powder</tt></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>
@@ -141,15 +148,6 @@ E.G.&nbsp;hk&nbsp;plane&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br
 &nbsp;&nbsp;&nbsp;&nbsp;plt.figure()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;plt.pcolormesh(Qx,Qy,plane)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;plt.axis('image')</tt></dd></dl>
-
-<dl><dt><a name="Plotting-generate_powder"><strong>generate_powder</strong></a>(self, q_max=8, peak_width=0.01, background=0)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern&nbsp;and&nbsp;returns&nbsp;the&nbsp;results<br>
-&nbsp;&nbsp;tth,I&nbsp;=&nbsp;<a href="#Plotting-generate_powder">generate_powder</a>(energy_kev=8.0,peak_width=0.05,background=0)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;q_max&nbsp;=&nbsp;maximum&nbsp;Q,&nbsp;in&nbsp;A-1<br>
-&nbsp;&nbsp;&nbsp;&nbsp;peak_width&nbsp;=&nbsp;width&nbsp;of&nbsp;convolution,&nbsp;in&nbsp;A-1<br>
-&nbsp;&nbsp;&nbsp;&nbsp;background&nbsp;=&nbsp;average&nbsp;of&nbsp;normal&nbsp;background<br>
-&nbsp;&nbsp;Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Q&nbsp;=&nbsp;[1000x1]&nbsp;array&nbsp;of&nbsp;wave-vector&nbsp;values<br>
-&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;=&nbsp;[1000x1]&nbsp;array&nbsp;of&nbsp;intensity&nbsp;values</tt></dd></dl>
 
 <dl><dt><a name="Plotting-plot_3Dlattice"><strong>plot_3Dlattice</strong></a>(self, q_max=4.0, x_axis=[1, 0, 0], y_axis=[0, 1, 0], centre=[0, 0, 0], cut_width=0.05)</dt><dd><tt>Plot&nbsp;lattice&nbsp;points&nbsp;in&nbsp;3D</tt></dd></dl>
 
@@ -278,7 +276,8 @@ E.G.&nbsp;hk&nbsp;plot&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
 &nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
 
-<dl><dt><a name="Plotting-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev=None, peak_width=0.01, background=0)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern,&nbsp;plots&nbsp;in&nbsp;a&nbsp;new&nbsp;figure&nbsp;with&nbsp;labels</tt></dd></dl>
+<dl><dt><a name="Plotting-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev=None, peak_width=0.01, background=0, powder_average=True)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern,&nbsp;plots&nbsp;in&nbsp;a&nbsp;new&nbsp;figure&nbsp;with&nbsp;labels<br>
+&nbsp;&nbsp;&nbsp;&nbsp;see&nbsp;classes_scattering.generate_powder</tt></dd></dl>
 
 <dl><dt><a name="Plotting-tensor_scattering_azimuth"><strong>tensor_scattering_azimuth</strong></a>(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None)</dt><dd><tt>Plot&nbsp;tensor&nbsp;scattering&nbsp;intensities<br>
 &nbsp;&nbsp;ss,&nbsp;sp,&nbsp;ps,&nbsp;pp&nbsp;=&nbsp;tensor_scattering('Ru1',&nbsp;[0,0,3],&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90)<br>
@@ -384,15 +383,6 @@ E.G.&nbsp;hk&nbsp;plot&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
 <hr>
 Methods inherited from <a href="Dans_Diffraction.classes_plotting.html#Plotting">Plotting</a>:<br>
 <dl><dt><a name="PlottingSuperstructure-__init__"><strong>__init__</strong></a>(self, xtl)</dt><dd><tt>initialise</tt></dd></dl>
-
-<dl><dt><a name="PlottingSuperstructure-generate_powder"><strong>generate_powder</strong></a>(self, q_max=8, peak_width=0.01, background=0)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern&nbsp;and&nbsp;returns&nbsp;the&nbsp;results<br>
-&nbsp;&nbsp;tth,I&nbsp;=&nbsp;<a href="#PlottingSuperstructure-generate_powder">generate_powder</a>(energy_kev=8.0,peak_width=0.05,background=0)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;q_max&nbsp;=&nbsp;maximum&nbsp;Q,&nbsp;in&nbsp;A-1<br>
-&nbsp;&nbsp;&nbsp;&nbsp;peak_width&nbsp;=&nbsp;width&nbsp;of&nbsp;convolution,&nbsp;in&nbsp;A-1<br>
-&nbsp;&nbsp;&nbsp;&nbsp;background&nbsp;=&nbsp;average&nbsp;of&nbsp;normal&nbsp;background<br>
-&nbsp;&nbsp;Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Q&nbsp;=&nbsp;[1000x1]&nbsp;array&nbsp;of&nbsp;wave-vector&nbsp;values<br>
-&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;=&nbsp;[1000x1]&nbsp;array&nbsp;of&nbsp;intensity&nbsp;values</tt></dd></dl>
 
 <dl><dt><a name="PlottingSuperstructure-plot_3Dlattice"><strong>plot_3Dlattice</strong></a>(self, q_max=4.0, x_axis=[1, 0, 0], y_axis=[0, 1, 0], centre=[0, 0, 0], cut_width=0.05)</dt><dd><tt>Plot&nbsp;lattice&nbsp;points&nbsp;in&nbsp;3D</tt></dd></dl>
 
@@ -507,7 +497,8 @@ Plot&nbsp;ewald&nbsp;space&nbsp;coverage&nbsp;within&nbsp;a&nbsp;particular&nbsp
 &nbsp;&nbsp;&nbsp;&nbsp;F0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
 &nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth</tt></dd></dl>
 
-<dl><dt><a name="PlottingSuperstructure-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev=None, peak_width=0.01, background=0)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern,&nbsp;plots&nbsp;in&nbsp;a&nbsp;new&nbsp;figure&nbsp;with&nbsp;labels</tt></dd></dl>
+<dl><dt><a name="PlottingSuperstructure-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev=None, peak_width=0.01, background=0, powder_average=True)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern,&nbsp;plots&nbsp;in&nbsp;a&nbsp;new&nbsp;figure&nbsp;with&nbsp;labels<br>
+&nbsp;&nbsp;&nbsp;&nbsp;see&nbsp;classes_scattering.generate_powder</tt></dd></dl>
 
 <dl><dt><a name="PlottingSuperstructure-tensor_scattering_azimuth"><strong>tensor_scattering_azimuth</strong></a>(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None)</dt><dd><tt>Plot&nbsp;tensor&nbsp;scattering&nbsp;intensities<br>
 &nbsp;&nbsp;ss,&nbsp;sp,&nbsp;ps,&nbsp;pp&nbsp;=&nbsp;tensor_scattering('Ru1',&nbsp;[0,0,3],&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90)<br>

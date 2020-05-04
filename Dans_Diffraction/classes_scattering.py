@@ -46,8 +46,8 @@ class Scattering:
     Useage:
         xtl = Crystal()
         xtl.Scatter.setup_scatter(type='x-ray',energy_keV=8.0)
-        xtl.intensity([h,k,l]) # Returns intensity
-        xtl.print_all_refelctions() # Returns formated string of all allowed reflections
+        xtl.Scatter.intensity([h,k,l]) # Returns intensity
+        print(xtl.Scatter.print_all_refelctions()) # Returns formated string of all allowed reflections
         
         Allowed radiation types:
             'xray','neutron','xray magnetic','neutron magnetic','xray resonant'

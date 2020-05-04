@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_scattering</strong></big></big> (version 1.5)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_scattering</strong></big></big> (version 1.6)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_scattering.py">c:\users\grp66007\dropbox\python\dans_diffraction\dans_diffraction\classes_scattering.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_scattering.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_scattering.py</a></font></td></tr></table>
     <p><tt><a href="#Scattering">Scattering</a>&nbsp;Class&nbsp;"classes_scattering.py"<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Scattering">Scattering</a>&nbsp;functions&nbsp;for&nbsp;Crystal&nbsp;class.<br>
 &nbsp;<br>
@@ -16,8 +16,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;1.5<br>
-Last&nbsp;updated:&nbsp;18/02/20<br>
+Version&nbsp;1.6<br>
+Last&nbsp;updated:&nbsp;14/04/20<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 10/09/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -27,6 +27,8 @@ Version&nbsp;History:<br>
 21/01/19&nbsp;1.3&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;non-resonant&nbsp;diffraction,&nbsp;corrected&nbsp;resonant&nbsp;diffraction<br>
 16/12/19&nbsp;1.4&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;multiple_scattering&nbsp;code,&nbsp;print_all_reflections&nbsp;updated&nbsp;with&nbsp;units<br>
 18/02/20&nbsp;1.5&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;tensor_scattering&nbsp;code<br>
+20/03/20&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;Increased&nbsp;powder&nbsp;gauss&nbsp;width&nbsp;from&nbsp;2fwhm&nbsp;to&nbsp;6fwhm,&nbsp;added&nbsp;powder&nbsp;averaging<br>
+14/04/20&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;powder_correction<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -72,8 +74,8 @@ Simulate&nbsp;diffraction&nbsp;from&nbsp;Crystal<br>
 Useage:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;xtl&nbsp;=&nbsp;Crystal()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;xtl.Scatter.<a href="#Scattering-setup_scatter">setup_scatter</a>(type='x-ray',energy_keV=8.0)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;xtl.<a href="#Scattering-intensity">intensity</a>([h,k,l])&nbsp;#&nbsp;Returns&nbsp;intensity<br>
-&nbsp;&nbsp;&nbsp;&nbsp;xtl.print_all_refelctions()&nbsp;#&nbsp;Returns&nbsp;formated&nbsp;string&nbsp;of&nbsp;all&nbsp;allowed&nbsp;reflections<br>
+&nbsp;&nbsp;&nbsp;&nbsp;xtl.Scatter.<a href="#Scattering-intensity">intensity</a>([h,k,l])&nbsp;#&nbsp;Returns&nbsp;intensity<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print(xtl.Scatter.print_all_refelctions())&nbsp;#&nbsp;Returns&nbsp;formated&nbsp;string&nbsp;of&nbsp;all&nbsp;allowed&nbsp;reflections<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Allowed&nbsp;radiation&nbsp;types:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant'<br>&nbsp;</tt></td></tr>
@@ -83,11 +85,12 @@ Useage:<br>
 
 <dl><dt><a name="Scattering-find_close_reflections"><strong>find_close_reflections</strong></a>(self, HKL, energy_kev=None, max_twotheta=2, max_angle=10)</dt><dd><tt>Find&nbsp;and&nbsp;print&nbsp;list&nbsp;of&nbsp;reflections&nbsp;close&nbsp;to&nbsp;the&nbsp;given&nbsp;one</tt></dd></dl>
 
-<dl><dt><a name="Scattering-generate_powder"><strong>generate_powder</strong></a>(self, q_max=8, peak_width=0.01, background=0)</dt><dd><tt>Generates&nbsp;array&nbsp;of&nbsp;intensities&nbsp;along&nbsp;a&nbsp;spaced&nbsp;grid,&nbsp;equivalent&nbsp;to&nbsp;a&nbsp;powder&nbsp;pattern.<br>
+<dl><dt><a name="Scattering-generate_powder"><strong>generate_powder</strong></a>(self, q_max=8, peak_width=0.01, background=0, powder_average=True)</dt><dd><tt>Generates&nbsp;array&nbsp;of&nbsp;intensities&nbsp;along&nbsp;a&nbsp;spaced&nbsp;grid,&nbsp;equivalent&nbsp;to&nbsp;a&nbsp;powder&nbsp;pattern.<br>
 &nbsp;&nbsp;Q,I&nbsp;=&nbsp;<a href="#Scattering-generate_powder">generate_powder</a>(energy_kev=8.0,peak_width=0.05,background=0)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;q_max&nbsp;=&nbsp;maximum&nbsp;Q,&nbsp;in&nbsp;A-1<br>
 &nbsp;&nbsp;&nbsp;&nbsp;peak_width&nbsp;=&nbsp;width&nbsp;of&nbsp;convolution,&nbsp;in&nbsp;A-1<br>
 &nbsp;&nbsp;&nbsp;&nbsp;background&nbsp;=&nbsp;average&nbsp;of&nbsp;normal&nbsp;background<br>
+&nbsp;&nbsp;&nbsp;&nbsp;powder_average&nbsp;=&nbsp;True*/False,&nbsp;apply&nbsp;the&nbsp;powder&nbsp;averaging&nbsp;correction<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Q&nbsp;=&nbsp;[1000x1]&nbsp;array&nbsp;of&nbsp;wave-vector&nbsp;values<br>
 &nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;=&nbsp;[1000x1]&nbsp;array&nbsp;of&nbsp;intensity&nbsp;values<br>
@@ -160,6 +163,12 @@ See&nbsp;multiple_scattering.py&nbsp;for&nbsp;more&nbsp;details.&nbsp;Code&nbsp;
 &nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-neutron">neutron</a>([1,0,0])<br>
 &nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-neutron">neutron</a>([[1,0,0],[2,0,0],[3,0,0])<br>
 Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.</tt></dd></dl>
+
+<dl><dt><a name="Scattering-powder_correction"><strong>powder_correction</strong></a>(self, HKL, intensities, symmetric_multiplyer=True, powder_average=True)</dt><dd><tt>Averages&nbsp;symmetric&nbsp;reflections&nbsp;and&nbsp;applies&nbsp;symmetry&nbsp;multipliers&nbsp;and&nbsp;1/q^2&nbsp;correction<br>
+Ic&nbsp;=&nbsp;I0*C<br>
+:param&nbsp;HKL:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;[h,k,l]&nbsp;reflections<br>
+:param&nbsp;intensities:&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;reflection&nbsp;intensities<br>
+:return:&nbsp;[mx3],&nbsp;[mx1]&nbsp;arrays&nbsp;of&nbsp;averaged,&nbsp;corrected&nbsp;reflections&nbsp;+&nbsp;intensity</tt></dd></dl>
 
 <dl><dt><a name="Scattering-print_all_reflections"><strong>print_all_reflections</strong></a>(self, energy_kev=None, print_symmetric=False, min_intensity=0.01, max_intensity=None, units=None)</dt><dd><tt>Prints&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;allowed&nbsp;reflections&nbsp;at&nbsp;this&nbsp;energy<br>
 &nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;energy&nbsp;in&nbsp;keV<br>
@@ -299,11 +308,13 @@ Returned&nbsp;values&nbsp;are&nbsp;[n,3]&nbsp;arrays<br>
 The&nbsp;basis&nbsp;is&nbsp;chosen&nbsp;such&nbsp;that&nbsp;Q&nbsp;defines&nbsp;the&nbsp;scattering&nbsp;plane,&nbsp;sigma&nbsp;and&nbsp;pi&nbsp;directions&nbsp;are&nbsp;normal&nbsp;to&nbsp;this&nbsp;plane.<br>
 Q&nbsp;is&nbsp;defined&nbsp;as&nbsp;Q&nbsp;=&nbsp;kout&nbsp;-&nbsp;kin,&nbsp;with&nbsp;kout&nbsp;+ve&nbsp;along&nbsp;the&nbsp;projection&nbsp;of&nbsp;azim_zero</tt></dd></dl>
 
-<dl><dt><a name="Scattering-setup_scatter"><strong>setup_scatter</strong></a>(self, type=None, energy_kev=None, wavelength_a=None, specular=None, parallel=None, theta_offset=None, min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None)</dt><dd><tt>Simple&nbsp;way&nbsp;to&nbsp;set&nbsp;scattering&nbsp;parameters,&nbsp;each&nbsp;parameter&nbsp;is&nbsp;internal&nbsp;to&nbsp;xtl&nbsp;(self)<br>
+<dl><dt><a name="Scattering-setup_scatter"><strong>setup_scatter</strong></a>(self, type=None, energy_kev=None, wavelength_a=None, powder_units=None, specular=None, parallel=None, theta_offset=None, min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None)</dt><dd><tt>Simple&nbsp;way&nbsp;to&nbsp;set&nbsp;scattering&nbsp;parameters,&nbsp;each&nbsp;parameter&nbsp;is&nbsp;internal&nbsp;to&nbsp;xtl&nbsp;(self)<br>
 &nbsp;<br>
-type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering</strong>&nbsp;type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;'xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant'<br>
-energy_kev&nbsp;&nbsp;:&nbsp;self.<strong>_energy_kev</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;radiation&nbsp;energy&nbsp;in&nbsp;keV<br>
-wavelength_a:&nbsp;self.<strong>_wavelength_a</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;radiation&nbsp;wavelength&nbsp;in&nbsp;Angstrom<br>
+type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering</strong>&nbsp;type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;'xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant'<br>
+energy_kev&nbsp;&nbsp;:&nbsp;self.<strong>_energy_kev</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;radiation&nbsp;energy&nbsp;in&nbsp;keV<br>
+wavelength_a:&nbsp;self.<strong>_wavelength_a</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;radiation&nbsp;wavelength&nbsp;in&nbsp;Angstrom<br>
+powder_units:&nbsp;self.<strong>_powder_units</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;units&nbsp;to&nbsp;use&nbsp;when&nbsp;displaying/&nbsp;plotting&nbsp;['twotheta',&nbsp;'d','&nbsp;'q']<br>
+min_twotheta:&nbsp;self.<strong>_scattering_min_two_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;minimum&nbsp;detector&nbsp;(two-theta)&nbsp;angle<br>
 max_twotheta:&nbsp;self.<strong>_scattering_max_two_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;detector&nbsp;(two-theta)&nbsp;angle<br>
 min_theta&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_min_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;minimum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;-opening&nbsp;angle<br>
 max_theta&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_max_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;opening&nbsp;angle<br>

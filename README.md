@@ -113,6 +113,8 @@ xtl.Plot.simulate_hk0() # Reciprocal space plane
 
 
 ### Magnetic Structrues
+*Magnetic structures and scattering are currently in development and shouldn't be treated as accurate!*
+
 Simple magnetic structures can be loaded from magnetic cif (*.mcif) files. Magnetic moments are stored for each atom as
 a vector. The crystal object has a seperate set of magnetic symmetry operations. Symmetry operations from the 
 tables of magnetic spacegroups can also be loaded.
@@ -130,7 +132,8 @@ Ires = xtl.Scatter.xray_resonant_magnetic(HKL=[0,0,3], energy_kev=2.838, azim_ze
 ```
 
 ### Multiple Scattering
-Simulations of multiple scattering at different azimuths for a particular energy can be simulated. Based on code by Dr Gareth Nisbet.
+Simulations of multiple scattering at different azimuths for a particular energy can be simulated. Based on [code by Dr Gareth Nisbet](https://journals.iucr.org/a/issues/2015/01/00/td5022/).
+ [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12866.svg)](https://doi.org/10.5281/zenodo.12866).
 
 ```python
 azimuth, intensity = xtl.Scatter.ms_azimuth([h,k,l], energy_kev=8)
@@ -139,7 +142,7 @@ azimuth, intensity = xtl.Scatter.ms_azimuth([h,k,l], energy_kev=8)
 ![Multiple Scattering](Screenshots/ms_azimuth_silicon.png)
 
 ### Tensor Scattering
-Simulations of resonant scattering using tensors. Resonant x-ray azimuths can be simulated. Based on code by Prof. Steve Collins.
+Simulations of resonant scattering using tensors. Resonant x-ray azimuths can be simulated. Based on [code by Prof. Steve Collins](https://github.com/spc93/tensor-scattering-calculation).
 
 ```python
 ss, sp, ps, pp = xtl.Scatter.tensor_scattering('Ru1', [h,k,l], energy_kev=2.838, azir=[0,1,0], psideg=90)

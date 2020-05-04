@@ -1,5 +1,8 @@
 """
 Multiple Scattering code, By Dr Gareth Nisbet
+For more information see:
+Nisbet, A. G. A., Beutier, G., Fabrizi, F., Moser, B. & Collins, S. P. (2015). Acta Cryst. A71, 20-25.
+http://dx.doi.org/10.5281/zenodo.12866
 
 Example:
     xtl = dif.Crystal('Diamond.cif')
