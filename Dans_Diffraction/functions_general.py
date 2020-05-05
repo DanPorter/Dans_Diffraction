@@ -15,8 +15,8 @@ Usage:
     - from Dans_Diffraction import functions_general as fg
 
 
-Version 1.5
-Last updated: 27/03/20
+Version 1.6
+Last updated: 05/05/20
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -25,6 +25,7 @@ Version History:
 31/10/18 1.3    Added complex2str
 20/08/19 1.4    Added search_dict_lists
 27/03/20 1.5    Corrected error in gauss for 1d case when centre /= 0
+05/05/20 1.6    New version of readstfm, allows E powers and handles non-numbers.
 
 @author: DGPorter
 """
@@ -32,7 +33,7 @@ Version History:
 import sys, os, re
 import numpy as np
 
-__version__ = '1.5'
+__version__ = '1.6'
 
 # File directory
 directory = os.path.abspath(os.path.dirname(__file__))
@@ -524,27 +525,40 @@ def readstfm(string):
     """
     Read numbers written in standard form: 0.01(2), return value and error
     Read numbers from string with form 0.01(2), returns floats 0.01 and 0.02
+    Errors and values will return 0 if not given.
 
     E.G.
     readstfm('0.01(2)') = (0.01, 0.02)
     readstfm('1000(300)') = (1000.,300.)
+    readstfm('1.23(3)E4') = (12300.0, 300.0)
     """
 
-    values = re.findall('[-0-9.]+', string)
+    values = re.findall('[-0-9.]+|\([-0-9.]+\)', string)
+    if len(values) > 0 and '(' not in values[0] and values[0] != '.':
+        value = values[0]
+    else:
+        value = '0'
 
-    if values[0] == '.':
-        values[0] = '0'
-    value = float(values[0])
-    error = 0.
+    # Determine number of decimal places for error
+    idx = value.find('.') # returns -1 if . not found
+    if idx > -1:
+        pp = idx - len(value) + 1
+    else:
+        pp = 0
+    value = float(value)
 
-    if len(values) > 1:
-        error = float(values[1])
+    error = re.findall('\([-0-9.]+\)', string)
+    if len(error) > 0:
+        error = abs(float(error[0].strip('()')))
+        error = error * 10 ** pp
+    else:
+        error = 0.
 
-        # Determine decimal place
-        idx = values[0].find('.')  # returns -1 if no decimal
-        if idx > -1:
-            pp = idx - len(values[0]) + 1
-            error = error * 10 ** pp
+    power = re.findall('(?:[eE]|x10\^|\*10\^|\*10\*\*)([+-]?\d*\.?\d+)', string)
+    if len(power) > 0:
+        power = float(power[0])
+        value = value * 10 ** power
+        error = error * 10 ** power
     return value, error
 
 

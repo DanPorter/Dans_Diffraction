@@ -73,11 +73,12 @@ class Fdmnes:
         self.scf = False
         self.quadrupole = False
         self.azi_ref = [1, 0, 0]
+        self.correct_azi = True
         self.hkl_reflections = [[1, 0, 0]]
 
     def setup(self, exe_path=None, output_path=None, output_name=None, folder_name=None, input_name=None,
               comment=None, range=None, radius=None, edge=None, absorber=None, green=None, scf=None,
-              quadrupole=None, azi_ref=None, hkl_reflections=None):
+              quadrupole=None, azi_ref=None, correct_azi=None, hkl_reflections=None):
         """
         Set FDMNES Parameters
         :param exe_path: Location of FDMNES executable, e.g. 'c:\FDMNES\fdmnes_win64.exe'
@@ -94,6 +95,7 @@ class Fdmnes:
         :param scf: True/False, Self consistent solution
         :param quadrupole: False/True, E1E2 terms allowed
         :param azi_ref: azimuthal reference, [1,0,0]
+        :param correct_azi: if True, correct azimuthal reference for real cell (use in hexagonal systems)
         :param hkl_reflections: list of hkl reflections [[1,0,0],[0,1,0]]
         :return: None
         """
@@ -139,6 +141,9 @@ class Fdmnes:
         if azi_ref is not None:
             self.azi_ref = azi_ref
 
+        if correct_azi is not None:
+            self.correct_azi = correct_azi
+
         if hkl_reflections is not None:
             self.hkl_reflections = np.asarray(hkl_reflections).reshape(-1,3)
 
@@ -163,7 +168,10 @@ class Fdmnes:
         print('green : %s' % self.green)
         print('scf : %s' % self.scf)
         print('quadrupole : %s' % self.quadrupole)
-        print('azi_ref : %s' % self.azi_ref)
+        if self.correct_azi:
+            print('azi_ref : %s' % self.azimuthal_reference(self.azi_ref))
+        else:
+            print('azi_ref : %s' % self.azi_ref)
         print('hkl_reflections:')
         for ref in self.hkl_reflections:
             print('  (%1.0f,%1.0f,%1.0f)' % (ref[0], ref[1], ref[2]))
@@ -206,7 +214,10 @@ class Fdmnes:
         absorber_idx = np.where(type == self.absorber)[0]
         nonabsorber_idx = np.where(type != self.absorber)[0]
 
-        fdm_ar = self.azimuthal_reference(self.azi_ref)
+        if self.correct_azi:
+            fdm_ar = self.azimuthal_reference(self.azi_ref)
+        else:
+            fdm_ar = self.azi_ref
 
         if self.scf:
             SCF = ''
@@ -250,8 +261,11 @@ class Fdmnes:
         param_string += ' Convolution                  ! Performs the convolution\n\n'
 
         param_string += ' Zero_azim                    ! Define basis vector for zero psi angle\n'
-        param_string += '  {:6.3f} {:6.3f} {:6.3f}  '.format(fdm_ar[0],fdm_ar[1],fdm_ar[2])
-        param_string += '! Same as I16, Reciprocal ({} {} {}) in units of real SL. \n'.format(self.azi_ref[0],self.azi_ref[1],self.azi_ref[2])
+        param_string += '  {:6.3f} {:6.3f} {:6.3f}     '.format(fdm_ar[0],fdm_ar[1],fdm_ar[2])
+        if self.correct_azi:
+            param_string += '! Same as I16, Reciprocal ({} {} {}) in units of real SL. \n'.format(self.azi_ref[0],self.azi_ref[1],self.azi_ref[2])
+        else:
+            param_string += '\n'
 
         param_string += ' rxs                          ! Resonant x-ray scattering at various peaks, peak given by: h k l sigma pi azimuth.\n'
         for hkl in self.hkl_reflections:

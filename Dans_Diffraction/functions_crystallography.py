@@ -12,7 +12,7 @@ Usage:
     - from Dans_Diffraction import functions_crystallography as fc
 
 Version 3.0
-Last updated: 01/05/20
+Last updated: 05/05/20
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -28,6 +28,7 @@ Version History:
 03/04/20 2.8    Updated attenuation to work with arrays of elements
 19/04/20 2.9    Added writecif, made alterations to readcif for speed and readability, added spacegroup
 01/05/20 3.0    Updated atom_properties, now have atomic properties above 92 with warning. Some changes to readcif.
+05/05/20 3.0.1  Further changes to readcif. Changed method of symmetry_ops2magnetic
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -42,7 +43,7 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.0'
+__version__ = '3.0.1'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -51,10 +52,10 @@ ATOMFILE = os.path.join(datadir, 'Dans Element Properties.txt')
 
 # Symmetry translations (remove these to turn symmetry operations into magnetic one)
 TRANSLATIONS = [
-    '+1/2', '+1/3', '+2/3', '+1/4', '+3/4', '+1/6', '+5/6',
-    '1/2+', '1/3+', '2/3+', '1/4+', '3/4+', '1/6+', '5/6+',
-    '-1/2', '-1/3', '-2/3', '-1/4', '-3/4', '-1/6', '-5/6',
-    '1/2-', '1/3-', '2/3-', '1/4-', '3/4-', '1/6-', '5/6-'
+    '+1/2', '+1/3', '+2/3', '+1/4', '+3/4', '+1/6', '+5/6', '+5/4',
+    '1/2+', '1/3+', '2/3+', '1/4+', '3/4+', '1/6+', '5/6+', '5/4+',
+    '-1/2', '-1/3', '-2/3', '-1/4', '-3/4', '-1/6', '-5/6', '-5/4',
+    '1/2-', '1/3-', '2/3-', '1/4-', '3/4-', '1/6-', '5/6-', '5/4-',
 ]
 
 # Required CIF keys, must be available and not '?'
@@ -134,7 +135,7 @@ def readcif(filename=None, debug=False):
     n = 0
     while n < len(lines):
         # Convert line to columns
-        vals = lines[n].split()
+        vals = lines[n].strip().split()
 
         # skip empty lines
         if len(vals) == 0:
@@ -143,12 +144,11 @@ def readcif(filename=None, debug=False):
 
         # Search for stored value lines
         if vals[0][0] == '_':
-            chk = ''
             if len(vals) == 1:
                 # Record next lines that are not keys as string
                 if lines[n+1][0] == ';': n += 1
                 strarg = []
-                while lines[n+1][0] not in ['_', ';']:
+                while n+1 < len(lines) and (len(lines[n+1]) == 0 or lines[n+1][0].strip() not in ['_', ';']):
                     strarg += [lines[n+1].strip('\'"')]
                     n += 1
                 cifvals[vals[0]] = '\n'.join(strarg)
@@ -1793,7 +1793,16 @@ def symmetry_ops2magnetic(operations):
     # convert string to list
     if type(operations) is str:
         operations = [operations]
-    return [fg.multi_replace(sp, TRANSLATIONS, '') for sp in operations]
+    # Use RegEx to find translations
+    mag_op = []
+    for op in operations:
+        translations = re.findall('[\+\-]?\d/\d[\+\-]?', op)
+        op = fg.multi_replace(op, translations, '')
+        # also remove +/-1
+        translations = re.findall('[\+\-]?\d+?[\+\-]?', op)
+        op = fg.multi_replace(op, translations, '')
+        mag_op += [op]
+    return mag_op
 
 
 def hkl2str(hkl):

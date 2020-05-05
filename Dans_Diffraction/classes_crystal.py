@@ -823,9 +823,14 @@ class Atoms:
         label = cifvals['_atom_site_label']
 
         if '_atom_site_type_symbol' in keys:
-            element = [x.strip('+-.0123456789') for x in cifvals['_atom_site_type_symbol']]
+            element = [x.strip('+-.0123456789()') for x in cifvals['_atom_site_type_symbol']]
         else:
-            element = [x.strip('+-.0123456789') for x in cifvals['_atom_site_label']]
+            element = [x.strip('+-.0123456789()') for x in cifvals['_atom_site_label']]
+
+        # Replace Deuterium with Hydrogen
+        if 'D' in element:
+            warn('Replacing Deuterium ions with Hydrogen')
+            element = ['H' if el == 'D' else el for el in element]
 
         # Thermal parameters
         if '_atom_site_U_iso_or_equiv' in keys:
@@ -1244,14 +1249,13 @@ class Symmetry:
         keys = cifvals.keys()
 
         # Get symmetry operations
-        ops = fc.TRANSLATIONS
         if '_symmetry_equiv_pos_as_xyz' in keys:
             symops = cifvals['_symmetry_equiv_pos_as_xyz']
             symcen = ['x,y,z']
 
             # add magnetic symmetries (symops without translation)
-            symops_mag = [fg.multi_replace(sp, ops, '') for sp in symops]
-            cenops_mag = [fg.multi_replace(sp, ops, '') for sp in symcen]
+            symops_mag = fc.symmetry_ops2magnetic(symops)
+            cenops_mag = fc.symmetry_ops2magnetic(symcen)
             # self.symmetry_operations_time = [1]*len(symops)
             # self.centring_operations_time = [1]
         elif '_space_group_symop_operation_xyz' in keys:
@@ -1259,8 +1263,8 @@ class Symmetry:
             symcen = ['x,y,z']
 
             # add magnetic symmetries (symops without translation)
-            symops_mag = [fg.multi_replace(sp, ops, '') for sp in symops]
-            cenops_mag = [fg.multi_replace(sp, ops, '') for sp in symcen]
+            symops_mag = fc.symmetry_ops2magnetic(symops)
+            cenops_mag = fc.symmetry_ops2magnetic(symcen)
             # self.symmetry_operations_time = [1]*len(symops)
             # self.centring_operations_time = [1]
         elif '_space_group_symop_magn_operation_xyz' in keys:
@@ -1271,7 +1275,7 @@ class Symmetry:
             if '_space_group_symop_magn_operation_mxmymz' in keys:
                 symmag = cifvals['_space_group_symop_magn_operation_mxmymz']  # mx,my,mz
             else:
-                symmag = [fg.multi_replace(sp, ops, '') for sp in symops]
+                symmag = fc.symmetry_ops2magnetic(symops)
                 # invert magnetic symmetry when time odd
                 for n in range(len(symmag)):
                     if symtim[n] < 0:
@@ -1284,7 +1288,7 @@ class Symmetry:
             if '_space_group_symop_magn_centering_mxmymz' in keys:
                 symcenmag = cifvals['_space_group_symop_magn_centering_mxmymz']  # mx,my,mz
             else:
-                symcenmag = [fg.multi_replace(sp, ops, '') for sp in symcen]
+                symcenmag = fc.symmetry_ops2magnetic(symcen)
                 # invert magnetic symmetry when time odd
                 for n in range(len(symcenmag)):
                     if symcentim[n] < 0:

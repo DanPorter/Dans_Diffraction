@@ -18,7 +18,7 @@ Diamond
 2017
 
 Version 1.8
-Last updated: 02/05/20
+Last updated: 05/05/20
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -75,6 +75,7 @@ from . import functions_crystallography as fc
 from .classes_crystal import Crystal
 from .classes_multicrystal import MultiCrystal
 from .classes_structures import Structures
+from .functions_crystallography import readcif
 
 # FDMNES
 from .classes_fdmnes import fdmnes_checker
@@ -83,7 +84,7 @@ if fdmnes_checker():
 
 
 __version__ = '1.8'
-__date__ = '02/05/20'
+__date__ = '05/05/20'
 
 
 # Build
