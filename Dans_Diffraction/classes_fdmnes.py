@@ -256,7 +256,8 @@ class Fdmnes:
         param_string += '%s Quadrupole                   ! Allows quadrupolar E1E2 terms\n' % quadrupole
         param_string += '! magnetism                    ! performs magnetic calculations\n'
         param_string += ' Density                      ! Outputs the density of states as _sd1.txt\n'
-        param_string += ' Spherical                    ! Outputs the spherical tensors as _sph_.txt\n'
+        param_string += ' Sphere_all                   ! Outputs the spherical tensors as _sph_.txt\n'
+        param_string += ' Cartesian                    ! Outputs the cartesian tensors as _car_.txt\n'
         param_string += ' energpho                     ! output the energies in real terms\n'
         param_string += ' Convolution                  ! Performs the convolution\n\n'
 

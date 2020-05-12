@@ -10,6 +10,9 @@ Usage:
 For GUI use:
     ipython -m Dans_Diffraction gui
 
+To Parse a cif:
+    ipython -m Dans_Diffraction 'somefile.cif'
+
 By Dan Porter, PhD
 Diamond
 2017
@@ -28,6 +31,7 @@ if __name__ == '__main__':
     for arg in sys.argv:
         if 'cif' in arg.lower():
             xtl = dif.Crystal(arg)
+            print(xtl.info())
         elif 'gui' in arg.lower():
             xtl.start_gui()
 

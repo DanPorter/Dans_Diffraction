@@ -704,3 +704,21 @@ def plot_xray_attenuation(elements, min_energy=0, max_energy=20):
     plt.legend(np.asarray(elements).reshape(-1), loc=0, frameon=False, fontsize=18)
     labels('X-Ray Attenuation', 'Energy [keV]', r'$\mu/\rho$ [cm$^2$/g]')
 
+
+def plot_xray_scattering_factor(element, min_energy=0.5, max_energy=20):
+    """
+    Plot x-ray scattering factor for 1 or more elements
+    :param element: str name of element to plot
+    :param min_energy: float min energy in keV
+    :param max_energy: float max energy in keV
+    :return: None
+    """
+
+    ene = np.arange(min_energy, max_energy+0.01, 0.01)
+    f1, f2 = fc.atomic_scattering_factor(element, ene)
+
+    newplot(ene, f1, '-', lw=2, label='f1')
+    plt.plot(ene, f2, '-', lw=2, label='f2')
+    plt.xlim([min_energy, max_energy])
+    labels('X-Ray Scattering Factor\n%s' % element, 'Energy [keV]', None, legend=True)
+

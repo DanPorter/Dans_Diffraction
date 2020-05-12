@@ -968,6 +968,10 @@ class PropertiesGui:
                         activebackground=btn_active)
         var.pack(side=tk.LEFT)
 
+        var = tk.Button(line, text='X-Ray\nScattering Factor', font=BF, command=self.fun_xsf, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT)
+
     def fun_frac(self):
         """Atomic Fraction"""
         z = self.zfraction.get()
@@ -1058,6 +1062,15 @@ class PropertiesGui:
         elements = elements.replace(',', ' ')
         elelist = elements.split()
         fp.plot_xray_attenuation(elelist)
+        plt.show()
+
+    def fun_xsf(self):
+        """Properties button"""
+        elements = self.atoms.get()
+        elements = elements.replace(',', ' ')
+        elelist = elements.split()
+        for el in elelist:
+            fp.plot_xray_scattering_factor(el)
         plt.show()
 
 

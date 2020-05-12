@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.4
-Last updated: 30/03/20
+Version 1.5
+Last updated: 12/05/20
 
 Version History:
 10/11/17 0.1    Program created
@@ -17,6 +17,7 @@ Version History:
 23/02/19 1.2    Added xray_edges
 15/08/19 1.3    Added molcharge
 30/03/20 1.4    Added latex_table, info returns str, removed getattr from xray_edges, check if element exists
+12/05/20 1.5    Added orbitals function
 
 
 @author: DGPorter
@@ -26,8 +27,9 @@ import numpy as np
 
 from . import functions_general as fg
 from . import functions_crystallography as fc
+from .classes_orbitals import CrystalOrbitals
 
-__version__ = '1.4'
+__version__ = '1.5'
 
 
 class Properties:
@@ -54,6 +56,12 @@ class Properties:
         cifvals['_chemical_formula_sum'] = self.molname()
         cifvals['_chemical_formula_weight'] = self.weight()
         return cifvals
+
+    def orbitals(self):
+        """ Return orbital Compound from classes_orbitals"""
+        orbitals = CrystalOrbitals(self.xtl)
+        self.xtl.Orbitals = orbitals
+        return orbitals
 
     def volume(self):
         """Returns the volume in A^3"""

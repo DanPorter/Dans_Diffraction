@@ -15,8 +15,8 @@ Usage:
     - from Dans_Diffraction import functions_general as fg
 
 
-Version 1.6
-Last updated: 05/05/20
+Version 1.7
+Last updated: 12/05/20
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -26,6 +26,7 @@ Version History:
 20/08/19 1.4    Added search_dict_lists
 27/03/20 1.5    Corrected error in gauss for 1d case when centre /= 0
 05/05/20 1.6    New version of readstfm, allows E powers and handles non-numbers.
+12/05/20 1.7    Added replace_bracket_multiple
 
 @author: DGPorter
 """
@@ -33,7 +34,7 @@ Version History:
 import sys, os, re
 import numpy as np
 
-__version__ = '1.6'
+__version__ = '1.7'
 
 # File directory
 directory = os.path.abspath(os.path.dirname(__file__))
@@ -151,6 +152,29 @@ def ang(a, b, deg=False):
     if deg:
         return np.rad2deg(angle)
     return angle
+
+
+def cart2sph(xyz, deg=False):
+    """
+    Convert coordinates in cartesian to coordinates in spherical
+    https://en.wikipedia.org/wiki/Spherical_coordinate_system
+    ISO convention used.
+        theta = angle from Z-axis to X-axis
+          phi = angle from X-axis to component in XY plane
+    :param xyz: [n*3] array of [x,y,z] coordinates
+    :param deg: if True, returns angles in degrees
+    :return: [r, theta, phi]
+    """
+    xyz = np.asarray(xyz).reshape(-1, 3)
+    xy = xyz[:, 0] ** 2 + xyz[:, 1] ** 2
+    r = mag(xyz)
+    theta = np.arctan2(np.sqrt(xy), xyz[:, 2])  # for elevation angle defined from Z-axis down
+    #theta = np.arctan2(xyz[:,2], np.sqrt(xy))  # for elevation angle defined from XY-plane up
+    phi = np.arctan2(xyz[:, 1], xyz[:, 0])
+    if deg:
+        theta = np.rad2deg(theta)
+        phi = np.rad2deg(phi)
+    return np.vstack((r, theta, phi)).T
 
 
 def rot3D(A, alpha=0., beta=0., gamma=0.):
@@ -671,6 +695,60 @@ def multi_replace(string, old=[], new=[]):
         string = string.replace(i, j)
     return string
 
+
+def replace_bracket_multiple(name):
+    """
+    Replace any numbers in brackets with numbers multipled by bracket multiplyer
+    Assumes bracket multiplier is on the left side
+    e.g.
+        replace_bracket_multiple('Mn0.3(Fe3.6(Co1.2)2)4(Mo0.7Pr44)3')
+        >> 'Mn0.3Fe14.4Co9.6Mo2.1Pr132'
+    :param name: str
+    :return: str
+    """
+    """
+    To do:
+     - Multiply by fraction (regex for '/number')
+     - Multiple on right hand side
+    """
+    # Regex:
+    regex_num = re.compile('[\d\.]+')
+    regex_bracket_n = re.compile('\)[\d\.]+')
+
+    # Find outside brackets
+    bracket = []
+    start_idx = []
+    level=0
+    for n, s in enumerate(name):
+        if s in ['(', '[', '{']:
+            start_idx += [n]
+            level += 1
+        elif s in [')', ']', '}']:
+            level -= 1
+            if level == 0:
+                num = regex_bracket_n.findall(name[n:])
+                if len(num) > 0:
+                    bracket_end = n + len(num[0])
+                    num = float(num[0][1:])
+                else:
+                    bracket_end = n+1
+                    num = 1.0
+                bracket += [(
+                    name[start_idx[0]+1:n],  # insde brackets
+                    name[start_idx[0]:bracket_end],  # str to replace
+                    num  # multiplication appending bracket
+                )]
+                start_idx = []
+
+    for numstr, repstr, num in bracket:
+        # Run recursivley to get inner brackets
+        numstr = replace_bracket_multiple(numstr)
+        # Replace each number by it's multiple
+        for oldnum in regex_num.findall(numstr):
+            numstr = numstr.replace(oldnum, '%0.3g'%(float(oldnum)*num))
+        # Replace in original string
+        name = name.replace(repstr, numstr)
+    return name
 
 def nice_print(precision=4, linewidth=300):
     """

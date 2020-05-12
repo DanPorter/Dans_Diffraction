@@ -31,7 +31,7 @@ xtl.Scatter.setup_scatter(
     max_twotheta=130
     )
 
-print "X-Ray Magnetic Reflections"
+print("X-Ray Magnetic Reflections")
 print(xtl.Scatter.print_all_reflections(print_symmetric=True, min_intensity=0.1))
 
 #xtl.Scatter.print_ref_reflections(min_intensity=0.1)

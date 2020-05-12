@@ -4,9 +4,9 @@ Python package for loading crystal structures from cif files and calculating dif
 
 Usage:
     ***In Python***
-    from Dans_Diffraction import Crystal
+    import Dans_Diffraction as dif
     f = '/location/of/file.cif'
-    xtl = Crystal(f)
+    xtl = dif.Crystal(f)
     
 Usage:
     ***From Terminal***
@@ -17,8 +17,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.8
-Last updated: 05/05/20
+Version 1.8.1
+Last updated: 12/05/20
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -31,6 +31,7 @@ Version History:
 31/03/20 1.7    Refactored multicrystal methods, other minor changes, improved powder diffraction
 19/04/20 1.7.1  Added writecif + spacegroup file + functions
 02/05/20 1.8    Updated readcif, added heavy atom properties, added magnetic spacegroups
+12/05/20 1.8.1  Updated readcif, added atomic_scattering_factors and classes_orbitals
 
 -----------------------------------------------------------------------------
    Copyright 2020 Diamond Light Source Ltd.
@@ -53,6 +54,7 @@ Files in this package covered by this licence:
     classes_plotting.py
     classes_properties.py
     classes_multicrystal.py
+    classes_orbitals.py
     functions_general.py
     functions_plotting.py
     functions_crystallography.py
@@ -83,8 +85,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '1.8'
-__date__ = '05/05/20'
+__version__ = '1.8.1'
+__date__ = '12/05/20'
 
 
 # Build

@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.0
-Last updated: 05/05/20
+Version 3.1.0
+Last updated: 12/05/20
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -28,7 +28,8 @@ Version History:
 03/04/20 2.8    Updated attenuation to work with arrays of elements
 19/04/20 2.9    Added writecif, made alterations to readcif for speed and readability, added spacegroup
 01/05/20 3.0    Updated atom_properties, now have atomic properties above 92 with warning. Some changes to readcif.
-05/05/20 3.0.1  Further changes to readcif. Changed method of symmetry_ops2magnetic
+05/05/20 3.0.1  Further changes to readcif. Changed method of symmetry_ops2magnetic. Added str2element
+12/05/20 3.1.0  More readcif changes, added atomic_scattering_factor, element_charge_string, split_compound
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -43,12 +44,40 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.0.1'
+__version__ = '3.1.0'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
 datadir = os.path.join(datadir, 'data')
 ATOMFILE = os.path.join(datadir, 'Dans Element Properties.txt')
+
+# List of Elements in order sorted by length of name
+ELEMENT_LIST = [
+    'Zr', 'Mo', 'Es', 'Eu', 'Fe', 'Fl', 'Fm', 'Fr', 'Ga', 'Gd', 'Ge',
+    'He', 'Hf', 'Hg', 'Ho', 'Hs', 'In', 'Ir', 'Kr', 'La', 'Li', 'Lr',
+    'Lu', 'Lv', 'Mc', 'Zn', 'Mg', 'Er', 'Dy', 'Ds', 'Bk', 'Ag', 'Al',
+    'Am', 'Ar', 'As', 'At', 'Au', 'Ba', 'Be', 'Bh', 'Bi', 'Br', 'Db',
+    'Ca', 'Cd', 'Ce', 'Cf', 'Cl', 'Cm', 'Cn', 'Co', 'Cr', 'Cs', 'Cu',
+    'Mn', 'Md', 'Mt', 'Rb', 'Rf', 'Rh', 'Rn', 'Ru', 'Sb', 'Sc', 'Se',
+    'Sg', 'Si', 'Sm', 'Sn', 'Sr', 'Ta', 'Tb', 'Tc', 'Te', 'Th', 'Ti',
+    'Tl', 'Tm', 'Ts', 'Xe', 'Yb', 'Re', 'Rg', 'Ac', 'Pb', 'Nh', 'Ni',
+    'No', 'Np', 'Nd', 'Ra', 'Og', 'Os', 'Pa', 'Pd', 'Nb', 'Pm', 'Po',
+    'Pr', 'Pt', 'Na', 'Pu', 'Ne', 'B', 'W', 'V', 'Y', 'U', 'F', 'K',
+    'C', 'I', 'P', 'H', 'S', 'N', 'O',
+    'zr', 'mo', 'es', 'eu', 'fe', 'fl', 'fm', 'fr', 'ga', 'gd', 'ge',
+    'he', 'hf', 'hg', 'ho', 'hs', 'in', 'ir', 'kr', 'la', 'li', 'lr',
+    'lu', 'lv', 'mc', 'zn', 'mg', 'er', 'dy', 'ds', 'bk', 'ag', 'al',
+    'am', 'ar', 'as', 'at', 'au', 'ba', 'be', 'bh', 'bi', 'br', 'db',
+    'ca', 'cd', 'ce', 'cf', 'cl', 'cm', 'cn', 'co', 'cr', 'cs', 'cu',
+    'mn', 'md', 'mt', 'rb', 'rf', 'rh', 'rn', 'ru', 'sb', 'sc', 'se',
+    'sg', 'si', 'sm', 'sn', 'sr', 'ta', 'tb', 'tc', 'te', 'th', 'ti',
+    'tl', 'tm', 'ts', 'xe', 'yb', 're', 'rg', 'ac', 'pb', 'nh', 'ni',
+    'no', 'np', 'nd', 'ra', 'og', 'os', 'pa', 'pd', 'nb', 'pm', 'po',
+    'pr', 'pt', 'na', 'pu', 'ne', 'b', 'w', 'v', 'y', 'u', 'f', 'k',
+    'c', 'i', 'p', 'h', 's', 'n', 'o',
+    'D', 'd', # add Deuterium
+]
+element_regex = re.compile('|'.join(ELEMENT_LIST))
 
 # Symmetry translations (remove these to turn symmetry operations into magnetic one)
 TRANSLATIONS = [
@@ -820,10 +849,38 @@ def attenuation(element_z, energy_keV):
     energies = xma_data[:, 0] / 1000.
     out = np.zeros([len(energy_keV), len(element_z)])
     for n, z in enumerate(element_z):
+        # Interpolating the log values is much more reliable
+        out[:, n] = np.exp(np.interp(np.log(energy_keV), np.log(energies), np.log(xma_data[:, z])))
         out[:, n] = np.interp(energy_keV, energies, xma_data[:, z])
     if len(element_z) == 1:
         return out[:, 0]
     return out
+
+
+def atomic_scattering_factor(element, energy_kev=None):
+    """
+    Read atomic scattering factor table, giving f1+f2 for different energies
+    From: http://henke.lbl.gov/optical_constants/asf.html
+    :param element: str name of element
+    :param energy_kev: float or list energy in keV (None to return original, uninterpolated list)
+    :return: f1, f2
+    """
+    asf_file = os.path.join(datadir, 'atomic_scattering_factors.npy')
+    asf = np.load(asf_file, allow_pickle=True)
+    asf = asf.item()
+    energy = np.array(asf[element]['energy'])/1000. # eV -> keV
+    f1 = np.array(asf[element]['f1'])
+    f2 = np.array(asf[element]['f2'])
+    f1[f1 < -1000] = np.nan
+    f2[f2 < -1000] = np.nan
+
+    if energy_kev is None:
+        return energy, f1, f2
+
+    # Interpolate values
+    if1 = np.interp(energy_kev, energy, f1)
+    if2 = np.interp(energy_kev, energy, f2)
+    return if1, if2
 
 
 def spacegroups():
@@ -990,13 +1047,16 @@ def spacegroup_magnetic_list(sg_number):
 '--------------Element Properties & Charge----------------------'
 
 
-def element_symbol(element_Z):
+def element_symbol(element_Z=None):
     """
     Returns the element sympol for element_Z
-    :param element_Z: int
+    :param element_z: int or array or None for all elements
     :return: str
     """
     symbols = atom_properties(None, 'Element')
+    if element_Z is None:
+        return symbols
+    element_Z = np.asarray(element_Z).reshape(-1)
     return symbols[element_Z-1]
 
 
@@ -1012,39 +1072,118 @@ def element_z(element):
     return z
 
 
-def orbital_configuration(element_Z):
+def element_name(element=None):
     """
-    Returns the orbital configuration of an element as a list of strings
-    :param element_Z: int
-    :return: ['1s2', '2s2', '2p6', ...]
+    Returns the element name
+    :param element: str
+    :return: int
     """
-
-    config = atom_properties(element_symbol(element_Z), 'Config')
-    return config[0].split('.')
+    name = atom_properties(element, 'Name')
+    if len(name) == 1:
+        return name[0]
+    return name
 
 
 def split_element_symbol(element):
     """
     From element symbol, split charge and occupancy
       symbol, occupancy, charge = split_element_symbol('Co3+')
+    Any numbers appended by +/- are taken as charge, otherwise they are counted as occupancy.
+    e.g.    element     >   symbol  |   occupancy   |   charge
+            Co3+            Co          1.              3
+            3.2O2-          O           3.2             -2
+            fe3             Fe          3               0
     :param element: str
     :return: symbol: str
     :return: occupancy: float
     :return: charge: float
     """
-
-    atom_n = re.findall('[A-Z][a-z]?|[0-9]+[.]?[0-9]*', element)
-    symbol = atom_n[0]
-    charge = 0
-    occupancy = 1
-    if len(atom_n) > 1:
-        if '-' in element:
-            charge = -float(atom_n[1])
-        elif '+' in element:
-            charge = float(atom_n[1])
+    # Find element
+    symbol = element_regex.findall(element)[0]
+    # Find charge
+    find_charge = re.findall('[\d\.]+[\+-]', element)
+    if len(find_charge) > 0:
+        chargestr = find_charge[0]
+        element = element.replace(chargestr, '')
+        if '-' in chargestr:
+            charge = -float(chargestr[:-1])
         else:
-            occupancy = float(atom_n[1])
+            charge = float(chargestr[:-1])
+    else:
+        charge = 0.
+    # Find occupancy
+    find_occ = re.findall('[\d\.]+', element)
+    if len(find_occ) > 0:
+        occupancy = float(find_occ[0])
+    else:
+        occupancy = 1.
     return symbol, occupancy, charge
+
+
+def element_charge_string(symbol, occupancy=1.0, charge=0.0, latex=False):
+    """
+    Return formatted string of element with occupancy and charge
+    :param symbol: str - element string
+    :param occupancy: float - element occupancy or number of elements
+    :param charge: float - element charge
+    :param latex: if True, returns string formatted with latex tags
+    :return: str
+    """
+    if abs(charge) < 0.01:
+        chstr = ''
+    elif abs(charge - 1) < 0.01:
+        chstr = '+'
+    elif abs(charge + 1) < 0.01:
+        chstr = '-'
+    elif charge > 0:
+        chstr = '%0.3g+' % charge
+    else:
+        chstr = '%0.3g-' % abs(charge)
+
+    if latex:
+        chstr = '$^{%s}$' % chstr
+
+    if np.abs(occupancy - 1) < 0.01:
+        outstr = '%s%s' % (symbol, chstr)
+    else:
+        outstr = '%0.3g[%s%s]' % (occupancy, symbol, chstr)
+    return outstr
+
+
+def split_compound(compound_name):
+    """
+    Convert a molecular or compound name into a list of elements and numbers.
+    Assumes all element multiplications are to the LEFT of the element name.
+    Values in brackets are multiplied out.
+    E.g.
+        split_compound('Mn0.3(Fe3.6(Co1.2)2)4(Mo0.7Pr44)3')
+        >> ['Mn0.3', 'Fe14.4', 'Co9.6', 'Mo2.1', 'Pr132']
+    :param compound_name: str
+    :return: list of str
+    """
+    regex_element_num = re.compile('|'.join(['%s[\d\.]*' % el for el in ELEMENT_LIST]))
+    # Multiply out brackets
+    compound_name = fg.replace_bracket_multiple(compound_name)
+    return regex_element_num.findall(compound_name)
+
+
+def orbital_configuration(element, charge=None):
+    """
+    Returns the orbital configuration of an element as a list of strings
+    :param element: str, element name, e.g. 'Fe' or 'Fe3+' or '0.8Fe2+'
+    :param charge: int, element charge (overwrites charge given in element)
+    :return: ['1s2', '2s2', '2p6', ...]
+    """
+    symbol, occupancy, charge_str = split_element_symbol(element)
+    z = element_z(symbol)
+    if charge is None:
+        charge = charge_str
+    newz = z - int(charge) # floor
+    if newz < 1: newz = 1
+    if newz > 118: newz = 118
+    element = element_symbol(newz)
+    config = atom_properties(element, 'Config')
+    return config[0].split('.')
 
 
 def default_atom_charge(element):
@@ -1176,22 +1315,7 @@ def count_charges(list_of_elements, occupancy=None, divideby=1, latex=False):
 
     outstr = []
     for a in ats:
-        if np.abs(chno[a]-1) < 0.01:
-            chstr = '+'
-        elif np.abs(chno[a]+1) < 0.01:
-            chstr = '-'
-        elif chno[a] > 0:
-            chstr = '%0.2g+' % chno[a]
-        else:
-            chstr = '%0.2g-' % abs(chno[a])
-
-        if latex:
-            chstr = '$^{%s}$' % chstr
-
-        if np.abs(atno[a]-1) < 0.01:
-            outstr += ['%s%s' % (a, chstr)]
-        else:
-            outstr += ['%0.2g[%s%s]' % (atno[a], a, chstr)]
+        outstr += [element_charge_string(a, atno[a], chno[a], latex)]
     return outstr
 
 
@@ -1832,6 +1956,14 @@ def cut2powder(qx, qy, qz, cut):
 
 
 '--------------------------Misc Crystal Programs------------------------'
+
+
+def str2element(string):
+    """Finds element name in string"""
+    result = element_regex.findall(string)
+    if len(result) == 0:
+        return False
+    return result[0].capitalize()
 
 
 def debyewaller(uiso, Qmag=0):

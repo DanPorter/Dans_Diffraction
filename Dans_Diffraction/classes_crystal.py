@@ -51,6 +51,7 @@ from warnings import warn
 from . import functions_general as fg, functions_crystallography as fc
 from . import functions_crystallography as fc
 from .classes_properties import Properties
+#from .classes_orbitals import CrystalOrbitals
 from .classes_scattering import Scattering
 from .classes_multicrystal import MultiCrystal
 from .classes_plotting import Plotting, PlottingSuperstructure
@@ -127,6 +128,7 @@ class Crystal:
         self.Plot = Plotting(self)
         self.Scatter = Scattering(self)
         self.Properties = Properties(self)
+        #self.Orbitals = CrystalOrbitals(self) # slows down cif parsing a lot!
         # self.Fdmnes = Fdmnes(self)
 
     def generate_structure(self):
@@ -823,9 +825,14 @@ class Atoms:
         label = cifvals['_atom_site_label']
 
         if '_atom_site_type_symbol' in keys:
-            element = [x.strip('+-.0123456789()') for x in cifvals['_atom_site_type_symbol']]
+            element = [fc.str2element(x) for x in cifvals['_atom_site_type_symbol']]
         else:
-            element = [x.strip('+-.0123456789()') for x in cifvals['_atom_site_label']]
+            element = [fc.str2element(x) for x in cifvals['_atom_site_label']]
+
+        while False in element:
+            fidx = element.index(False)
+            warn('%s is not a valid element, replacing with H' % cifvals['_atom_site_label'][fidx])
+            element[fidx] = 'H'
 
         # Replace Deuterium with Hydrogen
         if 'D' in element:
@@ -1187,17 +1194,22 @@ class Atoms:
 
         out = ''
         if np.any(fg.mag(self.mxmymz()) > 0):
-            out += '  n Atom  u       v       w        Occ  Uiso      mx      my      mz      \n'
-            fmt = '%3.0f %4s %7.4f %7.4f %7.4f   %4.2f %6.4f   %7.4f %7.4f %7.4f\n'
+            out += '  n Label Atom  u       v       w        Occ  Uiso      mx      my      mz      \n'
+            fmt = '%3.0f %5s %4s %7.4f %7.4f %7.4f   %4.2f %6.4f   %7.4f %7.4f %7.4f\n'
             for n in disprange:
                 out += fmt % (
-                    n, self.type[n], self.u[n], self.v[n], self.w[n], self.occupancy[n], self.uiso[n], self.mx[n],
-                    self.my[n], self.mz[n])
+                    n, self.label[n], self.type[n], self.u[n], self.v[n], self.w[n],
+                    self.occupancy[n], self.uiso[n],
+                    self.mx[n], self.my[n], self.mz[n]
+                )
         else:
-            out += '  n Atom  u       v       w        Occ  Uiso\n'
-            fmt = '%3.0f %4s %7.4f %7.4f %7.4f   %4.2f %6.4f\n'
+            out += '  n Label Atom  u       v       w        Occ  Uiso\n'
+            fmt = '%3.0f %5s %4s %7.4f %7.4f %7.4f   %4.2f %6.4f\n'
             for n in disprange:
-                out += fmt % (n, self.type[n], self.u[n], self.v[n], self.w[n], self.occupancy[n], self.uiso[n])
+                out += fmt % (
+                    n, self.label[n], self.type[n], self.u[n], self.v[n], self.w[n],
+                    self.occupancy[n], self.uiso[n]
+                )
         return out
 
     def __repr__(self):
@@ -1887,8 +1899,8 @@ class Superstructure(Crystal):
     superstructure Crystal class
     """
 
-    Parent = Crystal()
-    P = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    #Parent = Crystal()
+    #P = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 
     def __init__(self, Parent, P):
         """Initialise"""
