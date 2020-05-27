@@ -1,17 +1,29 @@
 """
 Dans_Diffraction
-Python package for loading crystal structures from cif files and calculating diffraction information
+Python package for loading crystal structures from cif files and calculating diffraction information.
+
+Installation:
+$ pip install Dans-Diffraction
+or
+$ git clone https://github.com/DanPorter/Dans_Diffraction.git
+
+Requirements:
+Python 2.7+/3+ with packages: Numpy, Matplotlib, Scipy, Tkinter
+BuiltIn packages used: sys, os, re, glob, warnings, json, itertools
 
 Usage:
-    ***In Python***
+    ***In Python/ script***
     import Dans_Diffraction as dif
     f = '/location/of/file.cif'
     xtl = dif.Crystal(f)
     
 Usage:
     ***From Terminal***
-    cd /location/of/file
-    ipython -i -m -matplotlib tk Dans_Diffraction
+    $ cd /location/of/file
+    $ ipython -i -m -matplotlib tk Dans_Diffraction
+
+GitHub Repo: https://github.com/DanPorter/Dans_Diffraction
+Citation DOI: https://doi.org/10.5281/zenodo.3859501
 
 By Dan Porter, PhD
 Diamond
