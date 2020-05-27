@@ -18,8 +18,8 @@ The *Crystal* object has the structure:
 xtl = dif.Crystal('file.cif')
 xtl.Cell # Cell properties - lattice parameters, generation of direct and recriprocal lattice
 xtl.Symmetry # Symmetry properties - contains symmetry operations and functions to apply symmetry to positions & reflections.
-xtl.Atoms # Atomic site properties - describes atoms at symmetric sites
-xtl.Structure # Atomic site properties - describes atoms at all positions in unit cell
+xtl.Atoms # Symmetically unique Atomic sites - describes atoms at symmetric sites
+xtl.Structure # All Atomic sites - describes atoms at all positions in unit cell
 xtl.Plot  # Plot functions - Various Plotting methods to produce graphed output
 xtl.Scatter # Scattering & Diffraction functions - calculate various types of scattering based on the crystal structure.
 xtl.Properties # Various functions - calculate various crystal properties

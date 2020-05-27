@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.6
-Last updated: 14/04/20
+Version 1.7
+Last updated: 26/05/20
 
 Version History:
 10/09/17 0.1    Program created
@@ -20,6 +20,7 @@ Version History:
 18/02/20 1.5    Added tensor_scattering code
 20/03/20 1.6    Increased powder gauss width from 2fwhm to 6fwhm, added powder averaging
 14/04/20 1.6    Added powder_correction
+26/05/20 1.7    Removed tensor_scattering
 
 @author: DGPorter
 """
@@ -30,9 +31,9 @@ import numpy as np
 from . import functions_general as fg
 from . import functions_crystallography as fc
 from . import multiple_scattering as ms
-from . import tensor_scattering as ts
+# from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '1.6'
+__version__ = '1.7'
 __scattering_types__ = {'xray': ['xray','x','x-ray','thomson','charge'],
                         'neutron': ['neutron','n','nuclear'],
                         'xray magnetic': ['xray magnetic','magnetic xray','spin xray','xray spin'],
@@ -1470,6 +1471,7 @@ class Scattering:
             mesh = np.convolve(mesh, G, mode='same')
         return mesh_azi, mesh
 
+    '''  Removed tensor scattering 26/05/20 V1.7
     def tensor_scattering(self, atom_label, hkl, energy_kev=None, azir=[0, 0, 1], psideg=0, process='E1E1',
                           rank=2, time=+1, parity=+1, mk=None, lk=None, sk=None):
         """
@@ -1744,7 +1746,7 @@ class Scattering:
                              ss, psi_ss, sp, psi_sp, ps, psi_ps, pp, psi_pp)
         outstr += 'Reflections: %1.0f\n' % len(tth)
         return outstr
-
+    '''
 
 class ScatteringTypes:
     """

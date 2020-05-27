@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.1.0
-Last updated: 12/05/20
+Version 3.1.1
+Last updated: 26/05/20
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -26,10 +26,11 @@ Version History:
 06/03/19 2.6    Added print_atom_properties
 14/08/19 2.7    Added new Dans Element Properties file with extra comment line, new functions added
 03/04/20 2.8    Updated attenuation to work with arrays of elements
-19/04/20 2.9    Added writecif, made alterations to readcif for speed and readability, added spacegroup
+19/04/20 2.9    Added write_cif, made alterations to readcif for speed and readability, added spacegroup
 01/05/20 3.0    Updated atom_properties, now have atomic properties above 92 with warning. Some changes to readcif.
 05/05/20 3.0.1  Further changes to readcif. Changed method of symmetry_ops2magnetic. Added str2element
 12/05/20 3.1.0  More readcif changes, added atomic_scattering_factor, element_charge_string, split_compound
+26/05/20 3.1.1  Updated magnetic space groups, added magnetic positions (was only generators), added write_mcif
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -44,7 +45,7 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.1.0'
+__version__ = '3.1.1'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -507,7 +508,7 @@ def cif2dict(cifvals):
     return crys
 
 
-def writecif(cifvals, filename=None, comments=None):
+def write_cif(cifvals, filename=None, comments=None):
     """
     Write .cif file with values from a cif dict,
     Only basic items are saved, rather than returning the orginal file
@@ -597,9 +598,128 @@ def writecif(cifvals, filename=None, comments=None):
     if filename is None:
         return c
 
+    filename, extension = os.path.splitext(filename)
+    filename = filename + '.cif'
     with open(filename, 'wt') as f:
         f.write(c)
     print('CIF written to: %s' % filename)
+
+
+def write_mcif(cifvals, filename=None, comments=None):
+    """
+    Write magnetic .mcif file with values from a cif dict,
+    Only basic items are saved, rather than returning the original file
+    :param cifvals: dict from readcif
+    :param filename: filename to write (use None to return string)
+    :param comments: str comments to write to the file top matter
+    :return: None
+    """
+
+    keys = cifvals.keys()
+
+    def cif_value(name):
+        if name in keys:
+            return '%-40s %-12s\n' % (name, cifvals[name])
+        else:
+            print('%s not in cif dict' % name)
+            return '%-40s %-12s\n' % (name, '?')
+
+    def cif_loop(names):
+        cnames = [name for name in names if name in keys]
+        if len(cnames) < len(names):
+            inames = [name for name in names if name not in keys]
+            print('Loop Items not in cif dict: %s' % inames)
+        if len(cnames) == 0:
+            return ''
+        out = 'loop_\n'
+        out += ''.join(['%s\n' % name for name in cnames])
+        vals = [cifvals[name] for name in cnames]
+        for val_line in zip(*vals):
+            out += ' '.join(['%-12s' % val for val in val_line])
+            out += '\n'
+        return out
+
+    # Top Matter
+    c = '#----------------------------------------------------------------------\n'
+    c += '#   Crystal Structure: %s\n' % (cifvals['FileTitle'] if 'FileTitle' in keys else '')
+    c += '#----------------------------------------------------------------------\n'
+    c += '# CIF created in Dans_Diffraction\n'
+    c += '# Original cif:\n# %s\n' % (cifvals['Filename'] if 'Filename' in keys else 'None')
+
+    # Comments
+    c += '# Comments:\n'
+    if comments:
+        comments = comments.split('\n')
+        c += ''.join(['# %s\n' % comment for comment in comments])
+
+    # Crystal Data
+    c += '\ndata_WRITECIF\n'
+    c += cif_value('_chemical_name_mineral')
+    c += cif_value('_chemical_name_common')
+    c += cif_value('_pd_phase_name')
+    c += cif_value('_chemical_formula_sum')
+    c += cif_value('_chemical_formula_weight')
+    c += cif_value('_cell_formula_units_Z')
+
+    # Cell info
+    c += '\n# Cell info\n'
+    c += cif_value('_cell_length_a')
+    c += cif_value('_cell_length_b')
+    c += cif_value('_cell_length_c')
+    c += cif_value('_cell_angle_alpha')
+    c += cif_value('_cell_angle_beta')
+    c += cif_value('_cell_angle_gamma')
+    c += cif_value('_cell_volume')
+
+    # Symmetry info
+    c += '\n# Symmetry info\n'
+    c += cif_value('_space_group_magn.number_BNS')
+    c += cif_value('_space_group_magn.name_BNS')
+    c += '\n'
+    c += cif_loop([
+        '_space_group_symop_magn_operation.id',
+        '_space_group_symop_magn_operation.xyz',
+        '_space_group_symop_magn_operation.mxmymz',
+    ])
+    c += '\n'
+    c += cif_loop([
+        '_space_group_symop_magn_centering.id',
+        '_space_group_symop_magn_centering.xyz',
+        '_space_group_symop_magn_centering.mxmymz',
+    ])
+
+    # Atom info
+    c += '\n# Atom info\n'
+    c += cif_loop([
+        '_atom_site_label',
+        '_atom_site_type_symbol',
+        #'_atom_site_symmetry_multiplicity',
+        #'_atom_site_Wyckoff_symbol',
+        '_atom_site_fract_x',
+        '_atom_site_fract_y',
+        '_atom_site_fract_z',
+        '_atom_site_U_iso_or_equiv',
+        '_atom_site_occupancy',
+    ])
+
+    # Moment info
+    c += '\n# Atom info\n'
+    c += cif_loop([
+        '_atom_site_moment.label',
+        '_atom_site_moment.crystalaxis_x',
+        '_atom_site_moment.crystalaxis_y',
+        '_atom_site_moment.crystalaxis_z',
+        #'_atom_site_moment.symmform',
+    ])
+
+    if filename is None:
+        return c
+
+    filename, extension = os.path.splitext(filename)
+    filename = filename + '.mcif'
+    with open(filename, 'wt') as f:
+        f.write(c)
+    print('MCIF written to: %s' % filename)
 
 
 '--------------Functions to Read Database files----------------------'
@@ -1039,7 +1159,8 @@ def spacegroup_magnetic_list(sg_number):
         name = sg['space group name']
         setting = sg['setting']
         typename = sg['type name']
-        ops = sg['operators magnetic']
+        #ops = sg['operators magnetic']
+        ops = sg['positions magnetic']
         out += fmt % (parent, number, name, setting, typename, ops)
     return out
 
@@ -1832,6 +1953,17 @@ def dspace2q(dspace):
          Qmag = q2dspace(dspace)
     """
     return 2 * np.pi / dspace
+
+
+def resolution2energy(res, twotheta=180.):
+    """
+    Calcualte the energy required to achieve a specific resolution at a given two-theta
+    :param res: measurement resolution in A (==d-spacing)
+    :param twotheta: Bragg angle in Degrees
+    :return: float
+    """
+    theta = twotheta * np.pi / 360  # theta in radians
+    return (fg.h * fg.c * 1e10) / (res * np.sin(theta) * fg.e * 2 * 1000.)
 
 
 def wave2energy(wavelength):

@@ -1,6 +1,6 @@
 # Dans_Diffraction
 ## Atomic Properties Data
-This folder contains atomic properties data used by Dans_Diffraction programs.
+This folder contains atomic properties & symmetry data used by Dans_Diffraction programs.
 
 Full code documentation available [here](https://danporter.github.io/Dans_Diffraction/).
 
@@ -61,7 +61,7 @@ Magnetic spacegroup information can be read from the file as follows:
 sg = dif.fc.spacegroup(61) # space group number
 sg['magnetic space groups'] # returns magnetic spacegroups associated with the spcaegroup
 msg = dif.fc.spacegroup_magnetic(61.433)
-print(msg['operators magnetic'])
+print(msg['positions magnetic'])
 ```
 
 ### X-Ray Form Factors

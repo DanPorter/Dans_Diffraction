@@ -24,8 +24,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.7
-Last updated: 30/03/20
+Version 3.0
+Last updated: 27/05/20
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -40,6 +40,8 @@ Version History:
 12/12/19 2.6    Added Symmetry.is_symmetric_reflection(ref1, ref2), added multiple scattering code
 30/03/20 2.7    Moved Multicrystal class to separate file, other minor tweaks
 19/04/20 2.8    Added update_cif and write_cif funcitons
+12/05/20 2.9    Updated Atom.from_cif to be more reliable
+27/05/20 3.0    Updated write_cif for magnetic moments - now writes simple mcif structures
 
 @author: DGPorter
 """
@@ -56,7 +58,7 @@ from .classes_scattering import Scattering
 from .classes_multicrystal import MultiCrystal
 from .classes_plotting import Plotting, PlottingSuperstructure
 
-__version__ = '2.8'
+__version__ = '3.0'
 
 
 class Crystal:
@@ -104,6 +106,7 @@ class Crystal:
         self.Cell = Cell()
         self.Symmetry = Symmetry()
         self.Atoms = Atoms()
+        self.Structure = Atoms()
 
         # Get data from cif file
         if filename is not None:
@@ -191,7 +194,9 @@ class Crystal:
 
     def write_cif(self, filename=None, comments=None):
         """
-        Write crystal structure to file
+        Write crystal structure to CIF (Crystallographic Information File)
+         Only basic information is saved to the file, but enough to open in VESTA etc.
+         If magnetic ions are defined, a magnetic cif (*.mcif) will be produce
         :param filename: name to write too, if None, use writes to self.name (.cif/.mcif)
         :param comments: str comments to add to file header
         :return: None
@@ -200,12 +205,12 @@ class Crystal:
         cifvals = self.update_cif()
 
         if filename is None:
-            if self.Atoms.ismagnetic():
-                filename = '%s.mcif' % fg.saveable(self.name)
-            else:
-                filename = '%s.cif' % fg.saveable(self.name)
+            filename = '%s' % fg.saveable(self.name)
 
-        fc.writecif(cifvals, filename, comments)
+        if self.Atoms.ismagnetic():
+            fc.write_mcif(cifvals, filename, comments)
+        else:
+            fc.write_cif(cifvals, filename, comments)
 
     def new_cell(self, latt=[1.0]):
         """
@@ -425,14 +430,14 @@ class Cell:
         :return: cifvals
         """
 
-        cifvals['_cell_length_a'] = self.a
-        cifvals['_cell_length_b'] = self.b
-        cifvals['_cell_length_c'] = self.c
-        cifvals['_cell_angle_alpha'] = self.alpha
-        cifvals['_cell_angle_beta'] = self.beta
-        cifvals['_cell_angle_gamma'] = self.gamma
+        cifvals['_cell_length_a'] = '%1.6f' % self.a
+        cifvals['_cell_length_b'] = '%1.6f' % self.b
+        cifvals['_cell_length_c'] = '%1.6f' % self.c
+        cifvals['_cell_angle_alpha'] = '%1.4g' % self.alpha
+        cifvals['_cell_angle_beta'] = '%1.4g' % self.beta
+        cifvals['_cell_angle_gamma'] = '%1.4g' % self.gamma
 
-        cifvals['_cell_volume'] = self.volume()
+        cifvals['_cell_volume'] = '%1.4f' % self.volume()
         return cifvals
 
     def lp(self):
@@ -903,11 +908,24 @@ class Atoms:
         cifvals['_atom_site_fract_z'] = self.w
 
         # Magnetic moments
-        if '_atom_site_moment_label' in keys:
-            cifvals['_atom_site_moment_label'] = self.label
-            cifvals['_atom_site_moment_crystalaxis_x'] = self.mx
-            cifvals['_atom_site_moment_crystalaxis_y'] = self.my
-            cifvals['_atom_site_moment_crystalaxis_z'] = self.mz
+        mag_label = []
+        mag_x = []
+        mag_y = []
+        mag_z = []
+        mag_sym = []
+        for n in range(len(self.label)):
+            if self.mx[n]**2 + self.my[n]**2 + self.mz[n]**2 > 0.01:
+                mag_label += [self.label[n]]
+                mag_x += [self.mx[n]]
+                mag_y += [self.my[n]]
+                mag_z += [self.mz[n]]
+                mag_sym += ['mx,my,mz']
+
+        cifvals['_atom_site_moment.label'] = mag_label
+        cifvals['_atom_site_moment.crystalaxis_x'] = mag_x
+        cifvals['_atom_site_moment.crystalaxis_y'] = mag_y
+        cifvals['_atom_site_moment.crystalaxis_z'] = mag_z
+        #cifvals['_atom_site_moment.symmform'] = mag_sym
         return cifvals
 
     def changeatom(self, idx, u=None, v=None, w=None, type=None,
@@ -1225,6 +1243,7 @@ class Symmetry:
     spacegroup_number = 1
     symmetry_operations = ['x,y,z']
     symmetry_operations_magnetic = ['x,y,z']
+    #symmetry_operations_time = [1]
 
     # symmetry_operations_time = [1]
 
@@ -1268,8 +1287,8 @@ class Symmetry:
             # add magnetic symmetries (symops without translation)
             symops_mag = fc.symmetry_ops2magnetic(symops)
             cenops_mag = fc.symmetry_ops2magnetic(symcen)
-            # self.symmetry_operations_time = [1]*len(symops)
-            # self.centring_operations_time = [1]
+            #self.symmetry_operations_time = [1]*len(symops)
+            #self.centring_operations_time = [1]
         elif '_space_group_symop_operation_xyz' in keys:
             symops = cifvals['_space_group_symop_operation_xyz']
             symcen = ['x,y,z']
@@ -1359,33 +1378,30 @@ class Symmetry:
         """
         keys = cifvals.keys()
 
-        if '_symmetry_equiv_pos_as_xyz' in keys:
-            cifvals['_symmetry_equiv_pos_as_xyz'] = self.symmetry_operations
-        elif '_space_group_symop_operation_xyz' in keys:
-            cifvals['_space_group_symop_operation_xyz'] = self.symmetry_operations
-        elif '_space_group_symop_magn_operation_xyz' in keys:
-            cifvals['_space_group_symop_magn_operation_xyz'] = self.symmetry_operations_magnetic
-        else:
-            cifvals['_symmetry_equiv_pos_as_xyz'] = self.symmetry_operations
+        cifvals['_symmetry_equiv_pos_as_xyz'] = self.symmetry_operations
+        cifvals['_space_group_symop_operation_xyz'] = self.symmetry_operations
+
+        # newer versions of mcif don't use magn_operation.mxmymz but use symform in atom spec
+        # . may be in the wrong place for some program
+        magsym = [
+            '%s' % op.replace('x', 'mx').replace('y', 'my').replace('z', 'mz')
+            for op in self.symmetry_operations_magnetic
+        ]
+        cifvals['_space_group_symop_magn_operation.id'] = range(1, len(self.symmetry_operations)+1)
+        cifvals['_space_group_symop_magn_operation.xyz'] = ['%s, +1' % op for op in self.symmetry_operations]
+        cifvals['_space_group_symop_magn_operation.mxmymz'] = magsym
+        cifvals['_space_group_symop_magn_centering.id'] = ['1']
+        cifvals['_space_group_symop_magn_centering.xyz'] = ['x,y,z,+1']
+        cifvals['_space_group_symop_magn_centering.mxmymz'] = ['mx,my,mz']
 
         # Get space group
-        if '_symmetry_space_group_name_H-M' in keys:
-            cifvals['_symmetry_space_group_name_H-M'] = self.spacegroup
-        elif '_space_group_name_H-M_alt' in keys:
-            cifvals['_space_group_name_H-M_alt'] = self.spacegroup
-        elif '_space_group_magn_name_BNS' in keys:
-            cifvals['_space_group_magn_name_BNS'] = self.spacegroup
-        else:
-            cifvals['_symmetry_space_group_name_H-M'] = self.spacegroup
+        cifvals['_symmetry_space_group_name_H-M'] = self.spacegroup
+        cifvals['_space_group_name_H-M_alt'] = self.spacegroup
+        cifvals['_space_group_magn.name_BNS'] = self.spacegroup
 
-        if '_symmetry_Int_Tables_number' in keys:
-            cifvals['_symmetry_Int_Tables_number'] = self.spacegroup_number
-        elif '_space_group_IT_number' in keys:
-            cifvals['_space_group_IT_number'] = self.spacegroup_number
-        elif '_space_group_magn_number_BNS' in keys:
-            cifvals['_space_group_magn_number_BNS'] = self.spacegroup_number
-        else:
-            cifvals['_symmetry_Int_Tables_number'] = self.spacegroup_number
+        cifvals['_symmetry_Int_Tables_number'] = self.spacegroup_number
+        cifvals['_space_group_IT_number'] = self.spacegroup_number
+        cifvals['_space_group_magn.number_BNS'] = self.spacegroup_number
         return cifvals
 
     def load_spacegroup(self, sg_number):
@@ -1413,10 +1429,10 @@ class Symmetry:
         """
 
         maggroup = fc.spacegroup_magnetic(msg_number)
-        self.spacegroup_number = float(maggroup['space group number'])
+        self.spacegroup_number = maggroup['space group number']
         self.spacegroup = maggroup['space group name']
-        symops = maggroup['operators general']
-        symmag = maggroup['operators magnetic']
+        symops = maggroup['positions general']
+        symmag = maggroup['positions magnetic']
         symmag = [op.replace('m', '') for op in symmag]
         self.symmetry_operations = symops
         self.symmetry_operations_magnetic = symmag

@@ -38,9 +38,10 @@ TTFG = 'red'
 class StringViewer:
     """
     Simple GUI that displays strings
+        StringViewer(string, title, width)
     """
 
-    def __init__(self, string, title=''):
+    def __init__(self, string, title='', width=40):
         """Initialise"""
         # Create Tk inter instance
         self.root = tk.Tk()
@@ -84,7 +85,7 @@ class StringViewer:
         scany.pack(side=tk.RIGHT, fill=tk.Y)
 
         # Editable string box
-        self.text = tk.Text(frame_box, width=40, height=height, font=HF, wrap=tk.NONE, background=ety)
+        self.text = tk.Text(frame_box, width=width, height=height, font=HF, wrap=tk.NONE, background=ety)
         self.text.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
         self.text.insert(tk.END, string)
 

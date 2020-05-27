@@ -1,0 +1,145 @@
+Dans_Diffraction Unit Tests
+Python Version:
+3.7.1 (default, Dec 10 2018, 22:54:23) [MSC v.1915 64 bit (AMD64)]
+File Location:
+C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Test
+Location of Dans_Diffraction
+C:\Users\dgpor\Dropbox\Python\Dans_Diffraction
+Numpy version: 1.16.5
+Matplotlib version: 3.1.1
+Scipy version: 1.3.1
+Importing Dans_Diffraction...
+Dans_Diffraction version: 1.8.2
+  classes_crystal: 2.9
+  classes_plotting: 1.8.1
+  classes_scattering: 1.7
+  classes_properties: 1.5
+  classes_structures: 1.1
+  classes_orbitals: 1.0.0
+  classes_fdmnes: 1.6
+  functions_crystallography: 3.1.0
+  functions_plotting: 1.8
+  functions_general: 1.7
+Graphical front end version:
+  tkgui: 2.2
+Cobalt Weight =  58.93 g
+Cobalt x-ray scattering factor @ 3A =  19.75
+Cobalt magnetic form factor @ 0.5A =   0.17
+C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\functions_crystallography.py:973: RuntimeWarning: divide by zero encountered in log
+  out[:, n] = np.exp(np.interp(np.log(energy_keV), np.log(energies), np.log(xma_data[:, z])))
+Cobalt attenuation @ 8.00keV = 324.80 cm^2/g
+Cobalt atomic scattering factor @ 8.000keV: f1+if2 = (26.940409197907584+2.7446880688753272j)
+Building a crystal manually...
+Loading spacegroup 194
+Spacegroup 194: P63/mmc, nsyms=24
+Magnetic Spacegroup 194.264: P6_3/mmc1', nsyms=48
+Building a crystal from a cif file: C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\Structures\Na0.8CoO2_P63mmc.cif
+NB 62 cif files are included
+Building a crystal from an mcif file: C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\Structures\Sr3LiRuO6_C2'c'.mcif
+_chemical_name_mineral not in cif dict
+_chemical_name_common not in cif dict
+_cell_formula_units_Z not in cif dict
+_symmetry_cell_setting not in cif dict
+_symmetry_space_group_name_Hall not in cif dict
+CIF written to: Test.cif
+Writing CIF to: test.cif
+Test.cif loaded succesfully
+Test x-ray scattering:
+Energy =  8.000 keV
+( h, k, l) TwoTheta  Intensity
+( 1, 0, 0)    36.60     836.25
+( 2, 0, 0)    77.79     471.38
+( 1, 1, 0)    65.88    3036.94
+( 0, 0, 1)     8.23       0.00
+Test Magnetic scattering:
+( h, k, l)   Neutron      xray   Magn. N  Magn. XR   sig-sig    sig-pi    pi-sig     pi-pi
+( 0, 0, 3)       0.0       0.0    106.18    106.19  ss=    0.00  sp=    2.45  ps=    2.44  pp=    5.53
+Resonant scattering RuL2 psi=90 sp =   6.95
+MS Reflections: 400
+1 of 3
+C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\multiple_scattering.py:375: RuntimeWarning: invalid value encountered in arcsin
+  ((ko * np.sin(-brag1 * np.pi / 180.0)) + (realvecthkl[:, 2])) / ko) * 180.0 / np.pi) * np.pi / 180.0)
+C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\multiple_scattering.py:386: RuntimeWarning: invalid value encountered in sqrt
+  np.divide((np.square(orighk) - np.square(rhk) + np.square(rewl)), 2.0 * orighk)))
+C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\multiple_scattering.py:401: RuntimeWarning: invalid value encountered in remainder
+  psi1 = (np.mod(psirotate + 180.0, 360.0) - 180.0)
+C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\multiple_scattering.py:403: RuntimeWarning: invalid value encountered in remainder
+  psi2 = (np.mod(psirotate2 + 180.0, 360.0) - 180.0)
+2 of 3
+3 of 3
+Starting Plotting Tests...
+  Plotting Powder
+  Plotting hk0 plane
+  Plotting h0l plane
+  Plotting Crystal structure
+  Plotting azimuthal scan
+  Plotting multiple scattering
+MS Reflections: 406
+1 of 61
+2 of 61
+3 of 61
+4 of 61
+5 of 61
+6 of 61
+7 of 61
+8 of 61
+9 of 61
+10 of 61
+11 of 61
+12 of 61
+13 of 61
+14 of 61
+15 of 61
+16 of 61
+17 of 61
+18 of 61
+19 of 61
+20 of 61
+21 of 61
+22 of 61
+23 of 61
+24 of 61
+25 of 61
+26 of 61
+27 of 61
+28 of 61
+29 of 61
+30 of 61
+31 of 61
+32 of 61
+33 of 61
+34 of 61
+35 of 61
+36 of 61
+37 of 61
+38 of 61
+39 of 61
+40 of 61
+41 of 61
+42 of 61
+43 of 61
+44 of 61
+45 of 61
+46 of 61
+47 of 61
+48 of 61
+49 of 61
+50 of 61
+51 of 61
+52 of 61
+53 of 61
+54 of 61
+55 of 61
+56 of 61
+57 of 61
+58 of 61
+59 of 61
+60 of 61
+61 of 61
+  Plotting Superstructure hk0 plane
+Max Q distance: 5.66 A-1
+Number of reflections in sphere: 11025
+Number of non-symmetric reflections in box: 217
+  Plotting multicrystal powder
+C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\classes_plotting.py:1284: RuntimeWarning: divide by zero encountered in true_divide
+  I = I / Qmag ** 2

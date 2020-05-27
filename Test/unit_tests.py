@@ -129,7 +129,7 @@ print('\nResonant scattering RuL2 psi=90 sp = %6.2f'%resi)
 mslist = xtlm.Scatter.ms_azimuth([0,0,2], 2.967, [1,0,0])
 
 # 13) Tensor scattering
-ss, sp, ps, pp = xtlm.Scatter.tensor_scattering('Ru1_1', [0,0,3], 2.838, [0,1,0], psideg=np.arange(-180, 180, 1))
+#ss, sp, ps, pp = xtlm.Scatter.tensor_scattering('Ru1_1', [0,0,3], 2.838, [0,1,0], psideg=np.arange(-180, 180, 1))
 
 # 14) Generate superstructure
 P = [[3,0,0],[4,5,0],[0,0,1]] # Stripe Supercell
@@ -163,9 +163,9 @@ plt.show()
 print('  Plotting multiple scattering')
 xtlm.Plot.plot_multiple_scattering([0,0,2], [1,0,0], energy_range=[2.95, 2.98], numsteps=61)
 plt.show()
-print('  Plotting tensor scattering')
-xtlm.Plot.tensor_scattering_azimuth('Ru1_1', [0,0,3], 2.838, [0,1,0])
-plt.show()
+#print('  Plotting tensor scattering')
+#xtlm.Plot.tensor_scattering_azimuth('Ru1_1', [0,0,3], 2.838, [0,1,0])
+#plt.show()
 print('  Plotting Superstructure hk0 plane')
 sup.Plot.simulate_hk0()
 plt.clim([0,10])

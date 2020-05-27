@@ -64,13 +64,13 @@ class CrystalGui:
         # Filename (variable)
         f_file = tk.Frame(frame)
         f_file.pack(side=tk.TOP, expand=tk.YES, fill=tk.X)
-        self.file = tk.StringVar(frame, self.xtl.filename)
+        self.file = tk.StringVar(frame, self.short_file())
         var = tk.Label(f_file, text='CIF file:', font=SF, width=10)
         var.pack(side=tk.LEFT, expand=tk.NO)
-        var = tk.Label(f_file, textvariable=self.file, font=TF)
-        var.pack(side=tk.LEFT, expand=tk.YES)
+        var = tk.Label(f_file, textvariable=self.file, width=40, font=TF)
+        var.pack(side=tk.LEFT, expand=tk.NO, padx=3)
         var = tk.Button(f_file, text='Load CIF', font=BF, bg=btn, activebackground=btn_active, command=self.fun_loadcif)
-        var.pack(side=tk.LEFT, expand=tk.NO, padx=5)
+        var.pack(side=tk.RIGHT, expand=tk.NO, padx=5)
 
         # Name (variable)
         f_name = tk.Frame(frame)
@@ -140,9 +140,10 @@ class CrystalGui:
         var = tk.Button(f_but, text='Multiple\nScattering', bg=btn, activebackground=btn_active, font=BF,
                         command=self.fun_multiple_scattering)
         var.pack(side=tk.LEFT)
-        var = tk.Button(f_but, text='Tensor\nScattering', bg=btn, activebackground=btn_active, font=BF,
-                        command=self.fun_tensor_scattering)
-        var.pack(side=tk.LEFT)
+        # Remove Tensor-Scattering 26/05/20
+        #var = tk.Button(f_but, text='Tensor\nScattering', bg=btn, activebackground=btn_active, font=BF,
+        #                command=self.fun_tensor_scattering)
+        #var.pack(side=tk.LEFT)
         if fdmnes_checker():
             var = tk.Button(f_but, text='Run\nFDMNES', bg=btn, activebackground=btn_active, font=BF,
                             command=self.fun_fdmnes)
@@ -159,11 +160,16 @@ class CrystalGui:
     ############################## FUNCTIONS ##########################################
     ###################################################################################
     def fun_set(self):
-        self.file.set(self.xtl.filename)
+        self.file.set(self.short_file())
         self.name.set(self.xtl.name)
 
     def fun_get(self):
         self.xtl.name = self.name.get()
+
+    def short_file(self):
+        path, name = os.path.split(self.xtl.filename)
+        path, short_path = os.path.split(path)
+        return '/'.join([short_path, name])
 
     def fun_loadcif(self):
         # root = Tk().withdraw() # from Tkinter
@@ -243,8 +249,8 @@ class CrystalGui:
 
     def fun_info(self):
         """Display Crystal info"""
-        string = self.xtl.info()
-        StringViewer(string, self.xtl.name)
+        string = '%s\n%s' % (self.xtl.filename, self.xtl.info())
+        StringViewer(string, self.xtl.name, width=60)
 
     def fun_plotxtl(self):
         self.fun_set()
@@ -575,6 +581,31 @@ class SymmetryGui:
             activeBackground=opt_active,
             activeForeground=txtcol)
 
+        frm1 = tk.Frame(self.root)
+        frm1.pack(side=tk.TOP)
+
+        # Spacegroup entry
+        var = tk.Label(frm1, text='Spacegroup: ', font=TTF)
+        var.pack(side=tk.LEFT)
+        self.spacegroup = tk.StringVar(frm1, 'P1')
+        self.spacegroup_number = tk.StringVar(frm1, '1')
+        var = tk.Entry(frm1, textvariable=self.spacegroup_number, font=TF, width=4, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_spacegroup)
+        var.bind('<KP_Enter>', self.fun_spacegroup)
+        var = tk.Label(frm1, textvariable=self.spacegroup, width=14)
+        var.pack(side=tk.LEFT, padx=5)
+        # Spacegroup Buttons
+        var = tk.Button(frm1, text='Choose\nSpacegroup', command=self.fun_ch_spacegroup, height=2, font=BF, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT, padx=5, pady=5)
+        var = tk.Button(frm1, text='Choose\nSubgroup', command=self.fun_ch_subgroup, height=2,
+                        font=BF, bg=btn, activebackground=btn_active)
+        var.pack(side=tk.LEFT, padx=5, pady=5)
+        var = tk.Button(frm1, text='Choose Magnetic\nSpacegroup', command=self.fun_ch_maggroup, height=2,
+                        font=BF, bg=btn, activebackground=btn_active)
+        var.pack(side=tk.LEFT, padx=5, pady=5)
+
         frame = tk.Frame(self.root)
         frame.pack(side=tk.TOP)
 
@@ -617,28 +648,6 @@ class SymmetryGui:
         self.text_2.config(yscrollcommand=self.fun_move)
         self.text_3.config(yscrollcommand=self.fun_move)
         # scany.config(command=self.text1.yview)
-
-        frm1 = tk.Frame(self.root)
-        frm1.pack(side=tk.TOP)
-
-        # Spacegroup entry
-        var = tk.Label(frm1, text='Spacegroup: ', font=TTF)
-        var.pack(side=tk.LEFT)
-        self.spacegroup = tk.StringVar(frm1, 'P1')
-        self.spacegroup_number = tk.DoubleVar(frm1, '1')
-        var = tk.Entry(frm1, textvariable=self.spacegroup_number, font=TF, width=8, bg=ety, fg=ety_txt)
-        var.pack(side=tk.LEFT)
-        var.bind('<Return>', self.fun_spacegroup)
-        var.bind('<KP_Enter>', self.fun_spacegroup)
-        var = tk.Label(frm1, textvariable=self.spacegroup, width=20)
-        var.pack(side=tk.LEFT, padx=5)
-        # Button
-        var = tk.Button(frm1, text='Choose\nSpacegroup', command=self.fun_ch_spacegroup, height=2, font=BF, bg=btn,
-                        activebackground=btn_active)
-        var.pack(side=tk.LEFT, padx=5, pady=5)
-        var = tk.Button(frm1, text='Choose Magnetic\nSpacegroup', command=self.fun_ch_maggroup, height=2,
-                        font=BF, bg=btn,activebackground=btn_active)
-        var.pack(side=tk.LEFT, padx=5, pady=5)
 
         frm1 = tk.Frame(self.root)
         frm1.pack(side=tk.TOP)
@@ -765,6 +774,16 @@ class SymmetryGui:
         selection = SelectionBox(self.root, sg_list, current_selection, 'Select SpaceGroup', False).show()
         if len(selection) > 0:
             new_sg = int(selection[0].split()[0])
+            self.Symmetry.load_spacegroup(new_sg)
+            self.fun_set()
+
+    def fun_ch_subgroup(self):
+        """Button select subgroup"""
+        current = int(float(self.spacegroup_number.get()))  # str > float > int
+        sbg_list = fc.spacegroup_subgroups_list(current).split('\n')
+        selection = SelectionBox(self.root, sbg_list, [], 'Select SpaceGroup Subgroup', False).show()
+        if len(selection) > 0:
+            new_sg = int(selection[0].split()[3])
             self.Symmetry.load_spacegroup(new_sg)
             self.fun_set()
 
@@ -956,10 +975,6 @@ class PropertiesGui:
                         activebackground=btn_active)
         var.pack(side=tk.LEFT)
 
-        var = tk.Button(line, text='X-Ray\nScattering Factor', font=BF, command=self.fun_xrscat, bg=btn,
-                        activebackground=btn_active)
-        var.pack(side=tk.LEFT)
-
         var = tk.Button(line, text='Magnetic\nForm Factor', font=BF, command=self.fun_magff, bg=btn,
                         activebackground=btn_active)
         var.pack(side=tk.LEFT)
@@ -1038,15 +1053,9 @@ class PropertiesGui:
         elements = elements.replace(',', ' ')
         elelist = elements.split()
         out = fc.print_atom_properties(elelist)
-        StringViewer(out, 'Element Properties')
-
-    def fun_xrscat(self):
-        """Properties button"""
-        elements = self.atoms.get()
-        elements = elements.replace(',', ' ')
-        elelist = elements.split()
-        fp.plot_xray_scattering_factor(elelist)
-        plt.show()
+        width = 12 + 12*len(elelist)
+        if width > 120: width=120
+        StringViewer(out, 'Element Properties', width)
 
     def fun_magff(self):
         """Properties button"""

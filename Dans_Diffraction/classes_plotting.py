@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.7
-Last updated: 15/04/20
+Version 1.8.1
+Last updated: 26/05/20
 
 Version History:
 18/08/17 0.1    Program created
@@ -22,6 +22,8 @@ Version History:
 08/11/19 1.6    Increased pixel width on powder plots, improved superstructure recriprocal space planes
 14/04/20 1.7    Added powder avereging to simulate_powder
 15/04/20 1.7    Added minimum angle to simulate_powder
+13/05/20 1.8    Added plot_exchange_paths
+26/05/20 1.8.1  Removed tensor_scattering
 
 @author: DGPorter
 """
@@ -35,7 +37,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.7'
+__version__ = '1.8.1'
 
 
 class Plotting:
@@ -60,13 +62,13 @@ class Plotting:
         
         # Generate lattice
         tol = 0.05
-        uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.generate_lattice(1,1,1)
+        uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
         #uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.get()
         
         # Split atom types, color & radii
-        labels,idx,invidx = np.unique(label,return_index=True,return_inverse=True)
+        labels, idx, invidx = np.unique(label, return_index=True, return_inverse=True)
         types = type[idx]
-        colors = plt.cm.gist_rainbow(np.linspace(0,1,len(types)))
+        colors = plt.cm.gist_rainbow(np.linspace(0, 1, len(types)))
         #sizes = 300*np.ones(len(types))
         #sizes[types=='O'] = 50.
         sizes = fc.atom_properties(types, 'Radii')
@@ -92,7 +94,7 @@ class Plotting:
             xyz = np.array([R[m,:] for m in range(len(R)) if invidx[m] == n])
             iii = np.array([I[m] for m in range(len(R)) if invidx[m] == n])
             col = np.tile(colors[n], (len(xyz[iii,:]),1) )
-            ax.scatter(xyz[iii,0], xyz[iii,1], xyz[iii,2], s=sizes[n], c=col, label=labels[n], cmap=colors)
+            ax.scatter(xyz[iii,0], xyz[iii,1], xyz[iii,2], s=2*sizes[n], c=col, label=labels[n], cmap=colors)
             
             #mxyz = np.array([mxmymz[m,:] for m in range(len(R)) if invidx[m] == n])
             
@@ -112,23 +114,24 @@ class Plotting:
                 ax.text(R_st[n,0],R_st[n,1],R_st[n,2],'%2d: %s' %(n,label_st[n]),fontsize=10)
         
         # Create cell box
-        uvw = np.array([[0.,0,0],[1,0,0],[1,0,1],[1,1,1],[1,1,0],[0,1,0],[0,1,1],\
-                        [0,0,1],[1,0,1],[1,0,0],[1,1,0],[1,1,1],[0,1,1],[0,1,0],[0,0,0],[0,0,1]])
-        bpos = np.dot(uvw,self.xtl.Cell.UV())
-        ax.plot(bpos[:,0],bpos[:,1],bpos[:,2],c='k') # cell box
-        fp.plot_arrow(bpos[[0,1],0],bpos[[0,1],1],bpos[[0,1],2],col='r',width=4) # a
-        fp.plot_arrow(bpos[[0,5],0],bpos[[0,5],1],bpos[[0,5],2],col='g',width=4) # b
-        fp.plot_arrow(bpos[[0,7],0],bpos[[0,7],1],bpos[[0,7],2],col='b',width=4) # c
-        lim=np.max(self.xtl.Cell.lp()[:3])
-        ax.set_xlim(-lim/2, lim)
-        ax.set_ylim(-lim/2, lim)
-        ax.set_zlim(-lim/2, lim)
-        #ax.axis('equal')
+        uvw = np.array([[0., 0, 0], [1, 0, 0], [1, 0, 1], [1, 1, 1], [1, 1, 0], [0, 1, 0], [0, 1, 1],
+                        [0, 0, 1], [1, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1], [0, 1, 1], [0, 1, 0], [0, 0, 0],
+                        [0, 0, 1]])
+        bpos = np.dot(uvw, self.xtl.Cell.UV())
+        ax.plot(bpos[:, 0], bpos[:, 1], bpos[:, 2], c='k')  # cell box
+        fp.plot_arrow(bpos[[0, 1], 0], bpos[[0, 1], 1], bpos[[0, 1], 2], col='r', width=4)  # a
+        fp.plot_arrow(bpos[[0, 5], 0], bpos[[0, 5], 1], bpos[[0, 5], 2], col='g', width=4)  # b
+        fp.plot_arrow(bpos[[0, 7], 0], bpos[[0, 7], 1], bpos[[0, 7], 2], col='b', width=4)  # c
+        lim = np.max(self.xtl.Cell.lp()[:3])
+        ax.set_xlim(-lim / 10, lim)
+        ax.set_ylim(-lim / 10, lim)
+        ax.set_zlim(-lim / 10, lim)
+        # ax.axis('equal')
         ax.set_axis_off()
         
-        plt.legend()
+        plt.legend(fontsize=24, frameon=False)
         
-        plt.title(self.xtl.name,fontsize=20,fontweight='bold')
+        plt.title(self.xtl.name, fontsize=28, fontweight='bold')
     
     def plot_layers(self, layer_axis=2, layer_width=0.05, show_labels=False):
         """
@@ -223,6 +226,36 @@ class Plotting:
             
             ttl = '%s\nLayer %2.0f = %5.3f' %(self.xtl.name,L,layer)
             plt.title(ttl,fontsize=20,fontweight='bold')
+
+    def plot_exchange_paths(self, cen_idx, nearest_neighbor_distance=6.6, exchange_type='O', bond_angle=90.,
+                            search_in_cell=True, group_neighbors=True, disp=False):
+        """
+        Calcualtes exchange paths and adds them to the crystal structure plot
+        :param cen_idx: index of central ion in xtl.Structure
+        :param nearest_neighbor_distance: Maximum radius to serach to
+        :param exchange_type: str or None. Exchange path only incoroporates these elements, or None for any
+        :param bond_angle: float. Search for exchange ions withing this angle to the bond
+        :param search_in_cell: Bool. If True, only looks for neighbors within the unit cell
+        :param group_neighbors: Bool. If True, only shows neighbors with the same bond distance once
+        :param disp: Bool. If True, prints details of the calcualtion
+        :return:
+        """
+        exchange_paths, exchange_distances = self.xtl.Properties.exchange_paths(
+            cen_idx=cen_idx,
+            nearest_neighbor_distance=nearest_neighbor_distance,
+            bond_angle=bond_angle,
+            exchange_type=exchange_type,
+            search_in_cell=search_in_cell,
+            group_neighbors=group_neighbors,
+            disp=disp
+        )
+        self.plot_crystal()
+        ax = plt.gca()
+        for ex, dis in zip(exchange_paths, exchange_distances):
+            x = [el[2][0] for el in ex]
+            y = [el[2][1] for el in ex]
+            z = [el[2][2] for el in ex]
+            ax.plot3D(x, y, z, '-', lw=5)
 
     def simulate_powder(self, energy_kev=None, peak_width=0.01, background=0, powder_average=True):
         """
@@ -954,6 +987,7 @@ class Plotting:
         fp.labels(ttl, r'$\psi$ (deg)', 'Intensity')
         #plt.subplots_adjust(bottom=0.2)
 
+    ''' Remove tensor_scattering 26/05/20
     def tensor_scattering_azimuth(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], process='E1E1',
                                   rank=2, time=+1, parity=+1, mk=None, lk=None, sk=None):
         """
@@ -1025,6 +1059,7 @@ class Plotting:
         plt.xticks(np.arange(-180,181,45))
         plt.grid('on')
         fp.labels(ttl, 'Stokes [Deg]', 'Intensity [arb. units]')
+    '''
 
 
 class PlottingSuperstructure(Plotting):

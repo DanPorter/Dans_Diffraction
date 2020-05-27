@@ -8,7 +8,7 @@ Diamond
 2017
 
 Version 1.5
-Last updated: 12/05/20
+Last updated: 27/05/20
 
 Version History:
 10/11/17 0.1    Program created
@@ -17,7 +17,7 @@ Version History:
 23/02/19 1.2    Added xray_edges
 15/08/19 1.3    Added molcharge
 30/03/20 1.4    Added latex_table, info returns str, removed getattr from xray_edges, check if element exists
-12/05/20 1.5    Added orbitals function
+12/05/20 1.5    Added orbitals function, exchange_paths
 
 
 @author: DGPorter
@@ -54,7 +54,7 @@ class Properties:
         """
 
         cifvals['_chemical_formula_sum'] = self.molname()
-        cifvals['_chemical_formula_weight'] = self.weight()
+        cifvals['_chemical_formula_weight'] = '%1.4f' % self.weight()
         return cifvals
 
     def orbitals(self):
@@ -266,9 +266,9 @@ class Properties:
                 label = labels of the neighboring ions
         """
 
-        Rindex = self.xtl.Cell.calculateR(self.xtl.Structure.uvw()[structure_index,:])
+        Rindex = self.xtl.Cell.calculateR(self.xtl.Structure.uvw()[structure_index, :])
 
-        uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.generate_lattice(1,1,1)
+        uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
 
         R = self.xtl.Cell.calculateR(uvw)
 
@@ -283,8 +283,177 @@ class Properties:
 
         if disp:
             for i in ii:
-                print('{:3.0f} {:4s} {:6.3f} {:6.3f} {:6.3f} dist = {:6.3f}'.format(i,label[i],diff[i,0],diff[i,1],diff[i,2],mag[i]))
+                print('{:3.0f} {:4s} {:6.3f} {:6.3f} {:6.3f} dist = {:6.3f}'.format(i, label[i], diff[i, 0], diff[i, 1],
+                                                                                    diff[i, 2], mag[i]))
         return diff[ii,:], label[ii]
+
+    def exchange_paths(self, cen_idx=None, nearest_neighbor_distance=7.0, exchange_type='O', bond_angle=90.,
+                       search_in_cell=True, group_neighbors=True, disp=False, return_str=False):
+        """
+        Calcualte likely exchange pathways between neighboring ions within a certain radius
+        Ions in exchange path are selected by being close to the bond between neighboring atoms of the same type to the
+        central atom.
+        :param cen_idx: index of central ion in xtl.Structure, or None to select 1st magnetic ion in list
+        :param nearest_neighbor_distance: Maximum radius to serach to
+        :param exchange_type: str or None. Exchange path only incoroporates these elements, or None for any
+        :param bond_angle: float. Search for exchange ions withing this angle to the bond, in degrees
+        :param search_in_cell: Bool. If True, only looks for neighbors within the unit cell
+        :param group_neighbors: Bool. If True, only shows neighbors with the same bond distance once
+        :param disp: Bool. If True, prints details of the calcualtion
+        :param return_str: Bool. If True, returns a formatted string of the results
+        :return: exchange_path, excange_distance (, output_str)
+        """
+
+        if cen_idx is None:
+            # Select magnetic ions
+            mag_idx = np.where(fg.mag(self.xtl.Structure.mxmymz()) > 0.01)[0]
+            if len(mag_idx) == 0:
+                print('No Magnetic ions')
+                if return_str:
+                    return "No Magnetic ions"
+                return [], []
+            cen_idx = mag_idx[0]
+
+        if nearest_neighbor_distance is None:
+            # Default to average cell length (does this any make sense?)
+            nearest_neighbor_distance = np.mean(self.xtl.Cell.lp()[:3])
+
+        cen_uvw = self.xtl.Structure.uvw()[cen_idx, :]
+        cen_xyz = self.xtl.Cell.calculateR(cen_uvw)[0]
+        cen_type = self.xtl.Structure.type[cen_idx]
+
+        if disp:
+            print('Centre: %3d %4s (%6.2f,%6.2f,%6.2f)' % (cen_idx, cen_type, cen_uvw[0], cen_uvw[1], cen_uvw[2]))
+
+        # Generate lattice of muliple cells to remove cell boundary problem
+        uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
+        xyz = self.xtl.Cell.calculateR(uvw)
+        all_bonds = cen_xyz - xyz
+
+        # Exchange type
+        # exchange_type = 1  # all atoms
+        exchange_allowed = type == exchange_type
+
+        # Inside unit cell
+        if search_in_cell:
+            incell = np.all((uvw >= 0) * (uvw <= 1), axis=1)
+        else:
+            incell = 1
+
+        # Bond distances
+        mag = fg.mag(all_bonds)
+        neighbor_idx = np.where(incell * (type == cen_type) * (mag < nearest_neighbor_distance) * (mag > 0.01))[0]
+
+        # Sort order by distance to central atom
+        srt_idx = np.argsort(mag[neighbor_idx])
+        neighbor_idx = neighbor_idx[srt_idx]
+
+        # Goup distances
+        if group_neighbors:
+            group_val, array_index, group_index, group_count = fg.group(mag[neighbor_idx], 0.001)
+            neighbor_idx = neighbor_idx[group_index]
+
+        exchange_paths = []
+        exchange_distances = []
+        for nidx in neighbor_idx:
+            pos = xyz[nidx, :]
+            n_uvw = uvw[nidx, :]
+            n_type = label[nidx]
+            n_dist = mag[nidx]
+            if disp:
+                print('\nNeighbour:')
+                print('%3d %4s (%6.2f,%6.2f,%6.2f)' % (nidx, n_type, n_uvw[0], n_uvw[1], n_uvw[2]))
+                print(' %s-%s distance: %5.3f Å' % (cen_type, n_type, n_dist))
+            # Distance to average position
+            av_pos = (cen_xyz + pos) / 2
+            av_dis = fg.mag(av_pos - cen_xyz) * 1.1
+            av_dis_idx = fg.mag(av_pos - xyz) < av_dis
+            if disp:
+                print(' %d ions < %5.2f A to bond' % (sum(av_dis_idx), av_dis))
+
+            # Distace from Ru1
+            dist1_idx = (mag > 0.01) * (mag < av_dis)
+            if disp:
+                print(' %d ions < %5.2f A to Ru1' % (sum(dist1_idx), av_dis))
+
+            # Distance from Ru2
+            all_bonds2 = pos - xyz
+            mag2 = fg.mag(all_bonds2)
+            dist2_idx = (mag2 > 0.01) * (mag2 < av_dis)
+            if disp:
+                print(' %d ions < %5.2f A to Ru2' % (sum(dist2_idx), av_dis))
+
+            # bond angle from ru1
+            bond = cen_xyz - pos
+            bond_angles1 = np.array([fg.ang(bond, bnd) for bnd in all_bonds])
+            ang1_idx = abs(bond_angles1) < np.deg2rad(bond_angle)
+            if disp:
+                print(' %d ions < 30Deg to Ru1' % (sum(ang1_idx)))
+                print(' %d close ions < 30Deg to Ru1' % (sum(ang1_idx*dist1_idx)))
+                for nn in np.where(dist1_idx)[0]:
+                    print('   %4s (%6.2f,%6.2f,%6.2f) angle = %5.2f Deg' % (
+                        label[nn], uvw[nn, 0], uvw[nn, 1], uvw[nn, 2], np.rad2deg(bond_angles1[nn])))
+
+            # bond angle from ru2
+            bond = pos - cen_xyz
+            bond_angles2 = np.array([fg.ang(bond, bnd) for bnd in all_bonds2])
+            ang2_idx = abs(bond_angles2) < np.deg2rad(bond_angle)
+            if disp:
+                print(' %d ions < 30Deg to Ru2' % (sum(ang2_idx)))
+                print(' %d close ions < 30Deg to Ru2' % (sum(ang2_idx * dist2_idx)))
+                for nn in np.where(dist2_idx)[0]:
+                    print('   %4s (%6.2f,%6.2f,%6.2f) angle = %5.2f Deg' % (
+                        label[nn], uvw[nn, 0], uvw[nn, 1], uvw[nn, 2], np.rad2deg(bond_angles2[nn])))
+
+            # Atoms near bond
+            exchange_idx = av_dis_idx * (dist1_idx + dist2_idx) * ang1_idx * ang2_idx * exchange_allowed
+            near_bond_idx = np.where(exchange_idx)[0]
+            if disp:
+                print('Exchange ions: %d' % len(near_bond_idx))
+
+            # Sort by distance to central atom
+            srt_idx = np.argsort(mag[exchange_idx])
+            near_bond_idx = near_bond_idx[srt_idx]
+
+            exchange_dist = 0.
+            exchange_paths += [[[cen_idx, cen_type, cen_xyz]]]
+            for idx in near_bond_idx:
+                near_uvw = uvw[idx, :]
+                near_xyz = xyz[idx, :]
+                near_type = label[idx]
+
+                if disp:
+                    dist12 = '%4sRu1: %6.2f' % (near_type, mag[idx])
+                    dist21 = '%4sRu2: %6.2f' % (near_type, mag2[idx])
+                    ang12 = 'ang1: %3.0fDeg' % np.rad2deg(bond_angles1[idx])
+                    ang21 = 'ang2: %3.0fDeg' % np.rad2deg(bond_angles2[idx])
+                    print('   %4s (%6.2f,%6.2f,%6.2f) %s %s %s %s' % (
+                        near_type, near_uvw[0], near_uvw[0], near_uvw[0],
+                        dist12, dist21, ang12, ang21
+                    ))
+                exchange_dist += fg.mag(near_xyz - exchange_paths[-1][-1][2])
+                exchange_paths[-1] += [[idx, near_type, near_xyz]]
+            exchange_dist += fg.mag(pos - exchange_paths[-1][-1][2])
+            exchange_paths[-1] += [[nidx, n_type, pos]]
+            exchange_distances += [exchange_dist]
+            if disp:
+                print('Exchange dist: %5.3f Å' % exchange_dist)
+
+        outstr = 'Exchange Paths from [%3d] %4s (%5.2f,%5.2f,%5.2f) < %1.2f Å\n' % (
+            cen_idx, cen_type, cen_uvw[0], cen_uvw[1], cen_uvw[2], nearest_neighbor_distance)
+
+        # Print results
+        for ex, dis in zip(exchange_paths, exchange_distances):
+            str_exchange_path = '.'.join([e[1] for e in ex])
+            n_uvw = uvw[ex[-1][0], :]
+            str_neigh = '%4s(%5.2f,%5.2f,%5.2f)' % (ex[-1][1], n_uvw[1], n_uvw[0], n_uvw[2])
+            bond_dist = mag[ex[-1][0]]
+            outstr += '%s %12s BondDist=%5.3f Å. ExchangeDist=%5.3f Å\n' % (str_neigh, str_exchange_path, bond_dist, dis)
+        if disp:
+            print('\n\n%s' % outstr)
+        if return_str:
+            return exchange_paths, exchange_distances, outstr
+        return exchange_paths, exchange_distances
 
     def latex_table(self):
         """Return latex table of structure properties from CIF"""

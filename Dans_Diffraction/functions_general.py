@@ -26,7 +26,7 @@ Version History:
 20/08/19 1.4    Added search_dict_lists
 27/03/20 1.5    Corrected error in gauss for 1d case when centre /= 0
 05/05/20 1.6    New version of readstfm, allows E powers and handles non-numbers.
-12/05/20 1.7    Added replace_bracket_multiple
+12/05/20 1.7    Added sph2cart, replace_bracket_multiple
 
 @author: DGPorter
 """
@@ -244,6 +244,30 @@ def rotmat(a, b):
     return U
 
 
+def group(A, tolerance=0.0001):
+    """
+    Group similear values in an array, returning the group and indexes
+    array will be sorted so lowest numbers are grouped first
+      group_index, group_values, group_counts = group([2.1, 3.0, 3.1, 1.00], 0.1)
+    group_values = [1., 2., 3.] array of grouped numbers (rounded)
+    array_index = [1, 2, 2, 0] array matching A values to groups, such that A ~ group_values[group_index]
+    group_index = [3, 0, 1] array matching group values to A, such that group_values ~ A[group_index]
+    group_counts = [1, 1, 2] number of iterations of each item in group_values
+    :param A: list or numpy array of numbers
+    :param tolerance: values within this number will be grouped
+    :return: group_values, array_index, group_index, group_counts
+    """
+    A = np.asarray(A, dtype=np.float).reshape(-1)
+    idx = np.argsort(A)
+    rtn_idx = np.argsort(idx)
+    A2 = np.round(A/tolerance)*tolerance
+    groups, indices, inverse, counts = np.unique(A2[idx], return_index=True, return_inverse=True, return_counts=True)
+    # groups = A[idx][indices]  # return original, not rounded values
+    array_index = inverse[rtn_idx]
+    group_index = idx[indices]
+    return groups, array_index, group_index,  counts
+
+
 def unique_vector(vecarray, tol=0.05):
     """
     Find unique vectors in an array within a certain tolerance
@@ -285,6 +309,25 @@ def unique_vector(vecarray, tol=0.05):
     uniqueidx = [matchidx.index(n) for n in range(np.max(matchidx) + 1)]
     newarray = vecarray[uniqueidx, :]
     return newarray, uniqueidx, matchidx
+
+
+def distance2line(line_start, line_end, point):
+    """
+    Calculate distance from a line between the start and end to an arbitary point in space
+    :param line_start: array, position of the start of the line
+    :param line_end:  array, position of the end of the line
+    :param point: array, arbitary position in space
+    :return: float
+    """
+    line_start = np.asarray(line_start)
+    line_end = np.asarray(line_end)
+    point = np.asarray(point)
+
+    line_diff = line_end - line_start
+    unit_line = line_diff / np.sqrt(np.sum(line_diff ** 2))
+
+    vec_arb = (line_start - point) - np.dot((line_start - point), unit_line) * unit_line
+    return np.sqrt(np.sum(vec_arb ** 2))
 
 
 def find_index(A, value):
@@ -749,6 +792,7 @@ def replace_bracket_multiple(name):
         # Replace in original string
         name = name.replace(repstr, numstr)
     return name
+
 
 def nice_print(precision=4, linewidth=300):
     """

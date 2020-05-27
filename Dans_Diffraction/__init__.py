@@ -17,8 +17,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.8.1
-Last updated: 12/05/20
+Version 1.8.2
+Last updated: 26/05/20
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -29,9 +29,10 @@ Version History:
 13/12/19 1.5    Multiple Scattering added, tkGUI refactored, Startgui changed to start_gui
 20/02/20 1.6    Tensor Scattering added
 31/03/20 1.7    Refactored multicrystal methods, other minor changes, improved powder diffraction
-19/04/20 1.7.1  Added writecif + spacegroup file + functions
+19/04/20 1.7.1  Added write_cif + spacegroup file + functions
 02/05/20 1.8    Updated readcif, added heavy atom properties, added magnetic spacegroups
 12/05/20 1.8.1  Updated readcif, added atomic_scattering_factors and classes_orbitals
+26/05/20 1.8.2  Updated copyright, removed tensor scattering. Updated magnetic spacegroups
 
 -----------------------------------------------------------------------------
    Copyright 2020 Diamond Light Source Ltd.
@@ -85,8 +86,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '1.8.1'
-__date__ = '12/05/20'
+__version__ = '1.8.2'
+__date__ = '26/05/20'
 
 
 # Build
