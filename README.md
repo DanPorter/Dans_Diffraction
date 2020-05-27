@@ -1,7 +1,9 @@
 # Dans_Diffaction
-Reads crystallographic cif files and simulates diffraction
+Reads crystallographic cif files and simulates diffraction, among other things.
 
 **Version 1.8**
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3859501.svg)](https://doi.org/10.5281/zenodo.3859501)
 
 By Dan Porter, Diamond Light Source
 2020
@@ -30,6 +32,8 @@ xtl.start_gui()
 Full code documentation available [here](https://danporter.github.io/Dans_Diffraction/).
 
 For comments, queries or bugs - email [dan.porter@diamond.ac.uk](mailto:dan.porter@diamond.ac.uk)
+
+**Citation:** If you use this code (great!), please cite the published DOI: [10.5281/zenodo.3859501](https://doi.org/10.5281/zenodo.3859501)
 
 # Installation
 **Requirements:** 
