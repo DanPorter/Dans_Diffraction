@@ -210,7 +210,7 @@ analysis&nbsp;=&nbsp;fdm.<a href="#Fdmnes-analyse">analyse</a>()<br>&nbsp;</tt><
 Remember&nbsp;to&nbsp;use&nbsp;self.<strong>create_files</strong>&nbsp;and&nbsp;self.<strong>write_fdmfile</strong>&nbsp;first!<br>
 :return:&nbsp;subprocess.call&nbsp;output</tt></dd></dl>
 
-<dl><dt><a name="Fdmnes-setup"><strong>setup</strong></a>(self, exe_path=None, output_path=None, output_name=None, folder_name=None, input_name=None, comment=None, range=None, radius=None, edge=None, absorber=None, green=None, scf=None, quadrupole=None, azi_ref=None, hkl_reflections=None)</dt><dd><tt>Set&nbsp;FDMNES&nbsp;Parameters<br>
+<dl><dt><a name="Fdmnes-setup"><strong>setup</strong></a>(self, exe_path=None, output_path=None, output_name=None, folder_name=None, input_name=None, comment=None, range=None, radius=None, edge=None, absorber=None, green=None, scf=None, quadrupole=None, azi_ref=None, correct_azi=None, hkl_reflections=None)</dt><dd><tt>Set&nbsp;FDMNES&nbsp;Parameters<br>
 :param&nbsp;exe_path:&nbsp;Location&nbsp;of&nbsp;FDMNES&nbsp;executable,&nbsp;e.g.&nbsp;'c:\FDMNESdmnes_win64.exe'<br>
 :param&nbsp;output_path:&nbsp;Specify&nbsp;the&nbsp;output&nbsp;path<br>
 :param&nbsp;folder_name:&nbsp;Specify&nbsp;output&nbsp;folder&nbsp;name&nbsp;(replaces&nbsp;output_path)<br>
@@ -225,6 +225,7 @@ Remember&nbsp;to&nbsp;use&nbsp;self.<strong>create_files</strong>&nbsp;and&nbsp;
 :param&nbsp;scf:&nbsp;True/False,&nbsp;Self&nbsp;consistent&nbsp;solution<br>
 :param&nbsp;quadrupole:&nbsp;False/True,&nbsp;E1E2&nbsp;terms&nbsp;allowed<br>
 :param&nbsp;azi_ref:&nbsp;azimuthal&nbsp;reference,&nbsp;[1,0,0]<br>
+:param&nbsp;correct_azi:&nbsp;if&nbsp;True,&nbsp;correct&nbsp;azimuthal&nbsp;reference&nbsp;for&nbsp;real&nbsp;cell&nbsp;(use&nbsp;in&nbsp;hexagonal&nbsp;systems)<br>
 :param&nbsp;hkl_reflections:&nbsp;list&nbsp;of&nbsp;hkl&nbsp;reflections&nbsp;[[1,0,0],[0,1,0]]<br>
 :return:&nbsp;None</tt></dd></dl>
 

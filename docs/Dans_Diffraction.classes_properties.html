@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_properties</strong></big></big> (version 1.4)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_properties</strong></big></big> (version 1.5)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_properties.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_properties.py</a></font></td></tr></table>
     <p><tt><a href="#Properties">Properties</a>&nbsp;Class&nbsp;"classes_properties.py"<br>
@@ -16,8 +16,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;1.4<br>
-Last&nbsp;updated:&nbsp;30/03/20<br>
+Version&nbsp;1.5<br>
+Last&nbsp;updated:&nbsp;27/05/20<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 10/11/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -26,6 +26,7 @@ Version&nbsp;History:<br>
 23/02/19&nbsp;1.2&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;xray_edges<br>
 15/08/19&nbsp;1.3&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;molcharge<br>
 30/03/20&nbsp;1.4&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;latex_table,&nbsp;info&nbsp;returns&nbsp;str,&nbsp;removed&nbsp;getattr&nbsp;from&nbsp;xray_edges,&nbsp;check&nbsp;if&nbsp;element&nbsp;exists<br>
+12/05/20&nbsp;1.5&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;orbitals&nbsp;function,&nbsp;exchange_paths<br>
 &nbsp;<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
@@ -118,6 +119,19 @@ type&nbsp;=&nbsp;'cgs&nbsp;mass'&nbsp;&gt;&nbsp;returns&nbsp;mass&nbsp;susceptib
 type&nbsp;=&nbsp;'molar'&nbsp;&gt;&nbsp;returns&nbsp;molar&nbsp;susceptiblity&nbsp;in&nbsp;m^3/mol<br>
 type&nbsp;=&nbsp;'cgs&nbsp;molar'&nbsp;&gt;&nbsp;returns&nbsp;molar&nbsp;susceptiblity&nbsp;in&nbsp;emu/mol</tt></dd></dl>
 
+<dl><dt><a name="Properties-exchange_paths"><strong>exchange_paths</strong></a>(self, cen_idx=None, nearest_neighbor_distance=7.0, exchange_type='O', bond_angle=90.0, search_in_cell=True, group_neighbors=True, disp=False, return_str=False)</dt><dd><tt>Calcualte&nbsp;likely&nbsp;exchange&nbsp;pathways&nbsp;between&nbsp;neighboring&nbsp;ions&nbsp;within&nbsp;a&nbsp;certain&nbsp;radius<br>
+Ions&nbsp;in&nbsp;exchange&nbsp;path&nbsp;are&nbsp;selected&nbsp;by&nbsp;being&nbsp;close&nbsp;to&nbsp;the&nbsp;bond&nbsp;between&nbsp;neighboring&nbsp;atoms&nbsp;of&nbsp;the&nbsp;same&nbsp;type&nbsp;to&nbsp;the<br>
+central&nbsp;atom.<br>
+:param&nbsp;cen_idx:&nbsp;index&nbsp;of&nbsp;central&nbsp;ion&nbsp;in&nbsp;xtl.Structure,&nbsp;or&nbsp;None&nbsp;to&nbsp;select&nbsp;1st&nbsp;magnetic&nbsp;ion&nbsp;in&nbsp;list<br>
+:param&nbsp;nearest_neighbor_distance:&nbsp;Maximum&nbsp;radius&nbsp;to&nbsp;serach&nbsp;to<br>
+:param&nbsp;exchange_type:&nbsp;str&nbsp;or&nbsp;None.&nbsp;Exchange&nbsp;path&nbsp;only&nbsp;incoroporates&nbsp;these&nbsp;elements,&nbsp;or&nbsp;None&nbsp;for&nbsp;any<br>
+:param&nbsp;bond_angle:&nbsp;float.&nbsp;Search&nbsp;for&nbsp;exchange&nbsp;ions&nbsp;withing&nbsp;this&nbsp;angle&nbsp;to&nbsp;the&nbsp;bond,&nbsp;in&nbsp;degrees<br>
+:param&nbsp;search_in_cell:&nbsp;Bool.&nbsp;If&nbsp;True,&nbsp;only&nbsp;looks&nbsp;for&nbsp;neighbors&nbsp;within&nbsp;the&nbsp;unit&nbsp;cell<br>
+:param&nbsp;group_neighbors:&nbsp;Bool.&nbsp;If&nbsp;True,&nbsp;only&nbsp;shows&nbsp;neighbors&nbsp;with&nbsp;the&nbsp;same&nbsp;bond&nbsp;distance&nbsp;once<br>
+:param&nbsp;disp:&nbsp;Bool.&nbsp;If&nbsp;True,&nbsp;prints&nbsp;details&nbsp;of&nbsp;the&nbsp;calcualtion<br>
+:param&nbsp;return_str:&nbsp;Bool.&nbsp;If&nbsp;True,&nbsp;returns&nbsp;a&nbsp;formatted&nbsp;string&nbsp;of&nbsp;the&nbsp;results<br>
+:return:&nbsp;exchange_path,&nbsp;excange_distance&nbsp;(,&nbsp;output_str)</tt></dd></dl>
+
 <dl><dt><a name="Properties-info"><strong>info</strong></a>(self)</dt><dd><tt>Prints&nbsp;various&nbsp;properties&nbsp;of&nbsp;the&nbsp;crystal</tt></dd></dl>
 
 <dl><dt><a name="Properties-latex_table"><strong>latex_table</strong></a>(self)</dt><dd><tt>Return&nbsp;latex&nbsp;table&nbsp;of&nbsp;structure&nbsp;properties&nbsp;from&nbsp;CIF</tt></dd></dl>
@@ -138,6 +152,8 @@ type&nbsp;=&nbsp;'cgs&nbsp;molar'&nbsp;&gt;&nbsp;returns&nbsp;molar&nbsp;suscept
 &nbsp;&nbsp;&nbsp;&nbsp;element_no&nbsp;:&nbsp;float&nbsp;:&nbsp;The&nbsp;coordination&nbsp;number&nbsp;of&nbsp;element<br>
 &nbsp;&nbsp;&nbsp;&nbsp;latex&nbsp;:&nbsp;True/False&nbsp;:&nbsp;if&nbsp;true,&nbsp;outputs&nbsp;in&nbsp;latex&nbsp;format<br>
 :return:&nbsp;str</tt></dd></dl>
+
+<dl><dt><a name="Properties-orbitals"><strong>orbitals</strong></a>(self)</dt><dd><tt>Return&nbsp;orbital&nbsp;Compound&nbsp;from&nbsp;classes_orbitals</tt></dd></dl>
 
 <dl><dt><a name="Properties-update_cif"><strong>update_cif</strong></a>(self, cifvals)</dt><dd><tt>Update&nbsp;cif&nbsp;dict&nbsp;with&nbsp;new&nbsp;values<br>
 :param&nbsp;cifvals:&nbsp;cif&nbsp;dict&nbsp;from&nbsp;readcif<br>

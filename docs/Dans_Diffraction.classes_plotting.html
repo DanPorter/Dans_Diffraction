@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_plotting</strong></big></big> (version 1.7)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_plotting</strong></big></big> (version 1.8.1)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_plotting.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_plotting.py</a></font></td></tr></table>
     <p><tt><a href="#Plotting">Plotting</a>&nbsp;Class&nbsp;"classes_plotting.py"<br>
@@ -17,8 +17,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;1.7<br>
-Last&nbsp;updated:&nbsp;15/04/20<br>
+Version&nbsp;1.8.1<br>
+Last&nbsp;updated:&nbsp;26/05/20<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 18/08/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -31,6 +31,8 @@ Version&nbsp;History:<br>
 08/11/19&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;Increased&nbsp;pixel&nbsp;width&nbsp;on&nbsp;powder&nbsp;plots,&nbsp;improved&nbsp;superstructure&nbsp;recriprocal&nbsp;space&nbsp;planes<br>
 14/04/20&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;powder&nbsp;avereging&nbsp;to&nbsp;simulate_powder<br>
 15/04/20&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;minimum&nbsp;angle&nbsp;to&nbsp;simulate_powder<br>
+13/05/20&nbsp;1.8&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;plot_exchange_paths<br>
+26/05/20&nbsp;1.8.1&nbsp;&nbsp;Removed&nbsp;tensor_scattering<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -164,6 +166,16 @@ E.G.&nbsp;hk&nbsp;plane&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br
 &nbsp;&nbsp;&nbsp;&nbsp;Atoms&nbsp;are&nbsp;coloured&nbsp;according&nbsp;to&nbsp;their&nbsp;label<br>
 &nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;show_labels=True&nbsp;to&nbsp;show&nbsp;the&nbsp;label&nbsp;of&nbsp;each&nbsp;sphere</tt></dd></dl>
 
+<dl><dt><a name="Plotting-plot_exchange_paths"><strong>plot_exchange_paths</strong></a>(self, cen_idx, nearest_neighbor_distance=6.6, exchange_type='O', bond_angle=90.0, search_in_cell=True, group_neighbors=True, disp=False)</dt><dd><tt>Calcualtes&nbsp;exchange&nbsp;paths&nbsp;and&nbsp;adds&nbsp;them&nbsp;to&nbsp;the&nbsp;crystal&nbsp;structure&nbsp;plot<br>
+:param&nbsp;cen_idx:&nbsp;index&nbsp;of&nbsp;central&nbsp;ion&nbsp;in&nbsp;xtl.Structure<br>
+:param&nbsp;nearest_neighbor_distance:&nbsp;Maximum&nbsp;radius&nbsp;to&nbsp;serach&nbsp;to<br>
+:param&nbsp;exchange_type:&nbsp;str&nbsp;or&nbsp;None.&nbsp;Exchange&nbsp;path&nbsp;only&nbsp;incoroporates&nbsp;these&nbsp;elements,&nbsp;or&nbsp;None&nbsp;for&nbsp;any<br>
+:param&nbsp;bond_angle:&nbsp;float.&nbsp;Search&nbsp;for&nbsp;exchange&nbsp;ions&nbsp;withing&nbsp;this&nbsp;angle&nbsp;to&nbsp;the&nbsp;bond<br>
+:param&nbsp;search_in_cell:&nbsp;Bool.&nbsp;If&nbsp;True,&nbsp;only&nbsp;looks&nbsp;for&nbsp;neighbors&nbsp;within&nbsp;the&nbsp;unit&nbsp;cell<br>
+:param&nbsp;group_neighbors:&nbsp;Bool.&nbsp;If&nbsp;True,&nbsp;only&nbsp;shows&nbsp;neighbors&nbsp;with&nbsp;the&nbsp;same&nbsp;bond&nbsp;distance&nbsp;once<br>
+:param&nbsp;disp:&nbsp;Bool.&nbsp;If&nbsp;True,&nbsp;prints&nbsp;details&nbsp;of&nbsp;the&nbsp;calcualtion<br>
+:return:</tt></dd></dl>
+
 <dl><dt><a name="Plotting-plot_layers"><strong>plot_layers</strong></a>(self, layer_axis=2, layer_width=0.05, show_labels=False)</dt><dd><tt>Separate&nbsp;the&nbsp;structure&nbsp;into&nbsp;layers&nbsp;along&nbsp;the&nbsp;chosen&nbsp;axis<br>
 and&nbsp;plot&nbsp;the&nbsp;atoms&nbsp;in&nbsp;each&nbsp;layer&nbsp;in&nbsp;a&nbsp;separate&nbsp;figure.</tt></dd></dl>
 
@@ -279,41 +291,6 @@ E.G.&nbsp;hk&nbsp;plot&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
 <dl><dt><a name="Plotting-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev=None, peak_width=0.01, background=0, powder_average=True)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern,&nbsp;plots&nbsp;in&nbsp;a&nbsp;new&nbsp;figure&nbsp;with&nbsp;labels<br>
 &nbsp;&nbsp;&nbsp;&nbsp;see&nbsp;classes_scattering.generate_powder</tt></dd></dl>
 
-<dl><dt><a name="Plotting-tensor_scattering_azimuth"><strong>tensor_scattering_azimuth</strong></a>(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None)</dt><dd><tt>Plot&nbsp;tensor&nbsp;scattering&nbsp;intensities<br>
-&nbsp;&nbsp;ss,&nbsp;sp,&nbsp;ps,&nbsp;pp&nbsp;=&nbsp;tensor_scattering('Ru1',&nbsp;[0,0,3],&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90)<br>
-Uses&nbsp;TensorScatteringClass.py&nbsp;by&nbsp;Prof.&nbsp;Steve&nbsp;Collins,&nbsp;Dimaond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
-:param&nbsp;atom_label:&nbsp;str&nbsp;atom&nbsp;site&nbsp;label,&nbsp;e.g.&nbsp;Ru1<br>
-:param&nbsp;hkl:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;reflection&nbsp;to&nbsp;calculate<br>
-:param&nbsp;energy_kev:&nbsp;float<br>
-:param&nbsp;azir:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;azimuthal&nbsp;reference<br>
-:param&nbsp;process:&nbsp;str:&nbsp;'Scalar',&nbsp;'E1E1',&nbsp;'E1E2',&nbsp;'E2E2',&nbsp;'E1E1mag',&nbsp;'NonResMag'<br>
-:param&nbsp;rank:&nbsp;int,&nbsp;1,2,3:&nbsp;tensor&nbsp;rank.&nbsp;Only&nbsp;required<br>
-:param&nbsp;time:&nbsp;+/-1&nbsp;time&nbsp;symmetry<br>
-:param&nbsp;parity:&nbsp;+/-1&nbsp;parity<br>
-:param&nbsp;mk:<br>
-:param&nbsp;lk:<br>
-:param&nbsp;sk:<br>
-:return:&nbsp;none</tt></dd></dl>
-
-<dl><dt><a name="Plotting-tensor_scattering_stokes"><strong>tensor_scattering_stokes</strong></a>(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], psideg=0, pol_theta=45, process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None)</dt><dd><tt>Return&nbsp;tensor&nbsp;scattering&nbsp;intensities&nbsp;for&nbsp;non-standard&nbsp;polarisation<br>
-&nbsp;&nbsp;pol&nbsp;=&nbsp;<a href="#Plotting-tensor_scattering_stokes">tensor_scattering_stokes</a>('Ru1',&nbsp;[0,0,3],&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90,&nbsp;stokes=45)<br>
-Uses&nbsp;TensorScatteringClass.py&nbsp;by&nbsp;Prof.&nbsp;Steve&nbsp;Collins,&nbsp;Dimaond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
-:param&nbsp;atom_label:&nbsp;str&nbsp;atom&nbsp;site&nbsp;label,&nbsp;e.g.&nbsp;Ru1<br>
-:param&nbsp;hkl:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;reflection&nbsp;to&nbsp;calculate<br>
-:param&nbsp;energy_kev:&nbsp;float<br>
-:param&nbsp;azir:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;azimuthal&nbsp;reference<br>
-:param&nbsp;psideg:&nbsp;float,&nbsp;azimuthal&nbsp;angle<br>
-:param&nbsp;pol_theeta:&nbsp;float,&nbsp;scattering&nbsp;angle&nbsp;of&nbsp;polarisation&nbsp;analyser,&nbsp;degrees<br>
-:param&nbsp;process:&nbsp;str:&nbsp;'Scalar',&nbsp;'E1E1',&nbsp;'E1E2',&nbsp;'E2E2',&nbsp;'E1E1mag',&nbsp;'NonResMag'<br>
-:param&nbsp;rank:&nbsp;int,&nbsp;1,2,3:&nbsp;tensor&nbsp;rank.&nbsp;Only&nbsp;required<br>
-:param&nbsp;time:&nbsp;+/-1&nbsp;time&nbsp;symmetry<br>
-:param&nbsp;parity:&nbsp;+/-1&nbsp;parity<br>
-:param&nbsp;mk:<br>
-:param&nbsp;lk:<br>
-:param&nbsp;sk:<br>
-:return:&nbsp;array&nbsp;of&nbsp;intensity&nbsp;values<br>
-:return:&nbsp;none</tt></dd></dl>
-
 <hr>
 Data descriptors defined here:<br>
 <dl><dt><strong>__dict__</strong></dt>
@@ -398,6 +375,16 @@ Methods inherited from <a href="Dans_Diffraction.classes_plotting.html#Plotting"
 &nbsp;&nbsp;&nbsp;&nbsp;Click&nbsp;and&nbsp;drag&nbsp;to&nbsp;rotate&nbsp;the&nbsp;structure&nbsp;in&nbsp;3D<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Atoms&nbsp;are&nbsp;coloured&nbsp;according&nbsp;to&nbsp;their&nbsp;label<br>
 &nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;show_labels=True&nbsp;to&nbsp;show&nbsp;the&nbsp;label&nbsp;of&nbsp;each&nbsp;sphere</tt></dd></dl>
+
+<dl><dt><a name="PlottingSuperstructure-plot_exchange_paths"><strong>plot_exchange_paths</strong></a>(self, cen_idx, nearest_neighbor_distance=6.6, exchange_type='O', bond_angle=90.0, search_in_cell=True, group_neighbors=True, disp=False)</dt><dd><tt>Calcualtes&nbsp;exchange&nbsp;paths&nbsp;and&nbsp;adds&nbsp;them&nbsp;to&nbsp;the&nbsp;crystal&nbsp;structure&nbsp;plot<br>
+:param&nbsp;cen_idx:&nbsp;index&nbsp;of&nbsp;central&nbsp;ion&nbsp;in&nbsp;xtl.Structure<br>
+:param&nbsp;nearest_neighbor_distance:&nbsp;Maximum&nbsp;radius&nbsp;to&nbsp;serach&nbsp;to<br>
+:param&nbsp;exchange_type:&nbsp;str&nbsp;or&nbsp;None.&nbsp;Exchange&nbsp;path&nbsp;only&nbsp;incoroporates&nbsp;these&nbsp;elements,&nbsp;or&nbsp;None&nbsp;for&nbsp;any<br>
+:param&nbsp;bond_angle:&nbsp;float.&nbsp;Search&nbsp;for&nbsp;exchange&nbsp;ions&nbsp;withing&nbsp;this&nbsp;angle&nbsp;to&nbsp;the&nbsp;bond<br>
+:param&nbsp;search_in_cell:&nbsp;Bool.&nbsp;If&nbsp;True,&nbsp;only&nbsp;looks&nbsp;for&nbsp;neighbors&nbsp;within&nbsp;the&nbsp;unit&nbsp;cell<br>
+:param&nbsp;group_neighbors:&nbsp;Bool.&nbsp;If&nbsp;True,&nbsp;only&nbsp;shows&nbsp;neighbors&nbsp;with&nbsp;the&nbsp;same&nbsp;bond&nbsp;distance&nbsp;once<br>
+:param&nbsp;disp:&nbsp;Bool.&nbsp;If&nbsp;True,&nbsp;prints&nbsp;details&nbsp;of&nbsp;the&nbsp;calcualtion<br>
+:return:</tt></dd></dl>
 
 <dl><dt><a name="PlottingSuperstructure-plot_layers"><strong>plot_layers</strong></a>(self, layer_axis=2, layer_width=0.05, show_labels=False)</dt><dd><tt>Separate&nbsp;the&nbsp;structure&nbsp;into&nbsp;layers&nbsp;along&nbsp;the&nbsp;chosen&nbsp;axis<br>
 and&nbsp;plot&nbsp;the&nbsp;atoms&nbsp;in&nbsp;each&nbsp;layer&nbsp;in&nbsp;a&nbsp;separate&nbsp;figure.</tt></dd></dl>
@@ -499,41 +486,6 @@ Plot&nbsp;ewald&nbsp;space&nbsp;coverage&nbsp;within&nbsp;a&nbsp;particular&nbsp
 
 <dl><dt><a name="PlottingSuperstructure-simulate_powder"><strong>simulate_powder</strong></a>(self, energy_kev=None, peak_width=0.01, background=0, powder_average=True)</dt><dd><tt>Generates&nbsp;a&nbsp;powder&nbsp;pattern,&nbsp;plots&nbsp;in&nbsp;a&nbsp;new&nbsp;figure&nbsp;with&nbsp;labels<br>
 &nbsp;&nbsp;&nbsp;&nbsp;see&nbsp;classes_scattering.generate_powder</tt></dd></dl>
-
-<dl><dt><a name="PlottingSuperstructure-tensor_scattering_azimuth"><strong>tensor_scattering_azimuth</strong></a>(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None)</dt><dd><tt>Plot&nbsp;tensor&nbsp;scattering&nbsp;intensities<br>
-&nbsp;&nbsp;ss,&nbsp;sp,&nbsp;ps,&nbsp;pp&nbsp;=&nbsp;tensor_scattering('Ru1',&nbsp;[0,0,3],&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90)<br>
-Uses&nbsp;TensorScatteringClass.py&nbsp;by&nbsp;Prof.&nbsp;Steve&nbsp;Collins,&nbsp;Dimaond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
-:param&nbsp;atom_label:&nbsp;str&nbsp;atom&nbsp;site&nbsp;label,&nbsp;e.g.&nbsp;Ru1<br>
-:param&nbsp;hkl:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;reflection&nbsp;to&nbsp;calculate<br>
-:param&nbsp;energy_kev:&nbsp;float<br>
-:param&nbsp;azir:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;azimuthal&nbsp;reference<br>
-:param&nbsp;process:&nbsp;str:&nbsp;'Scalar',&nbsp;'E1E1',&nbsp;'E1E2',&nbsp;'E2E2',&nbsp;'E1E1mag',&nbsp;'NonResMag'<br>
-:param&nbsp;rank:&nbsp;int,&nbsp;1,2,3:&nbsp;tensor&nbsp;rank.&nbsp;Only&nbsp;required<br>
-:param&nbsp;time:&nbsp;+/-1&nbsp;time&nbsp;symmetry<br>
-:param&nbsp;parity:&nbsp;+/-1&nbsp;parity<br>
-:param&nbsp;mk:<br>
-:param&nbsp;lk:<br>
-:param&nbsp;sk:<br>
-:return:&nbsp;none</tt></dd></dl>
-
-<dl><dt><a name="PlottingSuperstructure-tensor_scattering_stokes"><strong>tensor_scattering_stokes</strong></a>(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], psideg=0, pol_theta=45, process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None)</dt><dd><tt>Return&nbsp;tensor&nbsp;scattering&nbsp;intensities&nbsp;for&nbsp;non-standard&nbsp;polarisation<br>
-&nbsp;&nbsp;pol&nbsp;=&nbsp;<a href="#PlottingSuperstructure-tensor_scattering_stokes">tensor_scattering_stokes</a>('Ru1',&nbsp;[0,0,3],&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90,&nbsp;stokes=45)<br>
-Uses&nbsp;TensorScatteringClass.py&nbsp;by&nbsp;Prof.&nbsp;Steve&nbsp;Collins,&nbsp;Dimaond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
-:param&nbsp;atom_label:&nbsp;str&nbsp;atom&nbsp;site&nbsp;label,&nbsp;e.g.&nbsp;Ru1<br>
-:param&nbsp;hkl:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;reflection&nbsp;to&nbsp;calculate<br>
-:param&nbsp;energy_kev:&nbsp;float<br>
-:param&nbsp;azir:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;azimuthal&nbsp;reference<br>
-:param&nbsp;psideg:&nbsp;float,&nbsp;azimuthal&nbsp;angle<br>
-:param&nbsp;pol_theeta:&nbsp;float,&nbsp;scattering&nbsp;angle&nbsp;of&nbsp;polarisation&nbsp;analyser,&nbsp;degrees<br>
-:param&nbsp;process:&nbsp;str:&nbsp;'Scalar',&nbsp;'E1E1',&nbsp;'E1E2',&nbsp;'E2E2',&nbsp;'E1E1mag',&nbsp;'NonResMag'<br>
-:param&nbsp;rank:&nbsp;int,&nbsp;1,2,3:&nbsp;tensor&nbsp;rank.&nbsp;Only&nbsp;required<br>
-:param&nbsp;time:&nbsp;+/-1&nbsp;time&nbsp;symmetry<br>
-:param&nbsp;parity:&nbsp;+/-1&nbsp;parity<br>
-:param&nbsp;mk:<br>
-:param&nbsp;lk:<br>
-:param&nbsp;sk:<br>
-:return:&nbsp;array&nbsp;of&nbsp;intensity&nbsp;values<br>
-:return:&nbsp;none</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="Dans_Diffraction.classes_plotting.html#Plotting">Plotting</a>:<br>

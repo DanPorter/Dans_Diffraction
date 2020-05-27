@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>Dans_Diffraction</strong></big></big> (version 1.8, 02/05/20)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>Dans_Diffraction</strong></big></big> (version 1.8.2, 26/05/20)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5C__init__.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\__init__.py</a></font></td></tr></table>
     <p><tt>Dans_Diffraction<br>
@@ -14,9 +14,9 @@ Python&nbsp;package&nbsp;for&nbsp;loading&nbsp;crystal&nbsp;structures&nbsp;from
 &nbsp;<br>
 Usage:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;***In&nbsp;Python***<br>
-&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;Dans_Diffraction&nbsp;import&nbsp;Crystal<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;Dans_Diffraction&nbsp;as&nbsp;dif<br>
 &nbsp;&nbsp;&nbsp;&nbsp;f&nbsp;=&nbsp;'/location/of/file.cif'<br>
-&nbsp;&nbsp;&nbsp;&nbsp;xtl&nbsp;=&nbsp;Crystal(f)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;xtl&nbsp;=&nbsp;dif.Crystal(f)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
 Usage:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;***From&nbsp;Terminal***<br>
@@ -27,8 +27,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;1.8<br>
-Last&nbsp;updated:&nbsp;02/05/20<br>
+Version&nbsp;1.8.2<br>
+Last&nbsp;updated:&nbsp;26/05/20<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 02/03/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
@@ -39,8 +39,10 @@ Version&nbsp;History:<br>
 13/12/19&nbsp;1.5&nbsp;&nbsp;&nbsp;&nbsp;Multiple&nbsp;Scattering&nbsp;added,&nbsp;tkGUI&nbsp;refactored,&nbsp;Startgui&nbsp;changed&nbsp;to&nbsp;start_gui<br>
 20/02/20&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;Tensor&nbsp;Scattering&nbsp;added<br>
 31/03/20&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;Refactored&nbsp;multicrystal&nbsp;methods,&nbsp;other&nbsp;minor&nbsp;changes,&nbsp;improved&nbsp;powder&nbsp;diffraction<br>
-19/04/20&nbsp;1.7.1&nbsp;&nbsp;Added&nbsp;writecif&nbsp;+&nbsp;spacegroup&nbsp;file&nbsp;+&nbsp;functions<br>
+19/04/20&nbsp;1.7.1&nbsp;&nbsp;Added&nbsp;write_cif&nbsp;+&nbsp;spacegroup&nbsp;file&nbsp;+&nbsp;functions<br>
 02/05/20&nbsp;1.8&nbsp;&nbsp;&nbsp;&nbsp;Updated&nbsp;readcif,&nbsp;added&nbsp;heavy&nbsp;atom&nbsp;properties,&nbsp;added&nbsp;magnetic&nbsp;spacegroups<br>
+12/05/20&nbsp;1.8.1&nbsp;&nbsp;Updated&nbsp;readcif,&nbsp;added&nbsp;atomic_scattering_factors&nbsp;and&nbsp;classes_orbitals<br>
+26/05/20&nbsp;1.8.2&nbsp;&nbsp;Updated&nbsp;copyright,&nbsp;removed&nbsp;tensor&nbsp;scattering.&nbsp;Updated&nbsp;magnetic&nbsp;spacegroups<br>
 &nbsp;<br>
 -----------------------------------------------------------------------------<br>
 &nbsp;&nbsp;&nbsp;Copyright&nbsp;2020&nbsp;Diamond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
@@ -63,6 +65,7 @@ Files&nbsp;in&nbsp;this&nbsp;package&nbsp;covered&nbsp;by&nbsp;this&nbsp;licence
 &nbsp;&nbsp;&nbsp;&nbsp;classes_plotting.py<br>
 &nbsp;&nbsp;&nbsp;&nbsp;classes_properties.py<br>
 &nbsp;&nbsp;&nbsp;&nbsp;classes_multicrystal.py<br>
+&nbsp;&nbsp;&nbsp;&nbsp;classes_orbitals.py<br>
 &nbsp;&nbsp;&nbsp;&nbsp;functions_general.py<br>
 &nbsp;&nbsp;&nbsp;&nbsp;functions_plotting.py<br>
 &nbsp;&nbsp;&nbsp;&nbsp;functions_crystallography.py<br>
@@ -83,15 +86,16 @@ Other&nbsp;files&nbsp;are&nbsp;either&nbsp;covered&nbsp;by&nbsp;their&nbsp;own&n
 <a href="Dans_Diffraction.classes_crystal.html">classes_crystal</a><br>
 <a href="Dans_Diffraction.classes_fdmnes.html">classes_fdmnes</a><br>
 <a href="Dans_Diffraction.classes_multicrystal.html">classes_multicrystal</a><br>
-</td><td width="25%" valign=top><a href="Dans_Diffraction.classes_plotting.html">classes_plotting</a><br>
+</td><td width="25%" valign=top><a href="Dans_Diffraction.classes_orbitals.html">classes_orbitals</a><br>
+<a href="Dans_Diffraction.classes_plotting.html">classes_plotting</a><br>
 <a href="Dans_Diffraction.classes_properties.html">classes_properties</a><br>
 <a href="Dans_Diffraction.classes_scattering.html">classes_scattering</a><br>
-<a href="Dans_Diffraction.classes_structures.html">classes_structures</a><br>
-</td><td width="25%" valign=top><a href="Dans_Diffraction.functions_crystallography.html">functions_crystallography</a><br>
+</td><td width="25%" valign=top><a href="Dans_Diffraction.classes_structures.html">classes_structures</a><br>
+<a href="Dans_Diffraction.functions_crystallography.html">functions_crystallography</a><br>
 <a href="Dans_Diffraction.functions_general.html">functions_general</a><br>
 <a href="Dans_Diffraction.functions_plotting.html">functions_plotting</a><br>
-<a href="Dans_Diffraction.functions_scattering.html">functions_scattering</a><br>
-</td><td width="25%" valign=top><a href="Dans_Diffraction.multiple_scattering.html">multiple_scattering</a><br>
+</td><td width="25%" valign=top><a href="Dans_Diffraction.functions_scattering.html">functions_scattering</a><br>
+<a href="Dans_Diffraction.multiple_scattering.html">multiple_scattering</a><br>
 <a href="Dans_Diffraction.tensor_scattering.html">tensor_scattering</a><br>
 <a href="Dans_Diffraction.tkgui.html"><strong>tkgui</strong>&nbsp;(package)</a><br>
 </td></tr></table></td></tr></table><p>

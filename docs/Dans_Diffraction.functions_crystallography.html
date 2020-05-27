@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_crystallography</strong></big></big> (version 3.0)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_crystallography</strong></big></big> (version 3.1.1)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_crystallography.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\functions_crystallography.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;functions_crystallography.py<br>
@@ -20,8 +20,8 @@ Usage:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;OR<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;from&nbsp;Dans_Diffraction&nbsp;import&nbsp;functions_crystallography&nbsp;as&nbsp;fc<br>
 &nbsp;<br>
-Version&nbsp;3.0<br>
-Last&nbsp;updated:&nbsp;01/05/20<br>
+Version&nbsp;3.1.1<br>
+Last&nbsp;updated:&nbsp;26/05/20<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 09/07/15&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
@@ -35,8 +35,11 @@ Version&nbsp;History:<br>
 06/03/19&nbsp;2.6&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;print_atom_properties<br>
 14/08/19&nbsp;2.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;new&nbsp;Dans&nbsp;Element&nbsp;Properties&nbsp;file&nbsp;with&nbsp;extra&nbsp;comment&nbsp;line,&nbsp;new&nbsp;functions&nbsp;added<br>
 03/04/20&nbsp;2.8&nbsp;&nbsp;&nbsp;&nbsp;Updated&nbsp;attenuation&nbsp;to&nbsp;work&nbsp;with&nbsp;arrays&nbsp;of&nbsp;elements<br>
-19/04/20&nbsp;2.9&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;writecif,&nbsp;made&nbsp;alterations&nbsp;to&nbsp;readcif&nbsp;for&nbsp;speed&nbsp;and&nbsp;readability,&nbsp;added&nbsp;spacegroup<br>
+19/04/20&nbsp;2.9&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;write_cif,&nbsp;made&nbsp;alterations&nbsp;to&nbsp;readcif&nbsp;for&nbsp;speed&nbsp;and&nbsp;readability,&nbsp;added&nbsp;spacegroup<br>
 01/05/20&nbsp;3.0&nbsp;&nbsp;&nbsp;&nbsp;Updated&nbsp;atom_properties,&nbsp;now&nbsp;have&nbsp;atomic&nbsp;properties&nbsp;above&nbsp;92&nbsp;with&nbsp;warning.&nbsp;Some&nbsp;changes&nbsp;to&nbsp;readcif.<br>
+05/05/20&nbsp;3.0.1&nbsp;&nbsp;Further&nbsp;changes&nbsp;to&nbsp;readcif.&nbsp;Changed&nbsp;method&nbsp;of&nbsp;symmetry_ops2magnetic.&nbsp;Added&nbsp;str2element<br>
+12/05/20&nbsp;3.1.0&nbsp;&nbsp;More&nbsp;readcif&nbsp;changes,&nbsp;added&nbsp;atomic_scattering_factor,&nbsp;element_charge_string,&nbsp;split_compound<br>
+26/05/20&nbsp;3.1.1&nbsp;&nbsp;Updated&nbsp;magnetic&nbsp;space&nbsp;groups,&nbsp;added&nbsp;magnetic&nbsp;positions&nbsp;(was&nbsp;only&nbsp;generators),&nbsp;added&nbsp;write_mcif<br>
 &nbsp;<br>
 Acknoledgements:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;April&nbsp;2020&nbsp;&nbsp;Thanks&nbsp;to&nbsp;ChunHai&nbsp;Wang&nbsp;for&nbsp;helpful&nbsp;suggestions&nbsp;in&nbsp;readcif!<br>
@@ -131,6 +134,11 @@ Available&nbsp;information&nbsp;includes:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;x-ray&nbsp;absorption&nbsp;edge<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;x-ray&nbsp;absorption&nbsp;edge<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M1...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;x-ray&nbsp;absorption&nbsp;edge</tt></dd></dl>
+ <dl><dt><a name="-atomic_scattering_factor"><strong>atomic_scattering_factor</strong></a>(element, energy_kev=None)</dt><dd><tt>Read&nbsp;atomic&nbsp;scattering&nbsp;factor&nbsp;table,&nbsp;giving&nbsp;f1+f2&nbsp;for&nbsp;different&nbsp;energies<br>
+From:&nbsp;<a href="http://henke.lbl.gov/optical_constants/asf.html">http://henke.lbl.gov/optical_constants/asf.html</a><br>
+:param&nbsp;element:&nbsp;str&nbsp;name&nbsp;of&nbsp;element<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;or&nbsp;list&nbsp;energy&nbsp;in&nbsp;keV&nbsp;(None&nbsp;to&nbsp;return&nbsp;original,&nbsp;uninterpolated&nbsp;list)<br>
+:return:&nbsp;f1,&nbsp;f2</tt></dd></dl>
  <dl><dt><a name="-attenuation"><strong>attenuation</strong></a>(element_z, energy_keV)</dt><dd><tt>Returns&nbsp;the&nbsp;x-ray&nbsp;mass&nbsp;attenuation,&nbsp;u/p,&nbsp;in&nbsp;cm^2/g<br>
 &nbsp;&nbsp;e.g.&nbsp;A&nbsp;=&nbsp;<a href="#-attenuation">attenuation</a>(23,np.arange(7,8,0.01))&nbsp;#&nbsp;Cu<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;=&nbsp;<a href="#-attenuation">attenuation</a>([23,24,25],&nbsp;5.6)<br>
@@ -223,8 +231,17 @@ E.G.:<br>
 &nbsp;&nbsp;&nbsp;Note:&nbsp;Currently&nbsp;only&nbsp;in&nbsp;the&nbsp;verticle&nbsp;geometry!</tt></dd></dl>
  <dl><dt><a name="-dspace2q"><strong>dspace2q</strong></a>(dspace)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;|Q|<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qmag&nbsp;=&nbsp;<a href="#-q2dspace">q2dspace</a>(dspace)</tt></dd></dl>
- <dl><dt><a name="-element_symbol"><strong>element_symbol</strong></a>(element_Z)</dt><dd><tt>Returns&nbsp;the&nbsp;element&nbsp;sympol&nbsp;for&nbsp;element_Z<br>
-:param&nbsp;element_Z:&nbsp;int<br>
+ <dl><dt><a name="-element_charge_string"><strong>element_charge_string</strong></a>(symbol, occupancy=1.0, charge=0.0, latex=False)</dt><dd><tt>Return&nbsp;formatted&nbsp;string&nbsp;of&nbsp;element&nbsp;with&nbsp;occupancy&nbsp;and&nbsp;charge<br>
+:param&nbsp;symbol:&nbsp;str&nbsp;-&nbsp;element&nbsp;string<br>
+:param&nbsp;occupancy:&nbsp;float&nbsp;-&nbsp;element&nbsp;occupancy&nbsp;or&nbsp;number&nbsp;of&nbsp;elements<br>
+:param&nbsp;charge:&nbsp;float&nbsp;-&nbsp;element&nbsp;charge<br>
+:param&nbsp;latex:&nbsp;if&nbsp;True,&nbsp;returns&nbsp;string&nbsp;formatted&nbsp;with&nbsp;latex&nbsp;tags<br>
+:return:&nbsp;str</tt></dd></dl>
+ <dl><dt><a name="-element_name"><strong>element_name</strong></a>(element=None)</dt><dd><tt>Returns&nbsp;the&nbsp;element&nbsp;name<br>
+:param&nbsp;element:&nbsp;str<br>
+:return:&nbsp;int</tt></dd></dl>
+ <dl><dt><a name="-element_symbol"><strong>element_symbol</strong></a>(element_Z=None)</dt><dd><tt>Returns&nbsp;the&nbsp;element&nbsp;sympol&nbsp;for&nbsp;element_Z<br>
+:param&nbsp;element_z:&nbsp;int&nbsp;or&nbsp;array&nbsp;or&nbsp;None&nbsp;for&nbsp;all&nbsp;elements<br>
 :return:&nbsp;str</tt></dd></dl>
  <dl><dt><a name="-element_z"><strong>element_z</strong></a>(element)</dt><dd><tt>Returns&nbsp;the&nbsp;element&nbsp;number&nbsp;Z<br>
 :param&nbsp;element:&nbsp;str<br>
@@ -356,8 +373,9 @@ https://www.ncnr.nist.gov/resources/n-lengths/<br>
 &nbsp;b&nbsp;=&nbsp;<a href="#-neutron_scattering_length">neutron_scattering_length</a>('Co')<br>
 :param&nbsp;element:&nbsp;[n*str]&nbsp;list&nbsp;or&nbsp;array&nbsp;of&nbsp;elements<br>
 :return:&nbsp;[n]&nbsp;array&nbsp;of&nbsp;scattering&nbsp;lengths</tt></dd></dl>
- <dl><dt><a name="-orbital_configuration"><strong>orbital_configuration</strong></a>(element_Z)</dt><dd><tt>Returns&nbsp;the&nbsp;orbital&nbsp;configuration&nbsp;of&nbsp;an&nbsp;element&nbsp;as&nbsp;a&nbsp;list&nbsp;of&nbsp;strings<br>
-:param&nbsp;element_Z:&nbsp;int<br>
+ <dl><dt><a name="-orbital_configuration"><strong>orbital_configuration</strong></a>(element, charge=None)</dt><dd><tt>Returns&nbsp;the&nbsp;orbital&nbsp;configuration&nbsp;of&nbsp;an&nbsp;element&nbsp;as&nbsp;a&nbsp;list&nbsp;of&nbsp;strings<br>
+:param&nbsp;element:&nbsp;str,&nbsp;element&nbsp;name,&nbsp;e.g.&nbsp;'Fe'&nbsp;or&nbsp;'Fe3+'&nbsp;or&nbsp;'0.8Fe2+'<br>
+:param&nbsp;charge:&nbsp;int,&nbsp;element&nbsp;charge&nbsp;(overwrites&nbsp;charge&nbsp;given&nbsp;in&nbsp;element)<br>
 :return:&nbsp;['1s2',&nbsp;'2s2',&nbsp;'2p6',&nbsp;...]</tt></dd></dl>
  <dl><dt><a name="-orthogonal_axes"><strong>orthogonal_axes</strong></a>(x_axis=[1, 0, 0], y_axis=[0, 1, 0])</dt><dd><tt>Returns&nbsp;orthogonal&nbsp;right-handed&nbsp;cartesian&nbsp;axes&nbsp;based&nbsp;on&nbsp;the&nbsp;plane&nbsp;of&nbsp;two&nbsp;non-perpendicular&nbsp;vectors<br>
 E.G.<br>
@@ -416,6 +434,10 @@ Some&nbsp;useful&nbsp;standard&nbsp;CIF&nbsp;keywords:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_x<br>
 &nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_y<br>
 &nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_z</tt></dd></dl>
+ <dl><dt><a name="-resolution2energy"><strong>resolution2energy</strong></a>(res, twotheta=180.0)</dt><dd><tt>Calcualte&nbsp;the&nbsp;energy&nbsp;required&nbsp;to&nbsp;achieve&nbsp;a&nbsp;specific&nbsp;resolution&nbsp;at&nbsp;a&nbsp;given&nbsp;two-theta<br>
+:param&nbsp;res:&nbsp;measurement&nbsp;resolution&nbsp;in&nbsp;A&nbsp;(==d-spacing)<br>
+:param&nbsp;twotheta:&nbsp;Bragg&nbsp;angle&nbsp;in&nbsp;Degrees<br>
+:return:&nbsp;float</tt></dd></dl>
  <dl><dt><a name="-spacegroup"><strong>spacegroup</strong></a>(sg_number)</dt><dd><tt>Return&nbsp;a&nbsp;dict&nbsp;of&nbsp;information&nbsp;for&nbsp;a&nbsp;space&nbsp;group<br>
 :param&nbsp;sg_number:&nbsp;int&nbsp;space&nbsp;group&nbsp;number,&nbsp;as&nbsp;in&nbsp;the&nbsp;international&nbsp;tables&nbsp;of&nbsp;Crystallography<br>
 :return:&nbsp;dict</tt></dd></dl>
@@ -468,12 +490,26 @@ Loaded&nbsp;from&nbsp;json&nbsp;file&nbsp;created&nbsp;from&nbsp;the&nbsp;Bilbao
  <dl><dt><a name="-spacegroups_magnetic"><strong>spacegroups_magnetic</strong></a>(sg_number)</dt><dd><tt>Returns&nbsp;dict&nbsp;of&nbsp;magnetic&nbsp;space&nbsp;groups&nbsp;for&nbsp;required&nbsp;space&nbsp;group<br>
 :param&nbsp;sg_number:&nbsp;space&nbsp;group&nbsp;number&nbsp;(1-230)<br>
 :return:&nbsp;dict</tt></dd></dl>
+ <dl><dt><a name="-split_compound"><strong>split_compound</strong></a>(compound_name)</dt><dd><tt>Convert&nbsp;a&nbsp;molecular&nbsp;or&nbsp;compound&nbsp;name&nbsp;into&nbsp;a&nbsp;list&nbsp;of&nbsp;elements&nbsp;and&nbsp;numbers.<br>
+Assumes&nbsp;all&nbsp;element&nbsp;multiplications&nbsp;are&nbsp;to&nbsp;the&nbsp;LEFT&nbsp;of&nbsp;the&nbsp;element&nbsp;name.<br>
+Values&nbsp;in&nbsp;brackets&nbsp;are&nbsp;multiplied&nbsp;out.<br>
+E.g.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-split_compound">split_compound</a>('Mn0.3(Fe3.6(Co1.2)2)4(Mo0.7Pr44)3')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&nbsp;['Mn0.3',&nbsp;'Fe14.4',&nbsp;'Co9.6',&nbsp;'Mo2.1',&nbsp;'Pr132']<br>
+:param&nbsp;compound_name:&nbsp;str<br>
+:return:&nbsp;list&nbsp;of&nbsp;str</tt></dd></dl>
  <dl><dt><a name="-split_element_symbol"><strong>split_element_symbol</strong></a>(element)</dt><dd><tt>From&nbsp;element&nbsp;symbol,&nbsp;split&nbsp;charge&nbsp;and&nbsp;occupancy<br>
 &nbsp;&nbsp;symbol,&nbsp;occupancy,&nbsp;charge&nbsp;=&nbsp;<a href="#-split_element_symbol">split_element_symbol</a>('Co3+')<br>
+Any&nbsp;numbers&nbsp;appended&nbsp;by&nbsp;+/-&nbsp;are&nbsp;taken&nbsp;as&nbsp;charge,&nbsp;otherwise&nbsp;they&nbsp;are&nbsp;counted&nbsp;as&nbsp;occupancy.<br>
+e.g.&nbsp;&nbsp;&nbsp;&nbsp;element&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;&nbsp;&nbsp;symbol&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;occupancy&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;charge<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Co3+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Co&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.2O2-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;O&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fe3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<br>
 :param&nbsp;element:&nbsp;str<br>
 :return:&nbsp;symbol:&nbsp;str<br>
 :return:&nbsp;occupancy:&nbsp;float<br>
 :return:&nbsp;charge:&nbsp;float</tt></dd></dl>
+ <dl><dt><a name="-str2element"><strong>str2element</strong></a>(string)</dt><dd><tt>Finds&nbsp;element&nbsp;name&nbsp;in&nbsp;string</tt></dd></dl>
  <dl><dt><a name="-sum_sym_ref"><strong>sum_sym_ref</strong></a>(symhkl)</dt><dd><tt>Remove&nbsp;equivalent&nbsp;hkl&nbsp;positions&nbsp;and&nbsp;return&nbsp;the&nbsp;number&nbsp;of&nbsp;times&nbsp;each&nbsp;is&nbsp;generated.</tt></dd></dl>
  <dl><dt><a name="-symmetry_ops2magnetic"><strong>symmetry_ops2magnetic</strong></a>(operations)</dt><dd><tt>Convert&nbsp;list&nbsp;of&nbsp;string&nbsp;symmetry&nbsp;operations&nbsp;to&nbsp;magnetic&nbsp;symmetry&nbsp;operations<br>
 i.e.&nbsp;remove&nbsp;translations</tt></dd></dl>
@@ -483,8 +519,14 @@ i.e.&nbsp;remove&nbsp;translations</tt></dd></dl>
  <dl><dt><a name="-warn"><strong>warn</strong></a>(message, category=None, stacklevel=1, source=None)</dt><dd><tt>Issue&nbsp;a&nbsp;warning,&nbsp;or&nbsp;maybe&nbsp;ignore&nbsp;it&nbsp;or&nbsp;raise&nbsp;an&nbsp;exception.</tt></dd></dl>
  <dl><dt><a name="-wave2energy"><strong>wave2energy</strong></a>(wavelength)</dt><dd><tt>Converts&nbsp;wavelength&nbsp;in&nbsp;A&nbsp;to&nbsp;energy&nbsp;in&nbsp;keV<br>
 &nbsp;Energy&nbsp;=&nbsp;<a href="#-wave2energy">wave2energy</a>(wavelength)</tt></dd></dl>
- <dl><dt><a name="-writecif"><strong>writecif</strong></a>(cifvals, filename=None, comments=None)</dt><dd><tt>Write&nbsp;.cif&nbsp;file&nbsp;with&nbsp;values&nbsp;from&nbsp;a&nbsp;cif&nbsp;dict,<br>
+ <dl><dt><a name="-write_cif"><strong>write_cif</strong></a>(cifvals, filename=None, comments=None)</dt><dd><tt>Write&nbsp;.cif&nbsp;file&nbsp;with&nbsp;values&nbsp;from&nbsp;a&nbsp;cif&nbsp;dict,<br>
 Only&nbsp;basic&nbsp;items&nbsp;are&nbsp;saved,&nbsp;rather&nbsp;than&nbsp;returning&nbsp;the&nbsp;orginal&nbsp;file<br>
+:param&nbsp;cifvals:&nbsp;dict&nbsp;from&nbsp;readcif<br>
+:param&nbsp;filename:&nbsp;filename&nbsp;to&nbsp;write&nbsp;(use&nbsp;None&nbsp;to&nbsp;return&nbsp;string)<br>
+:param&nbsp;comments:&nbsp;str&nbsp;comments&nbsp;to&nbsp;write&nbsp;to&nbsp;the&nbsp;file&nbsp;top&nbsp;matter<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-write_mcif"><strong>write_mcif</strong></a>(cifvals, filename=None, comments=None)</dt><dd><tt>Write&nbsp;magnetic&nbsp;.mcif&nbsp;file&nbsp;with&nbsp;values&nbsp;from&nbsp;a&nbsp;cif&nbsp;dict,<br>
+Only&nbsp;basic&nbsp;items&nbsp;are&nbsp;saved,&nbsp;rather&nbsp;than&nbsp;returning&nbsp;the&nbsp;original&nbsp;file<br>
 :param&nbsp;cifvals:&nbsp;dict&nbsp;from&nbsp;readcif<br>
 :param&nbsp;filename:&nbsp;filename&nbsp;to&nbsp;write&nbsp;(use&nbsp;None&nbsp;to&nbsp;return&nbsp;string)<br>
 :param&nbsp;comments:&nbsp;str&nbsp;comments&nbsp;to&nbsp;write&nbsp;to&nbsp;the&nbsp;file&nbsp;top&nbsp;matter<br>
@@ -504,6 +546,8 @@ Uses&nbsp;the&nbsp;oefficients&nbsp;for&nbsp;analytical&nbsp;approximation&nbsp;
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>ATOMFILE</strong> = r'C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\data\Dans Element Properties.txt'<br>
 <strong>CIF_REQUIRES</strong> = ['_cell_length_a', '_cell_length_b', '_cell_length_c', '_cell_angle_alpha', '_cell_angle_beta', '_cell_angle_gamma', '_atom_site_label', '_atom_site_fract_x', '_atom_site_fract_y', '_atom_site_fract_z']<br>
-<strong>TRANSLATIONS</strong> = ['+1/2', '+1/3', '+2/3', '+1/4', '+3/4', '+1/6', '+5/6', '1/2+', '1/3+', '2/3+', '1/4+', '3/4+', '1/6+', '5/6+', '-1/2', '-1/3', '-2/3', '-1/4', '-3/4', '-1/6', ...]<br>
-<strong>datadir</strong> = r'C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\data'</td></tr></table>
+<strong>ELEMENT_LIST</strong> = ['Zr', 'Mo', 'Es', 'Eu', 'Fe', 'Fl', 'Fm', 'Fr', 'Ga', 'Gd', 'Ge', 'He', 'Hf', 'Hg', 'Ho', 'Hs', 'In', 'Ir', 'Kr', 'La', ...]<br>
+<strong>TRANSLATIONS</strong> = ['+1/2', '+1/3', '+2/3', '+1/4', '+3/4', '+1/6', '+5/6', '+5/4', '1/2+', '1/3+', '2/3+', '1/4+', '3/4+', '1/6+', '5/6+', '5/4+', '-1/2', '-1/3', '-2/3', '-1/4', ...]<br>
+<strong>datadir</strong> = r'C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction\data'<br>
+<strong>element_regex</strong> = re.compile('Zr|Mo|Es|Eu|Fe|Fl|Fm|Fr|Ga|Gd|Ge|He|...n|Co|Cr|Cs|Cu|Mn|Md|Mt|Rb|Rf|Rh|Rn|Ru|Sb|Sc|Se|S)</td></tr></table>
 </body></html>

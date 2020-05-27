@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_scattering</strong></big></big> (version 1.6)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_scattering</strong></big></big> (version 1.7)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_scattering.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_scattering.py</a></font></td></tr></table>
     <p><tt><a href="#Scattering">Scattering</a>&nbsp;Class&nbsp;"classes_scattering.py"<br>
@@ -16,8 +16,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;1.6<br>
-Last&nbsp;updated:&nbsp;14/04/20<br>
+Version&nbsp;1.7<br>
+Last&nbsp;updated:&nbsp;26/05/20<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 10/09/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -29,6 +29,7 @@ Version&nbsp;History:<br>
 18/02/20&nbsp;1.5&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;tensor_scattering&nbsp;code<br>
 20/03/20&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;Increased&nbsp;powder&nbsp;gauss&nbsp;width&nbsp;from&nbsp;2fwhm&nbsp;to&nbsp;6fwhm,&nbsp;added&nbsp;powder&nbsp;averaging<br>
 14/04/20&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;powder_correction<br>
+26/05/20&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;Removed&nbsp;tensor_scattering<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -44,8 +45,7 @@ Version&nbsp;History:<br>
 <a href="numpy.html">numpy</a><br>
 </td><td width="25%" valign=top><a href="os.html">os</a><br>
 <a href="sys.html">sys</a><br>
-</td><td width="25%" valign=top><a href="Dans_Diffraction.tensor_scattering.html">Dans_Diffraction.tensor_scattering</a><br>
-</td></tr></table></td></tr></table><p>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -205,58 +205,6 @@ the&nbsp;crystal&nbsp;<a href="builtins.html#object">object</a>:<br>
 
 <dl><dt><a name="Scattering-print_symmetry_contributions"><strong>print_symmetry_contributions</strong></a>(self, HKL)</dt><dd><tt>Prints&nbsp;the&nbsp;symmetry&nbsp;contributions&nbsp;to&nbsp;the&nbsp;structure&nbsp;factor&nbsp;for&nbsp;each&nbsp;atomic&nbsp;site</tt></dd></dl>
 
-<dl><dt><a name="Scattering-print_tensor_scattering"><strong>print_tensor_scattering</strong></a>(self, atom_label, hkl, energy_kev=None, azir=[0, 0, 1], psideg=0, process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None)</dt><dd><tt>Return&nbsp;tensor&nbsp;scattering&nbsp;intensities<br>
-&nbsp;&nbsp;ss,&nbsp;sp,&nbsp;ps,&nbsp;pp&nbsp;=&nbsp;<a href="#Scattering-tensor_scattering">tensor_scattering</a>('Ru1',&nbsp;[0,0,3],&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90)<br>
-Uses&nbsp;TensorScatteringClass.py&nbsp;by&nbsp;Prof.&nbsp;Steve&nbsp;Collins,&nbsp;Dimaond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
-:param&nbsp;atom_label:&nbsp;str&nbsp;atom&nbsp;site&nbsp;label,&nbsp;e.g.&nbsp;Ru1<br>
-:param&nbsp;hkl:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;reflection&nbsp;to&nbsp;calculate<br>
-:param&nbsp;energy_kev:&nbsp;float<br>
-:param&nbsp;azir:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;azimuthal&nbsp;reference<br>
-:param&nbsp;psideg:&nbsp;float,&nbsp;azimuthal&nbsp;angle<br>
-:param&nbsp;process:&nbsp;str:&nbsp;'Scalar',&nbsp;'E1E1',&nbsp;'E1E2',&nbsp;'E2E2',&nbsp;'E1E1mag',&nbsp;'NonResMag'<br>
-:param&nbsp;rank:&nbsp;int,&nbsp;1,2,3:&nbsp;tensor&nbsp;rank.&nbsp;Only&nbsp;required<br>
-:param&nbsp;time:&nbsp;+/-1&nbsp;time&nbsp;symmetry<br>
-:param&nbsp;parity:&nbsp;+/-1&nbsp;parity<br>
-:param&nbsp;mk:<br>
-:param&nbsp;lk:<br>
-:param&nbsp;sk:<br>
-:return:&nbsp;str</tt></dd></dl>
-
-<dl><dt><a name="Scattering-print_tensor_scattering_refs"><strong>print_tensor_scattering_refs</strong></a>(self, atom_label, energy_kev=None, azir=[0, 0, 1], psideg=0, process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None, print_symmetric=False, units=None)</dt><dd><tt>Return&nbsp;tensor&nbsp;scattering&nbsp;intensities&nbsp;for&nbsp;all&nbsp;reflections&nbsp;at&nbsp;given&nbsp;azimuth&nbsp;and&nbsp;energy<br>
-&nbsp;&nbsp;ss,&nbsp;sp,&nbsp;ps,&nbsp;pp&nbsp;=&nbsp;<a href="#Scattering-tensor_scattering">tensor_scattering</a>('Ru1',&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90)<br>
-Uses&nbsp;TensorScatteringClass.py&nbsp;by&nbsp;Prof.&nbsp;Steve&nbsp;Collins,&nbsp;Dimaond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
-:param&nbsp;atom_label:&nbsp;str&nbsp;atom&nbsp;site&nbsp;label,&nbsp;e.g.&nbsp;Ru1<br>
-:param&nbsp;energy_kev:&nbsp;float<br>
-:param&nbsp;azir:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;azimuthal&nbsp;reference<br>
-:param&nbsp;psideg:&nbsp;float,&nbsp;azimuthal&nbsp;angle<br>
-:param&nbsp;process:&nbsp;str:&nbsp;'Scalar',&nbsp;'E1E1',&nbsp;'E1E2',&nbsp;'E2E2',&nbsp;'E1E1mag',&nbsp;'NonResMag'<br>
-:param&nbsp;rank:&nbsp;int,&nbsp;1,2,3:&nbsp;tensor&nbsp;rank.&nbsp;Only&nbsp;required<br>
-:param&nbsp;time:&nbsp;+/-1&nbsp;time&nbsp;symmetry<br>
-:param&nbsp;parity:&nbsp;+/-1&nbsp;parity<br>
-:param&nbsp;mk:<br>
-:param&nbsp;lk:<br>
-:param&nbsp;sk:<br>
-:param&nbsp;print_symmetric:&nbsp;False*/True&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;with&nbsp;the&nbsp;same&nbsp;intensity&nbsp;at&nbsp;the&nbsp;same&nbsp;angle<br>
-:param&nbsp;units:&nbsp;None/&nbsp;'twotheta'/&nbsp;'q'/&nbsp;'dspace'&nbsp;:&nbsp;choose&nbsp;scattering&nbsp;angle&nbsp;units&nbsp;to&nbsp;display<br>
-:return:&nbsp;str</tt></dd></dl>
-
-<dl><dt><a name="Scattering-print_tensor_scattering_refs_max"><strong>print_tensor_scattering_refs_max</strong></a>(self, atom_label, energy_kev=None, azir=[0, 0, 1], process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None, print_symmetric=False, units=None)</dt><dd><tt>Return&nbsp;tensor&nbsp;scattering&nbsp;intensities&nbsp;for&nbsp;all&nbsp;reflections&nbsp;at&nbsp;given&nbsp;energy&nbsp;at&nbsp;maximum&nbsp;intensity&nbsp;psi<br>
-&nbsp;&nbsp;ss,&nbsp;sp,&nbsp;ps,&nbsp;pp&nbsp;=&nbsp;<a href="#Scattering-tensor_scattering">tensor_scattering</a>('Ru1',&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90)<br>
-Uses&nbsp;TensorScatteringClass.py&nbsp;by&nbsp;Prof.&nbsp;Steve&nbsp;Collins,&nbsp;Dimaond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
-:param&nbsp;atom_label:&nbsp;str&nbsp;atom&nbsp;site&nbsp;label,&nbsp;e.g.&nbsp;Ru1<br>
-:param&nbsp;energy_kev:&nbsp;float<br>
-:param&nbsp;azir:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;azimuthal&nbsp;reference<br>
-:param&nbsp;process:&nbsp;str:&nbsp;'Scalar',&nbsp;'E1E1',&nbsp;'E1E2',&nbsp;'E2E2',&nbsp;'E1E1mag',&nbsp;'NonResMag'<br>
-:param&nbsp;rank:&nbsp;int,&nbsp;1,2,3:&nbsp;tensor&nbsp;rank.&nbsp;Only&nbsp;required<br>
-:param&nbsp;time:&nbsp;+/-1&nbsp;time&nbsp;symmetry<br>
-:param&nbsp;parity:&nbsp;+/-1&nbsp;parity<br>
-:param&nbsp;mk:<br>
-:param&nbsp;lk:<br>
-:param&nbsp;sk:<br>
-:param&nbsp;print_symmetric:&nbsp;False*/True&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;with&nbsp;the&nbsp;same&nbsp;intensity&nbsp;at&nbsp;the&nbsp;same&nbsp;angle<br>
-:param&nbsp;units:&nbsp;None/&nbsp;'twotheta'/&nbsp;'q'/&nbsp;'dspace'&nbsp;:&nbsp;choose&nbsp;scattering&nbsp;angle&nbsp;units&nbsp;to&nbsp;display<br>
-:return:&nbsp;str</tt></dd></dl>
-
 <dl><dt><a name="Scattering-print_tran_reflections"><strong>print_tran_reflections</strong></a>(self, energy_kev=None, min_intensity=0.01, max_intensity=None)</dt><dd><tt>Prints&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;allowed&nbsp;reflections&nbsp;at&nbsp;this&nbsp;energy&nbsp;in&nbsp;the&nbsp;transmission&nbsp;geometry<br>
 &nbsp;&nbsp;&nbsp;&nbsp;energy&nbsp;=&nbsp;energy&nbsp;in&nbsp;keV<br>
 &nbsp;&nbsp;&nbsp;&nbsp;min_intensity&nbsp;=&nbsp;None/&nbsp;0.01&nbsp;:&nbsp;omits&nbsp;reflections&nbsp;less&nbsp;than&nbsp;this&nbsp;(remove&nbsp;extinctions)<br>
@@ -321,42 +269,6 @@ max_theta&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_max_theta</strong>&nb
 theta_offset:&nbsp;self.<strong>_scattering_theta_offset</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;sample&nbsp;offset&nbsp;angle<br>
 specular&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_specular_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface<br>
 parallel&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_parallel_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface</tt></dd></dl>
-
-<dl><dt><a name="Scattering-tensor_scattering"><strong>tensor_scattering</strong></a>(self, atom_label, hkl, energy_kev=None, azir=[0, 0, 1], psideg=0, process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None)</dt><dd><tt>Return&nbsp;tensor&nbsp;scattering&nbsp;intensities<br>
-&nbsp;&nbsp;ss,&nbsp;sp,&nbsp;ps,&nbsp;pp&nbsp;=&nbsp;<a href="#Scattering-tensor_scattering">tensor_scattering</a>('Ru1',&nbsp;[0,0,3],&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90)<br>
-Uses&nbsp;TensorScatteringClass.py&nbsp;by&nbsp;Prof.&nbsp;Steve&nbsp;Collins,&nbsp;Dimaond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
-:param&nbsp;atom_label:&nbsp;str&nbsp;atom&nbsp;site&nbsp;label,&nbsp;e.g.&nbsp;Ru1<br>
-:param&nbsp;hkl:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;reflection&nbsp;to&nbsp;calculate<br>
-:param&nbsp;energy_kev:&nbsp;float<br>
-:param&nbsp;azir:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;azimuthal&nbsp;reference<br>
-:param&nbsp;psideg:&nbsp;float/array,&nbsp;azimuthal&nbsp;angle/&nbsp;range<br>
-:param&nbsp;process:&nbsp;str:&nbsp;'Scalar',&nbsp;'E1E1',&nbsp;'E1E2',&nbsp;'E2E2',&nbsp;'E1E1mag',&nbsp;'NonResMag'<br>
-:param&nbsp;rank:&nbsp;int,&nbsp;1,2,3:&nbsp;tensor&nbsp;rank.&nbsp;Only&nbsp;required<br>
-:param&nbsp;time:&nbsp;+/-1&nbsp;time&nbsp;symmetry<br>
-:param&nbsp;parity:&nbsp;+/-1&nbsp;parity<br>
-:param&nbsp;mk:<br>
-:param&nbsp;lk:<br>
-:param&nbsp;sk:<br>
-:return:&nbsp;ss,&nbsp;sp,&nbsp;ps,&nbsp;pp&nbsp;intensity&nbsp;values</tt></dd></dl>
-
-<dl><dt><a name="Scattering-tensor_scattering_stokes"><strong>tensor_scattering_stokes</strong></a>(self, atom_label, hkl, energy_kev=None, azir=[0, 0, 1], psideg=0, stokes=0, pol_theta=45, process='E1E1', rank=2, time=1, parity=1, mk=None, lk=None, sk=None)</dt><dd><tt>Return&nbsp;tensor&nbsp;scattering&nbsp;intensities&nbsp;for&nbsp;non-standard&nbsp;polarisation<br>
-&nbsp;&nbsp;pol&nbsp;=&nbsp;<a href="#Scattering-tensor_scattering_stokes">tensor_scattering_stokes</a>('Ru1',&nbsp;[0,0,3],&nbsp;2.838,&nbsp;[0,1,0],&nbsp;psideg=90,&nbsp;stokes=45)<br>
-Uses&nbsp;TensorScatteringClass.py&nbsp;by&nbsp;Prof.&nbsp;Steve&nbsp;Collins,&nbsp;Dimaond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
-:param&nbsp;atom_label:&nbsp;str&nbsp;atom&nbsp;site&nbsp;label,&nbsp;e.g.&nbsp;Ru1<br>
-:param&nbsp;hkl:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;reflection&nbsp;to&nbsp;calculate<br>
-:param&nbsp;energy_kev:&nbsp;float<br>
-:param&nbsp;azir:&nbsp;list/array,&nbsp;[h,k,l]&nbsp;azimuthal&nbsp;reference<br>
-:param&nbsp;psideg:&nbsp;float,&nbsp;azimuthal&nbsp;angle<br>
-:param&nbsp;stokes:&nbsp;float/array,&nbsp;rotation&nbsp;of&nbsp;polarisation&nbsp;analyser&nbsp;(0=sigma),&nbsp;degrees<br>
-:param&nbsp;pol_theta:&nbsp;float,&nbsp;scattering&nbsp;angle&nbsp;of&nbsp;polarisation&nbsp;analyser,&nbsp;degrees<br>
-:param&nbsp;process:&nbsp;str:&nbsp;'Scalar',&nbsp;'E1E1',&nbsp;'E1E2',&nbsp;'E2E2',&nbsp;'E1E1mag',&nbsp;'NonResMag'<br>
-:param&nbsp;rank:&nbsp;int,&nbsp;1,2,3:&nbsp;tensor&nbsp;rank.&nbsp;Only&nbsp;required<br>
-:param&nbsp;time:&nbsp;+/-1&nbsp;time&nbsp;symmetry<br>
-:param&nbsp;parity:&nbsp;+/-1&nbsp;parity<br>
-:param&nbsp;mk:<br>
-:param&nbsp;lk:<br>
-:param&nbsp;sk:<br>
-:return:&nbsp;array&nbsp;of&nbsp;intensity&nbsp;values</tt></dd></dl>
 
 <dl><dt><a name="Scattering-x_ray"><strong>x_ray</strong></a>(self, HKL)</dt><dd><tt>Calculate&nbsp;the&nbsp;squared&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;x-ray&nbsp;scattering&nbsp;factors<br>
 &nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-x_ray">x_ray</a>([1,0,0])<br>

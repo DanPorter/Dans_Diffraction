@@ -12,15 +12,18 @@ import Dans_Diffraction as dif
 
 
 f1 = cf+'/../Dans_Diffraction/Structures/Ca3CoMnO6.mcif' # from Bilbao magnetic server R-3c
-f2 = cf+'/../Dans_Diffraction/Structures/Li2IrO3.mcif' # from Bilbao magnetic server C2/m
-f3 = cf+'/../Dans_Diffraction/Structures/Sr3LiRuO6_C2\'c\'.mcif' # from isodistort R-3c
+f2 = cf+'/../Dans_Diffraction/Structures/Sr3LiRuO6_C2\'c\'.mcif' # from isodistort C2'/c'
+f3 = cf+'/../Dans_Diffraction/Structures/LaMnO3.mcif' # from Bilbao magnetic server Pn'ma'
 
 xtl1 = dif.Crystal(f1)
 xtl2 = dif.Crystal(f2)
 xtl3 = dif.Crystal(f3)
 
-xtl1.Symmetry.info()
+print(xtl1.name)
+print(xtl1.Symmetry.info())
 
-xtl2.Symmetry.info()
+print(xtl2.name)
+print(xtl2.Symmetry.info())
 
-xtl3.Symmetry.info()
+print(xtl3.name)
+print(xtl3.Symmetry.info())

@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_crystal</strong></big></big> (version 2.8)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_crystal</strong></big></big> (version 3.0)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_crystal.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_crystal.py</a></font></td></tr></table>
     <p><tt>classes_crystal.py<br>
@@ -34,8 +34,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;2.7<br>
-Last&nbsp;updated:&nbsp;30/03/20<br>
+Version&nbsp;3.0<br>
+Last&nbsp;updated:&nbsp;27/05/20<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 27/07/17&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
@@ -50,6 +50,8 @@ Version&nbsp;History:<br>
 12/12/19&nbsp;2.6&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;<a href="#Symmetry">Symmetry</a>.is_symmetric_reflection(ref1,&nbsp;ref2),&nbsp;added&nbsp;multiple&nbsp;scattering&nbsp;code<br>
 30/03/20&nbsp;2.7&nbsp;&nbsp;&nbsp;&nbsp;Moved&nbsp;Multicrystal&nbsp;class&nbsp;to&nbsp;separate&nbsp;file,&nbsp;other&nbsp;minor&nbsp;tweaks<br>
 19/04/20&nbsp;2.8&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;update_cif&nbsp;and&nbsp;write_cif&nbsp;funcitons<br>
+12/05/20&nbsp;2.9&nbsp;&nbsp;&nbsp;&nbsp;Updated&nbsp;Atom.from_cif&nbsp;to&nbsp;be&nbsp;more&nbsp;reliable<br>
+27/05/20&nbsp;3.0&nbsp;&nbsp;&nbsp;&nbsp;Updated&nbsp;write_cif&nbsp;for&nbsp;magnetic&nbsp;moments&nbsp;-&nbsp;now&nbsp;writes&nbsp;simple&nbsp;mcif&nbsp;structures<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -473,7 +475,9 @@ superstructure&nbsp;<a href="#Crystal">Crystal</a>&nbsp;class</tt></dd></dl>
 :param&nbsp;cifvals:&nbsp;cif&nbsp;dict&nbsp;from&nbsp;readcif&nbsp;(None&nbsp;to&nbsp;use&nbsp;self.<strong>cif</strong>)<br>
 :return:&nbsp;cifvals</tt></dd></dl>
 
-<dl><dt><a name="Crystal-write_cif"><strong>write_cif</strong></a>(self, filename=None, comments=None)</dt><dd><tt>Write&nbsp;crystal&nbsp;structure&nbsp;to&nbsp;file<br>
+<dl><dt><a name="Crystal-write_cif"><strong>write_cif</strong></a>(self, filename=None, comments=None)</dt><dd><tt>Write&nbsp;crystal&nbsp;structure&nbsp;to&nbsp;CIF&nbsp;(Crystallographic&nbsp;Information&nbsp;File)<br>
+&nbsp;Only&nbsp;basic&nbsp;information&nbsp;is&nbsp;saved&nbsp;to&nbsp;the&nbsp;file,&nbsp;but&nbsp;enough&nbsp;to&nbsp;open&nbsp;in&nbsp;VESTA&nbsp;etc.<br>
+&nbsp;If&nbsp;magnetic&nbsp;ions&nbsp;are&nbsp;defined,&nbsp;a&nbsp;magnetic&nbsp;cif&nbsp;(*.mcif)&nbsp;will&nbsp;be&nbsp;produce<br>
 :param&nbsp;filename:&nbsp;name&nbsp;to&nbsp;write&nbsp;too,&nbsp;if&nbsp;None,&nbsp;use&nbsp;writes&nbsp;to&nbsp;self.<strong>name</strong>&nbsp;(.cif/.mcif)<br>
 :param&nbsp;comments:&nbsp;str&nbsp;comments&nbsp;to&nbsp;add&nbsp;to&nbsp;file&nbsp;header<br>
 :return:&nbsp;None</tt></dd></dl>
@@ -569,12 +573,6 @@ Based&nbsp;on&nbsp;ratio&nbsp;of&nbsp;parent&nbsp;-&nbsp;to&nbsp;superstructure&
 &nbsp;&nbsp;&nbsp;&nbsp;[h,k,l]&nbsp;=&nbsp;<a href="#Superstructure-superhkl2parent">superhkl2parent</a>([h',k',l'])</tt></dd></dl>
 
 <hr>
-Data and other attributes defined here:<br>
-<dl><dt><strong>P</strong> = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]</dl>
-
-<dl><dt><strong>Parent</strong> = Crystal with 1 atomic positions, 1 symmetries</dl>
-
-<hr>
 Methods inherited from <a href="Dans_Diffraction.classes_crystal.html#Crystal">Crystal</a>:<br>
 <dl><dt><a name="Superstructure-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
 
@@ -640,7 +638,9 @@ superstructure&nbsp;<a href="#Crystal">Crystal</a>&nbsp;class</tt></dd></dl>
 :param&nbsp;cifvals:&nbsp;cif&nbsp;dict&nbsp;from&nbsp;readcif&nbsp;(None&nbsp;to&nbsp;use&nbsp;self.<strong>cif</strong>)<br>
 :return:&nbsp;cifvals</tt></dd></dl>
 
-<dl><dt><a name="Superstructure-write_cif"><strong>write_cif</strong></a>(self, filename=None, comments=None)</dt><dd><tt>Write&nbsp;crystal&nbsp;structure&nbsp;to&nbsp;file<br>
+<dl><dt><a name="Superstructure-write_cif"><strong>write_cif</strong></a>(self, filename=None, comments=None)</dt><dd><tt>Write&nbsp;crystal&nbsp;structure&nbsp;to&nbsp;CIF&nbsp;(Crystallographic&nbsp;Information&nbsp;File)<br>
+&nbsp;Only&nbsp;basic&nbsp;information&nbsp;is&nbsp;saved&nbsp;to&nbsp;the&nbsp;file,&nbsp;but&nbsp;enough&nbsp;to&nbsp;open&nbsp;in&nbsp;VESTA&nbsp;etc.<br>
+&nbsp;If&nbsp;magnetic&nbsp;ions&nbsp;are&nbsp;defined,&nbsp;a&nbsp;magnetic&nbsp;cif&nbsp;(*.mcif)&nbsp;will&nbsp;be&nbsp;produce<br>
 :param&nbsp;filename:&nbsp;name&nbsp;to&nbsp;write&nbsp;too,&nbsp;if&nbsp;None,&nbsp;use&nbsp;writes&nbsp;to&nbsp;self.<strong>name</strong>&nbsp;(.cif/.mcif)<br>
 :param&nbsp;comments:&nbsp;str&nbsp;comments&nbsp;to&nbsp;add&nbsp;to&nbsp;file&nbsp;header<br>
 :return:&nbsp;None</tt></dd></dl>
