@@ -24,8 +24,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.0
-Last updated: 27/05/20
+Version 3.0.1
+Last updated: 09/06/20
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -42,6 +42,7 @@ Version History:
 19/04/20 2.8    Added update_cif and write_cif funcitons
 12/05/20 2.9    Updated Atom.from_cif to be more reliable
 27/05/20 3.0    Updated write_cif for magnetic moments - now writes simple mcif structures
+09/06/20 3.0.1  Updated code for changes to fc.gen_sym_mat
 
 @author: DGPorter
 """
@@ -58,7 +59,7 @@ from .classes_scattering import Scattering
 from .classes_multicrystal import MultiCrystal
 from .classes_plotting import Plotting, PlottingSuperstructure
 
-__version__ = '3.0'
+__version__ = '3.0.1'
 
 
 class Crystal:
@@ -1388,7 +1389,7 @@ class Symmetry:
             for op in self.symmetry_operations_magnetic
         ]
         cifvals['_space_group_symop_magn_operation.id'] = range(1, len(self.symmetry_operations)+1)
-        cifvals['_space_group_symop_magn_operation.xyz'] = ['%s, +1' % op for op in self.symmetry_operations]
+        cifvals['_space_group_symop_magn_operation.xyz'] = ['%s,+1' % op for op in self.symmetry_operations]
         cifvals['_space_group_symop_magn_operation.mxmymz'] = magsym
         cifvals['_space_group_symop_magn_centering.id'] = ['1']
         cifvals['_space_group_symop_magn_centering.xyz'] = ['x,y,z,+1']
@@ -1644,8 +1645,9 @@ class Symmetry:
         ii = 0
         for n in range(len(HKL)):
             for m in range(NsymOps):
-                opHKL = np.dot(HKL[n], self.symmetry_matrices[m])
-                symHKL[ii, :] = opHKL[:3]
+                # multiply only by the rotational part
+                opHKL = np.dot(HKL[n], self.symmetry_matrices[m][:3, :3])
+                symHKL[ii, :] = opHKL
                 ii += 1
         return symHKL
 
@@ -1867,7 +1869,7 @@ class Symmetry:
         :return: str
         """
 
-        out = 'Spacegoup: %s (%g)\n' % (self.spacegroup, self.spacegroup_number)
+        out = 'Spacegoup: %s (%s)\n' % (self.spacegroup, self.spacegroup_number)
 
         out += 'Symmetry operations:\n'
         for n in range(len(self.symmetry_operations)):

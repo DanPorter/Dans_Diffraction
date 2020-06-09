@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.1.1
-Last updated: 26/05/20
+Version 3.2.0
+Last updated: 09/06/20
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -31,6 +31,7 @@ Version History:
 05/05/20 3.0.1  Further changes to readcif. Changed method of symmetry_ops2magnetic. Added str2element
 12/05/20 3.1.0  More readcif changes, added atomic_scattering_factor, element_charge_string, split_compound
 26/05/20 3.1.1  Updated magnetic space groups, added magnetic positions (was only generators), added write_mcif
+09/06/20 3.2    Updated gen_sym_mat, symmetry_ops2magnetic, added sym_op_det
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -45,7 +46,7 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.1.1'
+__version__ = '3.2.0'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -643,7 +644,7 @@ def write_mcif(cifvals, filename=None, comments=None):
     c = '#----------------------------------------------------------------------\n'
     c += '#   Crystal Structure: %s\n' % (cifvals['FileTitle'] if 'FileTitle' in keys else '')
     c += '#----------------------------------------------------------------------\n'
-    c += '# CIF created in Dans_Diffraction\n'
+    c += '# MCIF created in Dans_Diffraction\n'
     c += '# Original cif:\n# %s\n' % (cifvals['Filename'] if 'Filename' in keys else 'None')
 
     # Comments
@@ -1098,18 +1099,22 @@ def spacegroup_subgroups_list(sg_number):
     return out
 
 
-def spacegroups_magnetic(sg_number):
+def spacegroups_magnetic(sg_number=None):
     """
     Returns dict of magnetic space groups for required space group
-    :param sg_number: space group number (1-230)
+    :param sg_number: space group number (1-230) or None to return all magnetic spacegroups
     :return: dict
     """
-    sg_dict = spacegroup(sg_number)
-    msg_numbers = sg_dict['magnetic space groups']
 
     msg_file = os.path.join(datadir, 'SpaceGroupsMagnetic.json')
     with open(msg_file, 'r') as fp:
         msg_dict = json.load(fp)
+
+    if sg_number is None:
+        return msg_dict
+
+    sg_dict = spacegroup(sg_number)
+    msg_numbers = sg_dict['magnetic space groups']
     return [msg_dict[num] for num in msg_numbers]
 
 
@@ -1688,11 +1693,12 @@ def gen_sym_ref(sym_ops, hkl):
     sym_mat = gen_sym_mat(sym_ops)
     nops = len(sym_ops)
 
-    symhkl = np.zeros([nops, 4])
+    symhkl = np.zeros([nops, 3])
     for n, sym in enumerate(sym_mat):
-        symhkl[n, :] = np.dot(hkl, sym)
+        # multiply only by the rotational part
+        symhkl[n, :] = np.dot(hkl, sym[:3, :3])
 
-    return symhkl[:, :3]
+    return symhkl
 
 
 def sum_sym_ref(symhkl):
@@ -1714,23 +1720,32 @@ def gen_sym_mat(sym_ops):
     """
      Generate transformation matrix from symmetry operation
      Currently very ugly but it seems to work
-     sym_mat = gen_syn_mat(['x,y,z','y,-x,z+1/2'])
+     Tested in Test/test_gen_sym_mat - found to be fast and reliable.
+     sym_mat = gen_sym_mat(['x,y,z','y,-x,z+1/2'])
      sym_mat[0] = [[ 1.,  0.,  0.,  0.],
                    [ 0.,  1.,  0.,  0.],
-                   [ 0.,  0.,  1.,  0.]])
+                   [ 0.,  0.,  1.,  0.],
+                   [ 0.,  0.,  0.,  1.]])
      sym_mat[1] = [[ 0. ,  1. ,  0. ,  0. ],
                    [-1. ,  0. ,  0. ,  0. ],
-                   [ 0. ,  0. ,  1. ,  0.5]]
+                   [ 0. ,  0. ,  1. ,  0.5],
+                   [ 0.,   0.,   0.,   1.]]
     """
+
+    if type(sym_ops) is str:
+        sym_ops = [sym_ops]
+
     sym_mat = []
     for sym in sym_ops:
         sym = sym.lower()
+        sym = sym.strip('\"\'')
+        sym = sym.replace('/', './')  # float division
         ops = sym.split(',')
-        mat = np.zeros([3, 4])
+        mat = np.zeros((4, 4))
+        mat[3, 3] = 1
 
-        for n in range(len(ops)):
+        for n in range(3):
             op = ops[n]
-            op = op.strip('\"\'')
             if 'x' in op: mat[n, 0] = 1
             if '-x' in op: mat[n, 0] = -1
             if 'y' in op: mat[n, 1] = 1
@@ -1743,12 +1758,63 @@ def gen_sym_mat(sym_ops):
             op = op.replace('-y', '').replace('y', '')
             op = op.replace('-z', '').replace('z', '')
             op = op.replace('+', '')
-            op = op.replace('/', './')  # Allow float division
 
             if len(op.strip()) > 0:
                 mat[n, 3] = eval(op)
         sym_mat += [mat]
     return sym_mat
+
+
+def sym_mat2str(sym_mat, time=None):
+    """
+    Generate symmetry operation string from matrix
+    :param sym_mat: array [3x3] or [4x4]
+    :param time: +/-1 or None
+    :return: str 'x,y,z(,1)'
+    """
+    sym_mat = np.asarray(sym_mat)
+
+    rot = sym_mat[:3, :3]
+    if sym_mat.shape[1] == 4:
+        trans = sym_mat[:, 3]
+    else:
+        trans = np.zeros(3)
+
+    denominators = range(2, 8)
+    out = []
+    for n in range(3):
+        # Convert rotational part
+        xyz = '%1.3gx+%1.3gy+%1.3gz' % (rot[n][0], rot[n][1], rot[n][2])
+        xyz = re.sub('[+-]?0[xyz]', '', xyz).replace('1', '').replace('+-', '-').strip('+')
+
+        # Convert translational part
+        if abs(trans[n]) < 0.01:
+            add = ''
+        else:
+            chk = [(d * trans[n]) % 1 < 0.01 for d in denominators]
+            if any(chk):
+                denom = denominators[chk.index(True)]
+                add = '+%1.0f/%1.0f' % (denom*trans[n], denom)
+            else:
+                add = '+%1.4g' % trans[n]
+            add = add.replace('+-', '+')
+        #print(n, rot[n], trans[n], xyz, add)
+        out += [xyz + add]
+    if time is not None:
+        out += ['%+1.3g' % time]
+    return ','.join(out)
+
+
+def sym_op_det(sym_ops):
+    """
+    Return the determinant of a symmetry operation
+    :param sym_op: str e.g. 'x,-y,z+1/2' or 'y, x+y, -z, -1' or list of str ['x,y,z',...]
+    :return: float |det| or list of floats
+    """
+    mat = gen_sym_mat(sym_ops)
+    if len(mat) == 1:
+        return np.linalg.det(mat[0][:3, :3])
+    return [np.linalg.det(m[:3, :3]) for m in mat]
 
 
 def invert_sym(sym_op):
@@ -1765,6 +1831,52 @@ def invert_sym(sym_op):
     sym_op = sym_op.lower()
     new_op = sym_op.replace('x', '-x').replace('y', '-y').replace('z', '-z').replace('--', '+').replace('+-', '-')
     return new_op
+
+
+def sym_op_time(sym_op):
+    """
+    Return the time symmetry of a symmetry operation
+    :param sym_op: str e.g. 'x,-y,z+1/2' or 'y, x+y, -z, -1'
+    :return: +/-1
+    """
+    ops = sym_op.split(',')
+    if len(ops) < 4:
+        return 1
+    return eval(ops[3])
+
+
+def symmetry_ops2magnetic(operations):
+    """
+    Convert list of string symmetry operations to magnetic symmetry operations
+    See Vesta_Manual.pdf Section 9.1.1 "Creation and editing of a vector"
+    Magnetic symmetry
+        µ' = TPMµ
+    T = Time operators x,y,z,(+1)
+    P = Parity operator (determinant of M)
+    M = Symmetry operator without translations
+
+    :param operations: list of str ['x,y,z',]
+    :return: list of str ['x,y,z']
+    """
+    operations = np.asarray(operations).reshape(-1)
+    # Convert operations to matrices
+    mat_ops = gen_sym_mat(operations)
+    str_ops = []
+    for n, mat in enumerate(mat_ops):
+        # Get time operation
+        t = sym_op_time(operations[n])
+
+        # Only use rotational part
+        m = mat[:3, :3]
+
+        # Get parity
+        p = np.linalg.det(m)
+
+        # Generate string
+        mag_str = sym_mat2str(t * p * m)
+        #mag_str = mag_str.replace('x', 'mx').replace('y', 'my').replace('z', 'mz')
+        str_ops += [mag_str]
+    return str_ops
 
 
 def orthogonal_axes(x_axis=[1, 0, 0], y_axis=[0, 1, 0]):
@@ -2039,26 +2151,6 @@ def diffractometer_Q(eta, delta, energy_kev=8.0):
     Qx = K * (np.cos(eta) - np.cos(delta - eta))
     Qy = K * (np.sin(delta - eta) + np.sin(eta))
     return Qx, Qy
-
-
-def symmetry_ops2magnetic(operations):
-    """
-    Convert list of string symmetry operations to magnetic symmetry operations
-    i.e. remove translations
-    """
-    # convert string to list
-    if type(operations) is str:
-        operations = [operations]
-    # Use RegEx to find translations
-    mag_op = []
-    for op in operations:
-        translations = re.findall('[\+\-]?\d/\d[\+\-]?', op)
-        op = fg.multi_replace(op, translations, '')
-        # also remove +/-1
-        translations = re.findall('[\+\-]?\d+?[\+\-]?', op)
-        op = fg.multi_replace(op, translations, '')
-        mag_op += [op]
-    return mag_op
 
 
 def hkl2str(hkl):
