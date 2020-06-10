@@ -18,6 +18,8 @@ xtl = dif.Crystal(f)
 xtl.Atoms.changeatom(1,mxmymz=[0,3,0])
 xtl.generate_structure()
 
+print(xtl.Symmetry.info())
+
 xtl.Plot.plot_crystal()
 plt.show()
 

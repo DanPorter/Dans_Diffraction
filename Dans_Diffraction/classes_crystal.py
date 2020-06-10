@@ -24,8 +24,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.0.1
-Last updated: 09/06/20
+Version 3.1.0
+Last updated: 10/06/20
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -43,6 +43,7 @@ Version History:
 12/05/20 2.9    Updated Atom.from_cif to be more reliable
 27/05/20 3.0    Updated write_cif for magnetic moments - now writes simple mcif structures
 09/06/20 3.0.1  Updated code for changes to fc.gen_sym_mat
+10/06/20 3.1    Updated Symmetry to include time operators
 
 @author: DGPorter
 """
@@ -59,7 +60,7 @@ from .classes_scattering import Scattering
 from .classes_multicrystal import MultiCrystal
 from .classes_plotting import Plotting, PlottingSuperstructure
 
-__version__ = '3.0.1'
+__version__ = '3.1.0'
 
 
 class Crystal:
@@ -1244,9 +1245,8 @@ class Symmetry:
     spacegroup_number = 1
     symmetry_operations = ['x,y,z']
     symmetry_operations_magnetic = ['x,y,z']
-    #symmetry_operations_time = [1]
-
-    # symmetry_operations_time = [1]
+    symmetry_operations_time = [1]
+    symmetry_matrices = np.eye(4)
 
     def __init__(self, symmetry_operations=None, symmetry_operations_magnetic=None):
         """Initialises the symmetry group"""
@@ -1280,69 +1280,10 @@ class Symmetry:
 
         keys = cifvals.keys()
 
-        # Get symmetry operations
-        if '_symmetry_equiv_pos_as_xyz' in keys:
-            symops = cifvals['_symmetry_equiv_pos_as_xyz']
-            symcen = ['x,y,z']
-
-            # add magnetic symmetries (symops without translation)
-            symops_mag = fc.symmetry_ops2magnetic(symops)
-            cenops_mag = fc.symmetry_ops2magnetic(symcen)
-            #self.symmetry_operations_time = [1]*len(symops)
-            #self.centring_operations_time = [1]
-        elif '_space_group_symop_operation_xyz' in keys:
-            symops = cifvals['_space_group_symop_operation_xyz']
-            symcen = ['x,y,z']
-
-            # add magnetic symmetries (symops without translation)
-            symops_mag = fc.symmetry_ops2magnetic(symops)
-            cenops_mag = fc.symmetry_ops2magnetic(symcen)
-            # self.symmetry_operations_time = [1]*len(symops)
-            # self.centring_operations_time = [1]
-        elif '_space_group_symop_magn_operation_xyz' in keys:
-            symops_tim = cifvals['_space_group_symop_magn_operation_xyz']
-            # Each symop given with time value: x,y,z,+1, separate them:
-            symops = [','.join(s.split(',')[:3]) for s in symops_tim]  # x,y,z
-            symtim = [np.int(s.split(',')[-1]) for s in symops_tim]  # +1
-            if '_space_group_symop_magn_operation_mxmymz' in keys:
-                symmag = cifvals['_space_group_symop_magn_operation_mxmymz']  # mx,my,mz
-            else:
-                symmag = fc.symmetry_ops2magnetic(symops)
-                # invert magnetic symmetry when time odd
-                for n in range(len(symmag)):
-                    if symtim[n] < 0:
-                        symmag[n] = fc.invert_sym(symmag[n])
-
-            # Centring vectors also given in this case
-            symcen_tim = cifvals['_space_group_symop_magn_centering_xyz']
-            symcen = [','.join(s.split(',')[:3]) for s in symcen_tim]  # x,y,z
-            symcentim = [np.int(s.split(',')[-1]) for s in symcen_tim]  # +1
-            if '_space_group_symop_magn_centering_mxmymz' in keys:
-                symcenmag = cifvals['_space_group_symop_magn_centering_mxmymz']  # mx,my,mz
-            else:
-                symcenmag = fc.symmetry_ops2magnetic(symcen)
-                # invert magnetic symmetry when time odd
-                for n in range(len(symcenmag)):
-                    if symcentim[n] < 0:
-                        symcenmag[n] = fc.invert_sym(symcenmag[n])
-
-            # add magnetic symmetries
-            symops_mag = [op.replace('m', '') for op in symmag]
-            cenops_mag = [op.replace('m', '') for op in symcenmag]
-            # self.symmetry_operations_time = symtim
-            # self.centring_operations_time = symcentim
-
-        else:
-            symops = ['x,y,z']
-            symcen = ['x,y,z']
-            symops_mag = ['x,y,z']
-            cenops_mag = ['x,y,z']
-            # self.symmetry_operations_time = [1]
-            # self.centring_operations_time = [1]
-        self.symmetry_operations = fc.gen_symcen_ops(symops, symcen)
-        # self.centring_operations = ['x,y,z']
-        self.symmetry_operations_magnetic = fc.gen_symcen_ops(symops_mag, cenops_mag)
-        # self.centring_operations_magnetic = ['x,y,z']
+        sym, mag, tim = fc.cif_symmetry(cifvals)
+        self.symmetry_operations = sym
+        self.symmetry_operations_magnetic = mag
+        self.symmetry_operations_time = tim
 
         # Get space group
         if '_symmetry_space_group_name_H-M' in keys:
@@ -1351,10 +1292,10 @@ class Symmetry:
             spacegroup = cifvals['_space_group_name_H-M_alt']
         elif '_space_group_magn_name_BNS' in keys:
             spacegroup = cifvals['_space_group_magn_name_BNS']
-        elif len(symops) == 1:
+        elif len(sym) == 1:
             spacegroup = 'P1'
         else:
-            spacegroup = ''
+            spacegroup = 'unknown'
         self.spacegroup = spacegroup
 
         if '_symmetry_Int_Tables_number' in keys:
@@ -1384,13 +1325,15 @@ class Symmetry:
 
         # newer versions of mcif don't use magn_operation.mxmymz but use symform in atom spec
         # . may be in the wrong place for some program
-        magsym = [
-            '%s' % op.replace('x', 'mx').replace('y', 'my').replace('z', 'mz')
-            for op in self.symmetry_operations_magnetic
-        ]
+        # Add time to symmetry operations
+        time_ops = []
+        for n in range(len(self.symmetry_operations)):
+            ops = self.symmetry_operations[n].split(',')
+            ops += ['%+g' % self.symmetry_operations_time[n]]
+            time_ops += [','.join(ops[:4])]  # use the current value first
         cifvals['_space_group_symop_magn_operation.id'] = range(1, len(self.symmetry_operations)+1)
-        cifvals['_space_group_symop_magn_operation.xyz'] = ['%s,+1' % op for op in self.symmetry_operations]
-        cifvals['_space_group_symop_magn_operation.mxmymz'] = magsym
+        cifvals['_space_group_symop_magn_operation.xyz'] = time_ops
+        cifvals['_space_group_symop_magn_operation.mxmymz'] = self.symmetry_operations_magnetic
         cifvals['_space_group_symop_magn_centering.id'] = ['1']
         cifvals['_space_group_symop_magn_centering.xyz'] = ['x,y,z,+1']
         cifvals['_space_group_symop_magn_centering.mxmymz'] = ['mx,my,mz']
@@ -1419,6 +1362,7 @@ class Symmetry:
         symops = spacegroup['general positions']
         self.symmetry_operations = symops
         self.symmetry_operations_magnetic = fc.symmetry_ops2magnetic(symops)
+        self.symmetry_operations_time = [1]*len(symops)
 
     def load_magnetic_spacegroup(self, msg_number):
         """
@@ -1434,9 +1378,9 @@ class Symmetry:
         self.spacegroup = maggroup['space group name']
         symops = maggroup['positions general']
         symmag = maggroup['positions magnetic']
-        symmag = [op.replace('m', '') for op in symmag]
         self.symmetry_operations = symops
         self.symmetry_operations_magnetic = symmag
+        self.symmetry_operations_time = fc.sym_op_time(symops)
 
     def changesym(self, idx, operation):
         """
@@ -1471,14 +1415,16 @@ class Symmetry:
 
         operations = np.array(operations).reshape(-1)
         mag_operations = np.array(mag_operations).reshape(-1)
+        tim_operations = fc.sym_op_time(operations)
 
         if mag_operations[0] is None:
             mag_operations = fc.symmetry_ops2magnetic(operations)
 
-        for op, mag_op in zip(operations, mag_operations):
+        for op, mag_op, tim_op in zip(operations, mag_operations, tim_operations):
             if op not in self.symmetry_operations:
                 self.symmetry_operations += [op]
                 self.symmetry_operations_magnetic += [mag_op]
+                self.symmetry_operations_time += [tim_op]
         self.generate_matrices()
 
     def addcen(self, operations, mag_operations=None):
@@ -1494,6 +1440,7 @@ class Symmetry:
 
         self.symmetry_operations = fc.gen_symcen_ops(self.symmetry_operations, operations)
         self.symmetry_operations_magnetic = fc.gen_symcen_ops(self.symmetry_operations_magnetic, mag_operations)
+        self.symmetry_operations_time = fc.sym_op_time(self.symmetry_operations)
         self.generate_matrices()
 
     def generate_matrices(self):
@@ -1874,8 +1821,7 @@ class Symmetry:
         out += 'Symmetry operations:\n'
         for n in range(len(self.symmetry_operations)):
             x1 = self.symmetry_operations[n].strip('\"\'')
-            x2 = self.symmetry_operations_magnetic[n].strip('\"\'').replace('x', 'mx').replace('y', 'my').replace('z',
-                                                                                                                  'mz')
+            x2 = self.symmetry_operations_magnetic[n].strip('\"\'')
             out += '%2d %25s %25s\n' % (n, x1, x2)
         # print 'Centring operations:'
         # for n in range(len(self.centring_operations)):

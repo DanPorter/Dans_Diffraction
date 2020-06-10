@@ -17,4 +17,4 @@ xtl.Atoms.changeatom(1, mxmymz=[0, 3, 0.3])
 xtl.generate_structure()
 
 # write cif file
-xtl.write_cif('test.mcif', comments='This is a test!')
+xtl.write_cif('../Test/test.mcif', comments='This is a test!')

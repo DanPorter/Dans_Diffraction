@@ -77,7 +77,7 @@ ELEMENT_LIST = [
     'no', 'np', 'nd', 'ra', 'og', 'os', 'pa', 'pd', 'nb', 'pm', 'po',
     'pr', 'pt', 'na', 'pu', 'ne', 'b', 'w', 'v', 'y', 'u', 'f', 'k',
     'c', 'i', 'p', 'h', 's', 'n', 'o',
-    'D', 'd', # add Deuterium
+    'D', 'd',  # add Deuterium
 ]
 element_regex = re.compile('|'.join(ELEMENT_LIST))
 
@@ -177,10 +177,10 @@ def readcif(filename=None, debug=False):
         if vals[0][0] == '_':
             if len(vals) == 1:
                 # Record next lines that are not keys as string
-                if lines[n+1][0] == ';': n += 1
+                if lines[n + 1][0] == ';': n += 1
                 strarg = []
-                while n+1 < len(lines) and (len(lines[n+1]) == 0 or lines[n+1][0].strip() not in ['_', ';']):
-                    strarg += [lines[n+1].strip('\'"')]
+                while n + 1 < len(lines) and (len(lines[n + 1]) == 0 or lines[n + 1][0].strip() not in ['_', ';']):
+                    strarg += [lines[n + 1].strip('\'"')]
                     n += 1
                 cifvals[vals[0]] = '\n'.join(strarg)
                 chk = 'a'
@@ -206,10 +206,10 @@ def readcif(filename=None, debug=False):
             # Step 2: Assign data to columns
             # loops until line has less segments than columns
             while n < len(lines):
-                #cols = lines[n].split()
+                # cols = lines[n].split()
                 # this fixes error on symmetry arguments having spaces
                 # this will only work if the last argument in the loop is split by spaces (in quotes)
-                #cols = cols[:len(loopvals) - 1] + [''.join(cols[len(loopvals) - 1:])]
+                # cols = cols[:len(loopvals) - 1] + [''.join(cols[len(loopvals) - 1:])]
                 cols = [col for col in re.split("( |\\\".*?\\\"|'.*?')", lines[n]) if col.strip()]
                 if len(cols) != len(loopvals): break
                 if cols[0][0] == '_' or cols[0] == 'loop_': break  # catches error if loop is only 1 iteration
@@ -263,6 +263,47 @@ def cif_check(cifvals, required_keys=None, bad_value='?'):
         if bad_value in cifvals[key]:
             return False
     return True
+
+
+def cif_symmetry(cifvals):
+    """
+    Read symmetries from a cif dict
+    :param cifvals:
+    :return: list(symmetry_operations), list(magnetic_operations), list(time operations)
+    """
+    keys = cifvals.keys()
+
+    if '_symmetry_equiv_pos_as_xyz' in keys:
+        symops = cifvals['_symmetry_equiv_pos_as_xyz']
+        symmetry_operations = gen_symcen_ops(symops, ['x,y,z'])
+        symmetry_operations_magnetic = symmetry_ops2magnetic(symops)
+        symmetry_operations_time = sym_op_time(symops)
+    elif '_space_group_symop_operation_xyz' in keys:
+        symops = cifvals['_space_group_symop_operation_xyz']
+        symmetry_operations = gen_symcen_ops(symops, ['x,y,z'])
+        symmetry_operations_magnetic = symmetry_ops2magnetic(symops)
+        symmetry_operations_time = sym_op_time(symops)
+    elif '_space_group_symop_magn_operation_xyz' in keys:
+        symops = cifvals['_space_group_symop_magn_operation_xyz']
+        symcen = cifvals['_space_group_symop_magn_centering_xyz']
+        symmetry_operations = gen_symcen_ops(symops, symcen)
+        symmetry_operations_time = sym_op_time(symmetry_operations)
+
+        if '_space_group_symop_magn_operation_mxmymz' in keys:
+            magops = cifvals['_space_group_symop_magn_operation_mxmymz']  # mx,my,mz
+            magcen = cifvals['_space_group_symop_magn_centering_mxmymz']
+            magops = [op.replace('m', '') for op in magops]
+            magcen = [op.replace('m', '') for op in magcen]
+            symmetry_operations_magnetic = gen_symcen_ops(magops, magcen)
+        else:
+            symmetry_operations_magnetic = symmetry_ops2magnetic(symmetry_operations)
+    else:
+        symmetry_operations = ['x,y,z']
+        symmetry_operations_magnetic = ['x,y,z']
+        symmetry_operations_time = [1]
+
+    symmetry_operations_magnetic = sym_op_mx(symmetry_operations_magnetic)
+    return symmetry_operations, symmetry_operations_magnetic, symmetry_operations_time
 
 
 def cif2dict(cifvals):
@@ -587,8 +628,8 @@ def write_cif(cifvals, filename=None, comments=None):
     c += cif_loop([
         '_atom_site_label',
         '_atom_site_type_symbol',
-        #'_atom_site_symmetry_multiplicity',
-        #'_atom_site_Wyckoff_symbol',
+        # '_atom_site_symmetry_multiplicity',
+        # '_atom_site_Wyckoff_symbol',
         '_atom_site_fract_x',
         '_atom_site_fract_y',
         '_atom_site_fract_z',
@@ -694,8 +735,8 @@ def write_mcif(cifvals, filename=None, comments=None):
     c += cif_loop([
         '_atom_site_label',
         '_atom_site_type_symbol',
-        #'_atom_site_symmetry_multiplicity',
-        #'_atom_site_Wyckoff_symbol',
+        # '_atom_site_symmetry_multiplicity',
+        # '_atom_site_Wyckoff_symbol',
         '_atom_site_fract_x',
         '_atom_site_fract_y',
         '_atom_site_fract_z',
@@ -710,7 +751,7 @@ def write_mcif(cifvals, filename=None, comments=None):
         '_atom_site_moment.crystalaxis_x',
         '_atom_site_moment.crystalaxis_y',
         '_atom_site_moment.crystalaxis_z',
-        #'_atom_site_moment.symmform',
+        # '_atom_site_moment.symmform',
     ])
 
     if filename is None:
@@ -856,10 +897,10 @@ def print_atom_properties(elements=None):
 
     prop = atom_properties(elements)
     keys = prop.dtype.names
-    elename = ' '.join(['%10s'%ele for ele in prop['Element']])
-    out = '%8s : %s\n'%('', elename)
+    elename = ' '.join(['%10s' % ele for ele in prop['Element']])
+    out = '%8s : %s\n' % ('', elename)
     for key in keys:
-        propval = ' '.join(['%10s'%ele for ele in prop[key]])
+        propval = ' '.join(['%10s' % ele for ele in prop[key]])
         out += '%8s : %s\n' % (key, propval)
     return out
 
@@ -989,7 +1030,7 @@ def atomic_scattering_factor(element, energy_kev=None):
     asf_file = os.path.join(datadir, 'atomic_scattering_factors.npy')
     asf = np.load(asf_file, allow_pickle=True)
     asf = asf.item()
-    energy = np.array(asf[element]['energy'])/1000. # eV -> keV
+    energy = np.array(asf[element]['energy']) / 1000.  # eV -> keV
     f1 = np.array(asf[element]['f1'])
     f2 = np.array(asf[element]['f2'])
     f1[f1 < -1000] = np.nan
@@ -1051,7 +1092,7 @@ def spacegroup_list(sg_numbers=None):
     :return: str
     """
     if sg_numbers is None:
-        sg_numbers = range(1,231)
+        sg_numbers = range(1, 231)
     sg_numbers = np.asarray(sg_numbers, dtype=str).reshape(-1)
 
     sg_dict = spacegroups()
@@ -1164,7 +1205,7 @@ def spacegroup_magnetic_list(sg_number):
         name = sg['space group name']
         setting = sg['setting']
         typename = sg['type name']
-        #ops = sg['operators magnetic']
+        # ops = sg['operators magnetic']
         ops = sg['positions magnetic']
         out += fmt % (parent, number, name, setting, typename, ops)
     return out
@@ -1183,7 +1224,7 @@ def element_symbol(element_Z=None):
     if element_Z is None:
         return symbols
     element_Z = np.asarray(element_Z).reshape(-1)
-    return symbols[element_Z-1]
+    return symbols[element_Z - 1]
 
 
 def element_z(element):
@@ -1304,7 +1345,7 @@ def orbital_configuration(element, charge=None):
     z = element_z(symbol)
     if charge is None:
         charge = charge_str
-    newz = z - int(charge) # floor
+    newz = z - int(charge)  # floor
     if newz < 1: newz = 1
     if newz > 118: newz = 118
     element = element_symbol(newz)
@@ -1327,13 +1368,13 @@ def default_atom_charge(element):
         if elecharge != 0:
             charge[n] = elecharge
         elif group == 1:
-            charge[n] = 1*occupancy
+            charge[n] = 1 * occupancy
         elif group == 2:
-            charge[n] = 2*occupancy
+            charge[n] = 2 * occupancy
         elif group == 16:
-            charge[n] = -2*occupancy
+            charge[n] = -2 * occupancy
         elif group == 17:
-            charge[n] = -1*occupancy
+            charge[n] = -1 * occupancy
         elif group == 18:
             charge[n] = 0
         else:
@@ -1359,14 +1400,14 @@ def balance_atom_charge(list_of_elements, occupancy=None):
     charge = np.zeros(len(list_of_elements))
     for n in range(len(list_of_elements)):
         _, occ, _ = split_element_symbol(list_of_elements[n])
-        charge[n] = occupancy[n]*default_atom_charge(list_of_elements[n])
-        occupancy[n] = occupancy[n]*occ
+        charge[n] = occupancy[n] * default_atom_charge(list_of_elements[n])
+        occupancy[n] = occupancy[n] * occ
 
     remaining_charge = -np.nansum(charge)
     uncharged = np.sum(occupancy[np.isnan(charge)])
     for n in range(len(list_of_elements)):
         if np.isnan(charge[n]):
-            charge[n] = occupancy[n]*remaining_charge/uncharged
+            charge[n] = occupancy[n] * remaining_charge / uncharged
     return charge
 
 
@@ -1402,7 +1443,7 @@ def count_atoms(list_of_elements, occupancy=None, divideby=1, latex=False):
     ats = arrange_atom_order(ats)  # arrange this by alcali/TM/O
     outstr = []
     for a in ats:
-        atno = sum([occupancy[n] for n, x in enumerate(list_of_elements) if x == a])/float(divideby)
+        atno = sum([occupancy[n] for n, x in enumerate(list_of_elements) if x == a]) / float(divideby)
         if np.abs(atno - 1) < 0.01:
             atstr = ''
         else:
@@ -1436,8 +1477,8 @@ def count_charges(list_of_elements, occupancy=None, divideby=1, latex=False):
     atno = {}
     chno = {}
     for a in ats:
-        atno[a] = sum([occupancy[n] for n, x in enumerate(list_of_elements) if x == a])/float(divideby)
-        chno[a] = sum([charge[n] for n, x in enumerate(list_of_elements) if x == a])/(atno[a]*float(divideby))
+        atno[a] = sum([occupancy[n] for n, x in enumerate(list_of_elements) if x == a]) / float(divideby)
+        chno[a] = sum([charge[n] for n, x in enumerate(list_of_elements) if x == a]) / (atno[a] * float(divideby))
 
     outstr = []
     for a in ats:
@@ -1614,6 +1655,7 @@ def gen_sym_pos(sym_ops, x, y, z):
         # Evaluate string symmetry operation in terms of x,y,z
         sym = sym.replace('/', './')
         sym = sym.strip('\"\'')
+        sym = sym.replace('mx', 'x').replace('my', 'y').replace('mz', 'z')
         out = eval(sym)
         uvw[n] = np.array(out[0:3]) + 0.0  # add zero to remove -0.0 values
     return uvw
@@ -1667,16 +1709,24 @@ def gen_symcen_ops(sym_ops, cen_ops):
     for sym in sym_ops:
         sym = sym.lower()
         sym = sym.strip('\"\'')
-        x, y, z = sym.split(',')
-        x = x.strip()
-        y = y.strip()
-        z = z.strip()
+        s_op = sym.split(',')
+        x = s_op[0].strip()
+        y = s_op[1].strip()
+        z = s_op[2].strip()
+        if len(s_op) > 3:
+            t = int(s_op[3])
+        else:
+            t = 1
         for cen in cen_ops:
             cen = cen.lower()
             cen = cen.strip('\"\'')
             op = cen.replace('x', 'a').replace('y', 'b').replace('z', 'c')  # avoid replacing x/y twice
             op = op.replace('a', x).replace('b', y).replace('c', z)
             op = op.replace('--', '')
+            if op.count(',') > 2:
+                op = op.split(',')
+                op[3] = '%+d' % (int(op[3]) * t)
+                op = ','.join(op)
             ops += [op]
     return ops
 
@@ -1794,11 +1844,11 @@ def sym_mat2str(sym_mat, time=None):
             chk = [(d * trans[n]) % 1 < 0.01 for d in denominators]
             if any(chk):
                 denom = denominators[chk.index(True)]
-                add = '+%1.0f/%1.0f' % (denom*trans[n], denom)
+                add = '+%1.0f/%1.0f' % (denom * trans[n], denom)
             else:
                 add = '+%1.4g' % trans[n]
             add = add.replace('+-', '+')
-        #print(n, rot[n], trans[n], xyz, add)
+        # print(n, rot[n], trans[n], xyz, add)
         out += [xyz + add]
     if time is not None:
         out += ['%+1.3g' % time]
@@ -1808,7 +1858,7 @@ def sym_mat2str(sym_mat, time=None):
 def sym_op_det(sym_ops):
     """
     Return the determinant of a symmetry operation
-    :param sym_op: str e.g. 'x,-y,z+1/2' or 'y, x+y, -z, -1' or list of str ['x,y,z',...]
+    :param sym_ops: str e.g. 'x,-y,z+1/2' or 'y, x+y, -z, -1' or list of str ['x,y,z',...]
     :return: float |det| or list of floats
     """
     mat = gen_sym_mat(sym_ops)
@@ -1833,16 +1883,34 @@ def invert_sym(sym_op):
     return new_op
 
 
-def sym_op_time(sym_op):
+def sym_op_time(operations):
     """
     Return the time symmetry of a symmetry operation
-    :param sym_op: str e.g. 'x,-y,z+1/2' or 'y, x+y, -z, -1'
-    :return: +/-1
+    :param operations: list(str) e.g. ['x,-y,z+1/2', 'y, x+y, -z, -1']
+    :return: list, +/-1
     """
-    ops = sym_op.split(',')
-    if len(ops) < 4:
-        return 1
-    return eval(ops[3])
+    operations = np.asarray(operations).reshape(-1)
+    t_op = np.empty(len(operations))
+    for n, sym_op in enumerate(operations):
+        ops = sym_op.split(',')
+        if len(ops) < 4:
+            t_op[n] = 1
+        else:
+            t_op[n] = int(ops[3])
+    return list(t_op)
+
+
+def sym_op_mx(operations):
+    """
+    Convert each operation from x,y,z to mx,my,mz
+    :param operations: ['x,y,z',]
+    :return: ['mx,my,mz',]
+    """
+    operations = list(np.asarray(operations).reshape(-1))
+    for n in range(len(operations)):
+        if 'mx' in operations[n]: continue
+        operations[n] = operations[n].replace('x', 'mx').replace('y', 'my').replace('z', 'mz')
+    return operations
 
 
 def symmetry_ops2magnetic(operations):
@@ -1861,10 +1929,11 @@ def symmetry_ops2magnetic(operations):
     operations = np.asarray(operations).reshape(-1)
     # Convert operations to matrices
     mat_ops = gen_sym_mat(operations)
+    tim_ops = sym_op_time(operations)
     str_ops = []
     for n, mat in enumerate(mat_ops):
         # Get time operation
-        t = sym_op_time(operations[n])
+        t = tim_ops[n]
 
         # Only use rotational part
         m = mat[:3, :3]
@@ -1874,7 +1943,7 @@ def symmetry_ops2magnetic(operations):
 
         # Generate string
         mag_str = sym_mat2str(t * p * m)
-        #mag_str = mag_str.replace('x', 'mx').replace('y', 'my').replace('z', 'mz')
+        # mag_str = mag_str.replace('x', 'mx').replace('y', 'my').replace('z', 'mz')
         str_ops += [mag_str]
     return str_ops
 
@@ -2175,7 +2244,7 @@ def cut2powder(qx, qy, qz, cut):
     :param cut: [n,m] array of intensities
     :return: qm[o], pow[o]
     """
-    qq = np.sqrt(qx**2 + qy**2 + qz**2)
+    qq = np.sqrt(qx ** 2 + qy ** 2 + qz ** 2)
     return fg.grid_intensity(qq.ravel(), cut.ravel())
 
 
@@ -2215,7 +2284,7 @@ def powder_average(tth, energy_kev):
     :return: PA
     """
     q = calqmag(tth, energy_kev)
-    return 1/q**2
+    return 1 / q ** 2
 
 
 def calc_vol(UV):
@@ -2254,17 +2323,17 @@ def cif2table(cif):
         uiso = cif['_atom_site_B_iso_or_equiv']
     else:
         u_or_b = 'U$_{iso}$'
-        uiso = ['0.000']*len(label)
+        uiso = ['0.000'] * len(label)
     # Occupancy
     if '_atom_site_occupancy' in keys:
         occ = cif['_atom_site_occupancy']
     else:
-        occ = ['1.0']*len(label)
+        occ = ['1.0'] * len(label)
     # Multiplicity
     if '_atom_site_site_symmetry_multiplicity' in keys:
-        mult = [s+'a' for s in cif['_atom_site_site_symmetry_multiplicity']]
+        mult = [s + 'a' for s in cif['_atom_site_site_symmetry_multiplicity']]
     else:
-        mult = ['1a']*len(label)
+        mult = ['1a'] * len(label)
 
     # Get coordinates
     u = cif['_atom_site_fract_x']
@@ -2299,7 +2368,7 @@ def cif2table(cif):
     if '_diffrn_reflns_number' in keys:
         extra += ['%s reflections' % cif['_diffrn_reflns_number']]
     if '_refine_ls_wR_factor_ref' in keys:
-        extra += ['R$_w$ = %4.2f\\%%' % (float(cif['_refine_ls_wR_factor_ref'])*100)]
+        extra += ['R$_w$ = %4.2f\\%%' % (float(cif['_refine_ls_wR_factor_ref']) * 100)]
     extra = ', '.join(extra)
 
     # Create table str
