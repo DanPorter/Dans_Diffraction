@@ -29,8 +29,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9.1
-Last updated: 10/05/20
+Version 1.9.2
+Last updated: 16/05/20
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -47,6 +47,7 @@ Version History:
 26/05/20 1.8.2  Updated copyright, removed tensor scattering. Updated magnetic spacegroups
 09/06/20 1.9    Chaneged magnetic symmetry calculation, now correctly generates mag symmetry from operations
 10/06/20 1.9.1  Added time symmetry to Symmetry class
+16/06/20 1.9.2  Made change in simpulate_powder to remove linspace error
 
 -----------------------------------------------------------------------------
    Copyright 2020 Diamond Light Source Ltd.
@@ -100,8 +101,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '1.9.1'
-__date__ = '10/06/20'
+__version__ = '1.9.2'
+__date__ = '16/06/20'
 
 
 # Build

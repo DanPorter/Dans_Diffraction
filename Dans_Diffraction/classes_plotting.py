@@ -24,6 +24,7 @@ Version History:
 15/04/20 1.7    Added minimum angle to simulate_powder
 13/05/20 1.8    Added plot_exchange_paths
 26/05/20 1.8.1  Removed tensor_scattering
+16/06/20 1.8.2  Change to simulate_powder to make pixels int, remove linspace error in new numpy
 
 @author: DGPorter
 """
@@ -37,7 +38,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.8.1'
+__version__ = '1.8.2'
 
 
 class Plotting:
@@ -173,12 +174,12 @@ class Plotting:
         R = self.xtl.Cell.calculateR(uvw)
         
         # Loop over each layer
-        for L,layer in enumerate(layers):
+        for L, layer in enumerate(layers):
             # Find occupied atoms within the layer
             idx = np.all([np.abs(uvw[:,layer_axis]-layer) < layer_width, occ > 0.2],axis=0) 
             #print L,layer,np.sum(idx)
-            layx = R[idx,layer_axis_x]
-            layy = R[idx,layer_axis_y]
+            layx = R[idx, layer_axis_x]
+            layy = R[idx, layer_axis_y]
             laycol = colors[idx,:]
             laysize = sizes[idx]
             
@@ -286,10 +287,10 @@ class Plotting:
             I = I/(Qmag+0.001)**2
         
         # create plotting mesh
-        pixels = 2000*q_max # reduce this to make convolution faster
+        pixels = int(2000*q_max)  # reduce this to make convolution faster
         pixel_size = q_max/(1.0*pixels)
         peak_width_pixels = peak_width/(1.0*pixel_size)
-        mesh = np.zeros([int(pixels)])
+        mesh = np.zeros([pixels])
 
         if self.xtl.Scatter._powder_units.lower() in ['tth', 'angle', 'two-theta', 'twotheta', 'theta']:
             xx = self.xtl.Cell.tth(HKL, energy_kev)
@@ -399,10 +400,10 @@ class Plotting:
         I = self.xtl.Scatter.intensity(HKL)
         
         # create plotting mesh
-        pixels = 1000 # reduce this to make convolution faster
+        pixels = 1000  # reduce this to make convolution faster
         pixel_size = (2.0*q_max)/pixels
         mesh = np.zeros([pixels,pixels])
-        mesh_x = np.linspace(-q_max,q_max,pixels)
+        mesh_x = np.linspace(-q_max, q_max, pixels)
         X,Y = np.meshgrid(mesh_x,mesh_x)
         
         # add reflections to background
@@ -1145,10 +1146,10 @@ class PlottingSuperstructure(Plotting):
         I = I[incell]
 
         # create plotting mesh
-        pixels = 1000 # reduce this to make convolution faster
-        pixel_size = (2.0*q_max)/pixels
-        mesh = np.zeros([pixels,pixels])
-        mesh_x = np.linspace(-q_max,q_max,pixels)
+        pixels = 1000  # reduce this to make convolution faster
+        pixel_size = (2.0 * q_max) / pixels
+        mesh = np.zeros([pixels, pixels])
+        mesh_x = np.linspace(-q_max, q_max, pixels)
         X,Y = np.meshgrid(mesh_x, mesh_x)
         
         # add reflections to background
@@ -1378,10 +1379,10 @@ class MultiPlotting:
         """
         
         # create plotting mesh
-        pixels = 1000 # reduce this to make convolution faster
-        pixel_size = (2.0*q_max)/pixels
-        mesh = np.zeros([pixels,pixels])
-        mesh_x = np.linspace(-q_max,q_max,pixels)
+        pixels = 1000  # reduce this to make convolution faster
+        pixel_size = (2.0 * q_max) / pixels
+        mesh = np.zeros([pixels, pixels])
+        mesh_x = np.linspace(-q_max, q_max, pixels)
         X,Y = np.meshgrid(mesh_x,mesh_x)
         colours = iter(['b','g','r','c','m','y','k'])
         
