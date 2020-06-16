@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.7
-Last updated: 26/05/20
+Version 1.7.1
+Last updated: 16/06/20
 
 Version History:
 10/09/17 0.1    Program created
@@ -21,6 +21,7 @@ Version History:
 20/03/20 1.6    Increased powder gauss width from 2fwhm to 6fwhm, added powder averaging
 14/04/20 1.6    Added powder_correction
 26/05/20 1.7    Removed tensor_scattering
+16/06/20 1.7.1  Added output option of setup_scatter
 
 @author: DGPorter
 """
@@ -33,7 +34,7 @@ from . import functions_crystallography as fc
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '1.7'
+__version__ = '1.7.1'
 __scattering_types__ = {'xray': ['xray','x','x-ray','thomson','charge'],
                         'neutron': ['neutron','n','nuclear'],
                         'xray magnetic': ['xray magnetic','magnetic xray','spin xray','xray spin'],
@@ -930,7 +931,8 @@ class Scattering:
     
     def setup_scatter(self,type=None,energy_kev=None,wavelength_a=None, powder_units=None,
                       specular=None,parallel=None,theta_offset=None,
-                      min_theta=None,max_theta=None,min_twotheta=None,max_twotheta=None):
+                      min_theta=None,max_theta=None,min_twotheta=None,max_twotheta=None,
+                      output=True):
         """
         Simple way to set scattering parameters, each parameter is internal to xtl (self)
         
@@ -979,18 +981,23 @@ class Scattering:
         
         if max_twotheta is not None:
             self._scattering_max_twotheta = max_twotheta
-        
-        print('Scattering Options:')
-        print('                            Type : %s'%(self._scattering_type))
-        print('                  Default Energy : %6.3f keV'%(self._energy_kev))
-        print('                    Powder Units : %s'%(self._powder_units))
-        print('  Specular Direction (reflection): (%2.0f,%2.0f,%2.0f)'%(self._scattering_specular_direction[0],self._scattering_specular_direction[1],self._scattering_specular_direction[2]))
-        print('Parallel Direction (transmission): (%2.0f,%2.0f,%2.0f)'%(self._scattering_parallel_direction[0],self._scattering_parallel_direction[1],self._scattering_parallel_direction[2]))
-        print('                   Sample Offset : %5.2f'%(self._scattering_theta_offset))
-        print('             Minimum Theta angle : %5.2f'%(self._scattering_min_theta))
-        print('             Maximum Theta angle : %5.2f'%(self._scattering_max_theta))
-        print('         Minimum Two-Theta angle : %5.2f'%(self._scattering_min_twotheta))
-        print('         Maximum Two-Theta angle : %5.2f'%(self._scattering_max_twotheta))
+
+        if output:
+            print('Scattering Options:')
+            print('                            Type : %s' % self._scattering_type)
+            print('                  Default Energy : %6.3f keV' % self._energy_kev)
+            print('                    Powder Units : %s' % self._powder_units)
+            print('  Specular Direction (reflection): (%2.0f,%2.0f,%2.0f)' % (
+                self._scattering_specular_direction[0], self._scattering_specular_direction[1],
+                self._scattering_specular_direction[2]))
+            print('Parallel Direction (transmission): (%2.0f,%2.0f,%2.0f)' % (
+                self._scattering_parallel_direction[0], self._scattering_parallel_direction[1],
+                self._scattering_parallel_direction[2]))
+            print('                   Sample Offset : %5.2f' % self._scattering_theta_offset)
+            print('             Minimum Theta angle : %5.2f' % self._scattering_min_theta)
+            print('             Maximum Theta angle : %5.2f' % self._scattering_max_theta)
+            print('         Minimum Two-Theta angle : %5.2f' % self._scattering_min_twotheta)
+            print('         Maximum Two-Theta angle : %5.2f' % self._scattering_max_twotheta)
 
     def generate_powder(self, q_max=8, peak_width=0.01, background=0, powder_average=True):
         """
