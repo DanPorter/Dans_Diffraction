@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.8.1
-Last updated: 26/05/20
+Version 1.9.0
+Last updated: 29/06/20
 
 Version History:
 18/08/17 0.1    Program created
@@ -25,6 +25,7 @@ Version History:
 13/05/20 1.8    Added plot_exchange_paths
 26/05/20 1.8.1  Removed tensor_scattering
 16/06/20 1.8.2  Change to simulate_powder to make pixels int, remove linspace error in new numpy
+29/06/20 1.9.0  Removed scipy.convolve2d due to problems importing, new method more accurate but slower
 
 @author: DGPorter
 """
@@ -32,13 +33,13 @@ Version History:
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from scipy.signal import convolve2d
+#from scipy.signal import convolve2d
 
 from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.8.2'
+__version__ = '1.9.0'
 
 
 class Plotting:
@@ -394,18 +395,26 @@ class Plotting:
             plt.axis('image')
         """
 
-        Qx, Qy, HKL = self.xtl.Cell.reciprocal_space_plane(x_axis, y_axis, centre, q_max, cut_width)
+        qx, qy, hkl = self.xtl.Cell.reciprocal_space_plane(x_axis, y_axis, centre, q_max, cut_width)
         
         # Calculate intensities
-        I = self.xtl.Scatter.intensity(HKL)
+        inten = self.xtl.Scatter.intensity(hkl)
         
         # create plotting mesh
-        pixels = 1000  # reduce this to make convolution faster
+        pixels = 1001  # reduce this to make convolution faster
         pixel_size = (2.0*q_max)/pixels
-        mesh = np.zeros([pixels,pixels])
+        mesh = np.zeros([pixels, pixels])
         mesh_x = np.linspace(-q_max, q_max, pixels)
-        X,Y = np.meshgrid(mesh_x,mesh_x)
-        
+        xx, yy = np.meshgrid(mesh_x,mesh_x)
+
+        if peak_width is None or peak_width < pixel_size:
+            peak_width = pixel_size / 2
+
+        for n in range(len(inten)):
+            # Add each reflection as a gaussian
+            mesh += inten[n] * np.exp(-np.log(2) * (((xx - qx[n]) ** 2 + (yy - qy[n]) ** 2) / (peak_width / 2) ** 2))
+
+        """ old style using convolve2d, fast but occasional import problems, plus positions slightly inaccurate
         # add reflections to background
         pixel_i = ((Qx/(2*q_max) + 0.5)*pixels).astype(int)
         pixel_j = ((Qy/(2*q_max) + 0.5)*pixels).astype(int)
@@ -418,13 +427,13 @@ class Plotting:
             gauss_x = np.arange(-2*peak_width_pixels,2*peak_width_pixels+1)
             G = fg.gauss(gauss_x, gauss_x, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
             mesh = convolve2d(mesh,G, mode='same') # this is the slowest part
-        
+        """
         # Add background (if not None or 0)
         if background:
-            bkg = np.random.normal(background,np.sqrt(background), [pixels,pixels])
+            bkg = np.random.normal(background,np.sqrt(background), [pixels, pixels])
             mesh = mesh+bkg
         
-        return X,Y,mesh
+        return xx, yy, mesh
     
     def simulate_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],
                                     q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
@@ -921,9 +930,9 @@ class Plotting:
         else:
             calcstr = 'Geometry Only'
 
-        cmap = plt.get_cmap('rainbow') # grey_r
+        cmap = plt.get_cmap('rainbow')  # grey_r
 
-        plt.figure(figsize=(10, 5), dpi=130)
+        plt.figure(figsize=[2*self._figure_size[0], self._figure_size[1]], dpi=self._figure_dpi)
         if pv1 + pv2 + sfonly + full + pv1xsf1 != 0:
             plt.scatter(mslist[:, 3], mslist[:, 7], c=mslist[:, -1], s=2, cmap=cmap, lw=0)
             plt.scatter(mslist[:, 4], mslist[:, 7], c=mslist[:, -1], s=2, cmap=cmap, lw=0)
@@ -1088,13 +1097,13 @@ class PlottingSuperstructure(Plotting):
           background = average background value
           peak_width = reflection width in A-1
         Returns:
-          Qx/Qy = [1000x1000] array of coordinates
+          qx/qy = [1000x1000] array of coordinates
           plane = [1000x1000] array of plane in reciprocal space 
         
         E.G. hk plane at L=3 for hexagonal system:
-            Qx,Qy,plane = xtl.generate_intensity_cut([1,0,0],[0,1,0],[0,0,3])
+            qx,qy,plane = xtl.generate_intensity_cut([1,0,0],[0,1,0],[0,0,3])
             plt.figure()
-            plt.pcolormesh(Qx,Qy,plane)
+            plt.pcolormesh(qx,qy,plane)
             plt.axis('image')
         """
 
@@ -1130,39 +1139,47 @@ class PlottingSuperstructure(Plotting):
         print('Number of non-symmetric reflections in box: %1.0f'%len(HKLinbox))
 
         # Calculate intensity
-        I = self.xtl.Scatter.intensity(HKLinbox)
+        inten = self.xtl.Scatter.intensity(HKLinbox)
 
         # Apply Parent symmetry
         pHKL = self.xtl.superhkl2parent(HKLinbox)
-        pHKL, I = self.xtl.Parent.Symmetry.symmetric_intensity(pHKL, I)
+        pHKL, inten = self.xtl.Parent.Symmetry.symmetric_intensity(pHKL, inten)
         HKL = self.xtl.parenthkl2super(pHKL)
-        Q = self.xtl.calculateQ_parent(HKL)
+        q = self.xtl.calculateQ_parent(HKL)
 
-        box_coord = fg.index_coordinates(Q - c_cart, CELL)
+        box_coord = fg.index_coordinates(q - c_cart, CELL)
         incell = np.all(np.abs(box_coord) <= 0.5, axis=1)
         plane_coord = 2 * q_max * box_coord[incell, :]
-        Qx = plane_coord[:, 0]
-        Qy = plane_coord[:, 1]
-        I = I[incell]
+        qx = plane_coord[:, 0]
+        qy = plane_coord[:, 1]
+        inten = inten[incell]
 
         # create plotting mesh
-        pixels = 1000  # reduce this to make convolution faster
+        pixels = 1001  # reduce this to make convolution faster
         pixel_size = (2.0 * q_max) / pixels
         mesh = np.zeros([pixels, pixels])
         mesh_x = np.linspace(-q_max, q_max, pixels)
-        X,Y = np.meshgrid(mesh_x, mesh_x)
-        
+        xx, yy = np.meshgrid(mesh_x, mesh_x)
+
+        if peak_width is None or peak_width < pixel_size:
+            peak_width = pixel_size / 2
+
+        for n in range(len(inten)):
+            # Add each reflection as a gaussian
+            mesh += inten[n] * np.exp(-np.log(2) * (((xx - qx[n]) ** 2 + (yy - qy[n]) ** 2) / (peak_width / 2) ** 2))
+
+        """ Old method using convolve2d
         # add reflections to background
-        pixel_i = ((Qx/(2*q_max) + 0.5)*pixels).astype(int)
-        pixel_j = ((Qy/(2*q_max) + 0.5)*pixels).astype(int)
+        pixel_i = ((qx/(2*q_max) + 0.5)*pixels).astype(int)
+        pixel_j = ((qy/(2*q_max) + 0.5)*pixels).astype(int)
         
         # Only take values within the mesh
         in_mesh = np.all([pixel_i >= 0, pixel_i < pixels, pixel_j >= 0, pixel_j < pixels], axis=0)
         pixel_i = pixel_i[in_mesh]
         pixel_j = pixel_j[in_mesh]
-        I = I[in_mesh]
+        inten = inten[in_mesh]
         
-        mesh[pixel_j,pixel_i] = I
+        mesh[pixel_j,pixel_i] = inten
         
         # Convolve with a gaussian (if not None or 0)
         if peak_width:
@@ -1170,12 +1187,12 @@ class PlottingSuperstructure(Plotting):
             gauss_x = np.arange(-2*peak_width_pixels,2*peak_width_pixels+1)
             G = fg.gauss(gauss_x, gauss_x, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
             mesh = convolve2d(mesh,G, mode='same') # this is the slowest part
-        
+        """
         # Add background (if not None or 0)
         if background:
-            bkg = np.random.normal(background,np.sqrt(background), [pixels,pixels])
+            bkg = np.random.normal(background,np.sqrt(background), [pixels, pixels])
             mesh = mesh+bkg
-        return X, Y, mesh
+        return xx, yy, mesh
     
     def simulate_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],
                                     q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
@@ -1196,33 +1213,34 @@ class PlottingSuperstructure(Plotting):
         """
         
         # Determine the directions in cartesian space
-        x_cart,y_cart,z_cart = fc.orthogonal_axes(x_axis, y_axis)
+        x_cart, y_cart, z_cart = fc.orthogonal_axes(x_axis, y_axis)
         c_cart = self.xtl.Parent.Cell.calculateQ(centre)
 
         # Correct y-axis for label - original may not have been perp. to x_axis (e.g. hexagonal)
         y_axis = fg.norm(self.xtl.Parent.Cell.indexQ(y_cart))
-        y_axis = -y_axis/np.min(np.abs(y_axis[np.abs(y_axis)>0])) + 0.0 # +0.0 to remove -0
+        y_axis = -y_axis / np.min(np.abs(y_axis[np.abs(y_axis) > 0])) + 0.0  # +0.0 to remove -0
 
         # Determine orthogonal lattice vectors for plotting lines and labels
         vec_a = x_axis
-        vec_c = np.cross(x_axis,y_axis)
-        vec_b = fg.norm(np.cross(vec_c,vec_a))
+        vec_c = np.cross(x_axis, y_axis)
+        vec_b = fg.norm(np.cross(vec_c, vec_a))
 
         # Determine the supercell axes
         super_x_axis = self.xtl.parenthkl2super(x_axis)
         super_y_axis = self.xtl.parenthkl2super(y_axis)
-        
+
         # Generate intensity cut
-        X, Y, mesh = self.generate_intensity_cut(super_x_axis, super_y_axis, centre, q_max, cut_width, background, peak_width)
-        
+        X, Y, mesh = self.generate_intensity_cut(super_x_axis, super_y_axis, centre, q_max, cut_width, background,
+                                                 peak_width)
+
         # create figure
-        plt.figure(figsize=[12,10])
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         cmap = plt.get_cmap('hot_r')
-        plt.pcolormesh(X,Y,mesh,cmap=cmap)
+        plt.pcolormesh(X, Y, mesh, cmap=cmap)
         plt.axis('image')
         plt.colorbar()
-        plt.clim([background-(np.max(mesh)/200),background+(np.max(mesh)/50)])
-        
+        plt.clim([background - (np.max(mesh) / 200), background + (np.max(mesh) / 50)])
+
         # Lattice points and vectors within the plot
         Q_vec_a = self.xtl.Parent.Cell.calculateQ(vec_a)
         Q_vec_b = self.xtl.Parent.Cell.calculateQ(vec_b)
@@ -1233,15 +1251,15 @@ class PlottingSuperstructure(Plotting):
         mesh_vec_b = fg.index_coordinates(Q_vec_b, CELL) * 2 * q_max
 
         # Vector arrows and lattice point labels
-        cen_lab = '(%1.3g,%1.3g,%1.3g)' % (centre[0],centre[1],centre[2])
-        vec_a_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_a[0]+centre[0],vec_a[1]+centre[1],vec_a[2]+centre[2])
-        vec_b_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_b[0]+centre[0],vec_b[1]+centre[1],vec_b[2]+centre[2])
+        cen_lab = '(%1.3g,%1.3g,%1.3g)' % (centre[0], centre[1], centre[2])
+        vec_a_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_a[0] + centre[0], vec_a[1] + centre[1], vec_a[2] + centre[2])
+        vec_b_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_b[0] + centre[0], vec_b[1] + centre[1], vec_b[2] + centre[2])
 
         lattQ = fp.axis_lattice_points(mesh_vec_a, mesh_vec_b, plt.axis())
         fp.plot_lattice_lines(lattQ, mesh_vec_a, mesh_vec_b, lw=0.5, c='grey')
         fp.plot_vector_arrows(mesh_vec_a, mesh_vec_b, vec_a_lab, vec_b_lab)
-        plt.text(0 - (0.2*q_max), 0 - (0.1*q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18)
-        
+        plt.text(0 - (0.2 * q_max), 0 - (0.1 * q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18)
+
         # Plot labels
         xlab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0], x_axis[1], x_axis[2])
         ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0], y_axis[1], y_axis[2])
@@ -1285,7 +1303,7 @@ class MultiPlotting:
                 I = I / Qmag ** 2
             
             # create plotting mesh
-            pixels = 2000*q_max # reduce this to make convolution faster
+            pixels = int(2000*q_max)  # reduce this to make convolution faster
             pixel_size = q_max/pixels
             peak_width_pixels = peak_width/(1.0*pixel_size)
             mesh = np.zeros([int(pixels)])
@@ -1377,118 +1395,117 @@ class MultiPlotting:
             xtls = multi_crystal([xtl1,xtl2])
             xtl.simulate_intensity_cut([[1,0,0],[1,1,0]],[[0,1,0],[0,0,1]],[0,0,3])
         """
-        
+
         # create plotting mesh
-        pixels = 1000  # reduce this to make convolution faster
+        pixels = 1001  # reduce this to make convolution faster
         pixel_size = (2.0 * q_max) / pixels
         mesh = np.zeros([pixels, pixels])
         mesh_x = np.linspace(-q_max, q_max, pixels)
-        X,Y = np.meshgrid(mesh_x,mesh_x)
-        colours = iter(['b','g','r','c','m','y','k'])
+        xx, yy = np.meshgrid(mesh_x, mesh_x)
+        colours = iter(['b', 'g', 'r', 'c', 'm', 'y', 'k'])
+
+        if peak_width is None or peak_width < pixel_size:
+            peak_width = pixel_size / 2
         
         # Determine centre point
         c_cart = self.crystal_list[0].Cell.calculateQ(centre)
         
         # create figure
-        plt.figure(figsize=[12,10])
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         cmap = plt.get_cmap('hot_r')
-        pp = plt.pcolormesh(X,Y,mesh.T,cmap=cmap)
+        pp = plt.pcolormesh(xx, yy, mesh.T, cmap=cmap)
         plt.axis('image')
         plt.colorbar()
-        #plt.clim([background-(np.mean(I)/20),background+(np.mean(I)/5)])
+        #plt.clim([background-(np.mean(inten)/20),background+(np.mean(inten)/5)])
         
         n = 0
-        for xtl,x_axis,y_axis in zip(self.crystal_list,x_axis_crystal,y_axis_crystal):
+        for xtl, x_axis, y_axis in zip(self.crystal_list, x_axis_crystal, y_axis_crystal):
             # Determine the directions in cartesian space
             x_cart = fg.norm(xtl.Cell.calculateQ(x_axis))
             y_cart = fg.norm(xtl.Cell.calculateQ(y_axis))
-            z_cart = fg.norm(np.cross( x_cart, y_cart )) # z is perp. to x+y
-            y_cart = np.cross(x_cart,z_cart) # make sure y is perp. to x
-            
-            # Correct y-axis - original may not have been perp. to x_axis (e.g. hexagonal)
-            y_axis = fg.norm(xtl.Cell.indexQ(y_cart))
-            y_axis = -y_axis/np.min(np.abs(y_axis[np.abs(y_axis)>0])) + 0.0 # +0.0 to remove -0
-            
+            x_cart, y_cart, z_cart = fc.orthogonal_axes(x_cart, y_cart)
+
             # Determine orthogonal lattice vectors
             vec_a = x_axis
-            vec_c = np.cross(x_axis,y_axis)
-            vec_b = fg.norm(np.cross(vec_c,vec_a))
+            vec_c = np.cross(x_axis, y_axis)
+            vec_b = fg.norm(np.cross(vec_c, vec_a))
             xtl_centre = np.round(xtl.Cell.indexQ(c_cart))[0]
-            
+
             # Generate lattice of reciprocal space points
-            hmax,kmax,lmax  = fc.maxHKL(q_max,xtl.Cell.UVstar())
-            HKL = fc.genHKL([hmax,-hmax],[kmax,-kmax],[lmax,-lmax])
-            HKL = HKL + xtl_centre # reflection about central reflection
-            Q = xtl.Cell.calculateQ(HKL)
-            
+            maxq = np.sqrt(q_max ** 2 + q_max ** 2)
+            hmax, kmax, lmax = fc.maxHKL(maxq, xtl.Cell.UVstar())
+            HKL = fc.genHKL([hmax, -hmax], [kmax, -kmax], [lmax, -lmax])
+            HKL = HKL + xtl_centre  # reflection about central reflection
+            qvec = xtl.Cell.calculateQ(HKL)
+
             # generate box in reciprocal space
-            CELL = np.array([2*q_max*x_cart,-2*q_max*y_cart,cut_width*z_cart])
-            
+            CELL = np.array([2 * q_max * x_cart, -2 * q_max * y_cart, cut_width * z_cart])
+
             # find reflections within this box
-            inplot = fg.isincell(Q,c_cart,CELL)
-            HKL = HKL[inplot,:]
-            Q = Q[inplot,:]
-            
+            box_coord = fg.index_coordinates(qvec - c_cart, CELL)
+            incell = np.all(np.abs(box_coord) <= 0.5, axis=1)
+            qvec = 2 * q_max * box_coord[incell, :]
+
+            #inplot = fg.isincell(qvec, c_cart, CELL)
+            HKL = HKL[incell, :]
+            #qvec = qvec[inplot, :]
+
             # Calculate intensities
-            I = xtl.Scatter.intensity(HKL)
-            
+            inten = xtl.Scatter.intensity(HKL)
+
             # add reflections to background
-            mesh_coord = fg.index_coordinates(Q-c_cart, CELL)
-            pixel_coord = mesh_coord + 0.5
-            pixel_coord = (pixel_coord*pixels).astype(int)
-            
-            #for n in range(len(I)):
-            #    print n,HKL[n,:],Q[n,:],mesh_coord[n,:],pixel_coord[n,:]
-            
-            mesh[pixel_coord[:,0],pixel_coord[:,1]] = mesh[pixel_coord[:,0],pixel_coord[:,1]] + I
-            
+            for n in range(len(inten)):
+                # Add each reflection as a gaussian
+                mesh += inten[n] * np.exp(
+                    -np.log(2) * (((xx - qvec[n, 0]) ** 2 + (yy - qvec[n, 1]) ** 2) / (peak_width / 2) ** 2))
+
             # Lattice points and vectors within the plot
             Q_vec_a = xtl.Cell.calculateQ(vec_a)
             Q_vec_b = xtl.Cell.calculateQ(vec_b)
-            mesh_Q = mesh_coord*2*q_max
-            mesh_vec_a = fg.index_coordinates(Q_vec_a, CELL)*2*q_max
-            mesh_vec_b = fg.index_coordinates(Q_vec_b, CELL)*2*q_max
-            
+            mesh_vec_a = fg.index_coordinates(Q_vec_a, CELL) * 2 * q_max
+            mesh_vec_b = fg.index_coordinates(Q_vec_b, CELL) * 2 * q_max
+
             col = next(colours)
             if n == 0:
                 # 1st crystal only - plot lines and centre
-                cen_lab = '(%1.3g,%1.3g,%1.3g)$_1$' % (centre[0],centre[1],centre[2])
-                plt.text(0 - (0.2*q_max), 0 - (0.1*q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18, color=col)
-                fp.plot_lattice_lines(mesh_Q,mesh_vec_a,mesh_vec_b)
-                plt.clim([background-(np.mean(I)/20),background+(np.mean(I)/5)])
+                cen_lab = '(%1.3g,%1.3g,%1.3g)$_1$' % (centre[0], centre[1], centre[2])
+                plt.text(0 - (0.2 * q_max), 0 - (0.1 * q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold',
+                         size=18, color=col)
+                fp.plot_lattice_lines(qvec, mesh_vec_a, mesh_vec_b)
+                plt.clim([background - (np.mean(inten) / 20), background + (np.mean(inten) / 5)])
             else:
-                plt.plot(mesh_Q[:,0],mesh_Q[:,1],'o',label=xtl.name,c=col,markerfacecolor='none')
+                plt.plot(qvec[:, 0], qvec[:, 1], 'o', label=xtl.name, c=col, markerfacecolor='none')
             n += 1
-            
+
             # Vector arrows and lattice point labels
-            vec_a_lab = '(%1.3g,%1.3g,%1.3g)$_%d$' % (vec_a[0]+xtl_centre[0],vec_a[1]+xtl_centre[1],vec_a[2]+xtl_centre[2],n)
-            vec_b_lab = '(%1.3g,%1.3g,%1.3g)$_%d$' % (vec_b[0]+xtl_centre[0],vec_b[1]+xtl_centre[1],vec_b[2]+xtl_centre[2],n)
-            
-            fp.plot_arrow([0,mesh_vec_a[0,0]],[0,mesh_vec_a[0,1]],arrow_size=40,col=col)
-            plt.text(mesh_vec_a[0,0], mesh_vec_a[0,1], vec_a_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18, color=col)
-            fp.plot_arrow([0,mesh_vec_b[0,0]],[0,mesh_vec_b[0,1]],arrow_size=40,col=col)
-            plt.text(mesh_vec_b[0,0], mesh_vec_b[0,1], vec_b_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18, color=col)
-        
-        # Convolve with a gaussian
-        peak_width_pixels = peak_width/pixel_size
-        gauss_x = np.arange(-2*peak_width_pixels,2*peak_width_pixels+1)
-        G = fg.gauss(gauss_x,gauss_x,height=1,cen=0,fwhm=peak_width_pixels,bkg=0)
-        mesh = convolve2d(mesh,G, mode='same') # this is the slowest part
+            vec_a_lab = '(%1.3g,%1.3g,%1.3g)$_%d$' % (
+            vec_a[0] + xtl_centre[0], vec_a[1] + xtl_centre[1], vec_a[2] + xtl_centre[2], n)
+            vec_b_lab = '(%1.3g,%1.3g,%1.3g)$_%d$' % (
+            vec_b[0] + xtl_centre[0], vec_b[1] + xtl_centre[1], vec_b[2] + xtl_centre[2], n)
+
+            fp.plot_arrow([0, mesh_vec_a[0, 0]], [0, mesh_vec_a[0, 1]], arrow_size=40, col=col)
+            plt.text(mesh_vec_a[0, 0], mesh_vec_a[0, 1], vec_a_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18,
+                     color=col)
+            fp.plot_arrow([0, mesh_vec_b[0, 0]], [0, mesh_vec_b[0, 1]], arrow_size=40, col=col)
+            plt.text(mesh_vec_b[0, 0], mesh_vec_b[0, 1], vec_b_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18,
+                     color=col)
         
         # Add background
         if background > 0:
-            bkg = np.random.normal(background,np.sqrt(background), [pixels,pixels])
-            mesh = mesh+bkg
-        
+            bkg = np.random.normal(background, np.sqrt(background), [pixels, pixels])
+            mesh = mesh + bkg
+
         # Update plot
-        mesh = mesh[:-1,:-1].T # a very odd bug noted by lumbric: https://stackoverflow.com/questions/18797175/animation-with-pcolormesh-routine-in-matplotlib-how-do-i-initialize-the-data
+        # a very odd bug noted by lumbric:
+        # https://stackoverflow.com/questions/18797175/animation-with-pcolormesh-routine-in-matplotlib-how-do-i-initialize-the-data
+        mesh = mesh[:-1, :-1]
         pp.set_array(mesh.ravel())
-        
+
         # Plot labels
-        xlab = u'Qx [$\AA^{-1}$]' 
-        ylab = u'Qy [$\AA^{-1}$]' 
-        #ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.name,centre[0],centre[1],centre[2])
-        fp.labels(None,xlab,ylab)
+        xlab = u'Qx [$\AA^{-1}$]'
+        ylab = u'Qy [$\AA^{-1}$]'
+        # ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.name,centre[0],centre[1],centre[2])
+        fp.labels(None, xlab, ylab)
     
     def quick_intensity_cut(self,x_axis_crystal=[[1,0,0]],y_axis_crystal=[[0,1,0]],centre=[0,0,0], q_max=4.0,cut_width=0.05):
         """
@@ -1506,7 +1523,7 @@ class MultiPlotting:
         """
         
         # create figure
-        plt.figure(figsize=[12,10])
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         plt.axis('image')
         plt.axis([-q_max,q_max,-q_max,q_max])
         colours = iter(['b','g','r','c','m','y','k'])
