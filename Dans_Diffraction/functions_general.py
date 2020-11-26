@@ -15,8 +15,8 @@ Usage:
     - from Dans_Diffraction import functions_general as fg
 
 
-Version 1.7
-Last updated: 12/05/20
+Version 1.8
+Last updated: 20/07/20
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -27,6 +27,7 @@ Version History:
 27/03/20 1.5    Corrected error in gauss for 1d case when centre /= 0
 05/05/20 1.6    New version of readstfm, allows E powers and handles non-numbers.
 12/05/20 1.7    Added sph2cart, replace_bracket_multiple
+20/07/20 1.8    Added vector_inersection and plane_intersection, updated findranges, added whererun
 
 @author: DGPorter
 """
@@ -34,7 +35,7 @@ Version History:
 import sys, os, re
 import numpy as np
 
-__version__ = '1.7'
+__version__ = '1.8'
 
 # File directory
 directory = os.path.abspath(os.path.dirname(__file__))
@@ -244,6 +245,23 @@ def rotmat(a, b):
     return U
 
 
+def rotate_about_axis(point, axis, angle):
+    """
+    Rotate vector A about vector Axis by angle
+    Using Rodrigues' rotation formula: https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
+    :param point: [x,y,z] coordinate to rotate
+    :param axis: [dx,dy,dz] vector about which to rotate
+    :param angle: angle to rotate in deg
+    :return: [x,y,z] rotated point
+    """
+    point = np.asarray(point, dtype=np.float)
+    axis = np.asarray(axis, dtype=np.float) / np.sqrt(np.sum(np.square(axis)))
+    rad = np.deg2rad(angle)
+    cs = np.cos(rad)
+    sn = np.sin(rad)
+    return point * cs + np.cross(axis, point) * sn + axis * np.dot(axis, point) * (1 - cs)
+
+
 def group(A, tolerance=0.0001):
     """
     Group similear values in an array, returning the group and indexes
@@ -328,6 +346,59 @@ def distance2line(line_start, line_end, point):
 
     vec_arb = (line_start - point) - np.dot((line_start - point), unit_line) * unit_line
     return np.sqrt(np.sum(vec_arb ** 2))
+
+
+def vector_intersection(point1, direction1, point2, direction2):
+    """
+    Calculate the point in 2D where two lines cross.
+    If lines are parallel, return nan
+    For derivation, see: http://paulbourke.net/geometry/pointlineplane/
+    :param point1: [x,y] some coordinate on line 1
+    :param direction1: [dx, dy] the direction of line 1
+    :param point2: [x,y] some coordinate on line 2
+    :param direction2: [dx, dy] the direction of line 2
+    :return: [x, y]
+    """
+
+    point1 = np.asarray(point1)
+    point2 = np.asarray(point2)
+    direction1 = np.asarray(direction1)/np.sqrt(np.sum(np.square(direction1)))
+    direction2 = np.asarray(direction2)/np.sqrt(np.sum(np.square(direction2)))
+
+    if np.dot(direction1, direction2) == 1:
+        print('Vectors are parallel')
+        return np.nan
+
+    mat = np.array([direction1, -direction2])
+    ua, ub = np.dot(point2 - point1, np.linalg.inv(mat))
+    intersect = point1 + ua*direction1
+    return intersect
+
+
+def plane_intersection(line_point, line_direction, plane_point, plane_normal):
+    """
+    Calculate the point at which a line intersects a plane
+    :param line_point: [x,y],z] some coordinate on line
+    :param line_direction: [dx,dy],dz] the direction of line
+    :param plane_point:  [x,y],z] some coordinate on the plane
+    :param plane_normal: [dx,dy],dz] the normal vector of the plane
+    :return: [x,y],z]
+    """
+
+    line_point = np.asarray(line_point)
+    plane_point = np.asarray(plane_point)
+    line_direction = np.asarray(line_direction)/np.sqrt(np.sum(np.square(line_direction)))
+    plane_normal = np.asarray(plane_normal)/np.sqrt(np.sum(np.square(plane_normal)))
+
+    u1 = np.dot(plane_normal, plane_point - line_point)
+    u2 = np.dot(plane_normal, line_direction)
+
+    if u2 == 0:
+        print('Plane is parallel to line')
+        return np.nan
+    u = u1/u2
+    intersect = line_point + u*line_direction
+    return intersect
 
 
 def find_index(A, value):
@@ -662,19 +733,29 @@ def findranges(scannos, sep=':'):
 
     dif = np.diff(scannos)
 
-    stt, stp = [scannos[0]], [dif[0]]
+    stt, stp, rng = [scannos[0]], [dif[0]], [1]
     for n in range(1, len(dif)):
         if scannos[n + 1] != scannos[n] + dif[n - 1]:
             stt += [scannos[n]]
             stp += [dif[n]]
+            rng += [1]
+        else:
+            rng[-1] += 1
     stt += [scannos[-1]]
+    rng += [1]
 
     out = []
-    for x in range(0, len(stt), 2):
-        if stp[x] == 1:
+    x = 0
+    while x < len(stt):
+        if rng[x] == 1:
+            out += ['{}'.format(stt[x])]
+            x += 1
+        elif stp[x] == 1:
             out += ['{}{}{}'.format(stt[x], sep, stt[x + 1])]
+            x += 2
         else:
             out += ['{}{}{}{}{}'.format(stt[x], sep, stp[x], sep, stt[x + 1])]
+            x += 2
     return ','.join(out)
 
 
@@ -918,3 +999,8 @@ def map2grid(grid, points, values, widths=None, background=0):
         bkg = np.random.normal(background, np.sqrt(background), [pixels])
         grid_values = grid_values + bkg
     return grid_values
+
+
+def whererun():
+    """Returns the location where python was run"""
+    return os.path.abspath('.')

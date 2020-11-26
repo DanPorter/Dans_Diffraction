@@ -198,12 +198,12 @@ class Scattering:
         
         HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
         Nref = len(HKL)
-        
-        uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.get()
+
+        uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
         Nat = len(uvw)
         
         # Get atomic form factors
-        ff = fc.atom_properties(type, 'Coh_b')
+        ff = fc.atom_properties(atom_type, 'Coh_b')
         
         # Get Debye-Waller factor
         if self._use_isotropic_thermal_factor:
@@ -268,7 +268,7 @@ class Scattering:
             for m,mom in enumerate(moment):
                 # Calculate Magnetic part
                 QM = mom - np.dot(Qh,mom)*Qh
-                
+
                 # Calculate structure factor
                 SFm = SFm + ff[n,m]*np.exp(1j*2*np.pi*dot_KR[n,m])*QM
             
@@ -681,46 +681,58 @@ class Scattering:
         Q is defined as Q = kout - kin, with kout +ve along the projection of azim_zero
         """
 
+        hkl = np.asarray(hkl).reshape([-1, 3])
+
         if energy_kev is None:
             energy_kev = self._energy_kev
 
-        # Define coordinate system I,J,Q (U1,U2,U3)
-        Ihat, Jhat, Qhat = self.scatteringbasis(hkl, azim_zero, psi)
-        Ihat = Ihat.reshape([-1, 3])
-        Jhat = Jhat.reshape([-1, 3])
-        Qhat = Qhat.reshape([-1, 3])
+        out_kin = np.zeros([len(hkl), 3])
+        out_kout = np.zeros([len(hkl), 3])
+        out_ein = np.zeros([len(hkl), 3])
+        out_eout = np.zeros([len(hkl), 3])
+        for n in range(len(hkl)):
+            # Define coordinate system I,J,Q (U1,U2,U3)
+            Ihat, Jhat, Qhat = self.scatteringbasis(hkl[n, :], azim_zero, psi)
+            Ihat = Ihat.reshape([-1, 3])
+            Jhat = Jhat.reshape([-1, 3])
+            Qhat = Qhat.reshape([-1, 3])
 
-        # Determine wavevectors
-        bragg = self.xtl.Cell.tth(hkl, energy_kev) / 2.
-        rb = np.deg2rad(bragg).reshape([-1, 1])
-        kin = np.cos(rb) * Ihat - np.sin(rb) * Qhat
-        kout = np.cos(rb) * Ihat + np.sin(rb) * Qhat
-        esig = Jhat  # sigma polarisation (in or out)
-        piin = np.cross(kin, esig)  # pi polarisation in
-        piout = np.cross(kout, esig)  # pi polarisation out
+            # Determine wavevectors
+            bragg = self.xtl.Cell.tth(hkl[n, :], energy_kev) / 2.
+            rb = np.deg2rad(bragg).reshape([-1, 1])
+            kin = np.cos(rb) * Ihat - np.sin(rb) * Qhat
+            kout = np.cos(rb) * Ihat + np.sin(rb) * Qhat
+            esig = Jhat  # sigma polarisation (in or out)
+            piin = np.cross(kin, esig)  # pi polarisation in
+            piout = np.cross(kout, esig)  # pi polarisation out
 
-        # Polarisation
-        try:
-            # polarisation = 'ss' or 's-s'
-            polarisation = polarisation.replace('-', '').replace(' ', '')
-        except AttributeError:
-            # polarisation = angle in deg from sigma' to pi'
-            ein = 1.0 * esig
-            pol = np.deg2rad(polarisation)
-            eout = np.cos(pol)*esig + np.sin(pol)*piout
-        if polarisation in ['sigmasigma', 'sigsig', 'ss']:
-            ein = 1.0 * esig
-            eout = 1.0 * esig
-        elif polarisation in ['sigmapi', 'sigpi', 'sp']:
-            ein = 1.0 * esig
-            eout = 1.0 * piout
-        elif polarisation in ['pisigma', 'pisig', 'ps']:
-            ein = 1.0 * piin
-            eout = 1.0 * esig
-        elif polarisation in ['pipi', 'pp']:
-            ein = 1.0 * piin
-            eout = 1.0 * piout
-        return kin, kout, ein, eout
+            # Polarisation
+            try:
+                # polarisation = 'ss' or 's-s'
+                polarisation = polarisation.replace('-', '').replace(' ', '')
+            except AttributeError:
+                # polarisation = angle in deg from sigma' to pi'
+                ein = 1.0 * esig
+                pol = np.deg2rad(polarisation)
+                eout = np.cos(pol)*esig + np.sin(pol)*piout
+            if polarisation in ['sigmasigma', 'sigsig', 'ss']:
+                ein = 1.0 * esig
+                eout = 1.0 * esig
+            elif polarisation in ['sigmapi', 'sigpi', 'sp']:
+                ein = 1.0 * esig
+                eout = 1.0 * piout
+            elif polarisation in ['pisigma', 'pisig', 'ps']:
+                ein = 1.0 * piin
+                eout = 1.0 * esig
+            elif polarisation in ['pipi', 'pp']:
+                ein = 1.0 * piin
+                eout = 1.0 * piout
+            out_kin[n, :] = kin
+            out_kout[n, :] = kout
+            out_ein[n, :] = ein
+            out_eout[n, :] = eout
+
+        return out_kin, out_kout, out_ein, out_eout
 
     def scatteringcomponents(self, mxmymz, hkl, azim_zero=[1,0,0], psi=0):
         """
@@ -892,7 +904,13 @@ class Scattering:
             print('(%2.0f,%2.0f,%2.0f) %8.2f  %9.2f' % (HKL[n,0],HKL[n,1],HKL[n,2],tth[n],inten[n]))
     
     def hkl_reflection(self, HKL, energy_kev=None):
-        " Calculate the theta, two-theta and intensity of the given HKL in reflection geometry, display the result"
+        """
+        Calculate the theta, two-theta and intensity of the given HKL in reflection geometry, display the result
+        Uses sample orientation set up in setup_scatter
+        :param HKL: [h,k,l] or list of hkl
+        :param energy_kev: None or float
+        :return: str
+        """
         
         if energy_kev is None:
             energy_kev = self._energy_kev
@@ -929,9 +947,9 @@ class Scattering:
         for n in range(len(tth)):
             print('(%2.0f,%2.0f,%2.0f) %8.2f %8.2f  %9.2f' % (HKL[n,0],HKL[n,1],HKL[n,2],theta[n],tth[n],inten[n]))
     
-    def setup_scatter(self,type=None,energy_kev=None,wavelength_a=None, powder_units=None,
-                      specular=None,parallel=None,theta_offset=None,
-                      min_theta=None,max_theta=None,min_twotheta=None,max_twotheta=None,
+    def setup_scatter(self, type=None,energy_kev=None,wavelength_a=None, powder_units=None,
+                      specular=None, parallel=None, theta_offset=None,
+                      min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None,
                       output=True):
         """
         Simple way to set scattering parameters, each parameter is internal to xtl (self)
@@ -1162,43 +1180,48 @@ class Scattering:
         
         if energy_kev is None:
             energy_kev = self._energy_kev
-        
-        if min_intensity == None: min_intensity=-1
-        if max_intensity == None: max_intensity=np.inf
-        
+
+        if min_intensity is None: min_intensity = -1
+        if max_intensity is None: max_intensity = np.inf
+
         HKL = self.xtl.Cell.all_hkl(energy_kev, self._scattering_max_twotheta)
         HKL = self.xtl.Cell.sort_hkl(HKL)
-        tth = self.xtl.Cell.tth(HKL,energy_kev)
-        HKL = HKL[tth>self._scattering_min_twotheta,:]
-        tth = tth[tth>self._scattering_min_twotheta]
-        theta = self.xtl.Cell.theta_reflection(HKL, energy_kev, self._scattering_specular_direction,self._scattering_theta_offset)
-        #inten = np.sqrt(self.intensity(HKL)) # structure factor
+        tth = self.xtl.Cell.tth(HKL, energy_kev)
+        HKL = HKL[tth > self._scattering_min_twotheta, :]
+        tth = tth[tth > self._scattering_min_twotheta]
+        theta = self.xtl.Cell.theta_reflection(HKL, energy_kev, self._scattering_specular_direction,
+                                               self._scattering_theta_offset)
+        # inten = np.sqrt(self.intensity(HKL)) # structure factor
         inten = self.intensity(HKL)
-        
-        p1=(theta>self._scattering_min_theta) * (theta<self._scattering_max_theta)
-        p2=(tth>(theta+self._scattering_min_theta)) * (tth<(theta+self._scattering_max_theta))
-        pos_theta = p1*p2
+
+        p1 = (theta > self._scattering_min_theta) * (theta < self._scattering_max_theta)
+        p2 = (tth > (theta + self._scattering_min_theta)) * (tth < (theta + self._scattering_max_theta))
+        pos_theta = p1 * p2
         
         fmt = '(%2.0f,%2.0f,%2.0f) %8.2f %8.2f  %9.2f\n'
-        outstr = '' 
-        
-        outstr+= 'Energy = %6.3f keV\n' % energy_kev
-        outstr+= 'Radiation: %s\n' % self._scattering_type
-        outstr+= 'Specular Direction = (%1.0g,%1.0g,%1.0g)\n' %(self._scattering_specular_direction[0],self._scattering_specular_direction[1],self._scattering_specular_direction[2])
-        outstr+= '( h, k, l) TwoTheta    Theta  Intensity\n'
-        #outstr+= fmt % (HKL[0,0],HKL[0,1],HKL[0,2],tth[0],theta[0],inten[0]) # hkl(0,0,0)
+        outstr = ''
+
+        outstr += 'Energy = %6.3f keV\n' % energy_kev
+        outstr += 'Radiation: %s\n' % self._scattering_type
+        outstr += 'Specular Direction = (%1.0g,%1.0g,%1.0g)\n' % (
+            self._scattering_specular_direction[0],
+            self._scattering_specular_direction[1],
+            self._scattering_specular_direction[2]
+        )
+        outstr += '( h, k, l) TwoTheta    Theta  Intensity\n'
+        # outstr+= fmt % (HKL[0,0],HKL[0,1],HKL[0,2],tth[0],theta[0],inten[0]) # hkl(0,0,0)
         count = 0
-        for n in range(1,len(tth)):
+        for n in range(1, len(tth)):
             if inten[n] < min_intensity: continue
             if inten[n] > max_intensity: continue
             if not pos_theta[n]: continue
-            #if not print_symmetric and np.abs(tth[n]-tth[n-1]) < 0.01: continue # only works if sorted
+            # if not print_symmetric and np.abs(tth[n]-tth[n-1]) < 0.01: continue # only works if sorted
             count += 1
-            outstr+= fmt % (HKL[n,0],HKL[n,1],HKL[n,2],tth[n],theta[n],inten[n])
-        outstr+= 'Reflections: %1.0f\n'%count
+            outstr += fmt % (HKL[n, 0], HKL[n, 1], HKL[n, 2], tth[n], theta[n], inten[n])
+        outstr += 'Reflections: %1.0f\n' % count
         return outstr
     
-    def print_tran_reflections(self,energy_kev=None, min_intensity=0.01,max_intensity=None):
+    def print_tran_reflections(self, energy_kev=None, min_intensity=0.01, max_intensity=None):
         """
         Prints a list of all allowed reflections at this energy in the transmission geometry
             energy = energy in keV
@@ -1219,40 +1242,44 @@ class Scattering:
         
         if energy_kev is None:
             energy_kev = self._energy_kev
-        
-        if min_intensity == None: min_intensity=-1
-        if max_intensity == None: max_intensity=np.inf
-        
+
+        if min_intensity is None: min_intensity = -1
+        if max_intensity is None: max_intensity = np.inf
+
         HKL = self.xtl.Cell.all_hkl(energy_kev, self._scattering_max_twotheta)
         HKL = self.xtl.Cell.sort_hkl(HKL)
-        tth = self.xtl.Cell.tth(HKL,energy_kev)
-        HKL = HKL[tth>self._scattering_min_twotheta,:]
-        tth = tth[tth>self._scattering_min_twotheta]
+        tth = self.xtl.Cell.tth(HKL, energy_kev)
+        HKL = HKL[tth > self._scattering_min_twotheta, :]
+        tth = tth[tth > self._scattering_min_twotheta]
         theta = self.xtl.Cell.theta_transmission(HKL, energy_kev, self._scattering_parallel_direction)
-        #inten = np.sqrt(self.intensity(HKL)) # structure factor
+        # inten = np.sqrt(self.intensity(HKL)) # structure factor
         inten = self.intensity(HKL)
-        
-        p1=(theta>self._scattering_min_theta) * (theta<self._scattering_max_theta) 
-        p2=(tth>(theta+self._scattering_min_theta)) * (tth<(theta+self._scattering_max_theta))
-        pos_theta = p1*p2
-        
-        fmt = '(%2.0f,%2.0f,%2.0f) %8.2f %8.2f  %9.2f\n' 
-        outstr = '' 
-        
-        outstr+= 'Energy = %6.3f keV\n' % energy_kev
-        outstr+= 'Radiation: %s\n' % self._scattering_type
-        outstr+= 'Direction parallel to beam  = (%1.0g,%1.0g,%1.0g)\n' %(self._scattering_parallel_direction[0],self._scattering_parallel_direction[1],self._scattering_parallel_direction[2])
-        outstr+= '( h, k, l) TwoTheta    Theta  Intensity\n'
-        #outstr+= fmt % (HKL[0,0],HKL[0,1],HKL[0,2],tth[0],theta[0],inten[0]) # hkl(0,0,0)
+
+        p1 = (theta > self._scattering_min_theta) * (theta < self._scattering_max_theta)
+        p2 = (tth > (theta + self._scattering_min_theta)) * (tth < (theta + self._scattering_max_theta))
+        pos_theta = p1 * p2
+
+        fmt = '(%2.0f,%2.0f,%2.0f) %8.2f %8.2f  %9.2f\n'
+        outstr = ''
+
+        outstr += 'Energy = %6.3f keV\n' % energy_kev
+        outstr += 'Radiation: %s\n' % self._scattering_type
+        outstr += 'Direction parallel to beam  = (%1.0g,%1.0g,%1.0g)\n' % (
+            self._scattering_parallel_direction[0],
+            self._scattering_parallel_direction[1],
+            self._scattering_parallel_direction[2]
+        )
+        outstr += '( h, k, l) TwoTheta    Theta  Intensity\n'
+        # outstr+= fmt % (HKL[0,0],HKL[0,1],HKL[0,2],tth[0],theta[0],inten[0]) # hkl(0,0,0)
         count = 0
-        for n in range(1,len(tth)):
+        for n in range(1, len(tth)):
             if inten[n] < min_intensity: continue
             if inten[n] > max_intensity: continue
             if not pos_theta[n]: continue
-            #if not print_symmetric and np.abs(tth[n]-tth[n-1]) < 0.01: continue # only works if sorted
+            # if not print_symmetric and np.abs(tth[n]-tth[n-1]) < 0.01: continue # only works if sorted
             count += 1
-            outstr+= fmt % (HKL[n,0],HKL[n,1],HKL[n,2],tth[n],theta[n],inten[n])
-        outstr+=('Reflections: %1.0f\n'%count)
+            outstr += fmt % (HKL[n, 0], HKL[n, 1], HKL[n, 2], tth[n], theta[n], inten[n])
+        outstr += ('Reflections: %1.0f\n' % count)
         return outstr
     
     def print_symmetric_reflections(self,HKL):
@@ -1318,27 +1345,28 @@ class Scattering:
         """
         Prints the symmetry contributions to the structure factor for each atomic site
         """
-        
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
+
+        HKL = np.asarray(np.rint(HKL), dtype=np.float).reshape([-1, 3])
         Nref = len(HKL)
-        
+
         # Calculate the full intensity
         I = self.intensity(HKL)
-        
+
         # Calculate the structure factors of the symmetric atomic sites
-        buvw,btype,base_label,bocc,buiso,bmxmymz = self.xtl.Atoms.get()
+        buvw, btype, base_label, bocc, buiso, bmxmymz = self.xtl.Atoms.get()
         operations = np.hstack([self.xtl.Symmetry.symmetric_coordinate_operations(buvw[n]) for n in range(len(buvw))])
-        rotations = np.hstack([self.xtl.Symmetry.symmetric_coordinate_operations(buvw[n],True)[1] for n in range(len(buvw))])
+        rotations = np.hstack(
+            [self.xtl.Symmetry.symmetric_coordinate_operations(buvw[n], True)[1] for n in range(len(buvw))])
 
         # Calculate the structure factors
-        uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.get()
+        uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
         Qmag = self.xtl.Cell.Qmag(HKL)
-        ff = fc.xray_scattering_factor(type,Qmag)
-        dw = fc.debyewaller(uiso,Qmag)
-        dot_KR = np.dot(HKL,uvw.T)
-        phase = np.exp(1j*2*np.pi*dot_KR)
-        sf = ff*dw*occ*phase
-        
+        ff = fc.xray_scattering_factor(type, Qmag)
+        dw = fc.debyewaller(uiso, Qmag)
+        dot_KR = np.dot(HKL, uvw.T)
+        phase = np.exp(1j * 2 * np.pi * dot_KR)
+        sf = ff * dw * occ * phase
+
         # Generate the results
         outstr = ''
         for n in range(Nref):
@@ -1347,22 +1375,22 @@ class Scattering:
             all_sf = 0j
             for lab in base_label:
                 label_idx = np.argwhere(label == lab)
-                ss += '  %s\n'%lab
+                ss += '  %s\n' % lab
                 tot_phase = 0j
                 tot_sf = 0j
                 for a in label_idx:
-                    uvwstr = '(%-7.3g,%-7.3g,%-7.3g)'%(uvw[a,0],uvw[a,1],uvw[a,2])
-                    phstr = fg.complex2str(phase[n,a])
-                    sfstr = fg.complex2str(sf[n,a])
-                    val= (a,uvwstr,operations[a[0]],rotations[a[0]],phstr,sfstr)
-                    ss += '    %3d %s %25s %20s  %s  %s\n'%val
-                    tot_phase += phase[n,a]
-                    tot_sf += sf[n,a]
-                ss += '%74sTotal:  %s  %s\n'%(' ',fg.complex2str(tot_phase),fg.complex2str(tot_sf))
+                    uvwstr = '(%-7.3g,%-7.3g,%-7.3g)' % (uvw[a, 0], uvw[a, 1], uvw[a, 2])
+                    phstr = fg.complex2str(phase[n, a])
+                    sfstr = fg.complex2str(sf[n, a])
+                    val = (a, uvwstr, operations[a[0]], rotations[a[0]], phstr, sfstr)
+                    ss += '    %3d %s %25s %20s  %s  %s\n' % val
+                    tot_phase += phase[n, a]
+                    tot_sf += sf[n, a]
+                ss += '%74sTotal:  %s  %s\n' % (' ', fg.complex2str(tot_phase), fg.complex2str(tot_sf))
                 all_phase += tot_phase
                 all_sf += tot_sf
-            ss += '%62s Reflection Total:  %s  %s\n'%(' ',fg.complex2str(all_phase),fg.complex2str(all_sf))
-            outstr+= '(%2.0f,%2.0f,%2.0f) I = %9.2f    %s\n' % (HKL[n,0],HKL[n,1],HKL[n,2],I[n],ss)
+            ss += '%62s Reflection Total:  %s  %s\n' % (' ', fg.complex2str(all_phase), fg.complex2str(all_sf))
+            outstr += '(%2.0f,%2.0f,%2.0f) I = %9.2f    %s\n' % (HKL[n, 0], HKL[n, 1], HKL[n, 2], I[n], ss)
         return outstr
     
     def find_close_reflections(self,HKL,energy_kev=None,max_twotheta=2,max_angle=10):

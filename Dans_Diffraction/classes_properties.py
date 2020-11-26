@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.5
-Last updated: 27/05/20
+Version 1.6
+Last updated: 15/10/20
 
 Version History:
 10/11/17 0.1    Program created
@@ -18,6 +18,7 @@ Version History:
 15/08/19 1.3    Added molcharge
 30/03/20 1.4    Added latex_table, info returns str, removed getattr from xray_edges, check if element exists
 12/05/20 1.5    Added orbitals function, exchange_paths
+15/10/20 1.6    Added scattering lengths + factors
 
 
 @author: DGPorter
@@ -29,7 +30,7 @@ from . import functions_general as fg
 from . import functions_crystallography as fc
 from .classes_orbitals import CrystalOrbitals
 
-__version__ = '1.5'
+__version__ = '1.6'
 
 
 class Properties:
@@ -78,6 +79,31 @@ class Properties:
         """Return the molecular weight in g/mol"""
         return self.xtl.Structure.weight()
 
+    def neutron_scatteringlengths(self):
+        """
+        Return the bound coherent neutron scattering length for each atom in the structure
+        :return: [m] array of scattering lengths for each atom
+        """
+        return fc.neutron_scattering_length(self.xtl.Structure.type)
+
+    def xray_scattering_factor(self, hkl):
+        """
+        Return the x-ray scattering factor for given hkl reflections
+        :param hkl: [nx3] array of (h,k,l) reflections
+        :return: [nxm] array of scattering factors for each atom and reflection
+        """
+        qmag = self.xtl.Cell.Qmag(hkl)
+        return fc.xray_scattering_factor(self.xtl.Structure.type, qmag)
+
+    def magnetic_form_factor(self, hkl):
+        """
+        Return the magnetic form factor for given hkl reflections
+        :param hkl: [nx3] array of (h,k,l) reflections
+        :return: [nxm] array of scattering factors for each atom and reflection
+        """
+        qmag = self.xtl.Cell.Qmag(hkl)
+        return fc.magnetic_form_factor(self.xtl.Structure.type, qmag)
+
     def xray_edges(self):
         """
         Returns the x-ray absorption edges available and their energies
@@ -106,15 +132,15 @@ class Properties:
         :return: str
         """
 
-        type = self.xtl.Structure.type
+        atom_type = self.xtl.Structure.type
         occ = self.xtl.Structure.occupancy
 
         # Count elements
-        ats = np.unique(type)
+        ats = np.unique(atom_type)
         weights = fc.atom_properties(ats,'Weight')
         atno = np.zeros(len(ats))
         for n,element in enumerate(ats):
-            atno[n] = sum([occ[m] for m,x in enumerate(type) if x == element])
+            atno[n] = sum([occ[m] for m,x in enumerate(atom_type) if x == element])
 
         outstr=''
 
@@ -135,27 +161,27 @@ class Properties:
         :return: str
         """
 
-        type = np.asarray(self.xtl.Structure.type)
+        atom_type = np.asarray(self.xtl.Structure.type)
         occ = np.asarray(self.xtl.Structure.occupancy)
 
         # Count elements
-        ats = np.unique(type)
+        ats = np.unique(atom_type)
         ats = fc.arrange_atom_order(ats)  # arrange this by alcali/TM/O
         atno = {}
         for a in ats:
-            atno[a] = sum([occ[n] for n,x in enumerate(type) if x == a])
+            atno[a] = sum([occ[n] for n,x in enumerate(atom_type) if x == a])
 
         # default - set max Z atom to it's occupancy
         if element is None:
             z = fc.atom_properties(ats, 'Z')
-            element = ats[ np.argmax(z) ]
+            element = ats[np.argmax(z)]
             #element = min(atno, key=atno.get)
 
         if element_no is None:
-            element_no = np.max(occ[type == element])
+            element_no = np.max(occ[atom_type == element])
 
         divideby = atno[element]/ element_no
-        name = fc.count_atoms(type, occ, divideby, latex)
+        name = fc.count_atoms(atom_type, occ, divideby, latex)
         name = ''.join(name)
         return name
 
@@ -169,27 +195,27 @@ class Properties:
         :return: str
         """
 
-        type = np.asarray(self.xtl.Structure.type)
+        atom_type = np.asarray(self.xtl.Structure.type)
         occ = np.asarray(self.xtl.Structure.occupancy)
 
         # Count elements
-        ats = np.unique(type)
+        ats = np.unique(atom_type)
         ats = fc.arrange_atom_order(ats)  # arrange this by alcali/TM/O
         atno = {}
         for a in ats:
-            atno[a] = sum([occ[n] for n,x in enumerate(type) if x == a])
+            atno[a] = sum([occ[n] for n,x in enumerate(atom_type) if x == a])
 
         # default - set max Z atom to it's occupancy
         if element is None:
             z = fc.atom_properties(ats, 'Z')
-            element = ats[ np.argmax(z) ]
+            element = ats[np.argmax(z)]
             #element = min(atno, key=atno.get)
 
         if element_no is None:
-            element_no = np.max(occ[type == element])
+            element_no = np.max(occ[atom_type == element])
 
         divideby = atno[element]/ element_no
-        name = fc.count_charges(type, occ, divideby, latex)
+        name = fc.count_charges(atom_type, occ, divideby, latex)
         name = ' '.join(name)
         return name
 
@@ -203,14 +229,14 @@ class Properties:
 
         # determine u/p = sum(wi*(u/p)i) http://physics.nist.gov/PhysRefData/XrayMassCoef/chap2.html
         wi = self.xtl.Structure.mass_fraction()
-        Z = fc.atom_properties(self.xtl.Structure.type ,'Z')
+        Z = fc.atom_properties(self.xtl.Structure.type, 'Z')
         upi = fc.attenuation(Z, energy_kev)
         up = np.sum(wi*upi, axis=1)
 
         u = up*self.density()/10000
         return u
 
-    def diamagnetic_susceptibility(self, type='volume'):
+    def diamagnetic_susceptibility(self, atom_type='volume'):
         """
         Calculate diamagnetic contribution to susceptibility
 
@@ -227,32 +253,32 @@ class Properties:
         # X = diamagnetic susceptibility, N=no ions, V = volume
         # Zeff = no valence electrons, r = ionic radius
 
-        C = (fg.u0*fg.e**2)/(6*fg.me)
-        V = self.xtl.Cell.volume()*1e-30 # m^3
-        M = self.xtl.Structure.weight()/fg.Na # g
-        mol = 1/fg.Na
+        C = (fg.u0 * fg.e ** 2) / (6 * fg.me)
+        V = self.xtl.Cell.volume() * 1e-30  # m^3
+        M = self.xtl.Structure.weight() / fg.Na  # g
+        mol = 1 / fg.Na
 
         # susceptibility type
-        if type.lower() == 'mass':
-            D = M/1000 # kg
-        elif type.lower() == 'cgs mass':
-            D = M*(4*fg.pi)
-        elif type.lower() == 'molar':
+        if atom_type.lower() == 'mass':
+            D = M / 1000  # kg
+        elif atom_type.lower() == 'cgs mass':
+            D = M * (4 * fg.pi)
+        elif atom_type.lower() == 'molar':
             D = mol
-        elif type.lower() == 'cgs molar':
-            D = mol*(4*fg.pi*1e-6)
-        elif type.lower() == 'cgs volume':
-            D = V*(4*fg.pi)
+        elif atom_type.lower() == 'cgs molar':
+            D = mol * (4 * fg.pi * 1e-6)
+        elif atom_type.lower() == 'cgs volume':
+            D = V * (4 * fg.pi)
         else:
             D = V
 
         atom_types = np.unique(self.xtl.Structure.type)
         X = 0.0
         for at in atom_types:
-            N = np.sum(self.xtl.Structure.occupancy[self.xtl.Structure.type==at])
-            Zeff = fc.atom_properties(str(at),'ValenceE')[0]
-            r = fc.atom_properties(str(at),'Radii')[0]*1e-12
-            X += -(N/D)*C*(Zeff*r*r)
+            N = np.sum(self.xtl.Structure.occupancy[self.xtl.Structure.type == at])
+            Zeff = fc.atom_properties(str(at), 'ValenceE')[0]
+            r = fc.atom_properties(str(at), 'Radii')[0] * 1e-12
+            X += -(N / D) * C * (Zeff * r * r)
         return X
 
     def atomic_neighbours(self, structure_index=0, radius=2.5, disp=False):
@@ -268,7 +294,7 @@ class Properties:
 
         Rindex = self.xtl.Cell.calculateR(self.xtl.Structure.uvw()[structure_index, :])
 
-        uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
+        uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
 
         R = self.xtl.Cell.calculateR(uvw)
 
@@ -326,13 +352,13 @@ class Properties:
             print('Centre: %3d %4s (%6.2f,%6.2f,%6.2f)' % (cen_idx, cen_type, cen_uvw[0], cen_uvw[1], cen_uvw[2]))
 
         # Generate lattice of muliple cells to remove cell boundary problem
-        uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
+        uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
         xyz = self.xtl.Cell.calculateR(uvw)
         all_bonds = cen_xyz - xyz
 
         # Exchange type
         # exchange_type = 1  # all atoms
-        exchange_allowed = type == exchange_type
+        exchange_allowed = atom_type == exchange_type
 
         # Inside unit cell
         if search_in_cell:
@@ -342,7 +368,7 @@ class Properties:
 
         # Bond distances
         mag = fg.mag(all_bonds)
-        neighbor_idx = np.where(incell * (type == cen_type) * (mag < nearest_neighbor_distance) * (mag > 0.01))[0]
+        neighbor_idx = np.where(incell * (atom_type == cen_type) * (mag < nearest_neighbor_distance) * (mag > 0.01))[0]
 
         # Sort order by distance to central atom
         srt_idx = np.argsort(mag[neighbor_idx])

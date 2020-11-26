@@ -16,8 +16,8 @@ Usage:
 All plots generated require plt.show() call, unless using interactive mode
 
 
-Version 1.8
-Last updated: 03/04/20
+Version 1.9
+Last updated: 22/11/20
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -29,6 +29,7 @@ Version History:
 22/03/19 1.6    Added plot_circle, updated vecplot and plot_lattice_lines
 03/05/19 1.7    Added legend to labels function
 09/03/20 1.8    Added default figure size
+22/11/20 1.9    Update to labels to fix 3D plotting
 
 @author: DGPorter
 """
@@ -43,7 +44,7 @@ from mpl_toolkits.mplot3d import proj3d
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.8'
+__version__ = '1.9'
 
 DEFAULT_FONT = 'Times New Roman'
 FIGURE_SIZE = [12, 10]
@@ -80,9 +81,9 @@ def labels(ttl=None, xvar=None, yvar=None, zvar=None, legend=False, size='Normal
     plt.xticks(fontsize=tik, fontname=font)
     plt.yticks(fontsize=tik, fontname=font)
     plt.setp(plt.gca().spines.values(), linewidth=2)
-    if plt.gca().get_yaxis().get_scale() != 'log':
+    if plt.gca().get_yaxis().get_scale() != 'log' and 'linear' in plt.gca().name:
         plt.ticklabel_format(useOffset=False)
-        plt.ticklabel_format(style='sci',scilimits=(-3,3))
+        plt.ticklabel_format(style='sci', scilimits=(-3,3))
 
     if ttl is not None:
         plt.gca().set_title(ttl, fontsize=tit, fontweight='bold', fontname=font)
@@ -96,6 +97,9 @@ def labels(ttl=None, xvar=None, yvar=None, zvar=None, legend=False, size='Normal
     if zvar is not None:
         # Don't think this works, use ax.set_zaxis
         plt.gca().set_zlabel(zvar, fontsize=lab, fontname=font)
+        for t in plt.gca().zaxis.get_major_ticks():
+            t.label.set_fontsize(tik)
+            t.label.set_fontname(font)
 
     if legend:
         plt.legend(loc=0, frameon=False, prop={'size': leg, 'family': 'serif'})
@@ -493,18 +497,37 @@ def vecplot(UV, mode='hk0', axis=None, *args, **kwargs):
     plot_lattice_lines(latt, UV[0], UV[1], axis=axis, *args, **kwargs)
 
 
-def UV_arrows(UV):
+def UV_arrows(UV, alabel='a', blabel='b', clabel='c'):
     """
     Plot arrows with a*,b* on current figure
     """
     # Get current axis size
     ax = plt.gca()
+    if ax.name.lower() == '3d':
+        # 3D plot
+        ax_xlim = ax.get_xlim()
+        ax_ylim = ax.get_ylim()
+        ax_zlim = ax.get_zlim()
+        arrow_size = 40
+        color = 'k'
+        fontsize = 18
+        plot_arrow([0, UV[0, 0]], [0, UV[0, 1]], [0, UV[0, 2]], arrow_size=arrow_size, col=color)
+        ax.text(UV[0, 0], UV[0, 1], UV[0, 2], alabel, fontname=DEFAULT_FONT, weight='bold', size=fontsize)
+        plot_arrow([0, UV[1, 0]], [0, UV[1, 1]], [0, UV[1, 2]], arrow_size=arrow_size, col=color)
+        ax.text(UV[1, 0], UV[1, 1], UV[1, 2], blabel, fontname=DEFAULT_FONT, weight='bold', size=fontsize)
+        plot_arrow([0, UV[2, 0]], [0, UV[2, 1]], [0, UV[2, 2]], arrow_size=arrow_size, col=color)
+        ax.text(UV[2, 0], UV[2, 1], UV[2, 2], clabel, fontname=DEFAULT_FONT, weight='bold', size=fontsize)
+        ax.set_xlim(ax_xlim)
+        ax.set_ylim(ax_ylim)
+        ax.set_zlim(ax_zlim)
+        return
+    # 2D plot
     axsize = ax.axis()
     asty = dict(arrowstyle="->")
     plt.annotate("", xy=(UV[0, 0], UV[0, 1]), xytext=(0.0, 0.0), arrowprops=asty)
     plt.annotate("", xy=(UV[1, 0], UV[1, 1]), xytext=(0.0, 0.0), arrowprops=asty)
-    plt.annotate("a", (0.1 + UV[0, 0], UV[0, 1] - 0.2))
-    plt.annotate("b", (UV[1, 0] - 0.2, 0.1 + UV[1, 1]))
+    plt.annotate(alabel, (0.1 + UV[0, 0], UV[0, 1] - 0.2))
+    plt.annotate(blabel, (UV[1, 0] - 0.2, 0.1 + UV[1, 1]))
     ax.axis(axsize)
 
 
@@ -639,6 +662,8 @@ def plot_ewald_coverage(energy_kev, color='k', linewidth=2):
     Includes boundaries for theta=0, twotheta=180 and theta=twotheta
 
     :param energy_kev: float
+    :param color: str
+    :param linewidth: float
     :return: None
     """
 
@@ -705,9 +730,9 @@ def plot_xray_attenuation(elements, min_energy=0, max_energy=20):
     labels('X-Ray Attenuation', 'Energy [keV]', r'$\mu/\rho$ [cm$^2$/g]')
 
 
-def plot_xray_scattering_factor(element, min_energy=0.5, max_energy=20):
+def plot_atomic_scattering_factor(element, min_energy=0.5, max_energy=20):
     """
-    Plot x-ray scattering factor for 1 or more elements
+    Plot atomic scattering factor for 1 or more elements
     :param element: str name of element to plot
     :param min_energy: float min energy in keV
     :param max_energy: float max energy in keV

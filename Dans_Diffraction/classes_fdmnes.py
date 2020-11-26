@@ -68,7 +68,7 @@ class Fdmnes:
         self.range = '-19 0.1 20'
         self.radius = 4.0
         self.edge = 'K'
-        self.absorber = self.xtl.Atoms.type[0]
+        self.absorber = self.xtl.Atoms.atom_type[0]
         self.green = True
         self.scf = False
         self.quadrupole = False

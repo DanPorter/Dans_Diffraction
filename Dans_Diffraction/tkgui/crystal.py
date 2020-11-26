@@ -748,7 +748,6 @@ class SymmetryGui:
             self.text_1.insert(tk.END, '%3.0f\n' % n)
             sym = self.Symmetry.symmetry_operations[n].strip('\"\'')
             mag = self.Symmetry.symmetry_operations_magnetic[n]
-            mag = mag.strip('\"\'').replace('x', 'mx').replace('y', 'my').replace('z', 'mz')
             symstr += '%25s\n' % (sym)
             magstr += '%25s\n' % (mag)
 

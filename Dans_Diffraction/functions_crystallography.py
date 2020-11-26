@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.2.0
-Last updated: 09/06/20
+Version 3.2.1
+Last updated: 03/09/20
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -32,6 +32,7 @@ Version History:
 12/05/20 3.1.0  More readcif changes, added atomic_scattering_factor, element_charge_string, split_compound
 26/05/20 3.1.1  Updated magnetic space groups, added magnetic positions (was only generators), added write_mcif
 09/06/20 3.2    Updated gen_sym_mat, symmetry_ops2magnetic, added sym_op_det
+03/09/20 3.2.1  Updated cif_symmetry to allow for missing magnetic centring
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -46,7 +47,7 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.2.0'
+__version__ = '3.2.1'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -157,10 +158,7 @@ def readcif(filename=None, debug=False):
         text = text.replace("\n\n", "\n")
     lines = text.splitlines()
 
-    cifvals = {}
-    cifvals['Filename'] = filename
-    cifvals['Directory'] = dirName
-    cifvals['FileTitle'] = fname
+    cifvals = {'Filename': filename, 'Directory': dirName, 'FileTitle': fname}
 
     # Read file line by line, converting the cif file values to a python dict
     n = 0
@@ -285,7 +283,10 @@ def cif_symmetry(cifvals):
         symmetry_operations_time = sym_op_time(symops)
     elif '_space_group_symop_magn_operation_xyz' in keys:
         symops = cifvals['_space_group_symop_magn_operation_xyz']
-        symcen = cifvals['_space_group_symop_magn_centering_xyz']
+        if '_space_group_symop_magn_centering_xyz' in keys:
+            symcen = cifvals['_space_group_symop_magn_centering_xyz']
+        else:
+            symcen = ['x,y,z']
         symmetry_operations = gen_symcen_ops(symops, symcen)
         symmetry_operations_time = sym_op_time(symmetry_operations)
 
@@ -341,7 +342,7 @@ def cif2dict(cifvals):
     alpha, dalpha = fg.readstfm(cifvals['_cell_angle_alpha'])
     beta, dbeta = fg.readstfm(cifvals['_cell_angle_beta'])
     gamma, dgamma = fg.readstfm(cifvals['_cell_angle_gamma'])
-    UV = latpar2UV(a, b, c, alpha, beta, gamma)
+    UV = latpar2uv(a, b, c, alpha, beta, gamma)
 
     # Get atom names & labels
     label = cifvals['_atom_site_label']
@@ -1521,6 +1522,9 @@ def indx(Q, UV):
 def Bmatrix(UV):
     """
     Calculate the Busing and Levy B matrix from a real space UV
+    From: W. R. Busing and H. A. Levy, Acta Cryst. (1967). 22, 457-464
+    "Angle calculations for 3- and 4-circle X-ray and neutron diffractometers"
+    See also: https://docs.mantidproject.org/nightly/concepts/Lattice.html
     """
 
     a1, a2, a3 = fg.mag(UV)
@@ -1948,7 +1952,7 @@ def symmetry_ops2magnetic(operations):
     return str_ops
 
 
-def orthogonal_axes(x_axis=[1, 0, 0], y_axis=[0, 1, 0]):
+def orthogonal_axes(x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
     """
     Returns orthogonal right-handed cartesian axes based on the plane of two non-perpendicular vectors
     E.G.
@@ -1973,13 +1977,70 @@ def orthogonal_axes(x_axis=[1, 0, 0], y_axis=[0, 1, 0]):
 '----------------------------Conversions-------------------------------'
 
 
-def latpar2UV(a, b, c, alpha=90., beta=90., gamma=120.):
+def gen_lattice_parameters(lattice_parameters=(), *args, **kwargs):
     """
-    Convert a,b,c,alpha,beta,gamma to UV
-     UV = latpar2UV(a,b,c,alpha=90.,beta=90.,gamma=120.)
+    Generate list of lattice parameters:
+     a,b,c,alpha,beta,gamma = gen_lattice_parameters(args)
+    args:
+      1 -> a=b=c=1,alpha=beta=gamma=90
+      [1,2,3] -> a=1,b=2,c=3,alpha=beta=gamma=90
+      [1,2,3,120] -> a=1,b=2,c=3,alpha=beta=90,gamma=120
+      [1,2,3,10,20,30] -> a=1,b=2,c=3,alpha=10,beta=20,gamma=30
+      1,2,3,10,20,30 -> a=1,b=2,c=3,alpha=10,beta=20,gamma=30
+      a=1,b=2,c=3,alpha=10,beta=20,gamma=30 -> a=1,b=2,c=3,alpha=10,beta=20,gamma=30
+    :param lattice_parameters: float or list
+    :param args: floats
+    :param kwargs: lattice parameters
+    :return: a,b,c,alpha,beta,gamma
+    """
+
+    lattice_parameters = np.array(lattice_parameters, dtype=float).reshape(-1)
+    lattice_parameters = np.append(lattice_parameters, args)
+    if len(lattice_parameters) not in [0, 1, 3, 4, 6]:
+        raise Exception('Incorrect number of lattice parameters')
+    a = b = c = 1.0
+    alpha = beta = gamma = 90.0
+
+    if len(lattice_parameters) > 0:
+        a = lattice_parameters[0]
+        b = 1.0 * a
+        c = 1.0 * a
+
+    if len(lattice_parameters) > 1:
+        b = lattice_parameters[1]
+        c = lattice_parameters[2]
+
+    if len(lattice_parameters) == 4:
+        gamma = lattice_parameters[3]
+
+    if len(lattice_parameters) == 6:
+        alpha = lattice_parameters[3]
+        beta = lattice_parameters[4]
+        gamma = lattice_parameters[5]
+
+    if 'a' in kwargs:
+        a = float(kwargs.get('a'))
+    if 'b' in kwargs:
+        b = float(kwargs.get('b'))
+    if 'c' in kwargs:
+        c = float(kwargs.get('c'))
+    if 'alpha' in kwargs:
+        alpha = float(kwargs.get('alpha'))
+    if 'beta' in kwargs:
+        beta = float(kwargs.get('beta'))
+    if 'gamma' in kwargs:
+        gamma = float(kwargs.get('gamma'))
+    return a, b, c, alpha, beta, gamma
+
+
+def latpar2uv(lattice_parameters=(), *args, **kwargs):
+    """
+    Convert a,b,c,alpha,beta,gamma to UV=[A,B,C]
+     UV = latpar2uv(a,b,c,alpha=90.,beta=90.,gamma=120.)
      Vector c is defined along [0,0,1]
      Vector a and b are defined by the angles
     """
+    a, b, c, alpha, beta, gamma = gen_lattice_parameters(lattice_parameters, *args, **kwargs)
 
     # From http://pymatgen.org/_modules/pymatgen/core/lattice.html
     alpha_r = np.radians(alpha)
@@ -1999,13 +2060,14 @@ def latpar2UV(a, b, c, alpha=90., beta=90., gamma=120.):
     return np.round(np.array([aa, bb, cc]), 8)
 
 
-def latpar2UV_rot(a, b, c, alpha=90., beta=90., gamma=120.):
+def latpar2uv_rot(lattice_parameters=(), *args, **kwargs):
     """
-    Convert a,b,c,alpha,beta,gamma to UV
-     UV = latpar2UV_rot(a,b,c,alpha=90.,beta=90.,gamma=120.)
+    Convert a,b,c,alpha,beta,gamma to UV=[A,B,C]
+     UV = latpar2uv_rot(a,b,c,alpha=90.,beta=90.,gamma=120.)
      Vector b is defined along [0,1,0]
      Vector a and c are defined by the angles
     """
+    a, b, c, alpha, beta, gamma = gen_lattice_parameters(lattice_parameters, *args, **kwargs)
 
     # From http://pymatgen.org/_modules/pymatgen/core/lattice.html
     alpha_r = np.radians(alpha)
@@ -2071,16 +2133,54 @@ def hkl2Qmag(hkl, UVstar):
     return fg.mag(Q)
 
 
-def hkl2dspace(hkl, UVstar):
+def hkl2twotheta(hkl, UVstar, energy_kev=17.794):
     """
     Calcualte d-spacing from hkl reflection
     :param hkl: [nx3] array of reflections
     :param UV: [3x3] array of unit cell vectors
+    :param energy_kev: float energy in keV
+    :return: [nx1] array of d-spacing in A
+    """
+    q = np.dot(hkl, UVstar)
+    q_mag = fg.mag(q)
+    return cal2theta(q_mag, energy_kev)
+
+
+def hkl2dspace(hkl, UVstar):
+    """
+    Calcualte d-spacing from hkl reflection
+    :param hkl: [nx3] array of reflections
+    :param UV: [3x3] array of reciprocal unit cell vectors
     :return: [nx1] array of d-spacing in A
     """
     Q = np.dot(hkl, UVstar)
     Qmag = fg.mag(Q)
     return q2dspace(Qmag)
+
+
+def lattice_hkl2dspace(hkl, lattice_parameters=(), *args, **kwargs):
+    """
+    Calcualte dspace from lattice parameters
+    :param hkl: [nx3] array of reflections
+    :param lattice_parameters: a,b,c,alpha,beta,gamma
+    :return: float, d-spacing in A
+    """
+    uv = latpar2uv(lattice_parameters, *args, **kwargs)
+    uvs = RcSp(uv)
+    return hkl2dspace(hkl, uvs)
+
+
+def lattice_hkl2twotheta(hkl, energy_kev=17.794, lattice_parameters=(), *args, **kwargs):
+    """
+    Calcualte dspace from lattice parameters
+    :param hkl: [nx3] array of reflections
+    :param energy_kev: float, radiation energy in keV
+    :param lattice_parameters: a,b,c,alpha,beta,gamma
+    :return: float, d-spacing in A
+    """
+    uv = latpar2uv(lattice_parameters, *args, **kwargs)
+    uvs = RcSp(uv)
+    return hkl2twotheta(hkl, uvs, energy_kev)
 
 
 def calqmag(twotheta, energy_kev=17.794):
@@ -2118,6 +2218,19 @@ def caldspace(twotheta, energy_kev=17.794):
     qmag = calqmag(twotheta, energy_kev)
     dspace = q2dspace(qmag)
     return dspace
+
+
+def callattice(twotheta, energy_kev=17.794, hkl=(1, 0, 0)):
+    """
+    Calculate cubic lattice parameter, a from reflection two-theta
+    :param twotheta: Bragg angle, deg
+    :param energy_kev: energy in keV
+    :param hkl: reflection (cubic only
+    :return: float, lattice contant
+    """
+    qmag = calqmag(twotheta, energy_kev)
+    dspace = q2dspace(qmag)
+    return dspace * np.sqrt(np.sum(np.square(hkl)))
 
 
 def q2dspace(qmag):

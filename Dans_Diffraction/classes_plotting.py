@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9.0
-Last updated: 29/06/20
+Version 1.9.1
+Last updated: 26/11/20
 
 Version History:
 18/08/17 0.1    Program created
@@ -26,6 +26,7 @@ Version History:
 26/05/20 1.8.1  Removed tensor_scattering
 16/06/20 1.8.2  Change to simulate_powder to make pixels int, remove linspace error in new numpy
 29/06/20 1.9.0  Removed scipy.convolve2d due to problems importing, new method more accurate but slower
+26/11/20 1.9.1  Added layers input to plot_layers
 
 @author: DGPorter
 """
@@ -39,7 +40,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.9.0'
+__version__ = '1.9.1'
 
 
 class Plotting:
@@ -110,10 +111,10 @@ class Plotting:
         
         # Labels
         if show_labels:
-            uvw_st,type_st,label_st,occ_st,uiso_st,mxmymz_st = self.xtl.Structure.get()
+            uvw_st, type_st, label_st, occ_st, uiso_st, mxmymz_st = self.xtl.Structure.get()
             R_st = self.xtl.Cell.calculateR(uvw_st)
             for n in range(len(R_st)):
-                ax.text(R_st[n,0],R_st[n,1],R_st[n,2],'%2d: %s' %(n,label_st[n]),fontsize=10)
+                ax.text(R_st[n, 0], R_st[n, 1], R_st[n, 2], '%2d: %s' % (n, label_st[n]), fontsize=10)
         
         # Create cell box
         uvw = np.array([[0., 0, 0], [1, 0, 0], [1, 0, 1], [1, 1, 1], [1, 1, 0], [0, 1, 0], [0, 1, 1],
@@ -135,99 +136,111 @@ class Plotting:
         
         plt.title(self.xtl.name, fontsize=28, fontweight='bold')
     
-    def plot_layers(self, layer_axis=2, layer_width=0.05, show_labels=False):
+    def plot_layers(self, layers=None, layer_axis=2, layer_width=0.05, show_labels=False):
         """
         Separate the structure into layers along the chosen axis
         and plot the atoms in each layer in a separate figure.
+        :param layers: list of layers to plot in fractional coordinates, or NOne for automatic determination
+        :param layer_axis: axis (0,1,2) of direction normal to layers
+        :param layer_width: distance from layer value to include in plot
+        :param show_labels: False*/True add text labels
+        :return:
         """
-        
+
         if layer_axis == 'a': layer_axis = 0
         if layer_axis == 'b': layer_axis = 1
         if layer_axis == 'c': layer_axis = 2
-        
+
         # Choose x,y
         if layer_axis == 0:
-            layer_axis_x = 1 # b
-            layer_axis_y = 2 # c
+            layer_axis_x = 1  # b
+            layer_axis_y = 2  # c
         elif layer_axis == 1:
-            layer_axis_x = 0 # a
-            layer_axis_y = 2 # c
+            layer_axis_x = 0  # a
+            layer_axis_y = 2  # c
         elif layer_axis == 2:
-            layer_axis_x = 0 # a
-            layer_axis_y = 1 # b
+            layer_axis_x = 0  # a
+            layer_axis_y = 1  # b
+        else:
+            raise Exception('layer axis must be 0-2')
         
         # Generate layers
         uvw_st, type_st, label_st, occ_st, uiso_st, mxmymz_st = self.xtl.Structure.get()
-        vals,uniqeidx,matchidx = fg.unique_vector(uvw_st[:,layer_axis], layer_width)
-        # unique_vector takes the first value of each layer, the average is better
-        layers = [np.mean(uvw_st[np.asarray(matchidx)==n,layer_axis]) for n in range(len(vals))]
+        if layers is None:
+            vals, uniqeidx, matchidx = fg.unique_vector(uvw_st[:, layer_axis], layer_width)
+            # unique_vector takes the first value of each layer, the average is better
+            layers = [np.mean(uvw_st[np.asarray(matchidx) == n, layer_axis]) for n in range(len(vals))]
+        else:
+            layers = np.asarray(layers).reshape(-1)
         
         # Generate atomic positions
-        uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
-        
+        uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
+
         # Split atom types, color & radii
         labels, idx, invidx = np.unique(label, return_index=True, return_inverse=True)
-        label_colors = plt.cm.gist_rainbow(np.linspace(0,1,len(labels)))
-        colors = label_colors[invidx,:]
-        sizes = fc.atom_properties(type, 'Radii')
-        
+        cmap = plt.get_cmap('gist_rainbow')
+        label_colors = cmap(np.linspace(0, 1, len(labels)))
+        colors = label_colors[invidx, :]
+        sizes = fc.atom_properties(atom_type, 'Radii')
+
         # Get atomic positions
         R = self.xtl.Cell.calculateR(uvw)
-        
+
         # Loop over each layer
         for L, layer in enumerate(layers):
             # Find occupied atoms within the layer
-            idx = np.all([np.abs(uvw[:,layer_axis]-layer) < layer_width, occ > 0.2],axis=0) 
-            #print L,layer,np.sum(idx)
+            idx = np.all([np.abs(uvw[:, layer_axis] - layer) < layer_width, occ > 0.2], axis=0)
+            # print L,layer,np.sum(idx)
             layx = R[idx, layer_axis_x]
             layy = R[idx, layer_axis_y]
-            laycol = colors[idx,:]
+            laycol = colors[idx, :]
             laysize = sizes[idx]
-            
+
             # Create Figure
             plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
-            plt.scatter(layx,layy,laysize,laycol,marker='o')
-            
+            plt.scatter(layx, layy, laysize, laycol, marker='o')
+
             # Plot unoccupied atoms
-            idx_unocc = np.all([np.abs(uvw[:,layer_axis]-layer) < layer_width, occ <= 0.2],axis=0) 
-            layx_unocc = R[idx_unocc,layer_axis_x]
-            layy_unocc = R[idx_unocc,layer_axis_y]
-            laycol_unocc = colors[idx_unocc,:]
-            plt.scatter(layx_unocc,layy_unocc,50,laycol_unocc,marker='+')
-            
+            idx_unocc = np.all([np.abs(uvw[:, layer_axis] - layer) < layer_width, occ <= 0.2], axis=0)
+            layx_unocc = R[idx_unocc, layer_axis_x]
+            layy_unocc = R[idx_unocc, layer_axis_y]
+            laycol_unocc = colors[idx_unocc, :]
+            plt.scatter(layx_unocc, layy_unocc, 50, laycol_unocc, marker='+')
+
             # Labels
             if show_labels:
-                idx_st = np.abs(uvw_st[:,layer_axis]-layer) < layer_width
+                idx_st = np.abs(uvw_st[:, layer_axis] - layer) < layer_width
                 idx_p = np.where(idx_st)[0]
-                R_st = self.xtl.Cell.calculateR(uvw_st[idx_st,:])
+                R_st = self.xtl.Cell.calculateR(uvw_st[idx_st, :])
                 lab_st = label_st[idx_st]
                 for n in range(len(R_st)):
-                    plt.text(R_st[n,layer_axis_x],R_st[n,layer_axis_y],'%2d: %s' %(idx_p[n],lab_st[n]),fontsize=12, fontweight='bold')
-            
+                    plt.text(R_st[n, layer_axis_x], R_st[n, layer_axis_y], '%2d: %s' % (idx_p[n], lab_st[n]),
+                             fontsize=12, fontweight='bold')
+
             # Create cell box
-            box = np.zeros([5,3])
-            box[[1,2],layer_axis_x] = 1
-            box[[2,3],layer_axis_y] = 1
+            box = np.zeros([5, 3])
+            box[[1, 2], layer_axis_x] = 1
+            box[[2, 3], layer_axis_y] = 1
             bpos = self.xtl.Cell.calculateR(box)
-            plt.plot(bpos[:,layer_axis_x],bpos[:,layer_axis_y],'-k') # cell box
-            fp.plot_arrow(bpos[[0,1],layer_axis_x],bpos[[0,1],layer_axis_y],col='r',width=4) # a
-            fp.plot_arrow(bpos[[0,3],layer_axis_x],bpos[[0,3],layer_axis_y],col='g',width=4) # b
-            
+            plt.plot(bpos[:, layer_axis_x], bpos[:, layer_axis_y], '-k')  # cell box
+            fp.plot_arrow(bpos[[0, 1], layer_axis_x], bpos[[0, 1], layer_axis_y], col='r', width=4)  # a
+            fp.plot_arrow(bpos[[0, 3], layer_axis_x], bpos[[0, 3], layer_axis_y], col='g', width=4)  # b
+
             plt.axis('equal')
-            plt.xlim(1.1*np.min(bpos[:,layer_axis_x])-1, 1.1*np.max(bpos[:,layer_axis_x])+1)
-            plt.ylim(1.1*np.min(bpos[:,layer_axis_y])-1, 1.1*np.max(bpos[:,layer_axis_y])+1)
-            #ax.set_axis_off()
-            
+            plt.xlim(1.1 * np.min(bpos[:, layer_axis_x]) - 1, 1.1 * np.max(bpos[:, layer_axis_x]) + 1)
+            plt.ylim(1.1 * np.min(bpos[:, layer_axis_y]) - 1, 1.1 * np.max(bpos[:, layer_axis_y]) + 1)
+            # ax.set_axis_off()
+
             # Supercell grid
-            if hasattr(self.xtl,'Parent'):
+            if hasattr(self.xtl, 'Parent'):
                 parentUV = self.xtl.parentUV()
-                sclatt = fp.axis_lattice_points(parentUV[layer_axis_x,:], parentUV[layer_axis_y,:], plt.axis())
-                fp.plot_lattice_lines(sclatt, parentUV[layer_axis_x,:], parentUV[layer_axis_y,:],
+                sclatt = fp.axis_lattice_points(parentUV[layer_axis_x, :], parentUV[layer_axis_y, :], plt.axis())
+                fp.plot_lattice_lines(sclatt, parentUV[layer_axis_x, :], parentUV[layer_axis_y, :],
                                       linewidth=0.5, alpha=0.5, color='k')
-            #plt.legend()
-            
-            ttl = '%s\nLayer %2.0f = %5.3f' %(self.xtl.name,L,layer)
-            plt.title(ttl,fontsize=20,fontweight='bold')
+            # plt.legend()
+
+            ttl = '%s\nLayer %2.0f = %5.3f' % (self.xtl.name, L, layer)
+            plt.title(ttl, fontsize=20, fontweight='bold')
 
     def plot_exchange_paths(self, cen_idx, nearest_neighbor_distance=6.6, exchange_type='O', bond_angle=90.,
                             search_in_cell=True, group_neighbors=True, disp=False):
@@ -770,7 +783,7 @@ class Plotting:
         I = np.zeros(len(azi))
         for n in range(len(azi)):
             I[n] = self.xtl.Scatter.xray_nonresonant_magnetic(
-                HKL=hkl,
+                hkl=hkl,
                 energy_kev=energy_kev,
                 azim_zero=azim_zero,
                 psi=azi[n],

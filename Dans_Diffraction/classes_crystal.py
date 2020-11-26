@@ -24,8 +24,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.1.0
-Last updated: 10/06/20
+Version 3.2.1
+Last updated: 15/10/20
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -44,6 +44,8 @@ Version History:
 27/05/20 3.0    Updated write_cif for magnetic moments - now writes simple mcif structures
 09/06/20 3.0.1  Updated code for changes to fc.gen_sym_mat
 10/06/20 3.1    Updated Symmetry to include time operators
+02/09/20 3.2.0  Added Cell.reflection_hkl and transmission_hkl, added __str__ methods
+22/10/20 3.2.1  Added Cell.moment, updated Cell.latt()
 
 @author: DGPorter
 """
@@ -60,7 +62,7 @@ from .classes_scattering import Scattering
 from .classes_multicrystal import MultiCrystal
 from .classes_plotting import Plotting, PlottingSuperstructure
 
-__version__ = '3.1.0'
+__version__ = '3.2.1'
 
 
 class Crystal:
@@ -142,7 +144,7 @@ class Crystal:
         :return: None
         """
 
-        uvw, type, label, occ, uiso, mxmymz = self.Atoms.get()
+        uvw, atom_type, label, occ, uiso, mxmymz = self.Atoms.get()
 
         new_uvw = np.empty([0, 3])
         new_type = []
@@ -159,7 +161,7 @@ class Crystal:
             # Append to P1 atoms arrays
             new_uvw = np.append(new_uvw, sympos, axis=0)
             new_mxmymz = np.append(new_mxmymz, symmag, axis=0)
-            new_type += [type[n]] * Nsympos
+            new_type += [atom_type[n]] * Nsympos
             new_label += [label[n]] * Nsympos
             new_occupancy += [occ[n]] * Nsympos
             new_uiso += [uiso[n]] * Nsympos
@@ -214,13 +216,13 @@ class Crystal:
         else:
             fc.write_cif(cifvals, filename, comments)
 
-    def new_cell(self, latt=[1.0]):
+    def new_cell(self, lattice_parameters=(), *args, **kwargs):
         """
         Replace the lattice parameters
-        :param latt: [a,b,c,alpha,beta,gamma]
+        :param lattice_parameters: [a,b,c,alpha,beta,gamma]
         :return: None
         """
-        self.Cell.latt(latt)
+        self.Cell.latt(lattice_parameters, *args, **kwargs)
 
     def new_atoms(self, u=[0], v=[0], w=[0], type=None,
                   label=None, occupancy=None, uiso=None, mxmymz=None):
@@ -346,6 +348,9 @@ class Crystal:
         fmt = "%s with %d atomic positions, %d symmetries"
         return fmt % (self.name, len(self.Atoms.type), len(self.Symmetry.symmetry_operations))
 
+    def __str__(self):
+        return self.info()
+
 
 class Cell:
     """
@@ -368,36 +373,31 @@ class Cell:
     ]
 
     def __init__(self, a=1.0, b=1.0, c=1.0, alpha=90., beta=90.0, gamma=90.0):
-        self.latt([a, b, c, alpha, beta, gamma])
+        self.a = float(a)
+        self.b = float(b)
+        self.c = float(c)
+        self.alpha = float(alpha)
+        self.beta = float(beta)
+        self.gamma = float(gamma)
 
-    def latt(self, lattice_parameters):
+    def latt(self, lattice_parameters=(), *args, **kwargs):
         """ 
         Generate lattice parameters with list
-          latt([1]) -> a=b=c=1,alpha=beta=gamma=90
+          latt(1) -> a=b=c=1,alpha=beta=gamma=90
           latt([1,2,3]) -> a=1,b=2,c=3,alpha=beta=gamma=90
           latt([1,2,3,120]) -> a=1,b=2,c=3,alpha=beta=90,gamma=120
           latt([1,2,3,10,20,30]) -> a=1,b=2,c=3,alpha=10,beta=20,gamma=30
+          latt(1,2,3,10,20,30) -> a=1,b=2,c=3,alpha=10,beta=20,gamma=30
+          latt(a=1,b=2,c=3,alpha=10,beta=20,gamma=30]) -> a=1,b=2,c=3,alpha=10,beta=20,gamma=30
         """
 
-        self.a = float(lattice_parameters[0])
-        self.alpha = 90.0
-        self.beta = 90.0
-        self.gamma = 90.0
-
-        if len(lattice_parameters) == 1:
-            self.b = 1.0 * self.a
-            self.c = 1.0 * self.a
-        else:
-            self.b = float(lattice_parameters[1])
-            self.c = float(lattice_parameters[2])
-
-        if len(lattice_parameters) == 4:
-            self.gamma = 120.0
-
-        if len(lattice_parameters) == 6:
-            self.alpha = float(lattice_parameters[3])
-            self.beta = float(lattice_parameters[4])
-            self.gamma = float(lattice_parameters[5])
+        lp = fc.gen_lattice_parameters(lattice_parameters, *args, **kwargs)
+        self.a = lp[0]
+        self.b = lp[1]
+        self.c = lp[2]
+        self.alpha = lp[3]
+        self.beta = lp[4]
+        self.gamma = lp[5]
 
     def fromcif(self, cifvals):
         """
@@ -423,7 +423,7 @@ class Cell:
         beta, dbeta = fg.readstfm(cifvals['_cell_angle_beta'])
         gamma, dgamma = fg.readstfm(cifvals['_cell_angle_gamma'])
 
-        self.latt([a, b, c, alpha, beta, gamma])
+        self.latt(a, b, c, alpha, beta, gamma)
 
     def update_cif(self, cifvals):
         """
@@ -454,7 +454,7 @@ class Cell:
          Returns the unit cell as a [3x3] array, [A,B,C]
          The vector A is directed along the x-axis
         """
-        return fc.latpar2UV_rot(*self.lp())
+        return fc.latpar2uv_rot(*self.lp())
 
     def UVstar(self):
         """
@@ -486,7 +486,10 @@ class Cell:
         return out
 
     def __repr__(self):
-        return 'a = %1.5g A,  b = %1.5f A,  c = %1.5g A,  A = %1.5g,  B = %1.5g,  G = %1.5g' % self.lp()
+        return 'Cell(a=%1.5g, b=%1.5f, c=%1.5g, alpha=%1.5g, beta=%1.5g, gamma=%1.5g)' % self.lp()
+
+    def __str__(self):
+        return self.info()
 
     def generate_lattice(self, U, V, W):
         """
@@ -546,6 +549,14 @@ class Cell:
         R = np.reshape(np.asarray(R, dtype=np.float), [-1, 3])
         return fc.indx(R, self.UV())
 
+    def moment(self, mxmymz):
+        """Calcualte moment from value stored in cif"""
+        momentmag = fg.mag(mxmymz).reshape([-1, 1])
+        momentxyz = self.calculateR(mxmymz)
+        mom = momentmag * fg.norm(momentxyz)  # broadcast n*1 x n*3 = n*3
+        mom[np.isnan(mom)] = 0.
+        return mom
+
     def Qmag(self, HKL):
         """
         Returns the magnitude of wave-vector transfer of [h,k,l], in A-1
@@ -601,13 +612,13 @@ class Cell:
             angle[n] = np.rad2deg(fg.ang(Q[n], parallel)) - 90 + theta_offset
         return (tth / 2) + angle
 
-    def dspace(self, HKL):
+    def dspace(self, hkl):
         """
         Calculate the d-spacing in A
-        :param HKL: array : list of reflections
+        :param hkl: array : list of reflections
         :return: d-spacing
         """
-        Qmag = self.Qmag(HKL)
+        Qmag = self.Qmag(hkl)
         return fc.q2dspace(Qmag)
 
     def max_hkl(self, energy_kev=8.048, max_angle=180.0):
@@ -648,26 +659,66 @@ class Cell:
         Qm = self.Qmag(HKL)
         return HKL[Qm <= Qmax, :]
 
-    def sort_hkl(self, HKL, ascend=True):
+    def reflection_hkl(self, energy_kev=8.048, max_angle=180.0,
+                       specular=(0, 0, 1), theta_offset=0, min_theta=0, max_theta=180.):
+        """
+        Returns an array of all (h,k,l) reflections in reflection geometry
+        :param energy_kev: energy in keV
+        :param max_angle: max two-theta angle
+        :param specular: (h,k,l) of direction normal to surface and the incident beam
+        :param theta_offset: float : angle (deg) of surface relative to specular normal
+        :param min_theta: float : cut hkl reflections with reflection-theta lower than min_theta
+        :param max_theta: flaot : cut hkl reflections with reflection-theta greater than max_theta
+        :return: array of hkl
+        """
+        hkl = self.all_hkl(energy_kev, max_angle)
+        tth = self.tth(hkl, energy_kev)
+        theta = self.theta_reflection(hkl, energy_kev, specular, theta_offset)
+
+        p1 = (theta > min_theta) * (theta < max_theta)
+        p2 = (tth > (theta + min_theta)) * (tth < (theta + max_theta))
+        return hkl[p1 * p2, :]
+
+    def transmission_hkl(self, energy_kev=8.048, max_angle=180.0,
+                         parallel=(0, 0, 1), theta_offset=0, min_theta=0, max_theta=180.):
+        """
+        Returns an array of all (h,k,l) reflections in reflection geometry
+        :param energy_kev: energy in keV
+        :param max_angle: max two-theta angle
+        :param parallel: (h,k,l) of direction normal to surface, parallel to the incident beam
+        :param theta_offset: float : angle (deg) of surface relative to specular normal
+        :param min_theta: float : cut hkl reflections with reflection-theta lower than min_theta
+        :param max_theta: flaot : cut hkl reflections with reflection-theta greater than max_theta
+        :return: array of hkl
+        """
+        hkl = self.all_hkl(energy_kev, max_angle)
+        tth = self.tth(hkl, energy_kev)
+        theta = self.theta_transmission(hkl, energy_kev, parallel, theta_offset)
+
+        p1 = (theta > min_theta) * (theta < max_theta)
+        p2 = (tth > (theta + min_theta)) * (tth < (theta + max_theta))
+        return hkl[p1 * p2, :]
+
+    def sort_hkl(self, hkl, ascend=True):
         """
         Returns array of (h,k,l) sorted by two-theta
-        :param HKL: array : list of [h,k,l] values
+        :param hkl: array : list of [h,k,l] values
         :param ascend: True*/False : if False, lowest two-theta
         :return: HKL[sorted,:]
         """
 
-        HKL = np.reshape(np.asarray(HKL, dtype=np.float), [-1, 3])
-        Qm = self.Qmag(HKL)
+        hkl = np.reshape(np.asarray(hkl, dtype=np.float), [-1, 3])
+        Qm = self.Qmag(hkl)
         idx = np.argsort(Qm)
-        return HKL[idx, :]
+        return hkl[idx, :]
 
-    def powder_average(self, HKL):
+    def powder_average(self, hkl):
         """
         Returns the powder average correction for the given hkl
-        :param HKL: array : list of reflections
+        :param hkl: array : list of reflections
         :return: correction
         """
-        q = self.Qmag(HKL)
+        q = self.Qmag(hkl)
         return 1/(q+0.001)**2
 
     def find_close_reflections(self, hkl, energy_kev, max_twotheta=2, max_angle=10):
@@ -1235,6 +1286,9 @@ class Atoms:
     def __repr__(self):
         return "%d sites, elements: %s" % (len(self.type), np.unique(self.type))
 
+    def __str__(self):
+        return self.info()
+
 
 class Symmetry:
     """
@@ -1299,16 +1353,19 @@ class Symmetry:
         self.spacegroup = spacegroup
 
         if '_symmetry_Int_Tables_number' in keys:
-            sgn = float(cifvals['_symmetry_Int_Tables_number'])
+            sgn = cifvals['_symmetry_Int_Tables_number']
         elif '_space_group_IT_number' in keys:
-            sgn = float(cifvals['_space_group_IT_number'])
+            sgn = cifvals['_space_group_IT_number']
         elif '_space_group_magn_number_BNS' in keys:
-            sgn = float(cifvals['_space_group_magn_number_BNS'].strip('\'"'))
+            sgn = cifvals['_space_group_magn_number_BNS'].strip('\'"')
         elif spacegroup == 'P1':
-            sgn = 1
+            sgn = '1'
         else:
-            sgn = 0
-        self.spacegroup_number = sgn
+            sgn = '0'
+        try:
+            self.spacegroup_number = float(sgn)
+        except ValueError:
+            self.spacegroup_number = 0
 
         self.generate_matrices()
 
@@ -1810,6 +1867,32 @@ class Symmetry:
             return multiplyers[0]
         return multiplyers
 
+    def parity_time_info(self):
+        """
+        Returns string of parity and time operations for symmetry operations
+        :return: str
+        """
+        # From functions_crystallography.symmetry_ops2magnetic
+        operations = self.symmetry_operations
+        magnetic_ops = self.symmetry_operations_magnetic
+        # Convert operations to matrices
+        mat_ops = fc.gen_sym_mat(operations)
+        tim_ops = fc.sym_op_time(operations)
+
+        out = 'Spacegoup: %s (%s)\n' % (self.spacegroup, self.spacegroup_number)
+        out += '  n, Symmetry operations,   Time,    Parity,    T*P*M,  Magnetic Operation\n'
+        for n, mat in enumerate(mat_ops):
+            # Get time operation
+            t = tim_ops[n]
+            # Only use rotational part
+            m = mat[:3, :3]
+            # Get parity
+            p = np.linalg.det(m)
+            # Generate string
+            mag_str = fc.sym_mat2str(t * p * m)
+            out += "%3d, %19s, %6s, %9s, %8s, %19s\n" % (n, operations[n], t, p, mag_str, magnetic_ops[n])
+        return out
+
     def info(self):
         """
         Prints the symmetry information
@@ -1833,6 +1916,9 @@ class Symmetry:
 
     def __repr__(self):
         return "%d symmetry operations" % len(self.symmetry_operations)
+
+    def __str__(self):
+        return self.info()
 
 
 class Superstructure(Crystal):
