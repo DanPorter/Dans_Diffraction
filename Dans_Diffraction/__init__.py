@@ -112,8 +112,32 @@ __date__ = '26/11/20'
 structure_list = Structures()
 
 
-def info():
+def version_info():
     return 'Dans_Diffraction version %s (%s)' % (__version__, __date__)
+
+
+def module_info():
+    import sys
+    out = 'Python version %s' % sys.version
+    out += '\n%s' % version_info()
+    # Modules
+    out += '\n     numpy version: %s' % fg.np.__version__
+    try:
+        import matplotlib
+        out += '\nmatplotlib version: %s' % matplotlib.__version__
+    except ImportError:
+        out += '\nmatplotlib version: None'
+    try:
+        import tkinter
+        out += '\n   tkinter version: %s' % tkinter.TkVersion
+    except ImportError:
+        out += '\n   tkinter version: None'
+    try:
+        import scipy
+        out += '\n     scipy version: %s' % scipy.__version__
+    except ImportError:
+        out += '\n     scipy version: None'
+    return out
 
 
 # tkGUI Activation
