@@ -112,6 +112,10 @@ __date__ = '26/11/20'
 structure_list = Structures()
 
 
+def info():
+    return 'Dans_Diffraction version %s (%s)' % (__version__, __date__)
+
+
 # tkGUI Activation
 def start_gui(xtl=None):
     """Start GUI window (requires tkinter)"""
