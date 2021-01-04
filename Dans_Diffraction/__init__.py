@@ -51,6 +51,7 @@ Version History:
 29/06/20 1.9.3  Removed import of scipy.convolve2d due to import errrors, new method slower but more accurate
 02/09/20 1.9.4  Added string methods to Crystal classes
 26/11/20 1.9.5  Various improvements and corrections
+04/01/21 1.9.6  Added Scattering.structure_factor function
 
 -----------------------------------------------------------------------------
    Copyright 2020 Diamond Light Source Ltd.
@@ -104,8 +105,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '1.9.5'
-__date__ = '26/11/20'
+__version__ = '1.9.6'
+__date__ = '04/01/21'
 
 
 # Build

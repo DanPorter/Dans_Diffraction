@@ -4,6 +4,8 @@ SuperDuper Set of Tests of Dans_Diffraction
 
 import sys, os
 import datetime
+import matplotlib.pyplot as plt
+plt.ion()
 
 TEST_MULTIPLE_SCATTERING = True
 TEST_TENSOR_SCATTERING = False

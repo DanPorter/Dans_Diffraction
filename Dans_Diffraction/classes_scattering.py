@@ -22,6 +22,7 @@ Version History:
 14/04/20 1.6    Added powder_correction
 26/05/20 1.7    Removed tensor_scattering
 16/06/20 1.7.1  Added output option of setup_scatter
+04/01/21 1.7.2  Added structure_factor function
 
 @author: DGPorter
 """
@@ -34,7 +35,7 @@ from . import functions_crystallography as fc
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '1.7.1'
+__version__ = '1.7.2'
 __scattering_types__ = {'xray': ['xray','x','x-ray','thomson','charge'],
                         'neutron': ['neutron','n','nuclear'],
                         'xray magnetic': ['xray magnetic','magnetic xray','spin xray','xray spin'],
@@ -261,6 +262,7 @@ class Scattering:
         # Calculate dot product
         dot_KR = np.dot(HKL,uvw.T)
         
+
         # Calculate structure factor
         SF = np.zeros(Nref,dtype=np.complex)
         for n,Qh in enumerate(Qhat):
@@ -887,6 +889,29 @@ class Scattering:
             else:
                 print('Scattering type not defined')
         return np.array(intensity)
+
+    def structure_factor(self, HKL, scattering_type=None):
+        """
+        Calculate the complex structure factor for the given HKL
+          Crystal.structure_factor([1,0,0])
+          Crystal.structure_factor([[1,0,0],[2,0,0],[3,0,0])
+        Returns an array with the same length as HKL, giving the complex structure factor at each reflection.
+
+        Notes:
+        - Uses x-ray atomic form factors, calculated from approximated tables in the ITC
+        - This may be a little slow for large numbers of reflections, as it is not currently
+         possible to use accelerated calculation methods in Jython.
+        - Debye-Waller factor (atomic displacement) is applied for isotropic ADPs
+        - Crystal.scale is used to scale the complex structure factor, so the intensity is
+         reduced by (Crystal.scale)^2
+        - Testing against structure factors calculated by Vesta.exe is very close, though there
+          are some discrepancies, probably due to the method of calculation of the form factor.
+        """
+        prev_sf_setting = self._return_structure_factor
+        self._return_structure_factor = True
+        sf = self.intensity(HKL, scattering_type)
+        self._return_structure_factor = prev_sf_setting
+        return sf
     
     def hkl(self, HKL, energy_kev=None):
         " Calculate the two-theta and intensity of the given HKL, display the result"
