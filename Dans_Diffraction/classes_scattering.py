@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.7.1
-Last updated: 16/06/20
+Version 1.8
+Last updated: 21/01/21
 
 Version History:
 10/09/17 0.1    Program created
@@ -23,6 +23,7 @@ Version History:
 26/05/20 1.7    Removed tensor_scattering
 16/06/20 1.7.1  Added output option of setup_scatter
 04/01/21 1.7.2  Added structure_factor function
+21/01/21 1.8    Added xray_dispersion scattering function
 
 @author: DGPorter
 """
@@ -35,12 +36,13 @@ from . import functions_crystallography as fc
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '1.7.2'
+__version__ = '1.8.0'
 __scattering_types__ = {'xray': ['xray','x','x-ray','thomson','charge'],
                         'neutron': ['neutron','n','nuclear'],
                         'xray magnetic': ['xray magnetic','magnetic xray','spin xray','xray spin'],
                         'neutron magnetic': ['neutron magnetic','magnetic neutron','magnetic'],
-                        'xray resonant': ['xray resonant','resonant','resonant xray','rxs']}
+                        'xray resonant': ['xray resonant','resonant','resonant xray','rxs'],
+                        'xray dispersion': ['dispersion', 'xray dispersion']}
 
 
 class Scattering:
@@ -187,6 +189,55 @@ class Scattering:
         
         # Calculate intensity
         I = SF * np.conj(SF)
+        return np.real(I)
+
+    def xray_dispersion(self, HKL, energy_kev):
+        """
+        Calculate the squared structure factor for the given HKL,
+        using x-ray scattering factors with dispersion corrections
+          Scattering.xray_dispersion([1,0,0], 9.71)
+          Scattering.xray_dispersion([[1,0,0],[2,0,0],[3,0,0]], 2.838)
+          Scattering.xray_dispersion([[1,0,0],[2,0,0],[3,0,0]], np.arange(2.83, 2.86, 0.001))
+        Returns an array with the same length as HKL, giving the real intensity at each reflection.
+        if energy_kev is an array, the returned array will have shape [len(HKL), len(energy_kev)]
+        """
+
+        HKL = np.asarray(np.rint(HKL), dtype=np.float).reshape([-1, 3])
+
+        uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
+
+        Qmag = self.xtl.Cell.Qmag(HKL)
+
+        # Get atomic form factors
+        ff = fc.xray_scattering_factor_resonant(type, Qmag, energy_kev)  # shape (len(HKL), len(type), len(en))
+
+        # Get Debye-Waller factor
+        if self._use_isotropic_thermal_factor:
+            dw = fc.debyewaller(uiso, Qmag)
+        elif self._use_anisotropic_thermal_factor:
+            raise Exception('anisotropic thermal factor calcualtion not implemented yet')
+        else:
+            dw = 1
+
+        # Calculate dot product
+        dot_KR = np.dot(HKL, uvw.T)
+
+        energy_kev = np.asarray(energy_kev).reshape(-1)
+        sf = np.zeros([len(HKL), len(energy_kev)], dtype=np.complex)
+        for n, en in enumerate(energy_kev):
+            # Broadcasting used on 2D ff
+            sf[:, n] = np.sum(ff[:, :, n] * dw * occ * np.exp(1j * 2 * np.pi * dot_KR), axis=1)
+        if len(energy_kev) == 1:
+            sf = sf[:, 0]
+        elif len(HKL) == 1:
+            sf = sf[0, :]
+
+        sf = sf / self.xtl.scale
+
+        if self._return_structure_factor: return sf
+
+        # Calculate intensity
+        I = sf * np.conj(sf)
         return np.real(I)
     
     def neutron(self, HKL):
@@ -865,6 +916,8 @@ class Scattering:
                 intensity += list(self.xray_magnetic(_hkl)*1e4)
             elif scattering_type in ['neutron magnetic','magnetic neutron','magnetic']:
                 intensity += list(self.magnetic_neutron(_hkl)*1e4)
+            elif scattering_type in ['xray dispersion']:
+                intensity += self.xray_dispersion(_hkl, self._energy_kev).tolist()
             elif scattering_type in ['xray resonant','resonant','resonant xray','rxs']:
                 intensity += self.xray_resonant(_hkl).tolist()
             elif scattering_type in ['xray resonant magnetic', 'xray magnetic resonant',
@@ -979,7 +1032,7 @@ class Scattering:
         """
         Simple way to set scattering parameters, each parameter is internal to xtl (self)
         
-        type        : self._scattering type               :  'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
+        type        : self._scattering type               :  'xray','neutron','xray magnetic','neutron magnetic','xray resonant', 'xray dispersion'
         energy_kev  : self._energy_kev                    :  radiation energy in keV
         wavelength_a: self._wavelength_a                  :  radiation wavelength in Angstrom
         powder_units: self._powder_units                  :  units to use when displaying/ plotting ['twotheta', 'd',' 'q']

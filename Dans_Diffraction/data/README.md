@@ -76,3 +76,21 @@ f = dif.fc.xray_scattering_factor('Fe', Qmag=q)
 ```
 
 ![x-ray scattering factor](../../Screenshots/xray_scattering_factor.png)
+
+## X-Ray Dispersion corrrections
+X-Ray Atomic Scattering Factors are taken from the online tables at [CXRO](http://henke.lbl.gov/optical_constants/asf.html).
+The dispersion corrections for resonant x-ray scattering are calculated using
+<div align="center">f(Q, E) = f^0(|Q|) + f'(E) + if''(E)</div>
+Where f^0(|Q|) is the standard form factor and f', f'' are the dispersion corrections. The values of f1 and f2 in the 
+online tables can be converted to f', f'' using the following:
+ <div align="center">f' = f1 - f^0(0)</div>
+ <div align="center">f'' = -f2</div>
+For a particular energy or energy range, f' and f'' can be calcualted, as well as the toal scattering factor:
+
+```python
+en = np.arange(5, 10, 0.001)
+# f'  and f''
+f1, f2 = dif.fc.xray_dispersion_corrections('Co', en)
+# Total: f0+f1+if2 (complex)
+f = dif.fc.xray_scattering_factor_resonant('Co', Qmag=0, energy_kev=en)
+```

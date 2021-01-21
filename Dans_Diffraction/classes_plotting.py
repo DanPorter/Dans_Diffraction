@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9.1
-Last updated: 26/11/20
+Version 1.9.2
+Last updated: 21/01/20
 
 Version History:
 18/08/17 0.1    Program created
@@ -27,6 +27,7 @@ Version History:
 16/06/20 1.8.2  Change to simulate_powder to make pixels int, remove linspace error in new numpy
 29/06/20 1.9.0  Removed scipy.convolve2d due to problems importing, new method more accurate but slower
 26/11/20 1.9.1  Added layers input to plot_layers
+21/01/21 1.9.2  Added plot_xray_resonance
 
 @author: DGPorter
 """
@@ -40,7 +41,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.9.1'
+__version__ = '1.9.2'
 
 
 class Plotting:
@@ -701,7 +702,28 @@ class Plotting:
         ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0],y_axis[1],y_axis[2])
         ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name,centre[0],centre[1],centre[2])
         fp.labels(ttl,xlab,ylab)
-    
+
+    def plot_xray_resonance(self, hkl, energy_kev=None, width=1.0, npoints=200):
+        """
+        Plot energy scan using x-ray dispersion corrections
+        :param hkl: list of [h,k,l] reflections
+        :param energy_kev: float energy in keV to scan around
+        :param width: float in keV width of scan
+        :param npoints: int number of poins to calculate
+        :return: None
+        """
+        if energy_kev is None:
+            energy_kev = self.xtl.Scatter._energy_kev
+        hkl = np.asarray(hkl).reshape(-1, 3)
+        en_range = np.linspace(energy_kev-width/2, energy_kev+width/2, npoints)
+        inten = self.xtl.Scatter.xray_dispersion(hkl, en_range)  # shape (hkl, energy)
+
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
+        for n, hkl_val in enumerate(hkl):
+            hkl_str = '(%1.0f, %1.0f, %1.0f)' % (hkl_val[0], hkl_val[1], hkl_val[2])
+            plt.plot(en_range, inten[n, :], '-', lw=2, label=hkl_str)
+        fp.labels(self.xtl.name, 'Energy [keV]', '|SF|$^2$', legend=True)
+
     def simulate_azimuth(self,hkl,energy_kev=None,polarisation='sp',F0=1,F1=1,F2=1,azim_zero=[1,0,0]):
         """
         Simulate azimuthal scan of resonant x-ray scattering

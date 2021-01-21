@@ -151,6 +151,11 @@ xtlm.Scatter.print_intensity([0,0,3])
 resi=xtlm.Scatter.xray_resonant([0,0,3], energy_kev=2.967, polarisation='sp', azim_zero=[0,1,0], PSI=[90], F0=1, F1=1, F2=1)
 print('\nResonant scattering RuL2 psi=90 sp = %6.2f'%resi)
 
+# 12) X-ray scattering with dispersion corrections
+en = xtl2.Properties.Co.K
+inten = xtl2.Scatter.xray_dispersion([0, 0, 2], en)
+print('\nX-ray scattering with dispersion correction (002) at %s keV: %s' % (en, inten))
+
 # 12) Multiple scattering
 if TEST_MULTIPLE_SCATTERING:
     psi, ms_intensity = xtlm.Scatter.ms_azimuth([0,0,2], 2.967, [1,0,0])

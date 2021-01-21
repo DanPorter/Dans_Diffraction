@@ -10,8 +10,8 @@ By Dan Porter, PhD
 Diamond
 2019
 
-Version 2.2.1
-Last updated: 15/10/20
+Version 2.2.2
+Last updated: 21/01/21
 
 Version History:
 10/11/17 0.1    Program created
@@ -22,11 +22,12 @@ Version History:
 19/04/20 2.1    Added multi-crystal, write-cif buttons, changed layout of scattering gui
 27/04/20 2.2    Added SelectionBox to basic_widgets and spacegroup entry to SymmetryGui
 15/10/20 2.2.1  Slight correction to SymmetryGui - no longer adds 'm' to labels
+21/01/21 2.2.2  Added 'xray dispersion' scattering option
 
 @author: DGPorter
 """
 
 from .crystal import CrystalGui
 
-__version__ = '2.2.1'
-__date__ = '15/10/20'
+__version__ = '2.2.2'
+__date__ = '21/01/20'

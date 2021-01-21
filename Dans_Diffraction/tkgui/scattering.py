@@ -112,7 +112,7 @@ class ScatteringGui:
         # Type
         line = tk.Frame(box)
         line.pack(side=tk.TOP, fill=tk.X, pady=5)
-        types = ['X-Ray', 'Neutron', 'XRay Magnetic', 'Neutron Magnetic', 'XRay Resonant']
+        types = ['X-Ray', 'Neutron', 'XRay Magnetic', 'Neutron Magnetic', 'XRay Resonant', 'XRay Dispersion']
         var = tk.Label(line, text='Type:', font=SF)
         var.pack(side=tk.LEFT)
         var = tk.OptionMenu(line, self.type, *types)

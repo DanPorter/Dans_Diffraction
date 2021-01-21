@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.2.1
-Last updated: 03/09/20
+Version 3.3
+Last updated: 21/01/21
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -33,6 +33,7 @@ Version History:
 26/05/20 3.1.1  Updated magnetic space groups, added magnetic positions (was only generators), added write_mcif
 09/06/20 3.2    Updated gen_sym_mat, symmetry_ops2magnetic, added sym_op_det
 03/09/20 3.2.1  Updated cif_symmetry to allow for missing magnetic centring
+21/01/21 3.3    Added xray_scattering_factor_resonant and xray_dispersion_corrections functions added
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -47,7 +48,7 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.2.1'
+__version__ = '3.3'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -922,8 +923,8 @@ def neutron_scattering_length(element):
 def xray_scattering_factor(element, Qmag=0):
     """
     Read X-ray scattering factor table, calculate f(|Q|)
-    Uses the oefficients for analytical approximation to the scattering factors - ITC, p578
-     Qff = read_xsf(element,Qmag=[0])
+    Uses the coefficients for analytical approximation to the scattering factors - ITC, p578
+     Qff = xray_scattering_factor(element, Qmag=[0])
     :param element: [n*str] list or array of elements
     :param Qmag: [m] array of wavevector distance, in A^-1
     :return: [m*n] array of scattering factors
@@ -936,6 +937,7 @@ def xray_scattering_factor(element, Qmag=0):
 
     Qff = np.zeros([len(Qmag), len(coef)])
 
+    # Loop over elements
     for n in range(len(coef)):
         a1 = coef['a1'][n]
         b1 = coef['b1'][n]
@@ -947,11 +949,60 @@ def xray_scattering_factor(element, Qmag=0):
         b4 = coef['b4'][n]
         c = coef['c'][n]
 
+        # Array multiplication over Qmags
         f = a1 * np.exp(-b1 * (Qmag / (4 * np.pi)) ** 2) + \
             a2 * np.exp(-b2 * (Qmag / (4 * np.pi)) ** 2) + \
             a3 * np.exp(-b3 * (Qmag / (4 * np.pi)) ** 2) + \
             a4 * np.exp(-b4 * (Qmag / (4 * np.pi)) ** 2) + c
         Qff[:, n] = f
+    return Qff
+
+
+def xray_scattering_factor_resonant(element, Qmag, energy_kev):
+    """
+    Read X-ray scattering factor table, calculate f(|Q|)
+    Uses the coefficients for analytical approximation to the scattering factors - ITC, p578
+     Qff = xray_scattering_factor_resonant(element, energy_kev, qmag)
+
+    if resonant_energy = float(energy in keV), the total atomic scattering amplitude will be returned:
+        f(|Q|, E) = f0(|Q|) + f'(E) - if''(E)
+    See:
+    :param element: [n*str] list or array of elements
+    :param Qmag: [m] array wavevector distance |Q|, in A^-1
+    :param energy_kev: [o] array energy in keV
+    :return: [m*n*o] complex array of scattering factors
+    """
+
+    # Qmag and energy_kev should be a 1D array
+    Qmag = np.asarray(Qmag).reshape(-1)
+    energy_kev = np.asarray(energy_kev).reshape(-1)
+
+    coef = atom_properties(element, ['a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'c'])
+    f1, f2 = xray_dispersion_corrections(element, energy_kev)  # shape (len(energy), len(element))
+
+    Qff = np.zeros([len(Qmag), len(coef), len(energy_kev)], dtype=np.complex)
+    # Broadcast dispersion corrections
+    Qff[:, :, :] = f1.T + 1j * f2.T
+
+    # Loop over elements
+    for n in range(len(coef)):
+        a1 = coef['a1'][n]
+        b1 = coef['b1'][n]
+        a2 = coef['a2'][n]
+        b2 = coef['b2'][n]
+        a3 = coef['a3'][n]
+        b3 = coef['b3'][n]
+        a4 = coef['a4'][n]
+        b4 = coef['b4'][n]
+        c = coef['c'][n]
+
+        # Array multiplication over Qmags
+        f = a1 * np.exp(-b1 * (Qmag / (4 * np.pi)) ** 2) + \
+            a2 * np.exp(-b2 * (Qmag / (4 * np.pi)) ** 2) + \
+            a3 * np.exp(-b3 * (Qmag / (4 * np.pi)) ** 2) + \
+            a4 * np.exp(-b4 * (Qmag / (4 * np.pi)) ** 2) + c
+        for e in range(len(energy_kev)):
+            Qff[:, n, e] += f
     return Qff
 
 
@@ -1024,25 +1075,69 @@ def atomic_scattering_factor(element, energy_kev=None):
     """
     Read atomic scattering factor table, giving f1+f2 for different energies
     From: http://henke.lbl.gov/optical_constants/asf.html
-    :param element: str name of element
+    :param element: str or list of str, name of element
     :param energy_kev: float or list energy in keV (None to return original, uninterpolated list)
-    :return: f1, f2
+    :return: f1, f2, shape dependent on shapes of element and energy_kev
     """
     asf_file = os.path.join(datadir, 'atomic_scattering_factors.npy')
     asf = np.load(asf_file, allow_pickle=True)
     asf = asf.item()
-    energy = np.array(asf[element]['energy']) / 1000.  # eV -> keV
-    f1 = np.array(asf[element]['f1'])
-    f2 = np.array(asf[element]['f2'])
-    f1[f1 < -1000] = np.nan
-    f2[f2 < -1000] = np.nan
+
+    element = np.asarray(element, dtype=str).reshape(-1)
+    energy = {}
+    f1 = {}
+    f2 = {}
+    for el in element:
+        energy[el] = np.array(asf[el]['energy']) / 1000.  # eV -> keV
+        f1[el] = np.array(asf[el]['f1'])
+        f2[el] = np.array(asf[el]['f2'])
+        f1[el][f1[el] < -1000] = np.nan
+        f2[el][f2[el] < -1000] = np.nan
 
     if energy_kev is None:
+        if len(element) == 1:
+            return energy[el], f1[el], f2[el]
         return energy, f1, f2
 
     # Interpolate values
-    if1 = np.interp(energy_kev, energy, f1)
-    if2 = np.interp(energy_kev, energy, f2)
+    if len(element) == 1:
+        if1 = np.interp(energy_kev, energy[el], f1[el])
+        if2 = np.interp(energy_kev, energy[el], f2[el])
+        return if1, if2
+    if1 = np.zeros([np.size(energy_kev), len(element)])
+    if2 = np.zeros([np.size(energy_kev), len(element)])
+    for n, el in enumerate(element):
+        if1[:, n] = np.interp(energy_kev, energy[el], f1[el])
+        if2[:, n] = np.interp(energy_kev, energy[el], f2[el])
+    return if1, if2
+
+
+def xray_dispersion_corrections(elements, energy_kev=None):
+    """
+    Read xray dispersion corrections from atomic scattering factor table, giving f' and f" for different energies
+    From: http://henke.lbl.gov/optical_constants/asf.html
+    :param elements: list of str, name of element
+    :param energy_kev: float or list energy in keV (None to return original, uninterpolated list)
+    :return: f', f" with shape (len(energy), len(elements))
+    """
+    asf_file = os.path.join(datadir, 'atomic_scattering_factors.npy')
+    asf = np.load(asf_file, allow_pickle=True)
+    asf = asf.item()
+
+    energy_kev = np.asarray(energy_kev, dtype=float).reshape(-1)
+    elements = np.asarray(elements, dtype=str).reshape(-1)
+    if1 = np.zeros([len(energy_kev), len(elements)])
+    if2 = np.zeros([len(energy_kev), len(elements)])
+    for n, el in enumerate(elements):
+        z = asf[el]['Z']
+        energy = np.array(asf[el]['energy']) / 1000.  # eV -> keV
+        f1 = np.array(asf[el]['f1'])
+        f2 = np.array(asf[el]['f2'])
+        f1[f1 < -1000] = np.nan
+        f2[f2 < -1000] = np.nan
+        # interpolate and subtract f0==Z
+        if1[:, n] = np.interp(energy_kev, energy, f1) - z
+        if2[:, n] = -np.interp(energy_kev, energy, f2)
     return if1, if2
 
 
