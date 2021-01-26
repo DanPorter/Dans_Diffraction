@@ -77,7 +77,7 @@ f = dif.fc.xray_scattering_factor('Fe', Qmag=q)
 
 ![x-ray scattering factor](../../Screenshots/xray_scattering_factor.png)
 
-## X-Ray Dispersion corrrections
+### X-Ray Dispersion corrrections
 X-Ray Atomic Scattering Factors are taken from the online tables at [CXRO](http://henke.lbl.gov/optical_constants/asf.html).
 The dispersion corrections for resonant x-ray scattering are calculated using
 <div align="center">f(Q, E) = f^0(|Q|) + f'(E) + if''(E)</div>

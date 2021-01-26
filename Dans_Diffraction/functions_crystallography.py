@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.3
-Last updated: 21/01/21
+Version 3.4
+Last updated: 26/01/21
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -34,6 +34,7 @@ Version History:
 09/06/20 3.2    Updated gen_sym_mat, symmetry_ops2magnetic, added sym_op_det
 03/09/20 3.2.1  Updated cif_symmetry to allow for missing magnetic centring
 21/01/21 3.3    Added xray_scattering_factor_resonant and xray_dispersion_corrections functions added
+26/01/21 3.4    Added xray attenuation, transmission and refractive index
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -48,7 +49,7 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.3'
+__version__ = '3.4'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -1075,9 +1076,9 @@ def atomic_scattering_factor(element, energy_kev=None):
     """
     Read atomic scattering factor table, giving f1+f2 for different energies
     From: http://henke.lbl.gov/optical_constants/asf.html
-    :param element: str or list of str, name of element
+    :param element: str or list of str, name of element. If element string includes a number, this will multiply values
     :param energy_kev: float or list energy in keV (None to return original, uninterpolated list)
-    :return: f1, f2, shape dependent on shapes of element and energy_kev
+    :return: f1, f2, shape dependent on shapes of element and energy_kev:  float, or [ene] or [ele, ene]
     """
     asf_file = os.path.join(datadir, 'atomic_scattering_factors.npy')
     asf = np.load(asf_file, allow_pickle=True)
@@ -1088,11 +1089,14 @@ def atomic_scattering_factor(element, energy_kev=None):
     f1 = {}
     f2 = {}
     for el in element:
-        energy[el] = np.array(asf[el]['energy']) / 1000.  # eV -> keV
-        f1[el] = np.array(asf[el]['f1'])
-        f2[el] = np.array(asf[el]['f2'])
+        name, occ, charge = split_element_symbol(el)
+        energy[el] = np.array(asf[name]['energy']) / 1000.  # eV -> keV
+        f1[el] = np.array(asf[name]['f1'])
+        f2[el] = np.array(asf[name]['f2'])
         f1[el][f1[el] < -1000] = np.nan
         f2[el][f2[el] < -1000] = np.nan
+        f1[el] = f1[el] * occ
+        f2[el] = f2[el] * occ
 
     if energy_kev is None:
         if len(element) == 1:
@@ -1104,12 +1108,27 @@ def atomic_scattering_factor(element, energy_kev=None):
         if1 = np.interp(energy_kev, energy[el], f1[el])
         if2 = np.interp(energy_kev, energy[el], f2[el])
         return if1, if2
-    if1 = np.zeros([np.size(energy_kev), len(element)])
-    if2 = np.zeros([np.size(energy_kev), len(element)])
+    if1 = np.zeros([len(element), np.size(energy_kev)])
+    if2 = np.zeros([len(element), np.size(energy_kev)])
     for n, el in enumerate(element):
-        if1[:, n] = np.interp(energy_kev, energy[el], f1[el])
-        if2[:, n] = np.interp(energy_kev, energy[el], f2[el])
+        if1[n, :] = np.interp(energy_kev, energy[el], f1[el])
+        if2[n, :] = np.interp(energy_kev, energy[el], f2[el])
     return if1, if2
+
+
+def photoabsorption_crosssection(elements, energy_kev):
+    """
+    Calculate the photoabsorption cross section from the atomic scattering factors
+        u = 2*r0*lambda*f2
+    See: https://henke.lbl.gov/optical_constants/intro.html
+    :param elements: str or list of string element symbol, if list, absorption will be summed over elements
+    :param energy_kev: float or array x-ray energy
+    :return: float or array [len(energy)] m^2
+    """
+    f1, f2 = atomic_scattering_factor(elements, energy_kev)
+    f2 = f2.reshape(np.size(elements), np.size(energy_kev)).sum(axis=0)  # sum over elements
+    wavelength = energy2wave(energy_kev) * 1e-10
+    return 2 * fg.r0 * wavelength * f2
 
 
 def xray_dispersion_corrections(elements, energy_kev=None):
@@ -1580,6 +1599,142 @@ def count_charges(list_of_elements, occupancy=None, divideby=1, latex=False):
     for a in ats:
         outstr += [element_charge_string(a, atno[a], chno[a], latex)]
     return outstr
+
+
+def molecular_weight(compound_name):
+    """
+    Calculate the molecular weight of given compound
+    :param compound_name: str elements
+    :return: float weight in g
+    """
+    el_list = split_compound(compound_name)
+    weight = 0
+    for el in el_list:
+        name, occ, charge = split_element_symbol(el)
+        weight += occ * atom_properties(name, 'Weight')[0]
+    return weight
+
+
+def xray_attenuation_length(elements, energy_kev, atom_per_volume, grazing_angle=90):
+    """
+    Calcualte the attenuation length in microns
+    The depth into the material measured along the surface normal where the intensity of
+    x-rays falls to 1/e of its value at the surface.
+      A = sin(th) / n * mu
+    :param elements: str or list of str, if list - absorption will be summed over elements
+    :param energy_kev: float array
+    :param atom_per_volume: float atoms per A^3
+    :param grazing_angle: incidence angle relative to the surface, in degrees
+    :return: float or array in microns
+    """
+    mu = photoabsorption_crosssection(elements, energy_kev)
+    surface_normal = np.sin( np.deg2rad(grazing_angle))
+    return surface_normal * 1e6 / (1e30 * atom_per_volume * mu)
+
+
+def xray_transmission(elements, energy_kev, atom_per_volume, distance_um):
+    """
+    Calculate the transimssion of x-rays through a thick slab
+      T/T0 = exp(-n*mu*d)
+    :param elements: str or list of str, if list - absorption will be summed over elements
+    :param energy_kev: float array
+    :param atom_per_volume: float atoms per A^3
+    :param distance_um: float distance in microns
+    :return: float or array
+    """
+    mu = photoabsorption_crosssection(elements, energy_kev)  # float, or [ene]
+    return np.exp(-atom_per_volume * 1e30 * mu * distance_um * 1e-6)
+
+
+def xray_refractive_index(elements, energy_kev, atom_per_volume):
+    """
+    Calculate the complex index of refraction of a material
+      n = 1 - (1/2pi)N*r0*lambda^2*(f1+if2) = 1 - Delta - iBeta
+    :param elements: str or list of str, if list atomic scattering factors will be summed over elements
+    :param energy_kev: float array
+    :param atom_per_volume: float atoms per A^3
+    :return: complex float or array
+    """
+    f1, f2 = atomic_scattering_factor(elements, energy_kev)
+    ft = f1 + 1j * f2
+    ft = ft.reshape(np.size(elements), np.size(energy_kev)).sum(axis=0)  # sum over elements
+    atom_per_volume = atom_per_volume * 1e30  # atom per m^3
+    wavelength = energy2wave(energy_kev) * 1e-10  # m
+    return 1 - (ft * fg.r0 * atom_per_volume * wavelength**2 / (2 * fg.pi))
+
+
+def xray_reflectivity(elements, energy_kev, atom_per_volume, grazing_angle):
+    """
+    Calculate the specular reflectivity of a material
+      NOT CURRENTLY WORKING
+    :param elements: str or list of str, if list - absorption will be summed over elements
+    :param energy_kev: float array
+    :param atom_per_volume: float atoms per A^3
+    :param grazing_angle: incidence angle relative to the surface, in degrees
+    :return: float or array
+    """
+    #wavelength = energy2wave(energy_kev) * 1e-10
+    refindex = xray_refractive_index(elements, energy_kev, atom_per_volume)
+    #pilambda = 2 * fg.pi / wavelength
+    costh = np.cos(np.deg2rad(grazing_angle))
+    ki = costh
+    kt = np.sqrt(refindex*np.conj(refindex) - costh**2)
+    r = (ki - kt)/(ki + kt)
+    return np.real(r * np.conj(r))
+
+
+def molecular_attenuation_length(chemical_formula, energy_kev, density, grazing_angle=90):
+    """
+    Calcualte X-Ray Attenuation Length
+    Equivalent to: https://henke.lbl.gov/optical_constants/atten2.html
+    Based on formulas from: Henke, Gullikson, and Davis, Atomic Data and Nuclear Data Tables 54 no.2, 181-342 (July 1993)
+    :param chemical_formula: str molecular formula
+    :param energy_kev: float or array, x-ray energy in keV
+    :param density: float density in g/cm^3
+    :param grazing_angle: incidence angle relative to the surface, in degrees
+    :return: float or array, in microns
+    """
+    elements = split_compound(chemical_formula)
+    weight = molecular_weight(chemical_formula)
+    atom_per_volume = 1e-24 * density * fg.Na / weight  # atoms per A^3
+    return xray_attenuation_length(elements, energy_kev, atom_per_volume, grazing_angle)
+
+
+def molecular_refractive_index(chemical_formula, energy_kev, density):
+    """
+    Calculate Complex Index of Refraction
+        n = 1 - (1/2pi)N*r0*lambda^2*(f1+if2) = 1 - Delta - iBeta
+    Equivalent to: https://henke.lbl.gov/optical_constants/getdb2.html
+    Based on formulas from: Henke, Gullikson, and Davis, Atomic Data and Nuclear Data Tables 54 no.2, 181-342 (July 1993)
+    :param chemical_formula: str molecular formula
+    :param energy_kev: float or array, x-ray energy in keV
+    :param density: float density in g/cm^3
+    :return: n(complex), Delta, Beta
+    """
+    elements = split_compound(chemical_formula)
+    weight = molecular_weight(chemical_formula)
+    atom_per_volume = 1e-24 * density * fg.Na / weight  # atoms per A^3
+    n = xray_refractive_index(elements, energy_kev, atom_per_volume)
+    delta = 1 - np.real(n)
+    beta = -np.imag(n)
+    return n, delta, beta
+
+
+def filter_transmission(chemical_formula, energy_kev, density, thickness_um=100):
+    """
+    Calculate transmission of x-ray through a slab of material
+    Equivalent to https://henke.lbl.gov/optical_constants/filter2.html
+    Based on formulas from: Henke, Gullikson, and Davis, Atomic Data and Nuclear Data Tables 54 no.2, 181-342 (July 1993)
+    :param chemical_formula: str molecular formula
+    :param energy_kev: float or array, x-ray energy in keV
+    :param density: float density in g/cm^3
+    :param thickness_um: slab thickness in microns
+    :return: float or array
+    """
+    elements = split_compound(chemical_formula)
+    weight = molecular_weight(chemical_formula)
+    atom_per_volume = 1e-24 * density * fg.Na / weight  # atoms per A^3
+    return xray_transmission(elements, energy_kev, atom_per_volume, thickness_um)
 
 
 '-------------------Lattice Transformations------------------------------'

@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.6
-Last updated: 15/10/20
+Version 1.7
+Last updated: 26/01/21
 
 Version History:
 10/11/17 0.1    Program created
@@ -19,6 +19,7 @@ Version History:
 30/03/20 1.4    Added latex_table, info returns str, removed getattr from xray_edges, check if element exists
 12/05/20 1.5    Added orbitals function, exchange_paths
 15/10/20 1.6    Added scattering lengths + factors
+26/01/21 1.7    Added calculation of xray attenuation, transmission and refractive index
 
 
 @author: DGPorter
@@ -30,12 +31,18 @@ from . import functions_general as fg
 from . import functions_crystallography as fc
 from .classes_orbitals import CrystalOrbitals
 
-__version__ = '1.6'
+__version__ = '1.7'
 
 
 class Properties:
     """
     Properties functions for the Crystal Object
+    Example Usage:
+        xtl = Crystal('file.cif')
+        print(xtl.Properties)
+        xtl.Properties.density()
+        print(xtl.Properties.molcharge())
+        xtl.Properties.Co.K  # returns K edge of element Co (if Co in Crystal)
     """
     def __init__(self, xtl):
         """initialise"""
@@ -235,6 +242,73 @@ class Properties:
 
         u = up*self.density()/10000
         return u
+
+    def xray_transmission(self, energy_kev=None, thickness_um=100):
+        """
+        Calculate transmission of x-ray through a slab of material
+        Equivalent to https://henke.lbl.gov/optical_constants/filter2.html
+        Based on formulas from: Henke, Gullikson, and Davis, Atomic Data and Nuclear Data Tables 54 no.2, 181-342 (July 1993)
+        :param energy_kev: float or array, x-ray energy in keV
+        :param thickness_um: slab thickness in microns
+        :return: float or array
+        """
+        if energy_kev is None:
+            energy_kev = fc.getenergy()
+
+        atom_type = self.xtl.Structure.type
+        occ = self.xtl.Structure.occupancy
+        natoms = np.sum(occ)
+        vol = self.volume()
+        atom_per_volume = natoms / vol # atoms per A^3
+        elements = ['%s%s' % (at, o) for at, o in zip(atom_type, occ)]
+        return fc.xray_transmission(elements, energy_kev, atom_per_volume, thickness_um)
+
+    def xray_attenuation_length(self, energy_kev=None, grazing_angle=90):
+        """
+        Calcualte X-Ray Attenuation Length
+        Equivalent to: https://henke.lbl.gov/optical_constants/atten2.html
+        Based on formulas from: Henke, Gullikson, and Davis, Atomic Data and Nuclear Data Tables 54 no.2, 181-342 (July 1993)
+        :param energy_kev: float or array, x-ray energy in keV
+        :param grazing_angle: incidence angle relative to the surface, in degrees
+        :return: float or array, in microns
+        """
+        if energy_kev is None:
+            energy_kev = fc.getenergy()
+
+        atom_type = self.xtl.Structure.type
+        occ = self.xtl.Structure.occupancy
+        natoms = np.sum(occ)
+        vol = self.volume()
+        atom_per_volume = natoms / vol  # atoms per A^3
+        elements = ['%s%s' % (at, o) for at, o in zip(atom_type, occ)]
+        return fc.xray_attenuation_length(elements, energy_kev, atom_per_volume, grazing_angle)
+
+    def xray_reflectivity(self, energy_kev=None, grazing_angle=2):
+        """
+        Calculate the specular reflectivity of a material
+          NOT CURRENTLY WORKING
+        :param elements: str or list of str, if list - absorption will be summed over elements
+        :param energy_kev: float array
+        :param grazing_angle: incidence angle relative to the surface, in degrees
+        :return: float or array
+        """
+        if energy_kev is None:
+            energy_kev = fc.getenergy()
+        raise Warning("Warning: this doesn\'t work yet")
+
+        atom_type = self.xtl.Structure.type
+        occ = self.xtl.Structure.occupancy
+        natoms = np.sum(occ)
+        vol = self.volume()
+        atom_per_volume = natoms / vol  # atoms per A^3
+        elements = ['%s%s' % (at, o) for at, o in zip(atom_type, occ)]
+
+        refindex = fc.xray_refractive_index(elements, energy_kev, atom_per_volume)
+        costh = np.cos(np.deg2rad(grazing_angle))
+        ki = costh
+        kt = np.sqrt(refindex * np.conj(refindex) - costh ** 2)
+        r = (ki - kt) / (ki + kt)
+        return np.real(r * np.conj(r))
 
     def diamagnetic_susceptibility(self, atom_type='volume'):
         """
@@ -488,19 +562,19 @@ class Properties:
     def info(self):
         """Prints various properties of the crystal"""
 
-        out = ''
-        out += '-----------%s-----------'%self.xtl.name
-        out += ' Weight: %5.2f g/mol' %(self.weight())
-        out += ' Volume: %5.2f A^3' %(self.volume())
-        out += 'Density: %5.2f g/cm' %(self.density())
-        out += '\nAtoms:'
+        out = '\n'
+        out += '-----------%s-----------\n'%self.xtl.name
+        out += ' Weight: %5.2f g/mol\n' %(self.weight())
+        out += ' Volume: %5.2f A^3\n' %(self.volume())
+        out += 'Density: %5.2f g/cm\n' %(self.density())
+        out += '\nAtoms:\n'
         types = np.unique(self.xtl.Structure.type)
         props = fc.atom_properties(types) # returns a numpy structured array
         prop_names = props.dtype.names
         for key in prop_names:
             ele = '%20s :' % key
             ele += ''.join([' %10s :' %(item) for item in props[key]])
-            out += ele
+            out += ele + '\n'
         return out
 
     def __repr__(self):

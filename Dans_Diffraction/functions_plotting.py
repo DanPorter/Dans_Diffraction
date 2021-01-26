@@ -747,3 +747,69 @@ def plot_atomic_scattering_factor(element, min_energy=0.5, max_energy=20):
     plt.xlim([min_energy, max_energy])
     labels('X-Ray Scattering Factor\n%s' % element, 'Energy [keV]', None, legend=True)
 
+
+def plot_xray_transmission(chemical_formula, density=8.9, energy_range=None, thickness_um=100):
+    """
+    Plot transmission of x-ray through a slab of material at range of energies
+    Equivalent to https://henke.lbl.gov/optical_constants/filter2.html
+    Based on formulas from: Henke, Gullikson, and Davis, Atomic Data and Nuclear Data Tables 54 no.2, 181-342 (July 1993)
+    :param chemical_formula: str molecular formula
+    :param density: float density in g/cm^3
+    :param energy_range: array x-ray energy in keV, None for default range
+    :param thickness_um: slab thickness in microns
+    :return: float or array
+    """
+    if energy_range is None:
+        energy_range = np.arange(0.03, 20, 0.01)
+
+    transmission = fc.filter_transmission(chemical_formula, energy_range, density, thickness_um)
+    ttl = '%s Density=%5.3f, thickness=%3.3g μm' % (chemical_formula, density, thickness_um)
+
+    newplot(energy_range, transmission)
+    labels(ttl, 'Energy [keV]', 'Transmission')
+
+
+def plot_xray_attenuation_length(chemical_formula, density=8.9, energy_range=None, grazing_angle=90):
+    """
+    Plot the X-Ray Attenuation Length of a compound
+    Equivalent to: https://henke.lbl.gov/optical_constants/atten2.html
+    Based on formulas from: Henke, Gullikson, and Davis, Atomic Data and Nuclear Data Tables 54 no.2, 181-342 (July 1993)
+    :param chemical_formula: str molecular formula
+    :param density: float density in g/cm^3
+    :param energy_range: array x-ray energy in keV, None for default range
+    :param grazing_angle: incidence angle relative to the surface, in degrees
+    :return: float or array, in microns
+    """
+    if energy_range is None:
+        energy_range = np.arange(0.03, 20, 0.01)
+
+    transmission = fc.molecular_attenuation_length(chemical_formula, energy_range, density, grazing_angle)
+    ttl = '%s Density=%5.3f, Angle=%3.3g deg' % (chemical_formula, density, grazing_angle)
+
+    newplot(energy_range, transmission)
+    labels(ttl, 'Energy [keV]', 'Atten Length [μm]')
+
+
+def plot_xray_refractive_index(chemical_formula, density=8.9, energy_range=None):
+    """
+    Plot the Complex Index of Refraction of a compound
+        n = 1 - (1/2pi)N*r0*lambda^2*(f1+if2) = 1 - Delta - iBeta
+    Equivalent to: https://henke.lbl.gov/optical_constants/getdb2.html
+    Based on formulas from: Henke, Gullikson, and Davis, Atomic Data and Nuclear Data Tables 54 no.2, 181-342 (July 1993)
+    :param chemical_formula: str molecular formula
+    :param density: float density in g/cm^3
+    :param energy_range: array x-ray energy in keV, None for default range
+    :return: float or array, in microns
+    """
+    if energy_range is None:
+        energy_range = np.arange(0.03, 20, 0.01)
+
+    n, delta, beta = fc.molecular_refractive_index(chemical_formula, energy_range, density)
+    ttl = '%s Density=%5.3f\nIndex of Refraction = 1 - δ - iβ' % (chemical_formula, density)
+
+    newplot(energy_range, delta, 'r-', lw=2, label='δ')
+    plt.plot(energy_range, beta, 'b-', lw=2, label='β')
+    labels(ttl, 'Energy [keV]', None, legend=True)
+    plt.xscale('log')
+    plt.yscale('log')
+

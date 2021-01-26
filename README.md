@@ -1,7 +1,7 @@
 # Dans_Diffaction
 Reads crystallographic cif files and simulates diffraction, among other things.
 
-**Version 1.8**
+**Version 1.9**
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3859501.svg)](https://doi.org/10.5281/zenodo.3859501)
 
@@ -62,6 +62,7 @@ Dans_Diffraction can also be run in scripts as an import, example scripts are pr
 import Dans_Diffraction as dif
 xtl = dif.Crystal('some_file.cif')
 xtl.info() # print Crystal structure parameters
+help(xtl)  # all functions (nearly!) are documented
 ```
 
 ### Alter atomic positions
@@ -172,7 +173,17 @@ The Crystal class contains a lot of atomic properties that can be exposed in the
 xtl.Properties.info()
 ```
 
-All the properties are stored in the folder [Dans_Diffraction/data](data).
+Calculated properties include:
+ - Molecular weight
+ - Density
+ - Diamagnetic suscpetibility 
+ - x-ray absorption coefficient, attenuation length, transmission and refractive index
+ - Molecular charge balance
+ - Molecular mass fraction
+ - Atomic orbitals
+ - Magnetic exchange paths (in progress...)
+
+Properties are calulated using the atomic structure along with atomic data stored in the folder [Dans_Diffraction/data](data).
 
 
 ### Multiple Scattering

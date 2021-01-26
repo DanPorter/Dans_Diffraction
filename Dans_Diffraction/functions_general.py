@@ -49,6 +49,7 @@ u0 = 4 * pi * 1e-7  # H m-1 Magnetic permeability of free space
 me = 9.109e-31  # kg Electron rest mass
 Na = 6.022e23  # Avagadro's No
 A = 1e-10  # m Angstrom
+r0 = 2.8179403227e-15  # m classical electron radius = e^2/(4pi*e0*me*c^2)
 Cu = 8.048  # Cu-Ka emission energy, keV
 Mo = 17.4808  # Mo-Ka emission energy, keV
 #Mo = 17.4447 # Mo emission energy, keV

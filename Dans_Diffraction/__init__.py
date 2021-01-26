@@ -29,8 +29,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9.5
-Last updated: 26/11/20
+Version 1.9.7
+Last updated: 26/01/21
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -52,7 +52,7 @@ Version History:
 02/09/20 1.9.4  Added string methods to Crystal classes
 26/11/20 1.9.5  Various improvements and corrections
 04/01/21 1.9.6  Added Scattering.structure_factor function
-21/01/21 1.9.7  Added xray dispersion correction functions
+26/01/21 1.9.7  Added xray dispersion correction functions, plus x-ray interactions calculations
 
 -----------------------------------------------------------------------------
    Copyright 2020 Diamond Light Source Ltd.
@@ -107,7 +107,7 @@ if fdmnes_checker():
 
 
 __version__ = '1.9.7'
-__date__ = '21/01/21'
+__date__ = '26/01/21'
 
 
 # Build
