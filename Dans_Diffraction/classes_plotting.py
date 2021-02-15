@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9.2
-Last updated: 21/01/20
+Version 1.9.3
+Last updated: 15/02/21
 
 Version History:
 18/08/17 0.1    Program created
@@ -28,6 +28,7 @@ Version History:
 29/06/20 1.9.0  Removed scipy.convolve2d due to problems importing, new method more accurate but slower
 26/11/20 1.9.1  Added layers input to plot_layers
 21/01/21 1.9.2  Added plot_xray_resonance
+15/02/21 1.9.3  Added axis_reciprocal_lattice_points/lines/vectors
 
 @author: DGPorter
 """
@@ -41,7 +42,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.9.2'
+__version__ = '1.9.3'
 
 
 class Plotting:
@@ -385,7 +386,126 @@ class Plotting:
         ylab = u'Intensity [a. u.]'
         ttl = '%s\nE = %1.3f keV' % (self.xtl.name, energy_kev)
         fp.labels(ttl, xlab, ylab)
-    
+
+    def axis_reciprocal_lattice_points(self, axes=None, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
+                                       q_max=4.0, cut_width=0.05, **kwargs):
+        """
+        Add lines to the current axis showing the reciprocal lattice
+        :param axes: None for plt.gca() or axis of choice
+        :param x_axis: direction along x, in units of the reciprocal lattice (hkl)
+        :param y_axis: direction along y, in units of the reciprocal lattice (hkl)
+        :param centre: centre of the plot, in units of the reciprocal lattice (hkl)
+        :param q_max: maximum distance to plot to - in A-1
+        :param cut_width: width in height that will be included, in A-1
+        :param kwargs: keyword arguments to pass to plt.plot(..., **kwargs)
+        :return: None
+        """
+
+        if axes is None:
+            axes = plt.gca()
+        axis = axes.axis()
+
+        qx, qy, hkl = self.xtl.Cell.reciprocal_space_plane(x_axis, y_axis, centre, q_max, cut_width)
+        axes.plot(qx, qy, 'o', **kwargs)
+
+    def axis_reciprocal_lattice_lines(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0), q_max=4.0,
+                                      cut_width=0.05, axes=None, *args, **kwargs):
+        """
+        Add lines to the current axis showing the reciprocal lattice
+        :param x_axis: direction along x, in units of the reciprocal lattice (hkl)
+        :param y_axis: direction along y, in units of the reciprocal lattice (hkl)
+        :param centre: centre of the plot, in units of the reciprocal lattice (hkl)
+        :param q_max: maximum distance to plot to - in A-1
+        :param cut_width: width in height that will be included, in A-1
+        :param axes: None for plt.gca() or axis of choice
+        :param args: argments to pass to plot function, e.g. linewidth, alpha, color
+        :return: None
+        """
+
+        if axes is None:
+            axes = plt.gca()
+
+        # Determine the directions in cartesian space
+        x_cart = fg.norm(self.xtl.Cell.calculateQ(x_axis))
+        y_cart = fg.norm(self.xtl.Cell.calculateQ(y_axis))
+        z_cart = fg.norm(np.cross(x_cart, y_cart))  # z is perp. to x+y
+        y_cart = np.cross(x_cart, z_cart)  # make sure y is perp. to x
+        c_cart = self.xtl.Cell.calculateQ(centre)
+
+        # Correct y-axis for label - original may not have been perp. to x_axis (e.g. hexagonal)
+        y_axis = fg.norm(self.xtl.Cell.indexQ(y_cart))
+        y_axis = -y_axis / np.min(np.abs(y_axis[np.abs(y_axis) > 0])) + 0.0  # +0.0 to remove -0
+
+        # Determine orthogonal lattice vectors for plotting lines and labels
+        vec_a = x_axis
+        vec_c = np.cross(x_axis, y_axis)
+        vec_b = fg.norm(np.cross(vec_c, vec_a))
+
+        # Lattice points and vectors within the plot
+        Q_vec_a = self.xtl.Cell.calculateQ(vec_a)
+        Q_vec_b = self.xtl.Cell.calculateQ(vec_b)
+
+        CELL = np.array([2 * q_max * x_cart, -2 * q_max * y_cart, cut_width * z_cart])  # Plot/mesh unit cell
+
+        mesh_vec_a = fg.index_coordinates(Q_vec_a, CELL) * 2 * q_max  # coordinates wrt plot axes
+        mesh_vec_b = fg.index_coordinates(Q_vec_b, CELL) * 2 * q_max
+
+        qx, qy, hkl = self.xtl.Cell.reciprocal_space_plane(x_axis, y_axis, centre, q_max, cut_width)
+        lattQ = np.zeros((len(qx), 3))
+        lattQ[:, 0] = qx
+        lattQ[:, 1] = qy
+        fp.plot_lattice_lines(lattQ, mesh_vec_a, mesh_vec_b, axis=axes, *args, **kwargs)
+
+    def axis_reciprocal_lattice_vectors(self, axes=None, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
+                                        q_max=4.0, cut_width=0.05):
+        """
+        Add lines to the current axis showing the reciprocal lattice
+        :param axes: None for plt.gca() or axis of choice
+        :param x_axis: direction along x, in units of the reciprocal lattice (hkl)
+        :param y_axis: direction along y, in units of the reciprocal lattice (hkl)
+        :param centre: centre of the plot, in units of the reciprocal lattice (hkl)
+        :param q_max: maximum distance to plot to - in A-1
+        :param cut_width: width in height that will be included, in A-1
+        :return: None
+        """
+
+        if axes is None:
+            axes = plt.gca()
+        axis = axes.axis()
+
+        # Determine the directions in cartesian space
+        x_cart = fg.norm(self.xtl.Cell.calculateQ(x_axis))
+        y_cart = fg.norm(self.xtl.Cell.calculateQ(y_axis))
+        z_cart = fg.norm(np.cross(x_cart, y_cart))  # z is perp. to x+y
+        y_cart = np.cross(x_cart, z_cart)  # make sure y is perp. to x
+        c_cart = self.xtl.Cell.calculateQ(centre)
+
+        # Correct y-axis for label - original may not have been perp. to x_axis (e.g. hexagonal)
+        y_axis = fg.norm(self.xtl.Cell.indexQ(y_cart))
+        y_axis = -y_axis / np.min(np.abs(y_axis[np.abs(y_axis) > 0])) + 0.0  # +0.0 to remove -0
+
+        # Determine orthogonal lattice vectors for plotting lines and labels
+        vec_a = x_axis
+        vec_c = np.cross(x_axis, y_axis)
+        vec_b = fg.norm(np.cross(vec_c, vec_a))
+
+        # Lattice points and vectors within the plot
+        Q_vec_a = self.xtl.Cell.calculateQ(vec_a)
+        Q_vec_b = self.xtl.Cell.calculateQ(vec_b)
+
+        CELL = np.array([2 * q_max * x_cart, -2 * q_max * y_cart, cut_width * z_cart])  # Plot/mesh unit cell
+
+        mesh_vec_a = fg.index_coordinates(Q_vec_a, CELL) * 2 * q_max  # coordinates wrt plot axes
+        mesh_vec_b = fg.index_coordinates(Q_vec_b, CELL) * 2 * q_max
+
+        # Vector arrows and lattice point labels
+        cen_lab = '(%1.3g,%1.3g,%1.3g)' % (centre[0], centre[1], centre[2])
+        vec_a_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_a[0] + centre[0], vec_a[1] + centre[1], vec_a[2] + centre[2])
+        vec_b_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_b[0] + centre[0], vec_b[1] + centre[1], vec_b[2] + centre[2])
+
+        fp.plot_vector_arrows(mesh_vec_a, mesh_vec_b, vec_a_lab, vec_b_lab, axis=axes)
+        plt.text(0 - (0.2 * q_max), 0 - (0.1 * q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18)
+
     def generate_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],
                                     q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
         """

@@ -16,8 +16,8 @@ Usage:
 All plots generated require plt.show() call, unless using interactive mode
 
 
-Version 1.9
-Last updated: 22/11/20
+Version 1.9.1
+Last updated: 15/02/21
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -30,6 +30,7 @@ Version History:
 03/05/19 1.7    Added legend to labels function
 09/03/20 1.8    Added default figure size
 22/11/20 1.9    Update to labels to fix 3D plotting
+15/02/21 1.9.1  Update to vecplot for plotting on axis
 
 @author: DGPorter
 """
@@ -623,7 +624,7 @@ def plot_lattice_lines(latt, vec_a=[1, 0, 0], vec_b=[0, 1, 0], axis=None, *args,
 
 
 def plot_vector_arrows(vec_a=[1, 0, 0], vec_b=[1, 0, 0], vec_a_lab=None, vec_b_lab=None,
-                       arrow_size=40, color='b', fontsize=18):
+                       arrow_size=40, color='b', fontsize=18, axis=None):
     """
     Plot vector arrows for Cell on current axis
         Will generate two arrows on the current axis, pointing from the origin to vec_a and vec_b, respectivley.
@@ -640,8 +641,9 @@ def plot_vector_arrows(vec_a=[1, 0, 0], vec_b=[1, 0, 0], vec_a_lab=None, vec_b_l
     vec_a = np.asarray(vec_a).reshape([-1, np.shape(vec_a)[-1]])
     vec_b = np.asarray(vec_b).reshape((-1, np.shape(vec_b)[-1]))
 
-    ax = plt.gca()
-    axsize = ax.axis()
+    if axis is None:
+        axis = plt.gca()
+    axsize = axis.axis()
 
     # Vector arrows and lattice point labels
     if vec_a_lab is None:
@@ -649,11 +651,12 @@ def plot_vector_arrows(vec_a=[1, 0, 0], vec_b=[1, 0, 0], vec_a_lab=None, vec_b_l
     if vec_b_lab is None:
         vec_b_lab = 'b*'
 
+    plt.sca(axis)
     plot_arrow([0, vec_a[0, 0]], [0, vec_a[0, 1]], arrow_size=arrow_size, col=color)
     plt.text(vec_a[0, 0], vec_a[0, 1], vec_a_lab, fontname=DEFAULT_FONT, weight='bold', size=fontsize)
     plot_arrow([0, vec_b[0, 0]], [0, vec_b[0, 1]], arrow_size=arrow_size, col=color)
     plt.text(vec_b[0, 0], vec_b[0, 1], vec_b_lab, fontname=DEFAULT_FONT, weight='bold', size=fontsize)
-    ax.axis(axsize)
+    axis.axis(axsize)
 
 
 def plot_ewald_coverage(energy_kev, color='k', linewidth=2):

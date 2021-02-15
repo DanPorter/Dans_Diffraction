@@ -2,21 +2,15 @@
 """
 Module: Generally useful functions "functions_general.py"
 
-Contains various useful shortcuts for manipulating strings and arrays, 
+Contains various useful shortcuts for manipulating strings and arrays,
 making use of numpy and re.
 
 By Dan Porter, PhD
 Diamond
-2018
+2021
 
-Usage: 
-    - Run this file in an interactive console
-    OR
-    - from Dans_Diffraction import functions_general as fg
-
-
-Version 1.8
-Last updated: 20/07/20
+Version 2.0.0
+Last updated: 02/02/21
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -28,14 +22,19 @@ Version History:
 05/05/20 1.6    New version of readstfm, allows E powers and handles non-numbers.
 12/05/20 1.7    Added sph2cart, replace_bracket_multiple
 20/07/20 1.8    Added vector_inersection and plane_intersection, updated findranges, added whererun
+01/12/20 1.8.1  Added get_methods function
+26/01/21 1.8.2  Added shortstr and squaredata
+02/02/21 2.0.0  Merged changes in other versions, added vector_intersection and you_normal_vector
 
 @author: DGPorter
 """
 
 import sys, os, re
 import numpy as np
+import inspect
 
-__version__ = '1.8'
+__version__ = '2.0.0'
+__date__ = '02/Feb/2021'
 
 # File directory
 directory = os.path.abspath(os.path.dirname(__file__))
@@ -52,7 +51,7 @@ A = 1e-10  # m Angstrom
 r0 = 2.8179403227e-15  # m classical electron radius = e^2/(4pi*e0*me*c^2)
 Cu = 8.048  # Cu-Ka emission energy, keV
 Mo = 17.4808  # Mo-Ka emission energy, keV
-#Mo = 17.4447 # Mo emission energy, keV
+# Mo = 17.4447 # Mo emission energy, keV
 
 '--------------------------Misc General Programs------------------------'
 
@@ -171,7 +170,7 @@ def cart2sph(xyz, deg=False):
     xy = xyz[:, 0] ** 2 + xyz[:, 1] ** 2
     r = mag(xyz)
     theta = np.arctan2(np.sqrt(xy), xyz[:, 2])  # for elevation angle defined from Z-axis down
-    #theta = np.arctan2(xyz[:,2], np.sqrt(xy))  # for elevation angle defined from XY-plane up
+    # theta = np.arctan2(xyz[:,2], np.sqrt(xy))  # for elevation angle defined from XY-plane up
     phi = np.arctan2(xyz[:, 1], xyz[:, 0])
     if deg:
         theta = np.rad2deg(theta)
@@ -263,6 +262,27 @@ def rotate_about_axis(point, axis, angle):
     return point * cs + np.cross(axis, point) * sn + axis * np.dot(axis, point) * (1 - cs)
 
 
+def you_normal_vector(eta=0, chi=90, mu=0):
+    """
+    Determine the normal vector using the You diffractometer angles
+      you_normal_vector(0, 0, 0) = [1, 0, 0]
+      you_normal_vector(0, 90, 0) = [0, 1, 0]
+      you_normal_vector(90, 90, 0) = [0, 0, -1]
+      you_normal_vector(0, 0, 90) = [0, 0, -1]
+    :param eta: angle (deg) along the x-axis
+    :param mu: angle (deg) about the z-axis
+    :param chi: angle deg) a
+    :return: array
+    """
+    eta = np.deg2rad(eta)
+    chi = np.deg2rad(chi)
+    mu = np.deg2rad(mu)
+    normal = np.array([np.sin(mu) * np.sin(eta) * np.sin(chi) + np.cos(mu) * np.cos(chi),
+                       np.cos(eta) * np.sin(chi),
+                       -np.cos(mu) * np.sin(eta) * np.sin(chi) - np.sin(mu) * np.cos(chi)])
+    return normal
+
+
 def group(A, tolerance=0.0001):
     """
     Group similear values in an array, returning the group and indexes
@@ -279,12 +299,12 @@ def group(A, tolerance=0.0001):
     A = np.asarray(A, dtype=np.float).reshape(-1)
     idx = np.argsort(A)
     rtn_idx = np.argsort(idx)
-    A2 = np.round(A/tolerance)*tolerance
+    A2 = np.round(A / tolerance) * tolerance
     groups, indices, inverse, counts = np.unique(A2[idx], return_index=True, return_inverse=True, return_counts=True)
     # groups = A[idx][indices]  # return original, not rounded values
     array_index = inverse[rtn_idx]
     group_index = idx[indices]
-    return groups, array_index, group_index,  counts
+    return groups, array_index, group_index, counts
 
 
 def unique_vector(vecarray, tol=0.05):
@@ -363,17 +383,50 @@ def vector_intersection(point1, direction1, point2, direction2):
 
     point1 = np.asarray(point1)
     point2 = np.asarray(point2)
+    direction1 = np.asarray(direction1) / np.sqrt(np.sum(np.square(direction1)))
+    direction2 = np.asarray(direction2) / np.sqrt(np.sum(np.square(direction2)))
+
+    mat = np.array([direction1, -direction2])
+    try:
+        inv = np.linalg.inv(mat)
+    except np.linalg.LinAlgError:
+        print('Vectors are parallel')
+        return np.array([np.nan, np.nan])
+    ua, ub = np.dot(point2 - point1, inv)
+    intersect = point1 + ua*direction1
+    return intersect
+
+
+def vector_intersection3d(point1, direction1, point2, direction2):
+    """
+    Calculate the point in 3D where two lines cross.
+    If lines are parallel, return nan
+    For derivation, see: https://math.stackexchange.com/questions/270767/find-intersection-of-two-3d-lines/271366
+    :param point1: [x,y,z] some coordinate on line 1
+    :param direction1: [dx, dy, dz] the direction of line 1
+    :param point2: [x,y,z] some coordinate on line 2
+    :param direction2: [dx, dy, dz] the direction of line 2
+    :return: [x, y, z]
+    """
+
+    point1 = np.asarray(point1)
+    point2 = np.asarray(point2)
     direction1 = np.asarray(direction1)/np.sqrt(np.sum(np.square(direction1)))
     direction2 = np.asarray(direction2)/np.sqrt(np.sum(np.square(direction2)))
 
-    if np.dot(direction1, direction2) == 1:
-        print('Vectors are parallel')
-        return np.nan
-
-    mat = np.array([direction1, -direction2])
-    ua, ub = np.dot(point2 - point1, np.linalg.inv(mat))
-    intersect = point1 + ua*direction1
-    return intersect
+    line = point2 - point1
+    c1 = np.cross(direction2, line)
+    c2 = np.cross(direction2, direction1)
+    h = mag(c1)
+    k = mag(c2)
+    a = ang(c1, c2)
+    if h == 0 or k == 0:
+        print('Lines parallel')
+        return np.array([np.nan, np.nan, np.nan])
+    v = (h/k) * direction1
+    if np.abs(a) < np.pi/2:
+        return point1 + v
+    return point1 - v
 
 
 def plane_intersection(line_point, line_direction, plane_point, plane_normal):
@@ -388,16 +441,16 @@ def plane_intersection(line_point, line_direction, plane_point, plane_normal):
 
     line_point = np.asarray(line_point)
     plane_point = np.asarray(plane_point)
-    line_direction = np.asarray(line_direction)/np.sqrt(np.sum(np.square(line_direction)))
-    plane_normal = np.asarray(plane_normal)/np.sqrt(np.sum(np.square(plane_normal)))
+    line_direction = np.asarray(line_direction) / np.sqrt(np.sum(np.square(line_direction)))
+    plane_normal = np.asarray(plane_normal) / np.sqrt(np.sum(np.square(plane_normal)))
 
     u1 = np.dot(plane_normal, plane_point - line_point)
     u2 = np.dot(plane_normal, line_direction)
 
     if u2 == 0:
         print('Plane is parallel to line')
-        return np.nan
-    u = u1/u2
+        return None
+    u = u1 / u2
     intersect = line_point + u*line_direction
     return intersect
 
@@ -488,6 +541,35 @@ def detail(A):
     print('Min: {}, Max: {}, Mean: {}, NaNs: {}'.format(np.nanmin(A), np.nanmax(A), np.nanmean(A), np.sum(np.isnan(A))))
 
 
+def inline_help(func):
+    """Return function spec and first line of help in line"""
+    fun_name = '%s%s' % (func.__name__, inspect.signature(func))
+    fun_doc = func.__doc__.strip().split('\n')[0] if func.__doc__ else ""
+    return "%s\n\t%s" % (fun_name, fun_doc)
+
+
+def array_str(A):
+    """
+    Returns a short string with array information
+    :param A: np array
+    :return: str
+    """
+    shape = np.shape(A)
+    try:
+        amax = np.max(A)
+        amin = np.min(A)
+        amean = np.mean(A)
+        out_str = "%s max: %4.5g, min: %4.5g, mean: %4.5g"
+        return out_str % (shape, amax, amin, amean)
+    except TypeError:
+        # list of str
+        array = np.asarray(A).reshape(-1)
+        array_start = array[0]
+        array_end = array[-1]
+        out_str = "%s [%s, ..., %s]"
+        return out_str % (shape, array_start, array_end)
+
+
 def print_arrays(arrays=[]):
     """
     Prints values from several arrays with nice formatting
@@ -559,34 +641,34 @@ def sphere_array(A, max_angle1=90, max_angle2=90, step1=1, step2=1):
     """
     Rotate points in array A by multiple angles
      B = sphere_array(A, max_angle1, max_angle2, step1, step2)
-    
+
       A = [nx3] array of 3D coordinates
       max_angle1 = max rotation angle
       max_angle1 = max rotation angle
       step1 = angular step size
       step2 = angular step size
-      
+
     Each coordinate in A will be rotated by angles:
         angles = np.arange(0, max_angle+step, step)
     The output B will have size:
         [len(A) * len(angles1) * len(angles2), 3]
     """
-    
+
     A = np.asarray(A, dtype=np.float).reshape((-1, 3))
-    
-    angles1 = np.arange(0,max_angle1+step1,step1)
-    angles2 = np.arange(0,max_angle2+step2,step2)
+
+    angles1 = np.arange(0, max_angle1 + step1, step1)
+    angles2 = np.arange(0, max_angle2 + step2, step2)
     len1 = len(angles1)
     len2 = len(angles2)
     len3 = len(A)
-    tot_size = len1*len2*len3
-    OUT = np.zeros([tot_size,3])
+    tot_size = len1 * len2 * len3
+    OUT = np.zeros([tot_size, 3])
     for n in range(len(angles1)):
         for m in range(len(angles2)):
             B = rot3D(A, 0, angles1[n], angles2[m])
-            st = n*len2+m*len3
-            nd = n*len2+(m+1)*len3
-            OUT[st:nd,:] = B
+            st = n * len2 + m * len3
+            nd = n * len2 + (m + 1) * len3
+            OUT[st:nd, :] = B
     return OUT
 
 
@@ -679,7 +761,7 @@ def readstfm(string):
         value = '0'
 
     # Determine number of decimal places for error
-    idx = value.find('.') # returns -1 if . not found
+    idx = value.find('.')  # returns -1 if . not found
     if idx > -1:
         pp = idx - len(value) + 1
     else:
@@ -717,8 +799,8 @@ def saveable(string):
     for char in '*$&^?!':
         string = string.replace(char, '')
     # Remove non-ascii characters
-    string = ''.join(i for i in string if ord(i)<128)
-    #string = string.decode('unicode_escape').encode('ascii','ignore')
+    string = ''.join(i for i in string if ord(i) < 128)
+    # string = string.decode('unicode_escape').encode('ascii','ignore')
     return string
 
 
@@ -793,12 +875,12 @@ def complex2str(val, fmt='6.1f'):
 
     rl = np.real(val)
     im = np.imag(val)
-    fmt1 = '%'+fmt
-    fmt2 = '%-'+fmt
+    fmt1 = '%' + fmt
+    fmt2 = '%-' + fmt
     if im >= 0:
-        return (fmt1+' + i'+fmt2)%(rl,im)
+        return (fmt1 + ' + i' + fmt2) % (rl, im)
     elif im < 0:
-        return (fmt1+' - i'+fmt2)%(rl,np.abs(im))
+        return (fmt1 + ' - i' + fmt2) % (rl, np.abs(im))
 
 
 def multi_replace(string, old=[], new=[]):
@@ -843,7 +925,7 @@ def replace_bracket_multiple(name):
     # Find outside brackets
     bracket = []
     start_idx = []
-    level=0
+    level = 0
     for n, s in enumerate(name):
         if s in ['(', '[', '{']:
             start_idx += [n]
@@ -856,10 +938,10 @@ def replace_bracket_multiple(name):
                     bracket_end = n + len(num[0])
                     num = float(num[0][1:])
                 else:
-                    bracket_end = n+1
+                    bracket_end = n + 1
                     num = 1.0
                 bracket += [(
-                    name[start_idx[0]+1:n],  # insde brackets
+                    name[start_idx[0] + 1:n],  # insde brackets
                     name[start_idx[0]:bracket_end],  # str to replace
                     num  # multiplication appending bracket
                 )]
@@ -870,10 +952,22 @@ def replace_bracket_multiple(name):
         numstr = replace_bracket_multiple(numstr)
         # Replace each number by it's multiple
         for oldnum in regex_num.findall(numstr):
-            numstr = numstr.replace(oldnum, '%0.3g'%(float(oldnum)*num))
+            numstr = numstr.replace(oldnum, '%0.3g' % (float(oldnum) * num))
         # Replace in original string
         name = name.replace(repstr, numstr)
     return name
+
+
+def shortstr(string):
+    """
+    Shorten string by removing long floats
+    :param string: string, e.g. '#810002 scan eta 74.89533603616637 76.49533603616636 0.02 pil3_100k 1 roi2'
+    :return: shorter string, e.g. '#810002 scan eta 74.895 76.495 0.02 pil3_100k 1 roi2'
+    """
+    #return re.sub(r'(\d\d\d)\d{4,}', r'\1', string)
+    def subfun(m):
+        return str(round(float(m.group()), 3))
+    return re.sub(r'\d+\.\d{5,}', subfun, string)
 
 
 def nice_print(precision=4, linewidth=300):
@@ -925,6 +1019,33 @@ def frange(start, stop=None, step=1):
     return list(np.arange(start, stop + 0.00001, step, dtype=np.float))
 
 
+def squaredata(xdata, ydata, data, repeat=None):
+    """
+    Generate square arrays from 1D data, automatically determinging the repeat value
+    :param xdata: [n] array
+    :param ydata: [n] array
+    :param data: [n] array
+    :param repeat: int m or None to deteremine m from differences in xdata and y data
+    :return: X, Y, D [n//m, m] arrays
+    """
+
+    if repeat is None:
+        # Determine the repeat length of the scans
+        delta_x = np.abs(np.diff(xdata))
+        ch_idx_x = np.where(delta_x > delta_x.max() * 0.9)  # find biggest changes
+        ch_delta_x = np.diff(ch_idx_x)
+        rep_len_x = np.round(np.mean(ch_delta_x))
+        delta_y = np.abs(np.diff(ydata))
+        ch_idx_y = np.where(delta_y > delta_y.max() * 0.9)  # find biggest changes
+        ch_delta_y = np.diff(ch_idx_y)
+        rep_len_y = np.round(np.mean(ch_delta_y))
+        repeat = int(max(rep_len_x, rep_len_y))
+    xsquare = xdata[:repeat * (len(xdata) // repeat)].reshape(-1, repeat)
+    ysquare = ydata[:repeat * (len(ydata) // repeat)].reshape(-1, repeat)
+    dsquare = data[:repeat * (len(data) // repeat)].reshape(-1, repeat)
+    return xsquare, ysquare, dsquare
+
+
 def grid_intensity(points, values, resolution=0.01, peak_width=0.1, background=0):
     """
     Generates array of intensities along a spaced grid, equivalent to a powder pattern.
@@ -941,7 +1062,7 @@ def grid_intensity(points, values, resolution=0.01, peak_width=0.1, background=0
     values = np.asarray(values, dtype=np.float)
 
     # create plotting mesh
-    grid_points = np.arange(np.min(points)-50*resolution, np.max(points)+50*resolution, resolution)
+    grid_points = np.arange(np.min(points) - 50 * resolution, np.max(points) + 50 * resolution, resolution)
     pixels = len(grid_points)
     grid_values = np.zeros([pixels])
 
@@ -949,7 +1070,7 @@ def grid_intensity(points, values, resolution=0.01, peak_width=0.1, background=0
     pixel_size = (grid_points.max() - grid_points.min()) / pixels
     peak_width_pixels = peak_width / (1.0 * pixel_size)
 
-    pixel_coord = (points-grid_points.min()) / (grid_points-grid_points.min()).max()
+    pixel_coord = (points - grid_points.min()) / (grid_points - grid_points.min()).max()
     pixel_coord = (pixel_coord * (pixels - 1)).astype(int)
     pixel_coord = pixel_coord.astype(int)
 
@@ -958,7 +1079,7 @@ def grid_intensity(points, values, resolution=0.01, peak_width=0.1, background=0
 
     # Convolve with a gaussian (if >0 or not None)
     if peak_width:
-        gauss_x = np.arange(-3*peak_width_pixels, 3*peak_width_pixels + 1)  # gaussian width = 2*FWHM
+        gauss_x = np.arange(-3 * peak_width_pixels, 3 * peak_width_pixels + 1)  # gaussian width = 2*FWHM
         g = gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
         grid_values = np.convolve(grid_values, g, mode='same')
 
@@ -986,7 +1107,7 @@ def map2grid(grid, points, values, widths=None, background=0):
     widths = np.asarray(widths, dtype=np.float)
 
     if widths.size == 1:
-        widths = widths*np.ones(len(points))
+        widths = widths * np.ones(len(points))
 
     pixels = len(grid)
     grid_values = np.zeros([pixels])
@@ -1005,3 +1126,24 @@ def map2grid(grid, points, values, widths=None, background=0):
 def whererun():
     """Returns the location where python was run"""
     return os.path.abspath('.')
+
+
+def lastlines(filename, lines=1, max_line_length=255):
+    """Returns the last n lines of a text file"""
+    with open(filename, 'rb') as f:
+        f.seek(-(lines+1)*max_line_length, os.SEEK_END)
+        endlines = f.read().decode().split('\n')
+    return endlines[-lines:]
+
+
+def get_methods(object, include_special=True):
+    """Returns a list of methods (functions) within object"""
+    if include_special:
+        return [method_name for method_name in dir(object) if callable(getattr(object, method_name))]
+    return [method_name for method_name in dir(object) if callable(getattr(object, method_name)) and '__' not in method_name]
+
+
+def list_methods(object, include_special=False):
+    """Return list of methods (functions) in class object"""
+    methods = get_methods(object, include_special)
+    return '\n'.join([inline_help(getattr(object, fun)) for fun in methods])

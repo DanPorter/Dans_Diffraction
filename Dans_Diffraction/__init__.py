@@ -29,8 +29,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9.7
-Last updated: 26/01/21
+Version 1.9.8
+Last updated: 15/02/21
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -53,6 +53,7 @@ Version History:
 26/11/20 1.9.5  Various improvements and corrections
 04/01/21 1.9.6  Added Scattering.structure_factor function
 26/01/21 1.9.7  Added xray dispersion correction functions, plus x-ray interactions calculations
+15/02/21 1.9.8  Added plotting options for out-of-plane recirprocal lattice lines
 
 -----------------------------------------------------------------------------
    Copyright 2020 Diamond Light Source Ltd.
@@ -106,8 +107,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '1.9.7'
-__date__ = '26/01/21'
+__version__ = '1.9.8'
+__date__ = '15/02/21'
 
 
 # Build

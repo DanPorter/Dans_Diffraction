@@ -774,7 +774,7 @@ class Cell:
         maxq = np.sqrt(q_max ** 2 + q_max ** 2)
         hmax, kmax, lmax = fc.maxHKL(maxq, self.UVstar())
         HKL = fc.genHKL([hmax, -hmax], [kmax, -kmax], [lmax, -lmax])
-        HKL = HKL + centre  # reflection about central reflection
+        HKL = np.ceil(HKL + centre)  # reflection about central reflection
         Q = self.calculateQ(HKL)
 
         # generate box in reciprocal space
@@ -782,6 +782,8 @@ class Cell:
 
         box_coord = fg.index_coordinates(Q - c_cart, CELL)
         incell = np.all(np.abs(box_coord) <= 0.5, axis=1)
+        if np.sum(incell) < 1:
+            return np.zeros((0,)), np.zeros((0,)), np.zeros((0, 3))
         plane_coord = 2 * q_max * box_coord[incell, :]
         return plane_coord[:, 0], plane_coord[:, 1], HKL[incell, :]
 
