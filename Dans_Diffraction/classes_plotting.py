@@ -403,7 +403,6 @@ class Plotting:
 
         if axes is None:
             axes = plt.gca()
-        axis = axes.axis()
 
         qx, qy, hkl = self.xtl.Cell.reciprocal_space_plane(x_axis, y_axis, centre, q_max, cut_width)
         axes.plot(qx, qy, 'o', **kwargs)
@@ -836,7 +835,7 @@ class Plotting:
             energy_kev = self.xtl.Scatter._energy_kev
         hkl = np.asarray(hkl).reshape(-1, 3)
         en_range = np.linspace(energy_kev-width/2, energy_kev+width/2, npoints)
-        inten = self.xtl.Scatter.xray_dispersion(hkl, en_range)  # shape (hkl, energy)
+        inten = self.xtl.Scatter.xray_dispersion(hkl, en_range).reshape(len(hkl), -1)  # shape (hkl, energy)
 
         plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         for n, hkl_val in enumerate(hkl):
@@ -893,7 +892,7 @@ class Plotting:
         I = np.zeros(len(azi))
         for n in range(len(azi)):
             I[n] = self.xtl.Scatter.xray_resonant_magnetic(
-                HKL=hkl,
+                hkl,
                 energy_kev=energy_kev,
                 azim_zero=azim_zero,
                 psi=azi[n],
@@ -925,7 +924,7 @@ class Plotting:
         I = np.zeros(len(azi))
         for n in range(len(azi)):
             I[n] = self.xtl.Scatter.xray_nonresonant_magnetic(
-                hkl=hkl,
+                hkl,
                 energy_kev=energy_kev,
                 azim_zero=azim_zero,
                 psi=azi[n],
@@ -1238,6 +1237,8 @@ class PlottingSuperstructure(Plotting):
      - Generated plots have lines and vectors associated with parent structure
      - Effects functions such as xtl.Plot.simulate_hk0()
     """
+
+    _intensity_cut_parent_symmetry = True  # if True, symmetrises the cuts using the parent symmetry
     
     def generate_intensity_cut(self,x_axis=[1,0,0], y_axis=[0,1,0], centre=[0,0,0],
                                     q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05):
@@ -1297,9 +1298,12 @@ class PlottingSuperstructure(Plotting):
         inten = self.xtl.Scatter.intensity(HKLinbox)
 
         # Apply Parent symmetry
-        pHKL = self.xtl.superhkl2parent(HKLinbox)
-        pHKL, inten = self.xtl.Parent.Symmetry.symmetric_intensity(pHKL, inten)
-        HKL = self.xtl.parenthkl2super(pHKL)
+        if self._intensity_cut_parent_symmetry:
+            pHKL = self.xtl.superhkl2parent(HKLinbox)
+            pHKL, inten = self.xtl.Parent.Symmetry.symmetric_intensity(pHKL, inten)
+            HKL = self.xtl.parenthkl2super(pHKL)
+        else:
+            HKL = HKLinbox
         q = self.xtl.calculateQ_parent(HKL)
 
         box_coord = fg.index_coordinates(q - c_cart, CELL)

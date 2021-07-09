@@ -11,8 +11,6 @@ cf = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(cf, '..'))
 
 import Dans_Diffraction as dif
-#import Dans_Diffraction.classes_multiple_scattering as ts
-#from Dans_Diffraction.classes_multiple_scattering import run_calcms
 
 cif_file='../Dans_Diffraction/Structures/Na0.8CoO2_P63mmc.cif'
 xtl = dif.Crystal(cif_file)

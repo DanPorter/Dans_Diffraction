@@ -29,8 +29,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9.8
-Last updated: 15/02/21
+Version 1.9.9
+Last updated: 09/07/21
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -54,6 +54,8 @@ Version History:
 04/01/21 1.9.6  Added Scattering.structure_factor function
 26/01/21 1.9.7  Added xray dispersion correction functions, plus x-ray interactions calculations
 15/02/21 1.9.8  Added plotting options for out-of-plane recirprocal lattice lines
+10/06/21 1.9.9  Corrected error in calculation of DebyeWaller factor (APDs), added x-ray factors by Waasmaier and Kirfel
+09/07/21 1.9.9  Added new scattering factors to scattering factor settings
 
 -----------------------------------------------------------------------------
    Copyright 2020 Diamond Light Source Ltd.
@@ -107,8 +109,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '1.9.8'
-__date__ = '15/02/21'
+__version__ = '1.9.9'
+__date__ = '09/07/21'
 
 
 # Build

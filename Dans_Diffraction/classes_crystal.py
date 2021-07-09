@@ -210,6 +210,7 @@ class Crystal:
 
         if filename is None:
             filename = '%s' % fg.saveable(self.name)
+        cifvals['FileTitle'] = filename
 
         if self.Atoms.ismagnetic():
             fc.write_mcif(cifvals, filename, comments)
@@ -788,6 +789,48 @@ class Cell:
         return plane_coord[:, 0], plane_coord[:, 1], HKL[incell, :]
 
 
+class Atom:
+    """
+    Atom class
+    Contains site information
+    """
+    def __init__(self, u, v, w, atom_type, label, occupancy=1.0, uiso=0.001, mxmymz=None):
+        self.u = u
+        self.v = v
+        self.w = w
+        self.type = atom_type
+        self.label = label
+        self.occupancy = occupancy
+        self.uiso = uiso
+        if mxmymz is None:
+            mxmymz = np.array([0., 0, 0])
+        self.mxmymz = mxmymz
+
+        props = fc.atom_properties(atom_type)  # returns a numpy structured array
+        prop_names = props.dtype.names
+        self.properties = props
+        for key in prop_names:
+            setattr(self, key, props[key][0])
+
+    def __repr__(self):
+        out = "Atom(%.3g, %.3g, %.3g, %s, %s)" % (self.u, self.v, self.w, self.type, self.label)
+        return out
+
+    def __str__(self):
+        out = "%s, %s, u = %6.3f, v = %6.3f, w = %6.3f, occ = %4.2f, uiso = %5.3f, mxmymz = (%.3g,%.3g,%.3g)"
+        mx, my, mz = self.mxmymz
+        return out % (self.label, self.type, self.u, self.v, self.w, self.occupancy, self.uiso, mx, my, mz)
+
+    def info(self):
+        """Display atomic properties"""
+
+        prop_names = self.properties.dtype.names
+        out = ''
+        for key in prop_names:
+            out += '%20s : %s\n' % (key, self.properties[key][0])
+        return out
+
+
 class Atoms:
     """
     Contains properties of atoms within the crystal
@@ -823,22 +866,22 @@ class Atoms:
         if type is None:
             self.type = np.asarray([self._default_atom] * Natoms)
         else:
-            self.type = type
+            self.type = np.asarray(type, dtype=str).reshape(-1)
         # label
         if label is None:
-            self.label = np.asarray([self._default_atom] * Natoms)
+            self.label = self.type.copy()
         else:
-            self.label = label
+            self.label = np.asarray(label, dtype=str).reshape(-1)
         # occupancy
         if occupancy is None:
             self.occupancy = np.ones(Natoms)
         else:
-            self.occupancy = occupancy
+            self.occupancy = np.asarray(occupancy, dtype=np.float).reshape(-1)
         # Uiso
         if uiso is None:
             self.uiso = self._default_uiso * np.ones(Natoms)
         else:
-            self.uiso = uiso
+            self.uiso = np.asarray(uiso, dtype=np.float).reshape(-1)
         # Mag vector mxmymz
         if mxmymz is None:
             self.mx = np.zeros(Natoms)
@@ -854,6 +897,9 @@ class Atoms:
                  label=None, occupancy=None, uiso=None, mxmymz=None):
         """Re-initialises the class, generating new atomic positions"""
         self.__init__(u, v, w, type, label, occupancy, uiso, mxmymz=None)
+
+    def __getitem__(self, idx):
+        return self.atom(idx)
 
     def fromcif(self, cifvals):
         """
@@ -983,7 +1029,16 @@ class Atoms:
         #cifvals['_atom_site_moment.symmform'] = mag_sym
         return cifvals
 
-    def changeatom(self, idx, u=None, v=None, w=None, type=None,
+    def atom(self, idx):
+        """Create Atom object for atom site"""
+        idx = np.asarray(idx, dtype=int).reshape(-1)
+        atoms = [Atom(self.u[i], self.v[i], self.w[i], self.type[i], self.label[i],
+                      self.occupancy[i], self.uiso[i], self.mxmymz()[i]) for i in idx]
+        if len(atoms) == 1:
+            return atoms[0]
+        return atoms
+
+    def changeatom(self, idx=None, u=None, v=None, w=None, type=None,
                    label=None, occupancy=None, uiso=None, mxmymz=None):
         """
         Change an atoms properties
@@ -1012,7 +1067,9 @@ class Atoms:
             self.type[idx] = type
 
         if label is not None:
-            self.label[idx] = label
+            old_labels = list(self.label)
+            old_labels[idx] = label
+            self.label = np.array(old_labels)
 
         if occupancy is not None:
             self.occupancy[idx] = occupancy
@@ -1025,6 +1082,40 @@ class Atoms:
             self.mx[idx] = mpos[:, 0]
             self.my[idx] = mpos[:, 1]
             self.mz[idx] = mpos[:, 2]
+
+    def findatom(self, u=None, v=None, w=None, type=None,
+                 label=None, occupancy=None, uiso=None, mxmymz=None, tol=0.01):
+        """
+        Find atom using parameters, return idx
+        :param u: float
+        :param v: float
+        :param w: float
+        :param type: str
+        :param label: str
+        :param occupancy: float
+        :param uiso: float
+        :param mxmymz: [mx,my,mz]
+        :param tol: float, tolerance to match value
+        :return: array of indexes
+        """
+        all = np.ones(len(self.u))
+        if u is not None:
+            all *= np.abs(self.u - u) < tol
+        if v is not None:
+            all *= np.abs(self.v - v) < tol
+        if w is not None:
+            all *= np.abs(self.w - w) < tol
+        if type is not None:
+            all *= np.array(self.type) == type
+        if label is not None:
+            all *= np.array([True if label.lower() in a.lower() else False for a in self.label])
+        if occupancy is not None:
+            all *= np.abs(self.occupancy - occupancy) < tol
+        if uiso is not None:
+            all *= np.abs(self.uiso - uiso) < tol
+        if mxmymz is not None:
+            all *= fg.mag(self.mxmymz() - mxmymz) < tol
+        return np.where(all)[0]
 
     def addatom(self, u=0, v=0, w=0, type=None, label=None, occupancy=None, uiso=None, mxmymz=None):
         """

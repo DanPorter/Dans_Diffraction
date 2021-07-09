@@ -23,7 +23,8 @@ $ ipython -i -m Dans_Diffraction
 ### Datasources
 The data is taken from a number of sources:
 * Neutron scattering lengths: [NIST](http://www.ncnr.nist.gov/resources/n-lengths/)
-* X-ray Form factor: [ITC](https://it.iucr.org/C/), p578
+* X-ray Form factor: [ITC](https://it.iucr.org/C/), p578, Table 6.1.1.4
+* X-ray Form factor (Waasmaier & Kirfel, Acta Cryst. A 51, 416-431 (1995)): [diffpy](https://github.com/diffpy/libdiffpy/blob/master/src/runtime/f0_WaasKirf.dat)
 * Magnetic Form Factor: [ILL](https://www.ill.eu/sites/ccsl/ffacts/ffactnode4.html)
 * Element weights and radii: [Wikipedia](http://en.wikipedia.org/wiki/List_of_elements_by_atomic_properties)
 * X-ray Mass Attenuation Coefficients: [NIST](https://www.nist.gov/pml/x-ray-mass-attenuation-coefficients)

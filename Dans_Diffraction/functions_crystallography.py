@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.4
-Last updated: 26/01/21
+Version 3.6
+Last updated: 10/06/21
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -35,6 +35,8 @@ Version History:
 03/09/20 3.2.1  Updated cif_symmetry to allow for missing magnetic centring
 21/01/21 3.3    Added xray_scattering_factor_resonant and xray_dispersion_corrections functions added
 26/01/21 3.4    Added xray attenuation, transmission and refractive index
+31/03/21 3.5    Added point groups, gen_sym_unique
+10/06/21 3.6    Corrected mistake in DebyeWaller function. Added x-ray scattering factors from Waasmaier and Kirfel
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -49,7 +51,7 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.4'
+__version__ = '3.6'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -147,6 +149,7 @@ def readcif(filename=None, debug=False):
     """
 
     # Get file name
+    filename = os.path.abspath(os.path.expanduser(filename))
     (dirName, filetitle) = os.path.split(filename)
     (fname, Ext) = os.path.splitext(filetitle)
 
@@ -924,7 +927,7 @@ def neutron_scattering_length(element):
 def xray_scattering_factor(element, Qmag=0):
     """
     Read X-ray scattering factor table, calculate f(|Q|)
-    Uses the coefficients for analytical approximation to the scattering factors - ITC, p578
+    Uses the coefficients for analytical approximation to the scattering factors - ITC, p578 Table 6.1.1.4
      Qff = xray_scattering_factor(element, Qmag=[0])
     :param element: [n*str] list or array of elements
     :param Qmag: [m] array of wavevector distance, in A^-1
@@ -955,6 +958,50 @@ def xray_scattering_factor(element, Qmag=0):
             a2 * np.exp(-b2 * (Qmag / (4 * np.pi)) ** 2) + \
             a3 * np.exp(-b3 * (Qmag / (4 * np.pi)) ** 2) + \
             a4 * np.exp(-b4 * (Qmag / (4 * np.pi)) ** 2) + c
+        Qff[:, n] = f
+    return Qff
+
+
+def xray_scattering_factor_WaasKirf(element, Qmag=0):
+    """
+    Read X-ray scattering factor table, calculate f(|Q|)
+    Uses the coefficients for analytical approximation to the scattering factors from:
+       "Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431"
+    File from https://github.com/diffpy/libdiffpy/blob/master/src/runtime/f0_WaasKirf.dat
+     Qff = xray_scattering_factor_WaasKirf(element, Qmag=[0])
+    :param element: [n*str] list or array of elements
+    :param Qmag: [m] array of wavevector distance, in A^-1
+    :return: [m*n] array of scattering factors
+    """
+
+    filename = os.path.join(datadir, 'f0_WaasKirf.dat')
+    data = np.loadtxt(filename)
+    # get names
+    with open(filename) as f:
+        lines = re.findall('#S\s+\d+\s+[A-Z].*?\n', f.read())
+        table_names = [line[7:].strip() for line in lines]
+
+    # Qmag should be a 1D array
+    Qmag = np.asarray(Qmag).reshape(-1)
+    element = np.asarray(element, dtype=str).reshape(-1)
+
+    # data table: a1  a2  a3  a4  a5  c  b1  b2  b3  b4  b5
+    idx = [table_names.index(el) for el in element]
+    coef = data[idx, :]
+
+    Qff = np.zeros([len(Qmag), len(element)])
+
+    # Loop over elements
+    for n in range(len(element)):
+        a1, a2, a3, a4, a5, c, b1, b2, b3, b4, b5 = coef[n, :]
+
+        # Array multiplication over Qmags
+        # f0[k] = c + [SUM a_i * EXP(-b_i * (k ^ 2))]  i=1,5
+        f = a1 * np.exp(-b1 * (Qmag / (4 * np.pi)) ** 2) + \
+            a2 * np.exp(-b2 * (Qmag / (4 * np.pi)) ** 2) + \
+            a3 * np.exp(-b3 * (Qmag / (4 * np.pi)) ** 2) + \
+            a4 * np.exp(-b4 * (Qmag / (4 * np.pi)) ** 2) + \
+            a5 * np.exp(-b5 * (Qmag / (4 * np.pi)) ** 2) + c
         Qff[:, n] = f
     return Qff
 
@@ -1158,6 +1205,80 @@ def xray_dispersion_corrections(elements, energy_kev=None):
         if1[:, n] = np.interp(energy_kev, energy, f1) - z
         if2[:, n] = -np.interp(energy_kev, energy, f2)
     return if1, if2
+
+
+def pointgroups():
+    """Read pointgroup file, return dict"""
+    pg_file = os.path.join(datadir, 'PointGroups.json')
+    with open(pg_file, 'r') as fp:
+        pg = json.load(fp)
+    return pg
+
+
+def load_pointgroup(pg_number):
+    """
+    Load point group using number
+    Point Groups:
+    Triclinic
+      1 C1  (    1) GenPos:   1
+      2 Ci  (   -1) GenPos:   2
+    Monoclinic
+      3 C2  (    2) GenPos:   2
+      4 Cs  (    m) GenPos:   2
+      5 C2h (  2/m) GenPos:   4
+    Orthorhombic
+      6 D2  (  222) GenPos:   4
+      7 C2v (  mm2) GenPos:   4
+      8 D2h (  mmm) GenPos:   8
+    Tetragonal
+      9 C4  (    4) GenPos:   4
+     10 S4  (   -4) GenPos:   4
+     11 C4h (  4/m) GenPos:   8
+     12 D4  (  422) GenPos:   8
+     13 C4v (  4mm) GenPos:   8
+     14 D2d ( -42m) GenPos:   8
+     15 D4h (4/mmm) GenPos:  16
+    Trigonal
+     16 C3  (    3) GenPos:   3
+     17 C3i (   -3) GenPos:   6
+     18 D3  (  312) GenPos:   6
+     19 C3v (  3m1) GenPos:   6
+     20 D3d ( -31m) GenPos:  12
+    Hexagonal
+     21 C6  (    6) GenPos:   6
+     22 C3h (   -6) GenPos:   6
+     23 C6h (  6/m) GenPos:  12
+     24 D6  (  622) GenPos:  12
+     25 C6v (  6mm) GenPos:  12
+     26 D3h ( -6m2) GenPos:  12
+     27 D6h (6/mmm) GenPos:  24
+    Cubic
+     28 T   (   23) GenPos:  12
+     29 Th  (  m-3) GenPos:  24
+     30 O   (  432) GenPos:  24
+     31 Td  ( -43m) GenPos:  24
+     32 Oh  ( m-3m) GenPos:  48
+    :param pg_number: int or str, e.g. 'cubic'
+    :return: dict
+    """
+    try:
+        if pg_number.lower() in ['cubic']:
+            pg_number = 32
+        elif pg_number.lower() in ['hexagonal', 'hex']:
+            pg_number = 27
+        elif pg_number.lower() in ['trigonal']:
+            pg_number = 20
+        elif pg_number.lower() in ['tetragonal']:
+            pg_number = 15
+        elif pg_number.lower() in ['orthorhombic']:
+            pg_number = 8
+        elif pg_number.lower() in ['monoclinic', 'mono']:
+            pg_number = 5
+        elif pg_number.lower() in ['triclinic']:
+            pg_number = 2
+    except AttributeError:
+        pg_number = int(pg_number)
+    return pointgroups()[str(pg_number)]
 
 
 def spacegroups():
@@ -1945,6 +2066,31 @@ def gen_symcen_pos(sym_ops, cen_ops, x, y, z):
     return sympos
 
 
+def gen_sym_unique(sym_ops, x, y, z, cen_ops=None):
+    """
+    Generate positions from symmetry operations with idential positions removed
+    Usage:
+      uvw = gen_sym_unique(sym_ops,x,y,z)
+    E.G.
+      uvw = gen_sym_unique(['x,y,z','y,-x,z+1/2','x,y,z'],0.1,0.2,0.3)
+      uvw >> [[0.1,0.2,0.3] , [0.2,-0.1,0.8]]
+    :param sym_ops: list of str - symmetry operations
+    :param x: float
+    :param y: float
+    :param z: float
+    :param cen_ops: Optional - list of str for centring operations
+    :return: array of positions
+    """
+    if cen_ops:
+        sym_xyz = gen_symcen_pos(sym_ops, cen_ops, x, y, z)
+    else:
+        sym_xyz = gen_sym_pos(sym_ops, x, y, z)
+    sym_xyz = fitincell(sym_xyz)
+    # Remove identical positions
+    unique_xyz, uniqueidx, matchidx = fg.unique_vector(sym_xyz, tol=0.01)
+    return unique_xyz
+
+
 def gen_symcen_ops(sym_ops, cen_ops):
     """
     Build complete list of symmetry operations from symmetry and centring vectors
@@ -2560,6 +2706,32 @@ def uiso2biso(uiso):
     return uiso * (8 * np.pi ** 2)
 
 
+def euler_unit_vector(uvw, uv):
+    """
+    Convert vector in a specific basis to a cartesian basis and normalise to a unit vector
+    :param uvw: [nx3] array as [[u,v,w]]
+    :param uv: [3x3], basis vectors [a,b,c]
+    :return: [nx3] array xyz/|xyz|, where x,y,z = u*a+v*b+w*c
+    """
+    xyz = np.dot(uvw, uv)
+    return fg.norm(xyz)
+
+
+def euler_moment(mxmymz, uv):
+    """
+    Convert moment mxmymz coordinates from cif into eulerian basis
+    :param mxmymz: [nx3] array, units of Bohr magneton, directed along a,b,c
+    :param uv: [3x3] array, basis vectors [a,b,c]
+    :return: moments [nx3] array, units of Bohr magneton, directed along x,y,z
+    """
+    # Calculate moment
+    momentmag = fg.mag(mxmymz).reshape([-1, 1])
+    momentxyz = np.dot(mxmymz, uv)
+    moment = momentmag * fg.norm(momentxyz)  # broadcast n*1 x n*3 = n*3
+    moment[np.isnan(moment)] = 0.
+    return moment
+
+
 def diffractometer_Q(eta, delta, energy_kev=8.0):
     """
     Calculate wavevector transfer, Q for diffractometer within the scattering plane.
@@ -2628,13 +2800,14 @@ def debyewaller(uiso, Qmag=0):
      T = debyewaller(uiso,Qmag=[0])
 
         T = exp( -2*pi^2*Uiso/d^2 )
-        T = exp( -Uiso/2Q^2 )
+        T = exp( -Uiso/2 * Q^2 )
     """
 
     uiso = np.asarray(uiso, dtype=np.float).reshape(1, -1)
     Qmag = np.asarray(Qmag, dtype=np.float).reshape(-1, 1)
 
-    Tall = np.exp(-0.5 * np.dot(Qmag, uiso))
+    # Tall = np.exp(-0.5 * np.dot(Qmag, uiso))  # Not sure where this comes from... Jon's notes?
+    Tall = np.exp(-0.5 * np.dot(Qmag ** 2, uiso))
     return Tall
 
 

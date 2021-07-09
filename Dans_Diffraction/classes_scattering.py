@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.8
-Last updated: 21/01/21
+Version 1.9
+Last updated: 09/07/21
 
 Version History:
 10/09/17 0.1    Program created
@@ -24,6 +24,8 @@ Version History:
 16/06/20 1.7.1  Added output option of setup_scatter
 04/01/21 1.7.2  Added structure_factor function
 21/01/21 1.8    Added xray_dispersion scattering function
+10/06/21 1.9    Added x_ray calculation using Waasmaier and Kirfel scattering factors.
+09/07/21 1.9    Added new scattering factors as option on normal scattering functions
 
 @author: DGPorter
 """
@@ -36,7 +38,7 @@ from . import functions_crystallography as fc
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '1.8.0'
+__version__ = '1.9.0'
 __scattering_types__ = {'xray': ['xray','x','x-ray','thomson','charge'],
                         'neutron': ['neutron','n','nuclear'],
                         'xray magnetic': ['xray magnetic','magnetic xray','spin xray','xray spin'],
@@ -74,6 +76,10 @@ class Scattering:
     
     # Complex Structure factor
     _return_structure_factor = False
+
+    # Uses the coefficients for analytical approximation to the scattering factors from:
+    #        "Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431"
+    _use_waaskirf_scattering_factor = False
     
     # Thermal Factors
     _use_isotropic_thermal_factor = True
@@ -86,6 +92,7 @@ class Scattering:
     # Polarisation Options
     _polarised = False
     _polarisation = 'sp'
+    _polarisation_vector_incident = [0, 1, 0]
     
     # Radiation energy
     _energy_kev = fg.Cu
@@ -116,13 +123,16 @@ class Scattering:
         HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
         Nref = len(HKL)
         
-        uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.get()
+        uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
         Nat = len(uvw)
         
         Qmag = self.xtl.Cell.Qmag(HKL)
         
         # Get atomic form factors
-        ff = fc.xray_scattering_factor(type,Qmag)
+        if self._use_waaskirf_scattering_factor:
+            ff = fc.xray_scattering_factor_WaasKirf(atom_type, Qmag)
+        else:
+            ff = fc.xray_scattering_factor(atom_type, Qmag)
         
         # Get Debye-Waller factor
         if self._use_isotropic_thermal_factor:
@@ -160,10 +170,8 @@ class Scattering:
         """
         
         HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
-        Nref = len(HKL)
         
         uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.get()
-        Nat = len(uvw)
         
         # Get atomic form factors
         ff = fc.atom_properties(type, 'Z')
@@ -181,7 +189,7 @@ class Scattering:
         dot_KR = np.dot(HKL,uvw.T)
         
         # Calculate structure factor
-        SF =  np.sum(ff*dw*occ*np.exp(1j*2*np.pi*dot_KR),axis=1)
+        SF = np.sum(ff * dw * occ * np.exp(1j * 2 * np.pi * dot_KR), axis=1)
         
         SF = SF/self.xtl.scale
         
@@ -204,12 +212,12 @@ class Scattering:
 
         HKL = np.asarray(np.rint(HKL), dtype=np.float).reshape([-1, 3])
 
-        uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
+        uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
 
         Qmag = self.xtl.Cell.Qmag(HKL)
 
         # Get atomic form factors
-        ff = fc.xray_scattering_factor_resonant(type, Qmag, energy_kev)  # shape (len(HKL), len(type), len(en))
+        ff = fc.xray_scattering_factor_resonant(atom_type, Qmag, energy_kev)  # shape (len(HKL), len(type), len(en))
 
         # Get Debye-Waller factor
         if self._use_isotropic_thermal_factor:
@@ -248,11 +256,9 @@ class Scattering:
         Returns an array with the same length as HKL, giving the real intensity at each reflection.
         """
         
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
-        Nref = len(HKL)
+        HKL = np.asarray(np.rint(HKL), dtype=np.float).reshape([-1, 3])
 
         uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
-        Nat = len(uvw)
         
         # Get atomic form factors
         ff = fc.atom_properties(atom_type, 'Coh_b')
@@ -270,7 +276,7 @@ class Scattering:
         dot_KR = np.dot(HKL,uvw.T)
         
         # Calculate structure factor
-        SF =  np.sum(ff*dw*occ*np.exp(1j*2*np.pi*dot_KR),axis=1)
+        SF = np.sum(ff * dw * occ * np.exp(1j * 2 * np.pi * dot_KR), axis=1)
         
         SF = SF/self.xtl.scale
         
@@ -290,8 +296,8 @@ class Scattering:
         
         HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
         Nref = len(HKL)
-        
-        uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.get()
+
+        uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
         Nat = len(uvw)
         
         Q = self.xtl.Cell.calculateQ(HKL)
@@ -300,7 +306,7 @@ class Scattering:
         
         # Get magnetic form factors
         if self._use_magnetic_form_factor:
-            ff = fc.magnetic_form_factor(type,Qmag)
+            ff = fc.magnetic_form_factor(atom_type, Qmag)
         else:
             ff = np.ones([len(HKL), Nat])
         
@@ -312,7 +318,6 @@ class Scattering:
         
         # Calculate dot product
         dot_KR = np.dot(HKL,uvw.T)
-        
 
         # Calculate structure factor
         SF = np.zeros(Nref,dtype=np.complex)
@@ -323,11 +328,11 @@ class Scattering:
                 QM = mom - np.dot(Qh,mom)*Qh
 
                 # Calculate structure factor
-                SFm = SFm + ff[n,m]*np.exp(1j*2*np.pi*dot_KR[n,m])*QM
+                SFm = SFm + ff[n, m] * np.exp(1j * 2 * np.pi * dot_KR[n, m]) * QM
             
             # Calculate polarisation with incident neutron
             if self._polarised:
-                SF[n] = np.dot(SFm,self._polarisation_vector_incident)
+                SF[n] = np.dot(SFm, self._polarisation_vector_incident)
             else:
                 #SF[n] = np.dot(SFm,SFm) # maximum possible
                 SF[n] = (np.dot(SFm,[1,0,0]) + np.dot(SFm,[0,1,0]) + np.dot(SFm,[0,0,1]))/3 # average polarisation
@@ -435,9 +440,8 @@ class Scattering:
         
         PSI = np.asarray(PSI,dtype=np.float).reshape([-1])
         Npsi = len(PSI)
-        
-        uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.get()
-        Nat = len(uvw)
+
+        uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
         
         Qmag = self.xtl.Cell.Qmag(HKL)
         
@@ -459,7 +463,7 @@ class Scattering:
             
             # Calculate structure factor
             # Broadcasting used on 2D fxres
-            SF[:,psival] =  np.sum(fxres*dw*occ*np.exp(1j*2*np.pi*dot_KR),axis=1)
+            SF[:,psival] = np.sum(fxres*dw*occ*np.exp(1j*2*np.pi*dot_KR),axis=1)
             
         SF = SF/self.xtl.scale
         
@@ -967,7 +971,7 @@ class Scattering:
         return sf
     
     def hkl(self, HKL, energy_kev=None):
-        " Calculate the two-theta and intensity of the given HKL, display the result"
+        """ Calculate the two-theta and intensity of the given HKL, display the result"""
         
         if energy_kev is None:
             energy_kev = self._energy_kev
@@ -1028,7 +1032,7 @@ class Scattering:
     def setup_scatter(self, type=None,energy_kev=None,wavelength_a=None, powder_units=None,
                       specular=None, parallel=None, theta_offset=None,
                       min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None,
-                      output=True):
+                      output=True, scattering_factors=None):
         """
         Simple way to set scattering parameters, each parameter is internal to xtl (self)
         
@@ -1077,6 +1081,14 @@ class Scattering:
         
         if max_twotheta is not None:
             self._scattering_max_twotheta = max_twotheta
+
+        if scattering_factors is not None:
+            if scattering_factors.lower() in ['ws', 'waaskirf', 'alternate', 'alt']:
+                print('Using scattering factors from: "Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431"')
+                self._use_waaskirf_scattering_factor = True
+            else:
+                print('Using scattering factors from: International Tables of Crystallography Vol. C, Table 6.1.1.4')
+                self._use_waaskirf_scattering_factor = False
 
         if output:
             print('Scattering Options:')
