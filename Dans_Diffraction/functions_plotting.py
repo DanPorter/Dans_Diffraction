@@ -229,6 +229,7 @@ def newplot3(*args, **kwargs):
     Shortcut to creating a simple 3D plot
     Automatically tiles 1 dimensional x and y arrays to match 2D z array,
     assuming z.shape = (len(x),len(y))
+      newplot3(x, y, z, ...)
 
     E.G.
       newplot3([1,2,3,4],[9,8,7],[[2,4,6],[8,10,12],[14,16,18],[20,22,24]],'-o')
@@ -373,7 +374,7 @@ def sliderplot2D(ZZZ, XX=None, YY=None, slidervals=None, *args, **kwargs):
     sldr.on_changed(update)
 
 
-def plot_cell(cell_centre=[0, 0, 0], CELL=np.eye(3)):
+def plot_cell(cell_centre=[0, 0, 0], CELL=np.eye(3), color='k'):
     """
     Plot a box defined by a unit cell on the current plot
     :param cell_centre: [1x3] array : centre of cell, default [0,0,0]
@@ -381,12 +382,12 @@ def plot_cell(cell_centre=[0, 0, 0], CELL=np.eye(3)):
     :return: None
     """
 
-    uvw = np.array([[0., 0, 0], [1, 0, 0], [1, 0, 1], [1, 1, 1], [1, 1, 0], [0, 1, 0], [0, 1, 1], \
+    uvw = np.array([[0., 0, 0], [1, 0, 0], [1, 0, 1], [1, 1, 1], [1, 1, 0], [0, 1, 0], [0, 1, 1],
                     [0, 0, 1], [1, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1], [0, 1, 1], [0, 1, 0], [0, 0, 0], [0, 0, 1]])
     uvw = uvw - 0.5  # plot around box centre
     bpos = np.dot(uvw, CELL)
     bpos = bpos + cell_centre
-    plt.plot(bpos[:, 0], bpos[:, 1], bpos[:, 2], c='k')  # cell box
+    plt.plot(bpos[:, 0], bpos[:, 1], bpos[:, 2], c=color)  # cell box
 
 
 def plot_circle(radius=1.0, centre=[0,0], height=0, *args, **kwargs):
@@ -579,7 +580,7 @@ def plot_lattice_points2D(Q, markersize=12, color='b', marker='o'):
     ax.axis(axsize)
 
 
-def plot_lattice_lines(latt, vec_a=[1, 0, 0], vec_b=[0, 1, 0], axis=None, *args, **kwargs):
+def plot_lattice_lines(latt, vec_a=(1, 0, 0), vec_b=(0, 1, 0), axis=None, *args, **kwargs):
     """
     Add lines defining the reciprocal lattice to the current plot
         Generates square or hexagonal lines where vertices are the lattice points within the image.

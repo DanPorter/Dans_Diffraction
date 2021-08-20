@@ -6,9 +6,11 @@ Installation:
 $ pip install Dans-Diffraction
 or
 $ git clone https://github.com/DanPorter/Dans_Diffraction.git
+or
+$ pip install git+https://github.com/DanPorter/Dans_Diffraction.git
 
 Requirements:
-Python 2.7+/3+ with packages: Numpy, Matplotlib, Scipy, Tkinter
+Python 2.7+/3+ with packages: Numpy, Matplotlib, Tkinter
 BuiltIn packages used: sys, os, re, glob, warnings, json, itertools
 
 Usage:
@@ -29,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9.9
-Last updated: 09/07/21
+Version 2.0.0
+Last updated: 20/08/21
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -56,6 +58,7 @@ Version History:
 15/02/21 1.9.8  Added plotting options for out-of-plane recirprocal lattice lines
 10/06/21 1.9.9  Corrected error in calculation of DebyeWaller factor (APDs), added x-ray factors by Waasmaier and Kirfel
 09/07/21 1.9.9  Added new scattering factors to scattering factor settings
+20/08/21 2.0.0  Added functions_scattering module with updated, more consistent scattering formula
 
 -----------------------------------------------------------------------------
    Copyright 2020 Diamond Light Source Ltd.
@@ -109,8 +112,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '1.9.9'
-__date__ = '09/07/21'
+__version__ = '2.0.0'
+__date__ = '20/08/21'
 
 
 # Build

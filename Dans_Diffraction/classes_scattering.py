@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9
-Last updated: 09/07/21
+Version 2.0
+Last updated: 20/08/21
 
 Version History:
 10/09/17 0.1    Program created
@@ -26,19 +26,22 @@ Version History:
 21/01/21 1.8    Added xray_dispersion scattering function
 10/06/21 1.9    Added x_ray calculation using Waasmaier and Kirfel scattering factors.
 09/07/21 1.9    Added new scattering factors as option on normal scattering functions
+20/08/21 2.0    Switched over to new scattering module, added self.powder()
 
 @author: DGPorter
 """
 
 import sys,os
 import numpy as np
+import datetime
 
 from . import functions_general as fg
 from . import functions_crystallography as fc
+from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '1.9.0'
+__version__ = '2.0.0'
 __scattering_types__ = {'xray': ['xray','x','x-ray','thomson','charge'],
                         'neutron': ['neutron','n','nuclear'],
                         'xray magnetic': ['xray magnetic','magnetic xray','spin xray','xray spin'],
@@ -62,6 +65,7 @@ class Scattering:
     
     #------Options-------
     # Standard Options
+    _hkl = None  # added so recalculation not required
     _scattering_type = 'xray'  # 'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
     _scattering_specular_direction = [0,0,1]  # reflection
     _scattering_parallel_direction = [0,0,1]  # transmission
@@ -70,9 +74,15 @@ class Scattering:
     _scattering_max_theta = 180.0
     _scattering_min_twotheta = -180.0
     _scattering_max_twotheta = 180.0
+    _time_report = True
+    _debug_mode = False
 
-    # Units
+    # powder options
     _powder_units = 'tth' # tth (two theta), Q, d
+    _powder_background = 0.0
+    _powder_peak_width = 0.01  # in Deg
+    _powder_average = True
+    _powder_pixels = 2000
     
     # Complex Structure factor
     _return_structure_factor = False
@@ -100,6 +110,7 @@ class Scattering:
     # Resonant X-ray Options
     _azimuthal_angle = 0
     _azimuthal_reference = [1,0,0]
+    _resonant_flm = (0, 1, 0)
     _resonant_approximation_e1e1 = True
     _resonant_approximation_e2e2 = False
     _resonant_approximation_e1e2 = False
@@ -111,7 +122,435 @@ class Scattering:
 
         # Initialise the scattering type container
         self.Type = ScatteringTypes(self, __scattering_types__)
-    
+
+    def __str__(self):
+        out = 'Scatter(%r)\n' % self.xtl
+        out += '       Type: %s\n' % self._scattering_type
+        out += '     Energy: %s keV\n' % self._energy_kev
+        out += ' Wavelength: %s A\n' % fc.energy2wave(self._energy_kev)
+        out += ' ---Settings---\n'
+        out += '      Powder units: %s\n' % self._powder_units
+        out += '    Isotropic ADPs: %s\n' % self._use_isotropic_thermal_factor
+        #out += '  Anisotropic ADPs: %s\n' % self._use_anisotropic_thermal_factor
+        out += '  Specular Direction (reflection): (%2.0f,%2.0f,%2.0f)\n' % (
+            self._scattering_specular_direction[0], self._scattering_specular_direction[1],
+            self._scattering_specular_direction[2])
+        out += 'Parallel Direction (transmission): (%2.0f,%2.0f,%2.0f)\n' % (
+            self._scattering_parallel_direction[0], self._scattering_parallel_direction[1],
+            self._scattering_parallel_direction[2])
+        out += '      theta offset: %s\n' % self._scattering_theta_offset
+        out += '         min theta: %s\n' % self._scattering_min_theta
+        out += '         max theta: %s\n' % self._scattering_max_theta
+        out += '      min twotheta: %s\n' % self._scattering_min_twotheta
+        out += '      max twotheta: %s\n' % self._scattering_max_twotheta
+        out += ' ---X-Ray Settings---\n'
+        out += ' Waasmaier scattering factor: %s\n' % self._use_waaskirf_scattering_factor
+        out += ' ---Magnetic Settings---\n'
+        out += '   Mag. scattering: %s\n' % self._calclate_magnetic_component
+        out += '  Mag. form factor: %s\n' % self._use_magnetic_form_factor
+        out += '         Polarised: %s\n' % self._polarised
+        out += '      Polarisation: %s\n' % self._polarisation
+        out += '       Pol. vector: (%s,%s,%s)\n' % (self._polarisation_vector_incident[0],
+                                                     self._polarisation_vector_incident[1],
+                                                     self._polarisation_vector_incident[2])
+        out += ' ---Resonant Settings---\n'
+        out += '   Azimuthal angle: %s\n' % self._azimuthal_angle
+        out += '    Azimuthal ref.: (%s,%s,%s)\n' % (self._azimuthal_reference[0], self._azimuthal_reference[1],
+                                                     self._azimuthal_reference[2])
+        out += '               flm: (%s,%s,%s)\n' % (self._resonant_flm[0], self._resonant_flm[1],
+                                                     self._resonant_flm[2])
+        out += '  use e1e1 approx.: %s\n' % self._resonant_approximation_e1e1
+        #out += '  use e2e2 approx.: %s\n' % self._resonant_approximation_e2e2
+        #out += '  use e1e2 approx.: %s\n' % self._resonant_approximation_e1e2
+        #out += '  use m1m1 approx.: %s\n' % self._resonant_approximation_m1m1
+        return out
+
+    def setup_scatter(self, scattering_type=None, energy_kev=None, wavelength_a=None, powder_units=None,
+                      specular=None, parallel=None, theta_offset=None,
+                      min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None,
+                      output=True, scattering_factors=None, magnetic_formfactor=None,
+                      polarisation=None, polarisation_vector=None, azimuthal_reference=None, azimuth=None, flm=None):
+        """
+        Simple way to set scattering parameters, each parameter is internal to xtl (self)
+
+        scattering_type: self._scattering type            :  'xray','neutron','xray magnetic','neutron magnetic','xray resonant', 'xray dispersion'
+        energy_kev  : self._energy_kev                    :  radiation energy in keV
+        wavelength_a: self._wavelength_a                  :  radiation wavelength in Angstrom
+        powder_units: self._powder_units                  :  units to use when displaying/ plotting ['twotheta', 'd',' 'q']
+        min_twotheta: self._scattering_min_two_theta      :  minimum detector (two-theta) angle
+        max_twotheta: self._scattering_max_two_theta      :  maximum detector (two-theta) angle
+        min_theta   : self._scattering_min_theta          :  minimum sample angle = -opening angle
+        max_theta   : self._scattering_max_theta          :  maximum sample angle = opening angle
+        theta_offset: self._scattering_theta_offset       :  sample offset angle
+        specular    : self._scattering_specular_direction : [h,k,l] : reflections normal to sample surface
+        parallel    : self._scattering_parallel_direction : [h,k,l] : reflections normal to sample surface
+        scattering_factors: self._use_waaskirf_scattering_factor : xray scattering factor ['waaskirf', 'itc']
+        magnetic_formfactor: self._use_magnetic_form_factor: True/False magnetic form factor for magnetic SF
+        polarisation: self._polarisation                  : beam polarisation setting ['ss', 'sp'*, 'sp', 'pp']
+        polarisation_vector: _polarisation_vector_incident: [x,y,z] incident polarisation vector
+        azimuthal_reference: self._azimuthal_reference    : [h,k,l] direction of azimuthal zero angle
+        azimuth    : self._azimuthal_angle                : azimuthal angle in deg
+        flm        : self._resonant_flm                   : Resonant settings (flm1, flm2, flm3)
+        """
+
+        if scattering_type is not None:
+            self._scattering_type = scattering_type
+
+        if energy_kev is not None:
+            self._energy_kev = energy_kev
+
+        if wavelength_a is not None:
+            self._energy_kev = fc.wave2energy(wavelength_a)
+
+        if powder_units is not None:
+            self._powder_units = powder_units
+
+        if specular is not None:
+            self._scattering_specular_direction = specular
+
+        if parallel is not None:
+            self._scattering_parallel_direction = parallel
+
+        if theta_offset is not None:
+            self._scattering_theta_offset = theta_offset
+
+        if min_theta is not None:
+            self._scattering_min_theta = min_theta
+
+        if max_theta is not None:
+            self._scattering_max_theta = max_theta
+
+        if min_twotheta is not None:
+            self._scattering_min_twotheta = min_twotheta
+
+        if max_twotheta is not None:
+            self._scattering_max_twotheta = max_twotheta
+
+        if scattering_factors is not None:
+            if scattering_factors.lower() in ['ws', 'waaskirf', 'alternate', 'alt']:
+                print('Using scattering factors from: "Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431"')
+                self._use_waaskirf_scattering_factor = True
+            else:
+                print('Using scattering factors from: International Tables of Crystallography Vol. C, Table 6.1.1.4')
+                self._use_waaskirf_scattering_factor = False
+
+        if magnetic_formfactor is not None:
+            self._use_magnetic_form_factor = magnetic_formfactor
+
+        if polarisation_vector is not None:
+            self._polarisation_vector_incident = np.array(polarisation_vector, dtype=np.float).reshape(3)
+
+        if polarisation is not None:
+            self._polarisation = polarisation
+
+        if azimuthal_reference is not None:
+            self._azimuthal_reference = np.array(azimuthal_reference, dtype=np.float).reshape(3)
+
+        if azimuth is not None:
+            self._azimuthal_angle = azimuth
+
+        if flm is not None:
+            self._resonant_flm = np.array(flm).reshape(3)
+
+        if output:
+            print(self)
+            # print('Scattering Options:')
+            # print('                            Type : %s' % self._scattering_type)
+            # print('                  Default Energy : %6.3f keV' % self._energy_kev)
+            # print('                    Powder Units : %s' % self._powder_units)
+            # print('  Specular Direction (reflection): (%2.0f,%2.0f,%2.0f)' % (
+            #     self._scattering_specular_direction[0], self._scattering_specular_direction[1],
+            #     self._scattering_specular_direction[2]))
+            # print('Parallel Direction (transmission): (%2.0f,%2.0f,%2.0f)' % (
+            #     self._scattering_parallel_direction[0], self._scattering_parallel_direction[1],
+            #     self._scattering_parallel_direction[2]))
+            # print('                   Sample Offset : %5.2f' % self._scattering_theta_offset)
+            # print('             Minimum Theta angle : %5.2f' % self._scattering_min_theta)
+            # print('             Maximum Theta angle : %5.2f' % self._scattering_max_theta)
+            # print('         Minimum Two-Theta angle : %5.2f' % self._scattering_min_twotheta)
+            # print('         Maximum Two-Theta angle : %5.2f' % self._scattering_max_twotheta)
+
+    def get_hkl(self, regenerate=False, remove_symmetric=False, reflection=False, transmission=False,  **kwargs):
+        """
+        Return stored hkl or generate
+        :param regenerate: if True, hkl list will be regenerated, if False - previous list will be returned
+        :param remove_symmetric: generate only non-symmetric hkl values
+        :param reflection: generate only reflections possible in reflection geometry
+        :param transmission: generate only reflections possible in transmission geometry
+        :param kwargs: additional options to pass to setup_scatter()
+        :return: array
+        """
+        if not regenerate and self._hkl is not None:
+            return self._hkl
+        self.setup_scatter(output=False, **kwargs)
+
+        en = self._energy_kev
+        max_tth = self._scattering_max_twotheta
+
+        hkl = self.xtl.Cell.all_hkl(en, max_tth)
+        if remove_symmetric:
+            hkl = self.xtl.Symmetry.remove_symmetric_reflections(hkl)
+        hkl = self.xtl.Cell.sort_hkl(hkl)[1:]  # remove (0, 0, 0)
+
+        if reflection:
+            tth = self.xtl.Cell.tth(hkl, en)
+            hkl = hkl[tth > self._scattering_min_twotheta, :]
+            tth = tth[tth > self._scattering_min_twotheta]
+            theta = self.xtl.Cell.theta_reflection(hkl, en, self._scattering_specular_direction,
+                                                   self._scattering_theta_offset)
+            p1 = (theta > self._scattering_min_theta) * (theta < self._scattering_max_theta)
+            p2 = (tth > (theta + self._scattering_min_theta)) * (tth < (theta + self._scattering_max_theta))
+            hkl = hkl[p1 * p2]
+        elif transmission:
+            tth = self.xtl.Cell.tth(hkl, en)
+            hkl = hkl[tth > self._scattering_min_twotheta, :]
+            tth = tth[tth > self._scattering_min_twotheta]
+            theta = self.xtl.Cell.theta_transmission(hkl, en, self._scattering_parallel_direction)
+
+            p1 = (theta > self._scattering_min_theta) * (theta < self._scattering_max_theta)
+            p2 = (tth > (theta + self._scattering_min_theta)) * (tth < (theta + self._scattering_max_theta))
+            hkl = hkl[p1 * p2]
+        self._hkl = hkl
+        return self._hkl
+
+    def _debug(self):
+        """Toggle on debug mode"""
+        if self._debug_mode:
+            print('Debug mode: off')
+            self._debug_mode = False
+            fs.DEBUG_MODE = False
+        else:
+            print('Debug mode: on')
+            self._debug_mode = True
+            fs.DEBUG_MODE = True
+
+    def structure_factor(self, hkl=None, scattering_type=None, **kwargs):
+        """
+        Calculate the structure factor at reflection indexes (h,k,l)
+
+        Notes:
+        - Uses x-ray atomic form factors, calculated from approximated tables in the ITC
+        - This may be a little slow for large numbers of reflections, as it is not currently
+         possible to use accelerated calculation methods in Jython.
+        - Debye-Waller factor (atomic displacement) is applied for isotropic ADPs
+        - Crystal.scale is used to scale the complex structure factor, so the intensity is
+         reduced by (Crystal.scale)^2
+        - Testing against structure factors calculated by Vesta.exe is exactly the same when using Waasmaier structure factors.
+
+        :param hkl: array[n,3] : reflection indexes (h, k, l)
+        :param scattering_type: str : one of ['xray','neutron','xray magnetic','neutron magnetic','xray resonant']
+        :param kwargs: additional options to pass to scattering function
+        :return: complex array[n] : structure factors
+        """
+
+        if hkl is None:
+            hkl = self.get_hkl()
+        if scattering_type is None:
+            scattering_type = self._scattering_type
+
+        hkl = np.asarray(np.rint(hkl), dtype=np.float).reshape([-1, 3])
+        uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
+
+        q = self.xtl.Cell.calculateQ(hkl)
+        r = self.xtl.Cell.calculateR(uvw)
+
+        moment = fc.euler_moment(mxmymz, self.xtl.Cell.UV())
+        azi_ref_q = self.xtl.Cell.calculateQ(self._azimuthal_reference)
+
+        if 'energy_kev' in kwargs:
+            energy_kev = kwargs.pop('energy_kev')
+        elif 'wavelength_a' in kwargs:
+            energy_kev = fc.wave2energy(kwargs.pop('wavelength_a'))
+        else:
+            energy_kev = self._energy_kev
+        energy_kev = np.asarray(energy_kev, dtype=np.float).reshape(-1)
+        nenergy = len(energy_kev)
+
+        if 'psi' in kwargs:
+            psi = kwargs.pop('psi')
+        else:
+            psi = self._azimuthal_angle
+        psi = np.asarray(psi, dtype=np.float).reshape(-1)
+        npsi = len(psi)
+
+        options = fs.options(
+            occ=occ,
+            moment=moment,
+            incident_polarisation_vector=self._polarisation_vector_incident,
+            polarisation=self._polarisation,
+            azi_ref_q=azi_ref_q,
+            f0=self._resonant_flm[0],
+            f1=self._resonant_flm[1],
+            f2=self._resonant_flm[2],
+        )
+        options.update(kwargs)
+        scattering_fun = fs.get_scattering_function(scattering_type)
+        # print('Scattering function: %s' % scattering_fun.__name__)
+
+        # Break up long lists of HKLs
+        nref, natom = len(q), len(r)
+        n_arrays = np.ceil(nref * natom / fs.MAX_QR_ARRAY)
+        if n_arrays > 1:
+            print('Splitting %d reflections (%d atoms) into %1.0f parts' % (nref, natom, n_arrays))
+        q_array = np.array_split(q, n_arrays)
+        sf = np.zeros([nref, nenergy, npsi], dtype=np.complex)
+        start_time = datetime.datetime.now()
+        for e, enval in enumerate(energy_kev):
+            for p, psival in enumerate(psi):
+                ls = 0
+                for n, _q in enumerate(q_array):
+                    if n_arrays > 1:
+                        print(' Starting %2.0f/%2.0f: %d:%d' % (n + 1, n_arrays, ls, ls + len(_q)))
+                    qmag = fg.mag(_q)
+                    # Scattering factors
+                    if scattering_type in fs.SCATTERING_TYPES['neutron']:
+                        ff = fc.atom_properties(atom_type, 'Coh_b')
+                    elif scattering_type in fs.SCATTERING_TYPES['xray fast']:
+                        ff = fc.atom_properties(atom_type, 'Z')
+                    elif scattering_type in fs.SCATTERING_TYPES['xray dispersion']:
+                        ff = fc.xray_scattering_factor_resonant(atom_type, qmag, enval)
+                    elif self._use_waaskirf_scattering_factor:
+                        ff = fc.xray_scattering_factor_WaasKirf(atom_type, qmag)
+                    else:
+                        ff = fc.xray_scattering_factor(atom_type, qmag)
+
+                    # Get Debye-Waller factor
+                    if self._use_isotropic_thermal_factor:
+                        dw = fc.debyewaller(uiso, qmag)
+                    elif self._use_anisotropic_thermal_factor:
+                        raise Exception('anisotropic thermal factor calcualtion not implemented yet')
+                    else:
+                        dw = None
+
+                    # Get magnetic form factors
+                    if self._use_magnetic_form_factor:
+                        mf = fc.magnetic_form_factor(atom_type, qmag)
+                    else:
+                        mf = None
+
+                    options['scattering_factor'] = ff
+                    options['debyewaller'] = dw
+                    options['magnetic_formfactor'] = mf
+                    options['energy_kev'] = enval
+                    options['psi'] = psival
+
+                    sf[ls: ls + len(_q), e, p] = scattering_fun(_q, r, **options)
+                    ls = ls + len(_q)
+
+        end_time = datetime.datetime.now()
+        time_difference = end_time - start_time
+        if self._time_report and time_difference.total_seconds() > 10:
+            print('Calculated %d structure factors in %s' % (nref, time_difference))
+        sf = sf / self.xtl.scale
+        if nenergy == 1 and npsi == 1:
+            return sf[:, 0, 0]  # shape(nref)
+        if nenergy == 1:
+            return sf[:, 0, :]  # shape(nref, nenergy)
+        if npsi == 1:
+            return sf[:, :, 0]  # shape(nref, nspi)
+        return sf
+    new_structure_factor = structure_factor
+
+    def intensity(self, hkl=None, scattering_type=None, **options):
+        """
+
+        :param hkl:
+        :param scattering_type: str : one of ['xray','neutron','xray magnetic','neutron magnetic','xray resonant']
+        :return:
+        """
+        return fs.intensity(self.new_structure_factor(hkl, scattering_type, **options))
+    new_intensity = intensity
+
+    def powder(self, scattering_type=None, units=None, peak_width=None, background=None,
+               pixels=None, powder_average=None, **options):
+        """
+
+        Generates array of intensities along a spaced grid, equivalent to a powder pattern.
+          tth, iten = generate_powder('xray', units='tth', energy_kev=8)
+
+        :param scattering_type: str : one of ['xray','neutron','xray magnetic','neutron magnetic','xray resonant']
+        :param units: str : one of ['tth', 'dspace', 'q']
+        :param peak_width: float : Peak with in units of inverse wavevector (Q)
+        :param background: float : if >0, a normal background around this value will be added
+        :param pixels: int : number of pixels to add to the resulting mesh
+        :param powder_average: Bool : if True, intensities will be reduced for the powder average
+        :param options: additional arguments to pass to intensity calculation
+        :return xval: arrray : x-axis of powder scan (units)
+        :return yval: array :  intensity values at each point in x-axis
+        """
+        if scattering_type is None:
+            scattering_type = self._scattering_type
+        if units is None:
+            units = self._powder_units
+        if peak_width is None:
+            peak_width = self._powder_peak_width
+        if background is None:
+            background = self._powder_background
+        if pixels is None:
+            pixels = self._powder_pixels
+        if powder_average is None:
+            powder_average = self._powder_average
+        if 'energy_kev' in options:
+            energy_kev = options['energy_kev']
+        else:
+            energy_kev = self._energy_kev
+
+        # Units
+        min_twotheta = self._scattering_min_twotheta
+        if min_twotheta <= 0: min_twotheta = 1.0
+        max_twotheta = self._scattering_max_twotheta
+        q_min = fc.calqmag(min_twotheta, energy_kev)
+        q_max = fc.calqmag(max_twotheta, energy_kev)
+
+        # Get reflections
+        hmax, kmax, lmax = fc.maxHKL(q_max, self.xtl.Cell.UVstar())
+        HKL = fc.genHKL([hmax, -hmax], [kmax, -kmax], [lmax, -lmax])
+        HKL = self.xtl.Cell.sort_hkl(HKL)  # required for labels
+        Qmag = self.xtl.Cell.Qmag(HKL)
+        HKL = HKL[Qmag < q_max, :]
+        Qmag = self.xtl.Cell.Qmag(HKL)
+
+        # Calculate intensities
+        I = self.intensity(HKL, scattering_type, **options)
+
+        if powder_average:
+            # Apply powder averging correction, I0/|Q|**2
+            I = I/(Qmag+0.001)**2
+
+        # create plotting mesh
+        pixels = int(pixels * q_max)  # reduce this to make convolution faster
+        pixel_size = q_max / (1.0 * pixels)
+        peak_width_pixels = peak_width / (1.0 * pixel_size)
+        mesh = np.zeros([pixels])
+        mesh_q = np.linspace(q_min, q_max, pixels)
+
+        # add reflections to background
+        pixel_coord = Qmag / (1.0 * q_max)
+        pixel_coord = (pixel_coord * (pixels - 1)).astype(int)
+
+        for n in range(1, len(I)):
+            mesh[pixel_coord[n]] = mesh[pixel_coord[n]] + I[n]
+
+        # Convolve with a gaussian (if >0 or not None)
+        if peak_width:
+            gauss_x = np.arange(-3*peak_width_pixels, 3*peak_width_pixels + 1)  # gaussian width = 2*FWHM
+            G = fg.gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
+            mesh = np.convolve(mesh, G, mode='same')
+
+        # Add background (if >0 or not None)
+        if background:
+            bkg = np.random.normal(background, np.sqrt(background), [pixels])
+            mesh = mesh + bkg
+
+        # Change output units
+        if units.lower() in ['tth', 'angle', 'two-theta', 'twotheta', 'theta']:
+            xval = fc.cal2theta(mesh_q, energy_kev)
+        elif units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
+            xval = fc.q2dspace(mesh_q)
+        else:
+            xval = mesh_q
+        return xval, mesh
+
     def x_ray(self, HKL):
         """
         Calculate the squared structure factor for the given HKL, using x-ray scattering factors
@@ -120,7 +559,7 @@ class Scattering:
         Returns an array with the same length as HKL, giving the real intensity at each reflection.
         """
         
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
+        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1, 3])
         Nref = len(HKL)
         
         uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
@@ -884,7 +1323,7 @@ class Scattering:
             vals=(HKL[n][0],HKL[n][1],HKL[n][2],IN[n],IX[n],INM[n],IXM[n],IXRss[n],IXRsp[n],IXRps[n],IXRpp[n])
             print(fmt%vals)
     
-    def intensity(self, HKL, scattering_type=None):
+    def old_intensity(self, HKL, scattering_type=None):
         """
         Calculate the squared structure factor for the given HKL
           Crystal.intensity([1,0,0])
@@ -947,7 +1386,7 @@ class Scattering:
                 print('Scattering type not defined')
         return np.array(intensity)
 
-    def structure_factor(self, HKL, scattering_type=None):
+    def old_structure_factor(self, HKL, scattering_type=None):
         """
         Calculate the complex structure factor for the given HKL
           Crystal.structure_factor([1,0,0])
@@ -1028,84 +1467,6 @@ class Scattering:
         print('( h, k, l)    Theta TwoTheta  Intensity')
         for n in range(len(tth)):
             print('(%2.0f,%2.0f,%2.0f) %8.2f %8.2f  %9.2f' % (HKL[n,0],HKL[n,1],HKL[n,2],theta[n],tth[n],inten[n]))
-    
-    def setup_scatter(self, type=None,energy_kev=None,wavelength_a=None, powder_units=None,
-                      specular=None, parallel=None, theta_offset=None,
-                      min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None,
-                      output=True, scattering_factors=None):
-        """
-        Simple way to set scattering parameters, each parameter is internal to xtl (self)
-        
-        type        : self._scattering type               :  'xray','neutron','xray magnetic','neutron magnetic','xray resonant', 'xray dispersion'
-        energy_kev  : self._energy_kev                    :  radiation energy in keV
-        wavelength_a: self._wavelength_a                  :  radiation wavelength in Angstrom
-        powder_units: self._powder_units                  :  units to use when displaying/ plotting ['twotheta', 'd',' 'q']
-        min_twotheta: self._scattering_min_two_theta      :  minimum detector (two-theta) angle
-        max_twotheta: self._scattering_max_two_theta      :  maximum detector (two-theta) angle
-        min_theta   : self._scattering_min_theta          :  minimum sample angle = -opening angle
-        max_theta   : self._scattering_max_theta          :  maximum sample angle = opening angle
-        theta_offset: self._scattering_theta_offset       :  sample offset angle
-        specular    : self._scattering_specular_direction : [h,k,l] : reflections normal to sample surface
-        parallel    : self._scattering_parallel_direction : [h,k,l] : reflections normal to sample surface
-        """
-        
-        if type is not None:
-            self._scattering_type = type
-        
-        if energy_kev is not None:
-            self._energy_kev = energy_kev
-        
-        if wavelength_a is not None:
-            self._energy_kev = fc.wave2energy(wavelength_a)
-
-        if powder_units is not None:
-            self._powder_units = powder_units
-        
-        if specular is not None:
-            self._scattering_specular_direction = specular
-        
-        if parallel is not None:
-            self._scattering_parallel_direction = parallel
-        
-        if theta_offset is not None:
-            self._scattering_theta_offset = theta_offset
-        
-        if min_theta is not None:
-            self._scattering_min_theta = min_theta
-        
-        if max_theta is not None:
-            self._scattering_max_theta = max_theta
-        
-        if min_twotheta is not None:
-            self._scattering_min_twotheta = min_twotheta
-        
-        if max_twotheta is not None:
-            self._scattering_max_twotheta = max_twotheta
-
-        if scattering_factors is not None:
-            if scattering_factors.lower() in ['ws', 'waaskirf', 'alternate', 'alt']:
-                print('Using scattering factors from: "Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431"')
-                self._use_waaskirf_scattering_factor = True
-            else:
-                print('Using scattering factors from: International Tables of Crystallography Vol. C, Table 6.1.1.4')
-                self._use_waaskirf_scattering_factor = False
-
-        if output:
-            print('Scattering Options:')
-            print('                            Type : %s' % self._scattering_type)
-            print('                  Default Energy : %6.3f keV' % self._energy_kev)
-            print('                    Powder Units : %s' % self._powder_units)
-            print('  Specular Direction (reflection): (%2.0f,%2.0f,%2.0f)' % (
-                self._scattering_specular_direction[0], self._scattering_specular_direction[1],
-                self._scattering_specular_direction[2]))
-            print('Parallel Direction (transmission): (%2.0f,%2.0f,%2.0f)' % (
-                self._scattering_parallel_direction[0], self._scattering_parallel_direction[1],
-                self._scattering_parallel_direction[2]))
-            print('                   Sample Offset : %5.2f' % self._scattering_theta_offset)
-            print('             Minimum Theta angle : %5.2f' % self._scattering_min_theta)
-            print('             Maximum Theta angle : %5.2f' % self._scattering_max_theta)
-            print('         Minimum Two-Theta angle : %5.2f' % self._scattering_min_twotheta)
-            print('         Maximum Two-Theta angle : %5.2f' % self._scattering_max_twotheta)
 
     def generate_powder(self, q_max=8, peak_width=0.01, background=0, powder_average=True):
         """
@@ -1872,6 +2233,7 @@ class Scattering:
         outstr += 'Reflections: %1.0f\n' % len(tth)
         return outstr
     '''
+
 
 class ScatteringTypes:
     """

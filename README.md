@@ -1,7 +1,7 @@
 # Dans_Diffaction
 Reads crystallographic cif files and simulates diffraction, among other things.
 
-**Version 1.9**
+**Version 2.0**
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3859501.svg)](https://doi.org/10.5281/zenodo.3859501)
 
@@ -45,10 +45,15 @@ Stable version from PyPI:
 $ pip install Dans-Diffraction
 ```
 
-Latest version from GitHub:
+Download latest version from GitHub:
 ```text
 $ git clone https://github.com/DanPorter/Dans_Diffraction.git
 ```
+Or install latest version direct from GitHub:
+```text
+$ pip install git+https://github.com/DanPorter/Dans_Diffraction.git
+```
+
 
 # Operation
 Dans_Diffraction is best run within an interactive python environment:

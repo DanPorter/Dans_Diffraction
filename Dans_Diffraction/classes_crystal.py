@@ -146,6 +146,11 @@ class Crystal:
 
         uvw, atom_type, label, occ, uiso, mxmymz = self.Atoms.get()
 
+        # Shortcut if only 1 symmetry operation
+        if len(self.Symmetry.symmetry_operations) == 1:
+            self.Structure = Atoms(uvw[:, 0], uvw[:, 1], uvw[:, 2], atom_type, label, occ, uiso, mxmymz)
+            return
+
         new_uvw = np.empty([0, 3])
         new_type = []
         new_label = []
@@ -290,6 +295,7 @@ class Crystal:
         """
 
         super = Superstructure(self, P)
+        super.generate_super_positions()
         return super
 
     def add_parent(self, parent, P):
@@ -300,15 +306,13 @@ class Crystal:
             su = xtl.add_parent(parent, [[1,1,0],[0,2,0],[0,0,1]])
         """
 
-        uvw, type, label, occupancy, uiso, mxmymz = self.Structure.get()
+        uvw, atom_type, label, occupancy, uiso, mxmymz = self.Structure.get()
         latt = self.Cell.lp()
 
         super = Superstructure(parent, P)
         super.name = self.name
-
         super.new_cell(latt)
-        super.new_atoms(uvw[:, 0], uvw[:, 1], uvw[:, 2], type, label, occupancy, uiso, mxmymz)
-
+        super.new_atoms(uvw[:, 0], uvw[:, 1], uvw[:, 2], atom_type, label, occupancy, uiso, mxmymz)
         return super
 
     def start_gui(self):
@@ -2052,22 +2056,32 @@ class Superstructure(Crystal):
         self.Cell = Cell()
         self.Symmetry = Symmetry()
         self.Atoms = Atoms()
-
-        # Add exta functions
-        # self.Plot = Plotting(self)
-        # self.Scatter = Scattering(self)
+        self.Structure = Atoms()
 
         self.name = Parent.name + ' supercell'
         self.P = np.asarray(P, dtype=np.float)
         self.Parent = Parent
         newUV = Parent.Cell.calculateR(P)
         self.new_cell(fc.UV2latpar(newUV))
+        self.scale = Parent.scale * np.prod(self.P)
+
+        # Add exta functions
+        self.Plot = PlottingSuperstructure(self)
+        self.Scatter = Scattering(self)
+        self.Properties = Properties(self)
+
+    def generate_super_positions(self):
+        """
+        Generate the supercell and superstructure based on P and parent structure
+        :return: None, set new atom positions
+        """
 
         # Build lattice of points
-        UVW = fc.genHKL(2 * np.max(P))
-        real_lattice = Parent.Cell.calculateR(UVW)
+        UVW = fc.genHKL(2 * np.max(self.P))
+        real_lattice = self.Parent.Cell.calculateR(UVW)
 
         # Determine lattice points within the cell
+        newUV = self.Parent.Cell.calculateR(self.P)
         indx_lattice = fc.indx(real_lattice, newUV)
         isincell = np.all(indx_lattice <= 0.99, axis=1) * np.all(indx_lattice > -0.01, axis=1)
         # for n in range(len(real_lattice)):
@@ -2077,21 +2091,21 @@ class Superstructure(Crystal):
         Ncell = len(UVW)
 
         # Increase scale to match size of cell
-        self.scale = Parent.scale * Ncell
+        self.scale = self.Parent.scale * Ncell
 
         # Get Parent atoms
-        uvw, type, label, occ, uiso, mxmymz = Parent.Structure.get()
+        uvw, atom_type, label, occ, uiso, mxmymz = self.Parent.Structure.get()
 
         # Generate all atomic positions
         new_uvw = np.empty([0, 3])
         new_mxmymz = np.empty([0, 3])
-        new_type = np.tile(type, Ncell)
+        new_type = np.tile(atom_type, Ncell)
         new_label = np.tile(label, Ncell)
         new_occ = np.tile(occ, Ncell)
         new_uiso = np.tile(uiso, Ncell)
-        for n in range(len(UVW)):
+        for n in range(Ncell):
             latpos = np.array([UVW[n, 0] + uvw[:, 0], UVW[n, 1] + uvw[:, 1], UVW[n, 2] + uvw[:, 2]]).T
-            latR = Parent.Cell.calculateR(latpos)
+            latR = self.Parent.Cell.calculateR(latpos)
             latuvw = fc.indx(latR, newUV)
 
             # Append to P1 atoms arrays
@@ -2101,11 +2115,6 @@ class Superstructure(Crystal):
         self.new_atoms(u=new_uvw[:, 0], v=new_uvw[:, 1], w=new_uvw[:, 2],
                        type=new_type, label=new_label, occupancy=new_occ, uiso=new_uiso,
                        mxmymz=new_mxmymz)
-
-        # Add exta functions
-        self.Plot = PlottingSuperstructure(self)
-        self.Scatter = Scattering(self)
-        self.Properties = Properties(self)
 
     def set_scale(self):
         """
