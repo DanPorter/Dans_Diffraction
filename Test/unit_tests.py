@@ -16,7 +16,7 @@ TEST_FDMNES = False
 
 # Write output to file
 ranon = datetime.datetime.now()
-out_name = ranon.strftime('result_%Y_%m_%d_V1.9.txt')
+out_name = ranon.strftime('result_%Y_%m_%d_V2.1.txt')
 outfile = open(os.path.join('unit_test_results', out_name), 'wt')
 original_stdout = sys.stdout
 sys.stdout = outfile
@@ -56,23 +56,25 @@ except ImportError:
 except AttributeError:
     print('Import Dans_Diffraction was incorrect, retrying...')
     from Dans_Diffraction import Dans_Diffraction as dif
-print('Dans_Diffraction version: %s'%dif.__version__)
-print('  classes_crystal: %s'%dif.classes_crystal.__version__)
-print('  classes_plotting: %s'%dif.classes_plotting.__version__)
-print('  classes_scattering: %s'%dif.classes_scattering.__version__)
-print('  classes_properties: %s'%dif.classes_properties.__version__)
-print('  classes_structures: %s'%dif.classes_structures.__version__)
+print('Dans_Diffraction version: %s' % dif.__version__)
+print('  classes_crystal: %s' % dif.classes_crystal.__version__)
+print('  classes_plotting: %s' % dif.classes_plotting.__version__)
+print('  classes_scattering: %s' % dif.classes_scattering.__version__)
+print('  classes_properties: %s' % dif.classes_properties.__version__)
+print('  classes_structures: %s' % dif.classes_structures.__version__)
 print('  classes_orbitals: %s' % dif.classes_orbitals.__version__)
-print('  classes_fdmnes: %s'%dif.classes_fdmnes.__version__)
-print('  functions_crystallography: %s'%dif.fc.__version__)
-print('  functions_plotting: %s'%dif.fp.__version__)
-print('  functions_general: %s'%dif.fg.__version__)
+print('  classes_fdmnes: %s' % dif.classes_fdmnes.__version__)
+print('  classes_orientation: %s' % dif.classes_orientation.__version__)
+print('  functions_crystallography: %s' % dif.fc.__version__)
+print('  functions_plotting: %s' % dif.fp.__version__)
+print('  functions_general: %s' % dif.fg.__version__)
 
 # 2.1) Import GUI
 print('Graphical front end version:')
 try:
     from Dans_Diffraction import tkgui
-    print('  tkgui: %s'%tkgui.__version__)
+
+    print('  tkgui: %s' % tkgui.__version__)
 except ImportError:
     print('--- No tkinter available ---')
 

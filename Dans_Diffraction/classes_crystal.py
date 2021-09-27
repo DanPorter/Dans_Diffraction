@@ -24,8 +24,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.2.1
-Last updated: 15/10/20
+Version 3.2.2
+Last updated: 27/09/21
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -46,6 +46,7 @@ Version History:
 10/06/20 3.1    Updated Symmetry to include time operators
 02/09/20 3.2.0  Added Cell.reflection_hkl and transmission_hkl, added __str__ methods
 22/10/20 3.2.1  Added Cell.moment, updated Cell.latt()
+27/09/21 3.2.2  Added Cell.orientation, updated Cell.UV()
 
 @author: DGPorter
 """
@@ -56,13 +57,14 @@ from warnings import warn
 # Internal functions
 from . import functions_general as fg, functions_crystallography as fc
 from . import functions_crystallography as fc
+from .classes_orientation import Orientation
 from .classes_properties import Properties
 #from .classes_orbitals import CrystalOrbitals
 from .classes_scattering import Scattering
 from .classes_multicrystal import MultiCrystal
 from .classes_plotting import Plotting, PlottingSuperstructure
 
-__version__ = '3.2.1'
+__version__ = '3.2.2'
 
 
 class Crystal:
@@ -367,6 +369,7 @@ class Cell:
         UC.latt([2.85,2.85,10.8,90,90,120]) # Define the lattice parameters from a list
         UC.tth([0,0,12],energy_kev=8.0) # Calculate the two-theta of a reflection
         UC.lp() # Returns the current lattice parameters
+        UC.orientation # class to chanage cell orientation in space
     """
     _required_cif = [
         "_cell_length_a",
@@ -384,6 +387,7 @@ class Cell:
         self.alpha = float(alpha)
         self.beta = float(beta)
         self.gamma = float(gamma)
+        self.orientation = Orientation()
 
     def latt(self, lattice_parameters=(), *args, **kwargs):
         """ 
@@ -459,7 +463,7 @@ class Cell:
          Returns the unit cell as a [3x3] array, [A,B,C]
          The vector A is directed along the x-axis
         """
-        return fc.latpar2uv_rot(*self.lp())
+        return self.orientation(fc.latpar2uv_rot(*self.lp()))
 
     def UVstar(self):
         """
@@ -478,6 +482,9 @@ class Cell:
     def Bmatrix(self):
         """
         Calculate the Busing and Levy B matrix from a real space UV
+         "choose the x-axis parallel to a*, the y-axis in the plane of a* and b*, and the z-axis perpendicular to
+         that plane"
+         W. R. Busing & H. A. Levy, Acta  Cryst.  (1967). 22,  457
         """
         return fc.Bmatrix(self.UV())
 
@@ -1964,6 +1971,12 @@ class Symmetry:
             return multiplyers[0]
         return multiplyers
 
+    def spacegroup_name(self):
+        """Return the spacegroup name and number as str"""
+        spg = self.spacegroup.replace(' ', '')
+        spn = self.spacegroup_number
+        return "{} ({})".format(spg, spn)
+
     def parity_time_info(self):
         """
         Returns string of parity and time operations for symmetry operations
@@ -2012,7 +2025,7 @@ class Symmetry:
         return out
 
     def __repr__(self):
-        return "%d symmetry operations" % len(self.symmetry_operations)
+        return "%s, %d symmetry operations" % (self.spacegroup_name(), len(self.symmetry_operations))
 
     def __str__(self):
         return self.info()

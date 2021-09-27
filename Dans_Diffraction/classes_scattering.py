@@ -270,7 +270,7 @@ class Scattering:
             # print('         Minimum Two-Theta angle : %5.2f' % self._scattering_min_twotheta)
             # print('         Maximum Two-Theta angle : %5.2f' % self._scattering_max_twotheta)
 
-    def get_hkl(self, regenerate=False, remove_symmetric=False, reflection=False, transmission=False,  **kwargs):
+    def get_hkl(self, regenerate=True, remove_symmetric=False, reflection=False, transmission=False,  **kwargs):
         """
         Return stored hkl or generate
         :param regenerate: if True, hkl list will be regenerated, if False - previous list will be returned

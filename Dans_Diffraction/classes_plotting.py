@@ -640,28 +640,28 @@ class Plotting:
         ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name,centre[0],centre[1],centre[2])
         fp.labels(ttl,xlab,ylab)
     
-    def simulate_hk0(self,L=0,**kwargs):
+    def simulate_hk0(self, L=0, **kwargs):
         """
         Plots the hk(L) layer of reciprocal space
          for inputs, see help(xtl.simulate_intensity_cut)
         """
         self.simulate_intensity_cut([1,0,0], [0,1,0], [0,0,L],**kwargs)
     
-    def simulate_h0l(self,K=0,**kwargs):
+    def simulate_h0l(self, K=0, **kwargs):
         """
         Plots the h(K)l layer of reciprocal space
          for inputs, see help(xtl.simulate_intensity_cut)
         """
         self.simulate_intensity_cut([1,0,0], [0,0,1], [0,K,0],**kwargs)
     
-    def simulate_0kl(self,H=0,**kwargs):
+    def simulate_0kl(self, H=0, **kwargs):
         """
         Plots the (H)kl layer of reciprocal space
          for inputs, see help(xtl.simulate_intensity_cut)
         """
         self.simulate_intensity_cut([0,1,0], [0,0,1], [H,0,0],**kwargs)
     
-    def simulate_hhl(self,HmH=0,**kwargs):
+    def simulate_hhl(self, HmH=0, **kwargs):
         """
         Plots the hhl layer of reciprocal space
          for inputs, see help(xtl.simulate_intensity_cut)

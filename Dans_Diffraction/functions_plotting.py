@@ -16,8 +16,8 @@ Usage:
 All plots generated require plt.show() call, unless using interactive mode
 
 
-Version 1.9.1
-Last updated: 15/02/21
+Version 2.0
+Last updated: 27/09/21
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -31,6 +31,7 @@ Version History:
 09/03/20 1.8    Added default figure size
 22/11/20 1.9    Update to labels to fix 3D plotting
 15/02/21 1.9.1  Update to vecplot for plotting on axis
+27/09/21 2.0    Added plot3darray, plot_diffractometer_reciprocal_space
 
 @author: DGPorter
 """
@@ -256,6 +257,19 @@ def newplot3(*args, **kwargs):
             ax.plot(x[n], y[n], z[n], *args[3:], **kwargs)
     else:
         ax.plot(*args, **kwargs)
+
+
+def plot3darray(vec, *args, **kwargs):
+    """
+    Plot 3D vectors in 3D
+        plt.plot(vec[:, 0], vec[:, 1], vec[:, 3], *args, **kwargs)
+    :param vec: [n*3] array
+    :param args: args to pass to plt.plot
+    :param kwargs: kwargs to pass to plt.plot
+    :return: matplotlib plot object
+    """
+    vec = np.reshape(vec, (-1, 3))
+    return plt.plot(vec[:, 0], vec[:, 1], vec[:, 2], *args, **kwargs)
 
 
 def sliderplot(YY, X=None, slidervals=None, *args, **kwargs):
@@ -684,6 +698,55 @@ def plot_ewald_coverage(energy_kev, color='k', linewidth=2):
     plt.plot(Q2x, Q2y, color, linewidth, label=r'2$\theta$=$\theta$')
     plt.plot(Q3x, Q3y, color, linewidth, label=r'$\theta$=0')
     plt.axis([-q_max, q_max, 0, q_max])
+
+
+def plot_diffractometer_reciprocal_space(phi, chi, eta, mu, delta, gamma, uv, u, lab, energy_kev):
+    """
+    Plot crystal axes in lab frame of 6-circle diffractometer
+    :param phi:
+    :param chi:
+    :param eta:
+    :param mu:
+    :param delta:
+    :param gamma:
+    :param uv:
+    :param u:
+    :param lab:
+    :param energy_kev:
+    :return:
+    """
+
+    uvstar = fc.RcSp(uv)
+    maxhkl = fc.maxHKL(2, uvstar)
+    hkl = fc.genHKL(*maxhkl)
+    r = fc.diffractometer_rotation(phi, chi, eta, mu)
+    qdet = fc.diff6circleq(delta, gamma, energy_kev, lab=lab)
+    ki, kf = fc.diff6circlek(delta, gamma, energy_kev, lab=lab)
+    qlab = fc.labwavevector(hkl, uv, u, r, lab)
+    astar = fc.labwavevector([1, 0, 0], uv, u, r, lab)
+    bstar = fc.labwavevector([0, 1, 0], uv, u, r, lab)
+    cstar = fc.labwavevector([0, 0, 1], uv, u, r, lab)
+
+    fig = plt.figure(figsize=FIGURE_SIZE, dpi=FIGURE_DPI)
+    ax = fig.add_subplot(111, projection='3d')
+
+    def pltvec(vec, *args, **kwargs):
+        vec = np.reshape(vec, (-1, 3))
+        return plt.plot(vec[:, 1], vec[:, 2], vec[:, 0], *args, **kwargs)
+
+    pltvec(qlab, 'r+', ms=12, label='hkl')
+    pltvec([-ki, [0, 0, 0], kf, [0, 0, 0], qdet], 'k-', lw=5, label='q = kf - ki')
+    pltvec([[0, 0, 0], qdet], 'm-', lw=5, label='q = kf - ki')
+    pltvec([[0, 0, 0], astar], 'b-', lw=5, label='astar')
+    pltvec([[0, 0, 0], bstar], 'g-', lw=5, label='bstar')
+    pltvec([[0, 0, 0], cstar], 'y-', lw=5, label='cstar')
+    labels(None, 'Y', 'Z', 'X', legend=True)
+    ax.set_xlim([2, -2])
+    ax.set_ylim([2, -2])
+    ax.set_zlim([-2, 2])
+    #ax.invert_xaxis()
+    #ax.invert_yaxis()
+    plt.show()
 
 
 def plot_xray_scattering_factor(elements, maxq=10):

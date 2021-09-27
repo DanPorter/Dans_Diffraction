@@ -559,6 +559,43 @@ class Properties:
         """Return latex table of structure properties from CIF"""
         return fc.cif2table(self.xtl.cif)
 
+    def beamline_info(self, energy_kev=None):
+        """Prints various properties useful for experiments"""
+
+        out = '\n'
+        out += '-----------%s-----------\n' % self.xtl.name
+        out += ' Formula: {}\n'.format(self.molname())
+        out += 'Magnetic: {}\n'.format(self.xtl.Structure.ismagnetic())
+        out += '  Weight: %5.2f g/mol\n' % (self.weight())
+        out += ' Density: %5.2f g/cm\n' % (self.density())
+        # Symmetry
+        out += '\nSymmetry: %r\n' % self.xtl.Symmetry
+        # Cell info
+        out += self.xtl.Cell.info()
+
+        if energy_kev is not None:
+            out += '\nEnergy = %s\n' % energy_kev
+            # Xray edges
+            out += '  Near X-Ray Edges:\n'
+            for edge_str, edge_en in zip(*self.xray_edges()):
+                if abs(edge_en - energy_kev) < 1:
+                    out += '    %5s : %7.4f keV\n' % (edge_str, edge_en)
+            # Absorption
+            out += '   Absorption coef: {} um^-1\n'.format(self.absorption(energy_kev))
+            out += 'Attenuation length: {} um\n'.format(self.xray_attenuation_length(energy_kev))
+            out += '  |Q| @ tth=180deg: {} A^-1\n'.format(fc.calqmag(180, energy_kev))
+            out += '    d @ tth=180deg: {} A\n'.format(fc.caldspace(180, energy_kev))
+            out += '           Max HKL: ({:d},{:d},{:d})\n'.format(*self.xtl.Cell.max_hkl(energy_kev, 180))
+            allhkl = self.xtl.Scatter.get_hkl(True, False, energy_kev=energy_kev)
+            out += '          No. Refs: {}\n'.format(len(allhkl))
+        else:
+            # Xray edges
+            out += '\nX-Ray Edges:\n'
+            for edge_str, edge_en in zip(*self.xray_edges()):
+                out += '    %2s : %7.4f keV\n' % (edge_str, edge_en)
+        out += '\n'
+        return out
+
     def info(self):
         """Prints various properties of the crystal"""
 

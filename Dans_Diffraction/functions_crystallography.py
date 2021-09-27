@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.6
-Last updated: 10/06/21
+Version 3.7
+Last updated: 27/09/21
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -37,6 +37,7 @@ Version History:
 26/01/21 3.4    Added xray attenuation, transmission and refractive index
 31/03/21 3.5    Added point groups, gen_sym_unique
 10/06/21 3.6    Corrected mistake in DebyeWaller function. Added x-ray scattering factors from Waasmaier and Kirfel
+27/09/21 3.7    Added diffractometer orientation commands from Busing & Levy, H. You
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -51,7 +52,7 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.6'
+__version__ = '3.7'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -1890,32 +1891,290 @@ def indx(Q, UV):
     return HKL
 
 
+def latparvolume(a, b=None, c=None, alpha=90., beta=90., gamma=90.):
+    """
+    Calcualte the unit cell volume in A^3
+    :param a, b, c: float lattice parameters
+    :param alpha, beta, gamma: float lattice angles
+    :return: float volume in Angstrom^3
+    """
+    if b is None:
+        b = a
+    if c is None:
+        c = a
+    ca = np.cos(np.deg2rad(alpha))
+    cb = np.cos(np.deg2rad(beta))
+    cg = np.cos(np.deg2rad(gamma))
+    return np.sqrt(a**2 * b**2 * c**2 * (1 + 2 * ca * cb * cg - ca**2 - cb**2 - cg**2))
+
+
+def latpar_reciprocal(UV):
+    """
+    Return the reciprocal lattice parameters in inverse-angstroms and degrees
+    :param UV: [3*3] unit vector [a,b,c]
+    :return: a*, b*, c*, alpha*, beta*, gamma*
+    """
+    UVs = RcSp(UV) / (2 * np.pi)
+    b1, b2, b3 = fg.mag(UVs)
+    beta3 = fg.ang(UVs[0, :], UVs[1, :], 'deg')
+    beta2 = fg.ang(UVs[0, :], UVs[2, :], 'deg')
+    beta1 = fg.ang(UVs[1, :], UVs[2, :], 'deg')
+    return b1, b2, b3, beta1, beta2, beta3
+
+
 def Bmatrix(UV):
     """
     Calculate the Busing and Levy B matrix from a real space UV
+    "choose the x-axis parallel to a*, the y-axis in the plane of a* and b*, and the z-axis perpendicular to that plane"
     From: W. R. Busing and H. A. Levy, Acta Cryst. (1967). 22, 457-464
     "Angle calculations for 3- and 4-circle X-ray and neutron diffractometers"
     See also: https://docs.mantidproject.org/nightly/concepts/Lattice.html
     """
 
+    """
     a1, a2, a3 = fg.mag(UV)
     alpha3 = fg.ang(UV[0, :], UV[1, :])
     alpha2 = fg.ang(UV[0, :], UV[2, :])
     alpha1 = fg.ang(UV[1, :], UV[2, :])
-    # print a1,a2,a3
-    # print alpha1,alpha2,alpha3
     UVs = RcSp(UV) / (2 * np.pi)
     b1, b2, b3 = fg.mag(UVs)
     beta3 = fg.ang(UVs[0, :], UVs[1, :])
     beta2 = fg.ang(UVs[0, :], UVs[2, :])
     beta1 = fg.ang(UVs[1, :], UVs[2, :])
-    # print b1,b2,b3
-    # print beta1,beta2,beta3
 
     B = np.array([[b1, b2 * np.cos(beta3), b3 * np.cos(beta2)],
                   [0, b2 * np.sin(beta3), -b3 * np.sin(beta2) * np.cos(alpha1)],
                   [0, 0, 1 / a3]])
-    return B
+    return 2 * np.pi * B  # equivalent to transpose(UVs)
+    """
+    return RcSp(UV).T
+
+
+def latparBmatrix(a, b=None, c=None, alpha=90., beta=90., gamma=90.):
+    """
+    Calculate the Busing and Levy B matrix from a real space UV
+    "choose  the x  axis parallel  to a, the  y  axis  in  the  plane  of  a  and  b,  and  the  z  axis
+    perpendicular  to  that  plane"
+    From: W. R. Busing and H. A. Levy, Acta Cryst. (1967). 22, 457-464
+    "Angle calculations for 3- and 4-circle X-ray and neutron diffractometers"
+    See also: https://docs.mantidproject.org/nightly/concepts/Lattice.html
+    :param a, b, c: float lattice parameters
+    :param alpha, beta, gamma: float lattice angles
+    :return: [3*3] array
+    """
+    if b is None:
+        b = a
+    if c is None:
+        c = a
+    uv = latpar2uv_rot(a,b, c, alpha, beta, gamma)
+    return Bmatrix(uv)
+
+
+def umatrix(a_axis=None, b_axis=None, c_axis=None):
+    """
+    Define an orientation matrix in the diffractometer frame
+    Diffractometer frame according to Fig. 1, H. You, J. Appl. Cryst 32 (1999), 614-623
+      z-axis : axis parallel to the phi rotation axis when all angles 0 (towards wall (+x) in lab frame)
+      x-axis : vector normal to phi axis where phi=0 (toward ceiling (+y) in lab frame)
+      y-axis : vector normal to x,z axes (parallel to beam (+z) in lab frame)
+    :param a_axis: direction of a in the diffractometer frame
+    :param b_axis: direction of b in the diffractometer frame
+    :param c_axis: direction of c in the diffractometer frame
+    :return: [3*3] array
+    """
+    a_axis = np.cross(b_axis, c_axis) if a_axis is None else fg.norm(a_axis)
+    b_axis = np.cross(c_axis, a_axis) if b_axis is None else fg.norm(b_axis)
+    c_axis = np.cross(a_axis, b_axis) if c_axis is None else fg.norm(c_axis)
+    return np.array([a_axis, b_axis, c_axis], dtype=float)
+
+
+def ubmatrix(uv, u):
+    """
+    Return UB matrix
+    :param uv: [3*3] unit vector [a,b,c]
+    :param u: [3*3] orientation matrix in the diffractometer frame
+    :return: [3*3] array
+    """
+    b = Bmatrix(uv)
+    return np.dot(u, b)
+
+
+def rotmatrixz(phi):
+    """
+    Generate diffractometer rotation matrix phi (eta, delta) about z-axis
+    :param phi: float angle in degrees
+    :return: [3*3] array
+    """
+    phi = np.deg2rad(phi)
+    c = np.cos(phi)
+    s = np.sin(phi)
+    return np.array([[c, s, 0], [-s, c, 0], [0, 0, 1]])
+
+
+def rotmatrixy(chi):
+    """
+    Generate diffractometer rotation matrix chi about y-axis
+    :param chi: float angle in degrees
+    :return: [3*3] array
+    """
+    chi = np.deg2rad(chi)
+    c = np.cos(chi)
+    s = np.sin(chi)
+    return np.array([[c, 0, s], [0, 1, 0], [-s, 0, c]])
+
+
+def rotmatrixx(mu):
+    """
+    Generate diffractometer rotation matrix mu (gamma) about x-axis
+    :param mu: float angle in degrees
+    :return: [3*3] array
+    """
+    mu = np.deg2rad(mu)
+    c = np.cos(mu)
+    s = np.sin(mu)
+    return np.array([[1, 0, 0], [0, c, -s], [0, s, c]])
+
+
+def diffractometer_rotation(phi=0, chi=0, eta=0, mu=0):
+    """
+    Generate the 6-axis diffracometer rotation matrix
+      R = M * E * X * P
+    Also called Z in H. You, J. Appl. Cryst 32 (1999), 614-623
+    :param phi: float angle in degrees
+    :param chi: float angle in degrees
+    :param eta: float angle in degrees
+    :param mu: float angle in degrees
+    :return:  [3*3] array
+    """
+    P = rotmatrixz(phi)
+    X = rotmatrixy(chi)
+    E = rotmatrixz(eta)
+    M = rotmatrixx(mu)
+    return np.dot(M, np.dot(E, np.dot(X, P)))
+
+
+def diff2lab(vec, lab=None):
+    """
+    Convert between diffractometer frame and lab frame
+    Lab frame according to Diamond I16 beamline
+    Diffractometer frame according to Fig. 1, H. You, J. Appl. Cryst 32 (1999), 614-623
+      z-axis : axis parallel to the phi rotation axis when all angles 0 (towards wall (+x) in lab frame)
+      x-axis : vector normal to phi axis where phi=0 (toward ceiling (+y) in lab frame)
+      y-axis : vector normal to x,z axes (parallel to beam (+z) in lab frame)
+    :param vec: [3*n] array of vectors
+    :param lab: [3*3] transformation matrix, None=((0,1,0),(0,0,1),(1,0,0))
+    :return: [3*n] array of vectors
+    """
+    if lab is None:
+        lab = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]])  # (x_lab || z_diff, y_lab || x_diff, z_lab || y_diff)
+    return np.dot(lab, np.transpose(vec)).T
+
+
+def labvector(vec, U=None, R=None, LAB=None):
+    """
+    Transform any vector through the orientation, rotation and lab transformations
+    :param vec: [n*3] array of vectors in the diffractometer frame
+    :param U: [3*3] oritenation matrix (see umatrix)
+    :param R: [3x3] rotation matrix (see diffractometer_rotation)
+    :param LAB: [3x3] transformation matrix between diffractometer frame and lab frame
+    :return: [n*3] array of Q vectors in the lab coordinate system
+    """
+    if U is None:
+        U = np.eye(3)
+    if R is None:
+        R = np.eye(3)
+    if LAB is None:
+        LAB = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]])  # (x_lab || z_diff, y_lab || x_diff, z_lab || y_diff)
+    return np.dot(LAB, np.dot(R, np.dot(U, np.transpose(vec)))).T
+
+
+def labwavevector(hkl, UV, U=None, R=None, LAB=None):
+    """
+    Calculate the lab wavevector using the unit-vector, oritenation matrix and rotation matrix
+    Returns vectors in the lab coordinate system, by default defined like Diamond Light Source:
+      x-axis : away from synchrotron ring, towards wall
+      y-axis : towards ceiling
+      z-axis : along beam direction
+    :param hkl: [3xn] array of (h, k, l) reciprocal lattice vectors
+    :param UV: [3*3] Unit-vector matrix (see latpar2ub_rot)
+    :param U: [3*3] oritenation matrix (see umatrix)
+    :param R: [3x3] rotation matrix (see diffractometer_rotation)
+    :param LAB: [3x3] transformation matrix between diffractometer frame and lab frame
+    :return: [3xn] array of Q vectors in the lab coordinate system
+    """
+    if U is None:
+        U = np.eye(3)
+    if R is None:
+        R = np.eye(3)
+    if LAB is None:
+        LAB = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]])  # (x_lab || z_diff, y_lab || x_diff, z_lab || y_diff)
+    B = Bmatrix(UV)
+    return np.dot(LAB, np.dot(R, np.dot(U, np.dot(B, np.transpose(hkl))))).T
+
+
+def diff6circleq(delta, gamma, energy_kev=None, wavelength=1.0, lab=None):
+    """
+    Calcualte wavevector in diffractometer axis using detector angles
+    :param delta: float angle in degrees in vertical direction (about diff-z)
+    :param gamma: float angle in degrees in horizontal direction (about diff-x)
+    :param energy_kev: float energy in KeV
+    :param wavelength: float wavelength in A
+    :param lab: [3*3] lab transformation matrix
+    :return: [1*3]
+    """
+    if energy_kev is not None:
+        wavelength = energy2wave(energy_kev)
+
+    k = 2 * np.pi / wavelength
+    delta = np.deg2rad(delta)
+    gamma = np.deg2rad(gamma)
+    sd = np.sin(delta)
+    cd = np.cos(delta)
+    sg = np.sin(gamma)
+    cg = np.cos(gamma)
+    return diff2lab(k * np.array([sd, cd * cg - 1, cd * sg]), lab)
+
+
+def diff6circlek(delta, gamma, energy_kev=None, wavelength=1.0, lab=None):
+    """
+    Calcualte incident and final wavevectors in diffractometer axis using detector angles
+    :param delta: float angle in degrees in vertical direction (about diff-z)
+    :param gamma: float angle in degrees in horizontal direction (about diff-x)
+    :param energy_kev: float energy in KeV
+    :param wavelength: float wavelength in A
+    :param lab: [3*3] lab transformation matrix
+    :return: [1*3], [1*3] : ki, kf
+    """
+    if energy_kev is not None:
+        wavelength = energy2wave(energy_kev)
+
+    k = 2 * np.pi / wavelength
+    # q = kf - ki
+    q = diff6circleq(delta, gamma, energy_kev, wavelength, lab)
+    ki = k * diff2lab([0, 1, 0], lab)
+    kf = q + ki
+    return ki, kf
+
+
+def diff6circle2hkl(Qdiff, UV, U=None, R=None):
+    """
+    Calculate (h,k,l) position from
+    :param UV: [3*3] Unit-vector matrix (see latpar2ub_rot)
+    :param delta: float angle in degrees in vertical direction (about diff-z)
+    :param gamma: float angle in degrees in horizontal direction (about diff-x)
+    :param U: [3*3] oritenation matrix (see umatrix)
+    :param R: [3x3] rotation matrix (see diffractometer_rotation)
+    :return:
+    """
+    if U is None:
+        U = np.eye(3)
+    if R is None:
+        R = np.eye(3)
+    B = Bmatrix(UV)
+    invR = np.linalg.inv(R)
+    hphi = np.dot(invR, np.transpose(Qdiff))
+    invUB = np.linalg.inv(np.dot(U, B))
+    return np.dot(invUB, hphi).T
 
 
 def maxHKL(Qmax, UV):
