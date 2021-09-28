@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.0
-Last updated: 20/08/21
+Version 2.0.1
+Last updated: 28/09/21
 
 Version History:
 10/09/17 0.1    Program created
@@ -27,6 +27,7 @@ Version History:
 10/06/21 1.9    Added x_ray calculation using Waasmaier and Kirfel scattering factors.
 09/07/21 1.9    Added new scattering factors as option on normal scattering functions
 20/08/21 2.0    Switched over to new scattering module, added self.powder()
+28/09/21 2.0.1  Added __repr__
 
 @author: DGPorter
 """
@@ -41,7 +42,7 @@ from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '2.0.0'
+__version__ = '2.0.1'
 __scattering_types__ = {'xray': ['xray','x','x-ray','thomson','charge'],
                         'neutron': ['neutron','n','nuclear'],
                         'xray magnetic': ['xray magnetic','magnetic xray','spin xray','xray spin'],
@@ -117,11 +118,13 @@ class Scattering:
     _resonant_approximation_m1m1 = False
     
     def __init__(self, xtl):
-        "initialise"
         self.xtl = xtl
 
         # Initialise the scattering type container
         self.Type = ScatteringTypes(self, __scattering_types__)
+
+    def __repr__(self):
+        return 'Scattering(%s, %s)' % (self.xtl.name, self._scattering_type)
 
     def __str__(self):
         out = 'Scatter(%r)\n' % self.xtl

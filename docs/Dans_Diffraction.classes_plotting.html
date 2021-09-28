@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_plotting</strong></big></big> (version 1.8.1)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_plotting</strong></big></big> (version 1.9.3)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_plotting.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_plotting.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_plotting.py">c:\users\dgpor\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\classes_plotting.py</a></font></td></tr></table>
     <p><tt><a href="#Plotting">Plotting</a>&nbsp;Class&nbsp;"classes_plotting.py"<br>
 &nbsp;functions&nbsp;to&nbsp;plot&nbsp;the&nbsp;crystal&nbsp;structure&nbsp;and&nbsp;simulated&nbsp;<br>
 &nbsp;diffraction&nbsp;patterns.<br>
@@ -17,8 +17,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;1.8.1<br>
-Last&nbsp;updated:&nbsp;26/05/20<br>
+Version&nbsp;1.9.3<br>
+Last&nbsp;updated:&nbsp;15/02/21<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 18/08/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -33,6 +33,11 @@ Version&nbsp;History:<br>
 15/04/20&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;minimum&nbsp;angle&nbsp;to&nbsp;simulate_powder<br>
 13/05/20&nbsp;1.8&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;plot_exchange_paths<br>
 26/05/20&nbsp;1.8.1&nbsp;&nbsp;Removed&nbsp;tensor_scattering<br>
+16/06/20&nbsp;1.8.2&nbsp;&nbsp;Change&nbsp;to&nbsp;simulate_powder&nbsp;to&nbsp;make&nbsp;pixels&nbsp;int,&nbsp;remove&nbsp;linspace&nbsp;error&nbsp;in&nbsp;new&nbsp;numpy<br>
+29/06/20&nbsp;1.9.0&nbsp;&nbsp;Removed&nbsp;scipy.convolve2d&nbsp;due&nbsp;to&nbsp;problems&nbsp;importing,&nbsp;new&nbsp;method&nbsp;more&nbsp;accurate&nbsp;but&nbsp;slower<br>
+26/11/20&nbsp;1.9.1&nbsp;&nbsp;Added&nbsp;layers&nbsp;input&nbsp;to&nbsp;plot_layers<br>
+21/01/21&nbsp;1.9.2&nbsp;&nbsp;Added&nbsp;plot_xray_resonance<br>
+15/02/21&nbsp;1.9.3&nbsp;&nbsp;Added&nbsp;axis_reciprocal_lattice_points/lines/vectors<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -132,6 +137,35 @@ Data descriptors defined here:<br>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="Plotting-__init__"><strong>__init__</strong></a>(self, xtl)</dt><dd><tt>initialise</tt></dd></dl>
 
+<dl><dt><a name="Plotting-axis_reciprocal_lattice_lines"><strong>axis_reciprocal_lattice_lines</strong></a>(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0), q_max=4.0, cut_width=0.05, axes=None, *args, **kwargs)</dt><dd><tt>Add&nbsp;lines&nbsp;to&nbsp;the&nbsp;current&nbsp;axis&nbsp;showing&nbsp;the&nbsp;reciprocal&nbsp;lattice<br>
+:param&nbsp;x_axis:&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;y_axis:&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;centre:&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;q_max:&nbsp;maximum&nbsp;distance&nbsp;to&nbsp;plot&nbsp;to&nbsp;-&nbsp;in&nbsp;A-1<br>
+:param&nbsp;cut_width:&nbsp;width&nbsp;in&nbsp;height&nbsp;that&nbsp;will&nbsp;be&nbsp;included,&nbsp;in&nbsp;A-1<br>
+:param&nbsp;axes:&nbsp;None&nbsp;for&nbsp;plt.gca()&nbsp;or&nbsp;axis&nbsp;of&nbsp;choice<br>
+:param&nbsp;args:&nbsp;argments&nbsp;to&nbsp;pass&nbsp;to&nbsp;plot&nbsp;function,&nbsp;e.g.&nbsp;linewidth,&nbsp;alpha,&nbsp;color<br>
+:return:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Plotting-axis_reciprocal_lattice_points"><strong>axis_reciprocal_lattice_points</strong></a>(self, axes=None, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0), q_max=4.0, cut_width=0.05, **kwargs)</dt><dd><tt>Add&nbsp;lines&nbsp;to&nbsp;the&nbsp;current&nbsp;axis&nbsp;showing&nbsp;the&nbsp;reciprocal&nbsp;lattice<br>
+:param&nbsp;axes:&nbsp;None&nbsp;for&nbsp;plt.gca()&nbsp;or&nbsp;axis&nbsp;of&nbsp;choice<br>
+:param&nbsp;x_axis:&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;y_axis:&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;centre:&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;q_max:&nbsp;maximum&nbsp;distance&nbsp;to&nbsp;plot&nbsp;to&nbsp;-&nbsp;in&nbsp;A-1<br>
+:param&nbsp;cut_width:&nbsp;width&nbsp;in&nbsp;height&nbsp;that&nbsp;will&nbsp;be&nbsp;included,&nbsp;in&nbsp;A-1<br>
+:param&nbsp;kwargs:&nbsp;keyword&nbsp;arguments&nbsp;to&nbsp;pass&nbsp;to&nbsp;plt.plot(...,&nbsp;**kwargs)<br>
+:return:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Plotting-axis_reciprocal_lattice_vectors"><strong>axis_reciprocal_lattice_vectors</strong></a>(self, axes=None, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0), q_max=4.0, cut_width=0.05)</dt><dd><tt>Add&nbsp;lines&nbsp;to&nbsp;the&nbsp;current&nbsp;axis&nbsp;showing&nbsp;the&nbsp;reciprocal&nbsp;lattice<br>
+:param&nbsp;axes:&nbsp;None&nbsp;for&nbsp;plt.gca()&nbsp;or&nbsp;axis&nbsp;of&nbsp;choice<br>
+:param&nbsp;x_axis:&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;y_axis:&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;centre:&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;q_max:&nbsp;maximum&nbsp;distance&nbsp;to&nbsp;plot&nbsp;to&nbsp;-&nbsp;in&nbsp;A-1<br>
+:param&nbsp;cut_width:&nbsp;width&nbsp;in&nbsp;height&nbsp;that&nbsp;will&nbsp;be&nbsp;included,&nbsp;in&nbsp;A-1<br>
+:return:&nbsp;None</tt></dd></dl>
+
 <dl><dt><a name="Plotting-generate_intensity_cut"><strong>generate_intensity_cut</strong></a>(self, x_axis=[1, 0, 0], y_axis=[0, 1, 0], centre=[0, 0, 0], q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05)</dt><dd><tt>Generate&nbsp;a&nbsp;cut&nbsp;through&nbsp;reciprocal&nbsp;space,&nbsp;returns&nbsp;an&nbsp;array&nbsp;with&nbsp;centred&nbsp;reflections<br>
 Inputs:<br>
 &nbsp;&nbsp;x_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
@@ -176,8 +210,13 @@ E.G.&nbsp;hk&nbsp;plane&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br
 :param&nbsp;disp:&nbsp;Bool.&nbsp;If&nbsp;True,&nbsp;prints&nbsp;details&nbsp;of&nbsp;the&nbsp;calcualtion<br>
 :return:</tt></dd></dl>
 
-<dl><dt><a name="Plotting-plot_layers"><strong>plot_layers</strong></a>(self, layer_axis=2, layer_width=0.05, show_labels=False)</dt><dd><tt>Separate&nbsp;the&nbsp;structure&nbsp;into&nbsp;layers&nbsp;along&nbsp;the&nbsp;chosen&nbsp;axis<br>
-and&nbsp;plot&nbsp;the&nbsp;atoms&nbsp;in&nbsp;each&nbsp;layer&nbsp;in&nbsp;a&nbsp;separate&nbsp;figure.</tt></dd></dl>
+<dl><dt><a name="Plotting-plot_layers"><strong>plot_layers</strong></a>(self, layers=None, layer_axis=2, layer_width=0.05, show_labels=False)</dt><dd><tt>Separate&nbsp;the&nbsp;structure&nbsp;into&nbsp;layers&nbsp;along&nbsp;the&nbsp;chosen&nbsp;axis<br>
+and&nbsp;plot&nbsp;the&nbsp;atoms&nbsp;in&nbsp;each&nbsp;layer&nbsp;in&nbsp;a&nbsp;separate&nbsp;figure.<br>
+:param&nbsp;layers:&nbsp;list&nbsp;of&nbsp;layers&nbsp;to&nbsp;plot&nbsp;in&nbsp;fractional&nbsp;coordinates,&nbsp;or&nbsp;NOne&nbsp;for&nbsp;automatic&nbsp;determination<br>
+:param&nbsp;layer_axis:&nbsp;axis&nbsp;(0,1,2)&nbsp;of&nbsp;direction&nbsp;normal&nbsp;to&nbsp;layers<br>
+:param&nbsp;layer_width:&nbsp;distance&nbsp;from&nbsp;layer&nbsp;value&nbsp;to&nbsp;include&nbsp;in&nbsp;plot<br>
+:param&nbsp;show_labels:&nbsp;False*/True&nbsp;add&nbsp;text&nbsp;labels<br>
+:return:</tt></dd></dl>
 
 <dl><dt><a name="Plotting-plot_ms_azimuth"><strong>plot_ms_azimuth</strong></a>(self, hkl, energy_kev, azir=[0, 0, 1], pv=[1, 0], numsteps=3, peak_width=0.1, full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False, log=False)</dt><dd><tt>Run&nbsp;the&nbsp;multiple&nbsp;scattering&nbsp;code&nbsp;and&nbsp;plot&nbsp;the&nbsp;result<br>
 See&nbsp;multiple_scattering.py&nbsp;for&nbsp;more&nbsp;details.<br>
@@ -210,6 +249,13 @@ See&nbsp;multiple_scattering.py&nbsp;for&nbsp;more&nbsp;details.<br>
 :param&nbsp;pv2:&nbsp;True/False:&nbsp;calculation&nbsp;type:&nbsp;pv2<br>
 :param&nbsp;sfonly:&nbsp;True/False:&nbsp;calculation&nbsp;type:&nbsp;sfonly&nbsp;*default<br>
 :param&nbsp;pv1xsf1:&nbsp;True/False:&nbsp;calculation&nbsp;type:&nbsp;pv1xsf1?<br>
+:return:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Plotting-plot_xray_resonance"><strong>plot_xray_resonance</strong></a>(self, hkl, energy_kev=None, width=1.0, npoints=200)</dt><dd><tt>Plot&nbsp;energy&nbsp;scan&nbsp;using&nbsp;x-ray&nbsp;dispersion&nbsp;corrections<br>
+:param&nbsp;hkl:&nbsp;list&nbsp;of&nbsp;[h,k,l]&nbsp;reflections<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;energy&nbsp;in&nbsp;keV&nbsp;to&nbsp;scan&nbsp;around<br>
+:param&nbsp;width:&nbsp;float&nbsp;in&nbsp;keV&nbsp;width&nbsp;of&nbsp;scan<br>
+:param&nbsp;npoints:&nbsp;int&nbsp;number&nbsp;of&nbsp;poins&nbsp;to&nbsp;calculate<br>
 :return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Plotting-quick_intensity_cut"><strong>quick_intensity_cut</strong></a>(self, x_axis=[1, 0, 0], y_axis=[0, 1, 0], centre=[0, 0, 0], q_max=4.0, cut_width=0.05)</dt><dd><tt>Plot&nbsp;a&nbsp;cut&nbsp;through&nbsp;reciprocal&nbsp;space,&nbsp;visualising&nbsp;the&nbsp;intensity&nbsp;as&nbsp;different&nbsp;sized&nbsp;markers<br>
@@ -334,13 +380,13 @@ Inputs:<br>
 &nbsp;&nbsp;background&nbsp;=&nbsp;average&nbsp;background&nbsp;value<br>
 &nbsp;&nbsp;peak_width&nbsp;=&nbsp;reflection&nbsp;width&nbsp;in&nbsp;A-1<br>
 Returns:<br>
-&nbsp;&nbsp;Qx/Qy&nbsp;=&nbsp;[1000x1000]&nbsp;array&nbsp;of&nbsp;coordinates<br>
+&nbsp;&nbsp;qx/qy&nbsp;=&nbsp;[1000x1000]&nbsp;array&nbsp;of&nbsp;coordinates<br>
 &nbsp;&nbsp;plane&nbsp;=&nbsp;[1000x1000]&nbsp;array&nbsp;of&nbsp;plane&nbsp;in&nbsp;reciprocal&nbsp;space&nbsp;<br>
 &nbsp;<br>
 E.G.&nbsp;hk&nbsp;plane&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Qx,Qy,plane&nbsp;=&nbsp;xtl.<a href="#PlottingSuperstructure-generate_intensity_cut">generate_intensity_cut</a>([1,0,0],[0,1,0],[0,0,3])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;qx,qy,plane&nbsp;=&nbsp;xtl.<a href="#PlottingSuperstructure-generate_intensity_cut">generate_intensity_cut</a>([1,0,0],[0,1,0],[0,0,3])<br>
 &nbsp;&nbsp;&nbsp;&nbsp;plt.figure()<br>
-&nbsp;&nbsp;&nbsp;&nbsp;plt.pcolormesh(Qx,Qy,plane)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.pcolormesh(qx,qy,plane)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;plt.axis('image')</tt></dd></dl>
 
 <dl><dt><a name="PlottingSuperstructure-simulate_intensity_cut"><strong>simulate_intensity_cut</strong></a>(self, x_axis=[1, 0, 0], y_axis=[0, 1, 0], centre=[0, 0, 0], q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05)</dt><dd><tt>Plot&nbsp;a&nbsp;cut&nbsp;through&nbsp;reciprocal&nbsp;space,&nbsp;visualising&nbsp;the&nbsp;intensity<br>
@@ -360,6 +406,35 @@ E.G.&nbsp;hk&nbsp;plot&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
 <hr>
 Methods inherited from <a href="Dans_Diffraction.classes_plotting.html#Plotting">Plotting</a>:<br>
 <dl><dt><a name="PlottingSuperstructure-__init__"><strong>__init__</strong></a>(self, xtl)</dt><dd><tt>initialise</tt></dd></dl>
+
+<dl><dt><a name="PlottingSuperstructure-axis_reciprocal_lattice_lines"><strong>axis_reciprocal_lattice_lines</strong></a>(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0), q_max=4.0, cut_width=0.05, axes=None, *args, **kwargs)</dt><dd><tt>Add&nbsp;lines&nbsp;to&nbsp;the&nbsp;current&nbsp;axis&nbsp;showing&nbsp;the&nbsp;reciprocal&nbsp;lattice<br>
+:param&nbsp;x_axis:&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;y_axis:&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;centre:&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;q_max:&nbsp;maximum&nbsp;distance&nbsp;to&nbsp;plot&nbsp;to&nbsp;-&nbsp;in&nbsp;A-1<br>
+:param&nbsp;cut_width:&nbsp;width&nbsp;in&nbsp;height&nbsp;that&nbsp;will&nbsp;be&nbsp;included,&nbsp;in&nbsp;A-1<br>
+:param&nbsp;axes:&nbsp;None&nbsp;for&nbsp;plt.gca()&nbsp;or&nbsp;axis&nbsp;of&nbsp;choice<br>
+:param&nbsp;args:&nbsp;argments&nbsp;to&nbsp;pass&nbsp;to&nbsp;plot&nbsp;function,&nbsp;e.g.&nbsp;linewidth,&nbsp;alpha,&nbsp;color<br>
+:return:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="PlottingSuperstructure-axis_reciprocal_lattice_points"><strong>axis_reciprocal_lattice_points</strong></a>(self, axes=None, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0), q_max=4.0, cut_width=0.05, **kwargs)</dt><dd><tt>Add&nbsp;lines&nbsp;to&nbsp;the&nbsp;current&nbsp;axis&nbsp;showing&nbsp;the&nbsp;reciprocal&nbsp;lattice<br>
+:param&nbsp;axes:&nbsp;None&nbsp;for&nbsp;plt.gca()&nbsp;or&nbsp;axis&nbsp;of&nbsp;choice<br>
+:param&nbsp;x_axis:&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;y_axis:&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;centre:&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;q_max:&nbsp;maximum&nbsp;distance&nbsp;to&nbsp;plot&nbsp;to&nbsp;-&nbsp;in&nbsp;A-1<br>
+:param&nbsp;cut_width:&nbsp;width&nbsp;in&nbsp;height&nbsp;that&nbsp;will&nbsp;be&nbsp;included,&nbsp;in&nbsp;A-1<br>
+:param&nbsp;kwargs:&nbsp;keyword&nbsp;arguments&nbsp;to&nbsp;pass&nbsp;to&nbsp;plt.plot(...,&nbsp;**kwargs)<br>
+:return:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="PlottingSuperstructure-axis_reciprocal_lattice_vectors"><strong>axis_reciprocal_lattice_vectors</strong></a>(self, axes=None, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0), q_max=4.0, cut_width=0.05)</dt><dd><tt>Add&nbsp;lines&nbsp;to&nbsp;the&nbsp;current&nbsp;axis&nbsp;showing&nbsp;the&nbsp;reciprocal&nbsp;lattice<br>
+:param&nbsp;axes:&nbsp;None&nbsp;for&nbsp;plt.gca()&nbsp;or&nbsp;axis&nbsp;of&nbsp;choice<br>
+:param&nbsp;x_axis:&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;y_axis:&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;centre:&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+:param&nbsp;q_max:&nbsp;maximum&nbsp;distance&nbsp;to&nbsp;plot&nbsp;to&nbsp;-&nbsp;in&nbsp;A-1<br>
+:param&nbsp;cut_width:&nbsp;width&nbsp;in&nbsp;height&nbsp;that&nbsp;will&nbsp;be&nbsp;included,&nbsp;in&nbsp;A-1<br>
+:return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="PlottingSuperstructure-plot_3Dlattice"><strong>plot_3Dlattice</strong></a>(self, q_max=4.0, x_axis=[1, 0, 0], y_axis=[0, 1, 0], centre=[0, 0, 0], cut_width=0.05)</dt><dd><tt>Plot&nbsp;lattice&nbsp;points&nbsp;in&nbsp;3D</tt></dd></dl>
 
@@ -386,8 +461,13 @@ Methods inherited from <a href="Dans_Diffraction.classes_plotting.html#Plotting"
 :param&nbsp;disp:&nbsp;Bool.&nbsp;If&nbsp;True,&nbsp;prints&nbsp;details&nbsp;of&nbsp;the&nbsp;calcualtion<br>
 :return:</tt></dd></dl>
 
-<dl><dt><a name="PlottingSuperstructure-plot_layers"><strong>plot_layers</strong></a>(self, layer_axis=2, layer_width=0.05, show_labels=False)</dt><dd><tt>Separate&nbsp;the&nbsp;structure&nbsp;into&nbsp;layers&nbsp;along&nbsp;the&nbsp;chosen&nbsp;axis<br>
-and&nbsp;plot&nbsp;the&nbsp;atoms&nbsp;in&nbsp;each&nbsp;layer&nbsp;in&nbsp;a&nbsp;separate&nbsp;figure.</tt></dd></dl>
+<dl><dt><a name="PlottingSuperstructure-plot_layers"><strong>plot_layers</strong></a>(self, layers=None, layer_axis=2, layer_width=0.05, show_labels=False)</dt><dd><tt>Separate&nbsp;the&nbsp;structure&nbsp;into&nbsp;layers&nbsp;along&nbsp;the&nbsp;chosen&nbsp;axis<br>
+and&nbsp;plot&nbsp;the&nbsp;atoms&nbsp;in&nbsp;each&nbsp;layer&nbsp;in&nbsp;a&nbsp;separate&nbsp;figure.<br>
+:param&nbsp;layers:&nbsp;list&nbsp;of&nbsp;layers&nbsp;to&nbsp;plot&nbsp;in&nbsp;fractional&nbsp;coordinates,&nbsp;or&nbsp;NOne&nbsp;for&nbsp;automatic&nbsp;determination<br>
+:param&nbsp;layer_axis:&nbsp;axis&nbsp;(0,1,2)&nbsp;of&nbsp;direction&nbsp;normal&nbsp;to&nbsp;layers<br>
+:param&nbsp;layer_width:&nbsp;distance&nbsp;from&nbsp;layer&nbsp;value&nbsp;to&nbsp;include&nbsp;in&nbsp;plot<br>
+:param&nbsp;show_labels:&nbsp;False*/True&nbsp;add&nbsp;text&nbsp;labels<br>
+:return:</tt></dd></dl>
 
 <dl><dt><a name="PlottingSuperstructure-plot_ms_azimuth"><strong>plot_ms_azimuth</strong></a>(self, hkl, energy_kev, azir=[0, 0, 1], pv=[1, 0], numsteps=3, peak_width=0.1, full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False, log=False)</dt><dd><tt>Run&nbsp;the&nbsp;multiple&nbsp;scattering&nbsp;code&nbsp;and&nbsp;plot&nbsp;the&nbsp;result<br>
 See&nbsp;multiple_scattering.py&nbsp;for&nbsp;more&nbsp;details.<br>
@@ -420,6 +500,13 @@ See&nbsp;multiple_scattering.py&nbsp;for&nbsp;more&nbsp;details.<br>
 :param&nbsp;pv2:&nbsp;True/False:&nbsp;calculation&nbsp;type:&nbsp;pv2<br>
 :param&nbsp;sfonly:&nbsp;True/False:&nbsp;calculation&nbsp;type:&nbsp;sfonly&nbsp;*default<br>
 :param&nbsp;pv1xsf1:&nbsp;True/False:&nbsp;calculation&nbsp;type:&nbsp;pv1xsf1?<br>
+:return:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="PlottingSuperstructure-plot_xray_resonance"><strong>plot_xray_resonance</strong></a>(self, hkl, energy_kev=None, width=1.0, npoints=200)</dt><dd><tt>Plot&nbsp;energy&nbsp;scan&nbsp;using&nbsp;x-ray&nbsp;dispersion&nbsp;corrections<br>
+:param&nbsp;hkl:&nbsp;list&nbsp;of&nbsp;[h,k,l]&nbsp;reflections<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;energy&nbsp;in&nbsp;keV&nbsp;to&nbsp;scan&nbsp;around<br>
+:param&nbsp;width:&nbsp;float&nbsp;in&nbsp;keV&nbsp;width&nbsp;of&nbsp;scan<br>
+:param&nbsp;npoints:&nbsp;int&nbsp;number&nbsp;of&nbsp;poins&nbsp;to&nbsp;calculate<br>
 :return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="PlottingSuperstructure-quick_intensity_cut"><strong>quick_intensity_cut</strong></a>(self, x_axis=[1, 0, 0], y_axis=[0, 1, 0], centre=[0, 0, 0], q_max=4.0, cut_width=0.05)</dt><dd><tt>Plot&nbsp;a&nbsp;cut&nbsp;through&nbsp;reciprocal&nbsp;space,&nbsp;visualising&nbsp;the&nbsp;intensity&nbsp;as&nbsp;different&nbsp;sized&nbsp;markers<br>

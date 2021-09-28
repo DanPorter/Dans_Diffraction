@@ -6,26 +6,20 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_general</strong></big></big> (version 1.7)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_general</strong></big></big> (version 2.0.0, 02/Feb/2021)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_general.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\functions_general.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_general.py">c:\users\dgpor\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_general.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;Generally&nbsp;useful&nbsp;functions&nbsp;"functions_general.py"<br>
 &nbsp;<br>
-Contains&nbsp;various&nbsp;useful&nbsp;shortcuts&nbsp;for&nbsp;manipulating&nbsp;strings&nbsp;and&nbsp;arrays,&nbsp;<br>
+Contains&nbsp;various&nbsp;useful&nbsp;shortcuts&nbsp;for&nbsp;manipulating&nbsp;strings&nbsp;and&nbsp;arrays,<br>
 making&nbsp;use&nbsp;of&nbsp;numpy&nbsp;and&nbsp;re.<br>
 &nbsp;<br>
 By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
-2018<br>
+2021<br>
 &nbsp;<br>
-Usage:&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Run&nbsp;this&nbsp;file&nbsp;in&nbsp;an&nbsp;interactive&nbsp;console<br>
-&nbsp;&nbsp;&nbsp;&nbsp;OR<br>
-&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;from&nbsp;Dans_Diffraction&nbsp;import&nbsp;functions_general&nbsp;as&nbsp;fg<br>
-&nbsp;<br>
-&nbsp;<br>
-Version&nbsp;1.7<br>
-Last&nbsp;updated:&nbsp;12/05/20<br>
+Version&nbsp;2.0.0<br>
+Last&nbsp;updated:&nbsp;02/02/21<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 06/01/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created&nbsp;from&nbsp;DansGeneralProgs.py&nbsp;V2.3<br>
@@ -36,6 +30,10 @@ Version&nbsp;History:<br>
 27/03/20&nbsp;1.5&nbsp;&nbsp;&nbsp;&nbsp;Corrected&nbsp;error&nbsp;in&nbsp;gauss&nbsp;for&nbsp;1d&nbsp;case&nbsp;when&nbsp;centre&nbsp;/=&nbsp;0<br>
 05/05/20&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;New&nbsp;version&nbsp;of&nbsp;readstfm,&nbsp;allows&nbsp;E&nbsp;powers&nbsp;and&nbsp;handles&nbsp;non-numbers.<br>
 12/05/20&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;sph2cart,&nbsp;replace_bracket_multiple<br>
+20/07/20&nbsp;1.8&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;vector_inersection&nbsp;and&nbsp;plane_intersection,&nbsp;updated&nbsp;findranges,&nbsp;added&nbsp;whererun<br>
+01/12/20&nbsp;1.8.1&nbsp;&nbsp;Added&nbsp;get_methods&nbsp;function<br>
+26/01/21&nbsp;1.8.2&nbsp;&nbsp;Added&nbsp;shortstr&nbsp;and&nbsp;squaredata<br>
+02/02/21&nbsp;2.0.0&nbsp;&nbsp;Merged&nbsp;changes&nbsp;in&nbsp;other&nbsp;versions,&nbsp;added&nbsp;vector_intersection&nbsp;and&nbsp;you_normal_vector<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -45,11 +43,12 @@ Version&nbsp;History:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="inspect.html">inspect</a><br>
+<a href="numpy.html">numpy</a><br>
 </td><td width="25%" valign=top><a href="os.html">os</a><br>
-</td><td width="25%" valign=top><a href="re.html">re</a><br>
+<a href="re.html">re</a><br>
 </td><td width="25%" valign=top><a href="sys.html">sys</a><br>
-</td></tr></table></td></tr></table><p>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#eeaa77">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -60,6 +59,9 @@ Version&nbsp;History:<br>
 E.G.<br>
 <a href="#-ang">ang</a>([1,0,0],[0,1,0])&nbsp;&gt;&gt;&nbsp;1.571<br>
 <a href="#-ang">ang</a>([1,0,0],[0,1,0],'deg')&nbsp;&gt;&gt;&nbsp;90</tt></dd></dl>
+ <dl><dt><a name="-array_str"><strong>array_str</strong></a>(A)</dt><dd><tt>Returns&nbsp;a&nbsp;short&nbsp;string&nbsp;with&nbsp;array&nbsp;information<br>
+:param&nbsp;A:&nbsp;np&nbsp;array<br>
+:return:&nbsp;str</tt></dd></dl>
  <dl><dt><a name="-cart2sph"><strong>cart2sph</strong></a>(xyz, deg=False)</dt><dd><tt>Convert&nbsp;coordinates&nbsp;in&nbsp;cartesian&nbsp;to&nbsp;coordinates&nbsp;in&nbsp;spherical<br>
 https://en.wikipedia.org/wiki/Spherical_coordinate_system<br>
 ISO&nbsp;convention&nbsp;used.<br>
@@ -126,6 +128,7 @@ From&nbsp;<a href="http://fityk.nieto.pl/model.html">http://fityk.nieto.pl/model
 &nbsp;&nbsp;&nbsp;&nbsp;cen&nbsp;=&nbsp;peak&nbsp;centre<br>
 &nbsp;&nbsp;&nbsp;&nbsp;fwhm&nbsp;=&nbsp;peak&nbsp;full&nbsp;width&nbsp;at&nbsp;half-max<br>
 &nbsp;&nbsp;&nbsp;&nbsp;bkg&nbsp;=&nbsp;background</tt></dd></dl>
+ <dl><dt><a name="-get_methods"><strong>get_methods</strong></a>(object, include_special=True)</dt><dd><tt>Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;methods&nbsp;(functions)&nbsp;within&nbsp;object</tt></dd></dl>
  <dl><dt><a name="-grid_intensity"><strong>grid_intensity</strong></a>(points, values, resolution=0.01, peak_width=0.1, background=0)</dt><dd><tt>Generates&nbsp;array&nbsp;of&nbsp;intensities&nbsp;along&nbsp;a&nbsp;spaced&nbsp;grid,&nbsp;equivalent&nbsp;to&nbsp;a&nbsp;powder&nbsp;pattern.<br>
 &nbsp;&nbsp;grid,&nbsp;values&nbsp;=&nbsp;generate_powder(points,&nbsp;values,&nbsp;resolution=0.01,&nbsp;peak_width=0.1,&nbsp;background=0)<br>
 :param&nbsp;points:&nbsp;[nx1]&nbsp;position&nbsp;of&nbsp;values&nbsp;to&nbsp;place&nbsp;on&nbsp;grid<br>
@@ -147,6 +150,7 @@ group_counts&nbsp;=&nbsp;[1,&nbsp;1,&nbsp;2]&nbsp;number&nbsp;of&nbsp;iterations
  <dl><dt><a name="-index_coordinates"><strong>index_coordinates</strong></a>(A, CELL)</dt><dd><tt>Index&nbsp;A(x1,y1,1)&nbsp;on&nbsp;new&nbsp;coordinate&nbsp;system&nbsp;B(x2,y2,z2),&nbsp;defined&nbsp;by&nbsp;unit&nbsp;vectors&nbsp;CELL&nbsp;=&nbsp;[A,B,C]<br>
 &nbsp;&nbsp;A&nbsp;=&nbsp;[[nx3]]&nbsp;array&nbsp;of&nbsp;vectors<br>
 &nbsp;&nbsp;CELL&nbsp;=&nbsp;[[3x3]]&nbsp;matrix&nbsp;of&nbsp;vectors&nbsp;[a,b,c]</tt></dd></dl>
+ <dl><dt><a name="-inline_help"><strong>inline_help</strong></a>(func)</dt><dd><tt>Return&nbsp;function&nbsp;spec&nbsp;and&nbsp;first&nbsp;line&nbsp;of&nbsp;help&nbsp;in&nbsp;line</tt></dd></dl>
  <dl><dt><a name="-isincell"><strong>isincell</strong></a>(A, cell_centre=[0, 0, 0], CELL=array([[1., 0., 0.],
        [0., 1., 0.],
        [0., 0., 1.]]))</dt><dd><tt>&nbsp;Return&nbsp;boolean&nbsp;of&nbsp;whether&nbsp;vector&nbsp;xyx&nbsp;is&nbsp;inside&nbsp;a&nbsp;cell&nbsp;defined&nbsp;by&nbsp;position,&nbsp;size&nbsp;and&nbsp;rotation<br>
@@ -160,6 +164,8 @@ E.G.<br>
 &nbsp;&nbsp;&nbsp;CELL&nbsp;=&nbsp;<a href="#-cell">cell</a>([1,1,10],[0,0,0])<br>
 &nbsp;&nbsp;&nbsp;isinbox(xyz,centre,CELL)<br>
 &nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;[False,True,True]</tt></dd></dl>
+ <dl><dt><a name="-lastlines"><strong>lastlines</strong></a>(filename, lines=1, max_line_length=255)</dt><dd><tt>Returns&nbsp;the&nbsp;last&nbsp;n&nbsp;lines&nbsp;of&nbsp;a&nbsp;text&nbsp;file</tt></dd></dl>
+ <dl><dt><a name="-list_methods"><strong>list_methods</strong></a>(object, include_special=False)</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;methods&nbsp;(functions)&nbsp;in&nbsp;class&nbsp;object</tt></dd></dl>
  <dl><dt><a name="-mag"><strong>mag</strong></a>(A)</dt><dd><tt>Returns&nbsp;the&nbsp;magnitude&nbsp;of&nbsp;vector&nbsp;A<br>
 If&nbsp;A&nbsp;has&nbsp;2&nbsp;dimensions,&nbsp;returns&nbsp;an&nbsp;array&nbsp;of&nbsp;magnitudes<br>
 &nbsp;<br>
@@ -191,6 +197,12 @@ E.G.<br>
 E.G.<br>
 <a href="#-numbers2string">numbers2string</a>([50001,50002,50003])&nbsp;=&nbsp;'5000[1:3]'<br>
 <a href="#-numbers2string">numbers2string</a>([51020,51030,51040])&nbsp;=&nbsp;'510[20:10:40]'</tt></dd></dl>
+ <dl><dt><a name="-plane_intersection"><strong>plane_intersection</strong></a>(line_point, line_direction, plane_point, plane_normal)</dt><dd><tt>Calculate&nbsp;the&nbsp;point&nbsp;at&nbsp;which&nbsp;a&nbsp;line&nbsp;intersects&nbsp;a&nbsp;plane<br>
+:param&nbsp;line_point:&nbsp;[x,y],z]&nbsp;some&nbsp;coordinate&nbsp;on&nbsp;line<br>
+:param&nbsp;line_direction:&nbsp;[dx,dy],dz]&nbsp;the&nbsp;direction&nbsp;of&nbsp;line<br>
+:param&nbsp;plane_point:&nbsp;&nbsp;[x,y],z]&nbsp;some&nbsp;coordinate&nbsp;on&nbsp;the&nbsp;plane<br>
+:param&nbsp;plane_normal:&nbsp;[dx,dy],dz]&nbsp;the&nbsp;normal&nbsp;vector&nbsp;of&nbsp;the&nbsp;plane<br>
+:return:&nbsp;[x,y],z]</tt></dd></dl>
  <dl><dt><a name="-print_arrays"><strong>print_arrays</strong></a>(arrays=[])</dt><dd><tt>Prints&nbsp;values&nbsp;from&nbsp;several&nbsp;arrays&nbsp;with&nbsp;nice&nbsp;formatting<br>
 e.g.&nbsp;dgp.<a href="#-print_arrays">print_arrays</a>(1e6*np.random.rand(5,5))<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;6.04e+03&nbsp;&nbsp;&nbsp;2.29e+05&nbsp;&nbsp;&nbsp;7.19e+05&nbsp;&nbsp;&nbsp;4.74e+05&nbsp;&nbsp;&nbsp;9.59e+05<br>
@@ -245,6 +257,12 @@ In&nbsp;a&nbsp;right&nbsp;handed&nbsp;coordinate&nbsp;system.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;|________\Y<br>
 &nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_\/X</tt></dd></dl>
+ <dl><dt><a name="-rotate_about_axis"><strong>rotate_about_axis</strong></a>(point, axis, angle)</dt><dd><tt>Rotate&nbsp;vector&nbsp;A&nbsp;about&nbsp;vector&nbsp;Axis&nbsp;by&nbsp;angle<br>
+Using&nbsp;Rodrigues'&nbsp;rotation&nbsp;formula:&nbsp;https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula<br>
+:param&nbsp;point:&nbsp;[x,y,z]&nbsp;coordinate&nbsp;to&nbsp;rotate<br>
+:param&nbsp;axis:&nbsp;[dx,dy,dz]&nbsp;vector&nbsp;about&nbsp;which&nbsp;to&nbsp;rotate<br>
+:param&nbsp;angle:&nbsp;angle&nbsp;to&nbsp;rotate&nbsp;in&nbsp;deg<br>
+:return:&nbsp;[x,y,z]&nbsp;rotated&nbsp;point</tt></dd></dl>
  <dl><dt><a name="-rotmat"><strong>rotmat</strong></a>(a, b)</dt><dd><tt>Determine&nbsp;rotation&nbsp;matrix&nbsp;from&nbsp;a&nbsp;to&nbsp;b<br>
 From&nbsp;Kuba&nbsp;Ober's&nbsp;answer&nbsp;on&nbsp;stackexchange:<br>
 <a href="http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d/476311#476311">http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d/476311#476311</a><br>
@@ -266,6 +284,9 @@ e.g.<br>
 :param&nbsp;d:&nbsp;dict<br>
 :param&nbsp;kwargs:&nbsp;keyword=item<br>
 :return:&nbsp;boolean&nbsp;array&nbsp;index</tt></dd></dl>
+ <dl><dt><a name="-shortstr"><strong>shortstr</strong></a>(string)</dt><dd><tt>Shorten&nbsp;string&nbsp;by&nbsp;removing&nbsp;long&nbsp;floats<br>
+:param&nbsp;string:&nbsp;string,&nbsp;e.g.&nbsp;'#810002&nbsp;scan&nbsp;eta&nbsp;74.89533603616637&nbsp;76.49533603616636&nbsp;0.02&nbsp;pil3_100k&nbsp;1&nbsp;roi2'<br>
+:return:&nbsp;shorter&nbsp;string,&nbsp;e.g.&nbsp;'#810002&nbsp;scan&nbsp;eta&nbsp;74.895&nbsp;76.495&nbsp;0.02&nbsp;pil3_100k&nbsp;1&nbsp;roi2'</tt></dd></dl>
  <dl><dt><a name="-sphere_array"><strong>sphere_array</strong></a>(A, max_angle1=90, max_angle2=90, step1=1, step2=1)</dt><dd><tt>Rotate&nbsp;points&nbsp;in&nbsp;array&nbsp;A&nbsp;by&nbsp;multiple&nbsp;angles<br>
 &nbsp;B&nbsp;=&nbsp;<a href="#-sphere_array">sphere_array</a>(A,&nbsp;max_angle1,&nbsp;max_angle2,&nbsp;step1,&nbsp;step2)<br>
 &nbsp;<br>
@@ -274,11 +295,17 @@ e.g.<br>
 &nbsp;&nbsp;max_angle1&nbsp;=&nbsp;max&nbsp;rotation&nbsp;angle<br>
 &nbsp;&nbsp;step1&nbsp;=&nbsp;angular&nbsp;step&nbsp;size<br>
 &nbsp;&nbsp;step2&nbsp;=&nbsp;angular&nbsp;step&nbsp;size<br>
-&nbsp;&nbsp;<br>
+&nbsp;<br>
 Each&nbsp;coordinate&nbsp;in&nbsp;A&nbsp;will&nbsp;be&nbsp;rotated&nbsp;by&nbsp;angles:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;angles&nbsp;=&nbsp;np.arange(0,&nbsp;max_angle+step,&nbsp;step)<br>
 The&nbsp;output&nbsp;B&nbsp;will&nbsp;have&nbsp;size:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[len(A)&nbsp;*&nbsp;len(angles1)&nbsp;*&nbsp;len(angles2),&nbsp;3]</tt></dd></dl>
+ <dl><dt><a name="-squaredata"><strong>squaredata</strong></a>(xdata, ydata, data, repeat=None)</dt><dd><tt>Generate&nbsp;square&nbsp;arrays&nbsp;from&nbsp;1D&nbsp;data,&nbsp;automatically&nbsp;determinging&nbsp;the&nbsp;repeat&nbsp;value<br>
+:param&nbsp;xdata:&nbsp;[n]&nbsp;array<br>
+:param&nbsp;ydata:&nbsp;[n]&nbsp;array<br>
+:param&nbsp;data:&nbsp;[n]&nbsp;array<br>
+:param&nbsp;repeat:&nbsp;int&nbsp;m&nbsp;or&nbsp;None&nbsp;to&nbsp;deteremine&nbsp;m&nbsp;from&nbsp;differences&nbsp;in&nbsp;xdata&nbsp;and&nbsp;y&nbsp;data<br>
+:return:&nbsp;X,&nbsp;Y,&nbsp;D&nbsp;[n//m,&nbsp;m]&nbsp;arrays</tt></dd></dl>
  <dl><dt><a name="-stfm"><strong>stfm</strong></a>(val, err)</dt><dd><tt>Create&nbsp;standard&nbsp;form&nbsp;string&nbsp;from&nbsp;value&nbsp;and&nbsp;uncertainty"<br>
 &nbsp;str&nbsp;=&nbsp;<a href="#-stfm">stfm</a>(val,err)<br>
 &nbsp;Examples:<br>
@@ -316,6 +343,32 @@ newarray,uniqueidx,matchidx&nbsp;=&nbsp;<a href="#-unique_vector">unique_vector<
 &gt;&gt;&nbsp;newarray&nbsp;=&nbsp;[[1,0,0],[0,1,0]]<br>
 &gt;&gt;&nbsp;uniqueidx=&nbsp;[0,2]<br>
 &gt;&gt;&nbsp;matchidx&nbsp;=&nbsp;[0,0,1]</tt></dd></dl>
+ <dl><dt><a name="-vector_intersection"><strong>vector_intersection</strong></a>(point1, direction1, point2, direction2)</dt><dd><tt>Calculate&nbsp;the&nbsp;point&nbsp;in&nbsp;2D&nbsp;where&nbsp;two&nbsp;lines&nbsp;cross.<br>
+If&nbsp;lines&nbsp;are&nbsp;parallel,&nbsp;return&nbsp;nan<br>
+For&nbsp;derivation,&nbsp;see:&nbsp;<a href="http://paulbourke.net/geometry/pointlineplane/">http://paulbourke.net/geometry/pointlineplane/</a><br>
+:param&nbsp;point1:&nbsp;[x,y]&nbsp;some&nbsp;coordinate&nbsp;on&nbsp;line&nbsp;1<br>
+:param&nbsp;direction1:&nbsp;[dx,&nbsp;dy]&nbsp;the&nbsp;direction&nbsp;of&nbsp;line&nbsp;1<br>
+:param&nbsp;point2:&nbsp;[x,y]&nbsp;some&nbsp;coordinate&nbsp;on&nbsp;line&nbsp;2<br>
+:param&nbsp;direction2:&nbsp;[dx,&nbsp;dy]&nbsp;the&nbsp;direction&nbsp;of&nbsp;line&nbsp;2<br>
+:return:&nbsp;[x,&nbsp;y]</tt></dd></dl>
+ <dl><dt><a name="-vector_intersection3d"><strong>vector_intersection3d</strong></a>(point1, direction1, point2, direction2)</dt><dd><tt>Calculate&nbsp;the&nbsp;point&nbsp;in&nbsp;3D&nbsp;where&nbsp;two&nbsp;lines&nbsp;cross.<br>
+If&nbsp;lines&nbsp;are&nbsp;parallel,&nbsp;return&nbsp;nan<br>
+For&nbsp;derivation,&nbsp;see:&nbsp;https://math.stackexchange.com/questions/270767/find-intersection-of-two-3d-lines/271366<br>
+:param&nbsp;point1:&nbsp;[x,y,z]&nbsp;some&nbsp;coordinate&nbsp;on&nbsp;line&nbsp;1<br>
+:param&nbsp;direction1:&nbsp;[dx,&nbsp;dy,&nbsp;dz]&nbsp;the&nbsp;direction&nbsp;of&nbsp;line&nbsp;1<br>
+:param&nbsp;point2:&nbsp;[x,y,z]&nbsp;some&nbsp;coordinate&nbsp;on&nbsp;line&nbsp;2<br>
+:param&nbsp;direction2:&nbsp;[dx,&nbsp;dy,&nbsp;dz]&nbsp;the&nbsp;direction&nbsp;of&nbsp;line&nbsp;2<br>
+:return:&nbsp;[x,&nbsp;y,&nbsp;z]</tt></dd></dl>
+ <dl><dt><a name="-whererun"><strong>whererun</strong></a>()</dt><dd><tt>Returns&nbsp;the&nbsp;location&nbsp;where&nbsp;python&nbsp;was&nbsp;run</tt></dd></dl>
+ <dl><dt><a name="-you_normal_vector"><strong>you_normal_vector</strong></a>(eta=0, chi=90, mu=0)</dt><dd><tt>Determine&nbsp;the&nbsp;normal&nbsp;vector&nbsp;using&nbsp;the&nbsp;You&nbsp;diffractometer&nbsp;angles<br>
+&nbsp;&nbsp;<a href="#-you_normal_vector">you_normal_vector</a>(0,&nbsp;0,&nbsp;0)&nbsp;=&nbsp;[1,&nbsp;0,&nbsp;0]<br>
+&nbsp;&nbsp;<a href="#-you_normal_vector">you_normal_vector</a>(0,&nbsp;90,&nbsp;0)&nbsp;=&nbsp;[0,&nbsp;1,&nbsp;0]<br>
+&nbsp;&nbsp;<a href="#-you_normal_vector">you_normal_vector</a>(90,&nbsp;90,&nbsp;0)&nbsp;=&nbsp;[0,&nbsp;0,&nbsp;-1]<br>
+&nbsp;&nbsp;<a href="#-you_normal_vector">you_normal_vector</a>(0,&nbsp;0,&nbsp;90)&nbsp;=&nbsp;[0,&nbsp;0,&nbsp;-1]<br>
+:param&nbsp;eta:&nbsp;angle&nbsp;(deg)&nbsp;along&nbsp;the&nbsp;x-axis<br>
+:param&nbsp;mu:&nbsp;angle&nbsp;(deg)&nbsp;about&nbsp;the&nbsp;z-axis<br>
+:param&nbsp;chi:&nbsp;angle&nbsp;deg)&nbsp;a<br>
+:return:&nbsp;array</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">
@@ -328,10 +381,11 @@ newarray,uniqueidx,matchidx&nbsp;=&nbsp;<a href="#-unique_vector">unique_vector<
 <strong>Mo</strong> = 17.4808<br>
 <strong>Na</strong> = 6.022e+23<br>
 <strong>c</strong> = 299792458<br>
-<strong>directory</strong> = r'C:\Users\dgpor\Dropbox\Python\Dans_Diffraction\Dans_Diffraction'<br>
+<strong>directory</strong> = r'C:\Users\dgpor\OneDrive - Diamond Light Source Ltd\PythonProjects\Dans_Diffraction\Dans_Diffraction'<br>
 <strong>e</strong> = 1.6021733e-19<br>
 <strong>h</strong> = 6.62606868e-34<br>
 <strong>me</strong> = 9.109e-31<br>
 <strong>pi</strong> = 3.141592653589793<br>
+<strong>r0</strong> = 2.8179403227e-15<br>
 <strong>u0</strong> = 1.2566370614359173e-06</td></tr></table>
 </body></html>

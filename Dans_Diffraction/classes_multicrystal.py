@@ -6,11 +6,12 @@ By Dan Porter, PhD
 Diamond
 2020
 
-Version 1.0
-Last updated: 30/03/20
+Version 1.1
+Last updated: 27/09/21
 
 Version History:
 30/03/20 1.0    class MultiCrytal moved from classes_crystal
+27/09/21 1.1    Added __get__, __repr__ methods
 
 @author: DGPorter
 """
@@ -21,7 +22,7 @@ from . import functions_general as fg
 from . import functions_crystallography as fc
 from .classes_plotting import MultiPlotting
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 
 class MultiCrystal:
@@ -41,6 +42,25 @@ class MultiCrystal:
         """Set scale of crystal[index]"""
         xtl = self.crystal_list[index]
         xtl.scale = scale
+
+    def orient_set_r(self, rotation):
+        """Set rotation matrix in diffractometer frame"""
+        for xtl in self.crystal_list:
+            xtl.Cell.orientation.set_r(rotation)
+
+    def orient_6circle(self, phi=0, chi=0, eta=0, mu=0):
+        """Set rotation matrix using 6-circle diffractometer axes"""
+        rotation = fc.diffractometer_rotation(phi, chi, eta, mu)
+        self.orient_set_r(rotation)
+
+    def set_labframe(self, lab):
+        """Set transformation matrix between diffractometer and lab"""
+        for xtl in self.crystal_list:
+            xtl.Cell.orientation.set_lab(lab)
+
+    def set_labframe_i16(self):
+        """Set lab transformation matrix for beamline I16 at Diamond Light Source"""
+        self.set_labframe([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
 
     def setup_scatter(self, **kwargs):
         """
@@ -204,6 +224,9 @@ class MultiCrystal:
             return MultiCrystal(self.crystal_list+other.crystal_list)
         return MultiCrystal(self.crystal_list + [other])
 
+    def __get__(self, item):
+        return self.crystal_list[item]
+
     def info(self):
         """Display information about the contained crystals"""
 
@@ -213,4 +236,9 @@ class MultiCrystal:
         return out
 
     def __repr__(self):
+        s = ', '.join([xtl.name for xtl in self.crystal_list])
+        return "MultiCrystal([%s])" % s
+
+    def __str__(self):
         return self.info()
+

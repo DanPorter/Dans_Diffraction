@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_plotting</strong></big></big> (version 1.8)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_plotting</strong></big></big> (version 1.9)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_plotting.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\functions_plotting.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_plotting.py">c:\users\dgpor\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_plotting.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;Handy&nbsp;plotting&nbsp;functions&nbsp;"functions_plotting.py"<br>
 &nbsp;<br>
 Contains&nbsp;various&nbsp;plotting&nbsp;shortcuts&nbsp;using&nbsp;matplotlib.pyplot<br>
@@ -25,8 +25,8 @@ Usage:&nbsp;<br>
 All&nbsp;plots&nbsp;generated&nbsp;require&nbsp;plt.show()&nbsp;call,&nbsp;unless&nbsp;using&nbsp;interactive&nbsp;mode<br>
 &nbsp;<br>
 &nbsp;<br>
-Version&nbsp;1.8<br>
-Last&nbsp;updated:&nbsp;03/04/20<br>
+Version&nbsp;2.0<br>
+Last&nbsp;updated:&nbsp;27/09/21<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 06/01/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created&nbsp;from&nbsp;DansGeneralProgs.py&nbsp;V2.3<br>
@@ -38,6 +38,9 @@ Version&nbsp;History:<br>
 22/03/19&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;plot_circle,&nbsp;updated&nbsp;vecplot&nbsp;and&nbsp;plot_lattice_lines<br>
 03/05/19&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;legend&nbsp;to&nbsp;labels&nbsp;function<br>
 09/03/20&nbsp;1.8&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;default&nbsp;figure&nbsp;size<br>
+22/11/20&nbsp;1.9&nbsp;&nbsp;&nbsp;&nbsp;Update&nbsp;to&nbsp;labels&nbsp;to&nbsp;fix&nbsp;3D&nbsp;plotting<br>
+15/02/21&nbsp;1.9.1&nbsp;&nbsp;Update&nbsp;to&nbsp;vecplot&nbsp;for&nbsp;plotting&nbsp;on&nbsp;axis<br>
+27/09/21&nbsp;2.0&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;plot3darray,&nbsp;plot_diffractometer_reciprocal_space<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -1044,7 +1047,7 @@ Examples<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-UV_arrows"><strong>UV_arrows</strong></a>(UV)</dt><dd><tt>Plot&nbsp;arrows&nbsp;with&nbsp;a*,b*&nbsp;on&nbsp;current&nbsp;figure</tt></dd></dl>
+<td width="100%"><dl><dt><a name="-UV_arrows"><strong>UV_arrows</strong></a>(UV, alabel='a', blabel='b', clabel='c')</dt><dd><tt>Plot&nbsp;arrows&nbsp;with&nbsp;a*,b*&nbsp;on&nbsp;current&nbsp;figure</tt></dd></dl>
  <dl><dt><a name="-axis_lattice_points"><strong>axis_lattice_points</strong></a>(vec_a=[1, 0, 0], vec_b=[0, 1, 0], axis=[-4, 4, -4, 4])</dt><dd><tt>Generate&nbsp;a&nbsp;2D&nbsp;lattice&nbsp;of&nbsp;points&nbsp;generated&nbsp;by&nbsp;2&nbsp;vectors&nbsp;within&nbsp;a&nbsp;2D&nbsp;axis<br>
 :param&nbsp;vec_a:&nbsp;[1x3]&nbsp;array&nbsp;:&nbsp;a*&nbsp;vector<br>
 :param&nbsp;vec_b:&nbsp;[1x3]&nbsp;array&nbsp;:&nbsp;b*&nbsp;vector<br>
@@ -1078,9 +1081,16 @@ E.G.<br>
  <dl><dt><a name="-newplot3"><strong>newplot3</strong></a>(*args, **kwargs)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;a&nbsp;simple&nbsp;3D&nbsp;plot<br>
 Automatically&nbsp;tiles&nbsp;1&nbsp;dimensional&nbsp;x&nbsp;and&nbsp;y&nbsp;arrays&nbsp;to&nbsp;match&nbsp;2D&nbsp;z&nbsp;array,<br>
 assuming&nbsp;z.shape&nbsp;=&nbsp;(len(x),len(y))<br>
+&nbsp;&nbsp;<a href="#-newplot3">newplot3</a>(x,&nbsp;y,&nbsp;z,&nbsp;...)<br>
 &nbsp;<br>
 E.G.<br>
 &nbsp;&nbsp;<a href="#-newplot3">newplot3</a>([1,2,3,4],[9,8,7],[[2,4,6],[8,10,12],[14,16,18],[20,22,24]],'-o')</tt></dd></dl>
+ <dl><dt><a name="-plot3darray"><strong>plot3darray</strong></a>(vec, *args, **kwargs)</dt><dd><tt>Plot&nbsp;3D&nbsp;vectors&nbsp;in&nbsp;3D<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.plot(vec[:,&nbsp;0],&nbsp;vec[:,&nbsp;1],&nbsp;vec[:,&nbsp;3],&nbsp;*args,&nbsp;**kwargs)<br>
+:param&nbsp;vec:&nbsp;[n*3]&nbsp;array<br>
+:param&nbsp;args:&nbsp;args&nbsp;to&nbsp;pass&nbsp;to&nbsp;plt.plot<br>
+:param&nbsp;kwargs:&nbsp;kwargs&nbsp;to&nbsp;pass&nbsp;to&nbsp;plt.plot<br>
+:return:&nbsp;matplotlib&nbsp;plot&nbsp;object</tt></dd></dl>
  <dl><dt><a name="-plot_arrow"><strong>plot_arrow</strong></a>(x, y, z=None, col='r', width=2, arrow_size=40)</dt><dd><tt>Plot&nbsp;arrow&nbsp;in&nbsp;2D&nbsp;or&nbsp;3D&nbsp;on&nbsp;current&nbsp;axes<br>
 Usage&nbsp;2D:<br>
 &nbsp;&nbsp;<a href="#-plot_arrow">plot_arrow</a>([xi,xf],[yi,yf])<br>
@@ -1091,9 +1101,14 @@ Options:<br>
 &nbsp;&nbsp;width&nbsp;=&nbsp;line&nbsp;width&nbsp;(Def.&nbsp;=&nbsp;2)<br>
 &nbsp;&nbsp;arrow_size&nbsp;=&nbsp;size&nbsp;of&nbsp;arrow&nbsp;head&nbsp;(Def.&nbsp;=&nbsp;40)<br>
 &nbsp;&nbsp;col&nbsp;=&nbsp;arrow&nbsp;color&nbsp;(Deg.&nbsp;=&nbsp;red)</tt></dd></dl>
+ <dl><dt><a name="-plot_atomic_scattering_factor"><strong>plot_atomic_scattering_factor</strong></a>(element, min_energy=0.5, max_energy=20)</dt><dd><tt>Plot&nbsp;atomic&nbsp;scattering&nbsp;factor&nbsp;for&nbsp;1&nbsp;or&nbsp;more&nbsp;elements<br>
+:param&nbsp;element:&nbsp;str&nbsp;name&nbsp;of&nbsp;element&nbsp;to&nbsp;plot<br>
+:param&nbsp;min_energy:&nbsp;float&nbsp;min&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;max_energy:&nbsp;float&nbsp;max&nbsp;energy&nbsp;in&nbsp;keV<br>
+:return:&nbsp;None</tt></dd></dl>
  <dl><dt><a name="-plot_cell"><strong>plot_cell</strong></a>(cell_centre=[0, 0, 0], CELL=array([[1., 0., 0.],
        [0., 1., 0.],
-       [0., 0., 1.]]))</dt><dd><tt>Plot&nbsp;a&nbsp;box&nbsp;defined&nbsp;by&nbsp;a&nbsp;unit&nbsp;cell&nbsp;on&nbsp;the&nbsp;current&nbsp;plot<br>
+       [0., 0., 1.]]), color='k')</dt><dd><tt>Plot&nbsp;a&nbsp;box&nbsp;defined&nbsp;by&nbsp;a&nbsp;unit&nbsp;cell&nbsp;on&nbsp;the&nbsp;current&nbsp;plot<br>
 :param&nbsp;cell_centre:&nbsp;[1x3]&nbsp;array&nbsp;:&nbsp;centre&nbsp;of&nbsp;cell,&nbsp;default&nbsp;[0,0,0]<br>
 :param&nbsp;CELL:&nbsp;[3x3]&nbsp;array&nbsp;:&nbsp;unit&nbsp;cell&nbsp;vectors&nbsp;[A,B,C]<br>
 :return:&nbsp;None</tt></dd></dl>
@@ -1104,12 +1119,26 @@ Options:<br>
 :param&nbsp;args:&nbsp;plot&nbsp;commands<br>
 :param&nbsp;kwargs:&nbsp;plot&nbsp;commands<br>
 :return:&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-plot_diffractometer_reciprocal_space"><strong>plot_diffractometer_reciprocal_space</strong></a>(phi, chi, eta, mu, delta, gamma, uv, u, lab, energy_kev)</dt><dd><tt>Plot&nbsp;crystal&nbsp;axes&nbsp;in&nbsp;lab&nbsp;frame&nbsp;of&nbsp;6-circle&nbsp;diffractometer<br>
+:param&nbsp;phi:<br>
+:param&nbsp;chi:<br>
+:param&nbsp;eta:<br>
+:param&nbsp;mu:<br>
+:param&nbsp;delta:<br>
+:param&nbsp;gamma:<br>
+:param&nbsp;uv:<br>
+:param&nbsp;u:<br>
+:param&nbsp;lab:<br>
+:param&nbsp;energy_kev:<br>
+:return:</tt></dd></dl>
  <dl><dt><a name="-plot_ewald_coverage"><strong>plot_ewald_coverage</strong></a>(energy_kev, color='k', linewidth=2)</dt><dd><tt>Plot&nbsp;Ewald&nbsp;coverage&nbsp;of&nbsp;a&nbsp;single&nbsp;axis&nbsp;diffractometer&nbsp;on&nbsp;current&nbsp;plot&nbsp;in&nbsp;2D<br>
 Includes&nbsp;boundaries&nbsp;for&nbsp;theta=0,&nbsp;twotheta=180&nbsp;and&nbsp;theta=twotheta<br>
 &nbsp;<br>
 :param&nbsp;energy_kev:&nbsp;float<br>
+:param&nbsp;color:&nbsp;str<br>
+:param&nbsp;linewidth:&nbsp;float<br>
 :return:&nbsp;None</tt></dd></dl>
- <dl><dt><a name="-plot_lattice_lines"><strong>plot_lattice_lines</strong></a>(latt, vec_a=[1, 0, 0], vec_b=[0, 1, 0], axis=None, *args, **kwargs)</dt><dd><tt>Add&nbsp;lines&nbsp;defining&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;to&nbsp;the&nbsp;current&nbsp;plot<br>
+ <dl><dt><a name="-plot_lattice_lines"><strong>plot_lattice_lines</strong></a>(latt, vec_a=(1, 0, 0), vec_b=(0, 1, 0), axis=None, *args, **kwargs)</dt><dd><tt>Add&nbsp;lines&nbsp;defining&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;to&nbsp;the&nbsp;current&nbsp;plot<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Generates&nbsp;square&nbsp;or&nbsp;hexagonal&nbsp;lines&nbsp;where&nbsp;vertices&nbsp;are&nbsp;the&nbsp;lattice&nbsp;points&nbsp;within&nbsp;the&nbsp;image.<br>
 :param&nbsp;latt:&nbsp;[nx2/3]&nbsp;array&nbsp;:&nbsp;points&nbsp;at&nbsp;which&nbsp;to&nbsp;generate&nbsp;lattice<br>
 :param&nbsp;vec_a:&nbsp;[1x2/3]&nbsp;array&nbsp;:&nbsp;a*&nbsp;vector<br>
@@ -1126,7 +1155,7 @@ Includes&nbsp;boundaries&nbsp;for&nbsp;theta=0,&nbsp;twotheta=180&nbsp;and&nbsp;
  <dl><dt><a name="-plot_magnetic_form_factor"><strong>plot_magnetic_form_factor</strong></a>(elements, maxq=10)</dt><dd><tt>Plot&nbsp;magnetic&nbsp;form&nbsp;factor&nbsp;for&nbsp;1&nbsp;or&nbsp;more&nbsp;elements<br>
 :param&nbsp;elements:<br>
 :return:&nbsp;None</tt></dd></dl>
- <dl><dt><a name="-plot_vector_arrows"><strong>plot_vector_arrows</strong></a>(vec_a=[1, 0, 0], vec_b=[1, 0, 0], vec_a_lab=None, vec_b_lab=None, arrow_size=40, color='b', fontsize=18)</dt><dd><tt>Plot&nbsp;vector&nbsp;arrows&nbsp;for&nbsp;Cell&nbsp;on&nbsp;current&nbsp;axis<br>
+ <dl><dt><a name="-plot_vector_arrows"><strong>plot_vector_arrows</strong></a>(vec_a=[1, 0, 0], vec_b=[1, 0, 0], vec_a_lab=None, vec_b_lab=None, arrow_size=40, color='b', fontsize=18, axis=None)</dt><dd><tt>Plot&nbsp;vector&nbsp;arrows&nbsp;for&nbsp;Cell&nbsp;on&nbsp;current&nbsp;axis<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Will&nbsp;generate&nbsp;two&nbsp;arrows&nbsp;on&nbsp;the&nbsp;current&nbsp;axis,&nbsp;pointing&nbsp;from&nbsp;the&nbsp;origin&nbsp;to&nbsp;vec_a&nbsp;and&nbsp;vec_b,&nbsp;respectivley.<br>
 :param&nbsp;vec_a:&nbsp;[1x2/3]&nbsp;array&nbsp;:&nbsp;a*&nbsp;vector<br>
 :param&nbsp;vec_b:&nbsp;[1x2/3]&nbsp;array&nbsp;:&nbsp;b*&nbsp;vector<br>
@@ -1139,11 +1168,33 @@ Includes&nbsp;boundaries&nbsp;for&nbsp;theta=0,&nbsp;twotheta=180&nbsp;and&nbsp;
  <dl><dt><a name="-plot_xray_attenuation"><strong>plot_xray_attenuation</strong></a>(elements, min_energy=0, max_energy=20)</dt><dd><tt>Plot&nbsp;x-ray&nbsp;scattering&nbsp;factor&nbsp;for&nbsp;1&nbsp;or&nbsp;more&nbsp;elements<br>
 :param&nbsp;elements:<br>
 :return:&nbsp;None</tt></dd></dl>
- <dl><dt><a name="-plot_xray_scattering_factor"><strong>plot_xray_scattering_factor</strong></a>(element, min_energy=0.5, max_energy=20)</dt><dd><tt>Plot&nbsp;x-ray&nbsp;scattering&nbsp;factor&nbsp;for&nbsp;1&nbsp;or&nbsp;more&nbsp;elements<br>
-:param&nbsp;element:&nbsp;str&nbsp;name&nbsp;of&nbsp;element&nbsp;to&nbsp;plot<br>
-:param&nbsp;min_energy:&nbsp;float&nbsp;min&nbsp;energy&nbsp;in&nbsp;keV<br>
-:param&nbsp;max_energy:&nbsp;float&nbsp;max&nbsp;energy&nbsp;in&nbsp;keV<br>
+ <dl><dt><a name="-plot_xray_attenuation_length"><strong>plot_xray_attenuation_length</strong></a>(chemical_formula, density=8.9, energy_range=None, grazing_angle=90)</dt><dd><tt>Plot&nbsp;the&nbsp;X-Ray&nbsp;Attenuation&nbsp;Length&nbsp;of&nbsp;a&nbsp;compound<br>
+Equivalent&nbsp;to:&nbsp;https://henke.lbl.gov/optical_constants/atten2.html<br>
+Based&nbsp;on&nbsp;formulas&nbsp;from:&nbsp;Henke,&nbsp;Gullikson,&nbsp;and&nbsp;Davis,&nbsp;Atomic&nbsp;Data&nbsp;and&nbsp;Nuclear&nbsp;Data&nbsp;Tables&nbsp;54&nbsp;no.2,&nbsp;181-342&nbsp;(July&nbsp;1993)<br>
+:param&nbsp;chemical_formula:&nbsp;str&nbsp;molecular&nbsp;formula<br>
+:param&nbsp;density:&nbsp;float&nbsp;density&nbsp;in&nbsp;g/cm^3<br>
+:param&nbsp;energy_range:&nbsp;array&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV,&nbsp;None&nbsp;for&nbsp;default&nbsp;range<br>
+:param&nbsp;grazing_angle:&nbsp;incidence&nbsp;angle&nbsp;relative&nbsp;to&nbsp;the&nbsp;surface,&nbsp;in&nbsp;degrees<br>
+:return:&nbsp;float&nbsp;or&nbsp;array,&nbsp;in&nbsp;microns</tt></dd></dl>
+ <dl><dt><a name="-plot_xray_refractive_index"><strong>plot_xray_refractive_index</strong></a>(chemical_formula, density=8.9, energy_range=None)</dt><dd><tt>Plot&nbsp;the&nbsp;Complex&nbsp;Index&nbsp;of&nbsp;Refraction&nbsp;of&nbsp;a&nbsp;compound<br>
+&nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;=&nbsp;1&nbsp;-&nbsp;(1/2pi)N*r0*lambda^2*(f1+if2)&nbsp;=&nbsp;1&nbsp;-&nbsp;Delta&nbsp;-&nbsp;iBeta<br>
+Equivalent&nbsp;to:&nbsp;https://henke.lbl.gov/optical_constants/getdb2.html<br>
+Based&nbsp;on&nbsp;formulas&nbsp;from:&nbsp;Henke,&nbsp;Gullikson,&nbsp;and&nbsp;Davis,&nbsp;Atomic&nbsp;Data&nbsp;and&nbsp;Nuclear&nbsp;Data&nbsp;Tables&nbsp;54&nbsp;no.2,&nbsp;181-342&nbsp;(July&nbsp;1993)<br>
+:param&nbsp;chemical_formula:&nbsp;str&nbsp;molecular&nbsp;formula<br>
+:param&nbsp;density:&nbsp;float&nbsp;density&nbsp;in&nbsp;g/cm^3<br>
+:param&nbsp;energy_range:&nbsp;array&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV,&nbsp;None&nbsp;for&nbsp;default&nbsp;range<br>
+:return:&nbsp;float&nbsp;or&nbsp;array,&nbsp;in&nbsp;microns</tt></dd></dl>
+ <dl><dt><a name="-plot_xray_scattering_factor"><strong>plot_xray_scattering_factor</strong></a>(elements, maxq=10)</dt><dd><tt>Plot&nbsp;x-ray&nbsp;scattering&nbsp;factor&nbsp;for&nbsp;1&nbsp;or&nbsp;more&nbsp;elements<br>
+:param&nbsp;elements:<br>
 :return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-plot_xray_transmission"><strong>plot_xray_transmission</strong></a>(chemical_formula, density=8.9, energy_range=None, thickness_um=100)</dt><dd><tt>Plot&nbsp;transmission&nbsp;of&nbsp;x-ray&nbsp;through&nbsp;a&nbsp;slab&nbsp;of&nbsp;material&nbsp;at&nbsp;range&nbsp;of&nbsp;energies<br>
+Equivalent&nbsp;to&nbsp;https://henke.lbl.gov/optical_constants/filter2.html<br>
+Based&nbsp;on&nbsp;formulas&nbsp;from:&nbsp;Henke,&nbsp;Gullikson,&nbsp;and&nbsp;Davis,&nbsp;Atomic&nbsp;Data&nbsp;and&nbsp;Nuclear&nbsp;Data&nbsp;Tables&nbsp;54&nbsp;no.2,&nbsp;181-342&nbsp;(July&nbsp;1993)<br>
+:param&nbsp;chemical_formula:&nbsp;str&nbsp;molecular&nbsp;formula<br>
+:param&nbsp;density:&nbsp;float&nbsp;density&nbsp;in&nbsp;g/cm^3<br>
+:param&nbsp;energy_range:&nbsp;array&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV,&nbsp;None&nbsp;for&nbsp;default&nbsp;range<br>
+:param&nbsp;thickness_um:&nbsp;slab&nbsp;thickness&nbsp;in&nbsp;microns<br>
+:return:&nbsp;float&nbsp;or&nbsp;array</tt></dd></dl>
  <dl><dt><a name="-saveplot"><strong>saveplot</strong></a>(name, dpi=None, figure=None)</dt><dd><tt>Saves&nbsp;current&nbsp;figure&nbsp;as&nbsp;a&nbsp;png&nbsp;in&nbsp;the&nbsp;home&nbsp;directory<br>
 :param&nbsp;name:&nbsp;filename,&nbsp;including&nbsp;or&nbsp;expluding&nbsp;directory&nbsp;and&nbsp;or&nbsp;extension<br>
 :param&nbsp;dpi:&nbsp;image&nbsp;resolution,&nbsp;higher&nbsp;means&nbsp;larger&nbsp;image&nbsp;size,&nbsp;default=matplotlib&nbsp;default<br>

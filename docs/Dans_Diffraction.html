@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>Dans_Diffraction</strong></big></big> (version 1.8.2, 27/05/20)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>Dans_Diffraction</strong></big></big> (version 2.1.0, 27/09/21)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5C__init__.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\__init__.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5C__init__.py">c:\users\dgpor\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\__init__.py</a></font></td></tr></table>
     <p><tt>Dans_Diffraction<br>
 Python&nbsp;package&nbsp;for&nbsp;loading&nbsp;crystal&nbsp;structures&nbsp;from&nbsp;cif&nbsp;files&nbsp;and&nbsp;calculating&nbsp;diffraction&nbsp;information.<br>
 &nbsp;<br>
@@ -16,9 +16,11 @@ Installation:<br>
 $&nbsp;pip&nbsp;install&nbsp;Dans-Diffraction<br>
 or<br>
 $&nbsp;git&nbsp;clone&nbsp;https://github.com/DanPorter/Dans_Diffraction.git<br>
+or<br>
+$&nbsp;pip&nbsp;install&nbsp;git+https://github.com/DanPorter/Dans_Diffraction.git<br>
 &nbsp;<br>
 Requirements:<br>
-Python&nbsp;2.7+/3+&nbsp;with&nbsp;packages:&nbsp;Numpy,&nbsp;Matplotlib,&nbsp;Scipy,&nbsp;Tkinter<br>
+Python&nbsp;2.7+/3+&nbsp;with&nbsp;packages:&nbsp;Numpy,&nbsp;Matplotlib,&nbsp;Tkinter<br>
 BuiltIn&nbsp;packages&nbsp;used:&nbsp;sys,&nbsp;os,&nbsp;re,&nbsp;glob,&nbsp;warnings,&nbsp;json,&nbsp;itertools<br>
 &nbsp;<br>
 Usage:<br>
@@ -39,8 +41,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;1.8.2<br>
-Last&nbsp;updated:&nbsp;26/05/20<br>
+Version&nbsp;2.1.0<br>
+Last&nbsp;updated:&nbsp;27/09/21<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 02/03/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
@@ -55,6 +57,19 @@ Version&nbsp;History:<br>
 02/05/20&nbsp;1.8&nbsp;&nbsp;&nbsp;&nbsp;Updated&nbsp;readcif,&nbsp;added&nbsp;heavy&nbsp;atom&nbsp;properties,&nbsp;added&nbsp;magnetic&nbsp;spacegroups<br>
 12/05/20&nbsp;1.8.1&nbsp;&nbsp;Updated&nbsp;readcif,&nbsp;added&nbsp;atomic_scattering_factors&nbsp;and&nbsp;classes_orbitals<br>
 26/05/20&nbsp;1.8.2&nbsp;&nbsp;Updated&nbsp;copyright,&nbsp;removed&nbsp;tensor&nbsp;scattering.&nbsp;Updated&nbsp;magnetic&nbsp;spacegroups<br>
+09/06/20&nbsp;1.9&nbsp;&nbsp;&nbsp;&nbsp;Chaneged&nbsp;magnetic&nbsp;symmetry&nbsp;calculation,&nbsp;now&nbsp;correctly&nbsp;generates&nbsp;mag&nbsp;symmetry&nbsp;from&nbsp;operations<br>
+10/06/20&nbsp;1.9.1&nbsp;&nbsp;Added&nbsp;time&nbsp;symmetry&nbsp;to&nbsp;Symmetry&nbsp;class<br>
+16/06/20&nbsp;1.9.2&nbsp;&nbsp;Made&nbsp;change&nbsp;in&nbsp;simpulate_powder&nbsp;to&nbsp;remove&nbsp;linspace&nbsp;error<br>
+29/06/20&nbsp;1.9.3&nbsp;&nbsp;Removed&nbsp;import&nbsp;of&nbsp;scipy.convolve2d&nbsp;due&nbsp;to&nbsp;import&nbsp;errrors,&nbsp;new&nbsp;method&nbsp;slower&nbsp;but&nbsp;more&nbsp;accurate<br>
+02/09/20&nbsp;1.9.4&nbsp;&nbsp;Added&nbsp;string&nbsp;methods&nbsp;to&nbsp;Crystal&nbsp;classes<br>
+26/11/20&nbsp;1.9.5&nbsp;&nbsp;Various&nbsp;improvements&nbsp;and&nbsp;corrections<br>
+04/01/21&nbsp;1.9.6&nbsp;&nbsp;Added&nbsp;Scattering.structure_factor&nbsp;function<br>
+26/01/21&nbsp;1.9.7&nbsp;&nbsp;Added&nbsp;xray&nbsp;dispersion&nbsp;correction&nbsp;functions,&nbsp;plus&nbsp;x-ray&nbsp;interactions&nbsp;calculations<br>
+15/02/21&nbsp;1.9.8&nbsp;&nbsp;Added&nbsp;plotting&nbsp;options&nbsp;for&nbsp;out-of-plane&nbsp;recirprocal&nbsp;lattice&nbsp;lines<br>
+10/06/21&nbsp;1.9.9&nbsp;&nbsp;Corrected&nbsp;error&nbsp;in&nbsp;calculation&nbsp;of&nbsp;DebyeWaller&nbsp;factor&nbsp;(APDs),&nbsp;added&nbsp;x-ray&nbsp;factors&nbsp;by&nbsp;Waasmaier&nbsp;and&nbsp;Kirfel<br>
+09/07/21&nbsp;1.9.9&nbsp;&nbsp;Added&nbsp;new&nbsp;scattering&nbsp;factors&nbsp;to&nbsp;scattering&nbsp;factor&nbsp;settings<br>
+20/08/21&nbsp;2.0.0&nbsp;&nbsp;Added&nbsp;functions_scattering&nbsp;module&nbsp;with&nbsp;updated,&nbsp;more&nbsp;consistent&nbsp;scattering&nbsp;formula<br>
+27/09/21&nbsp;2.1.0&nbsp;&nbsp;Added&nbsp;classes_orientation&nbsp;and&nbsp;diffractometer&nbsp;orientation&nbsp;functions<br>
 &nbsp;<br>
 -----------------------------------------------------------------------------<br>
 &nbsp;&nbsp;&nbsp;Copyright&nbsp;2020&nbsp;Diamond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
@@ -98,17 +113,18 @@ Other&nbsp;files&nbsp;are&nbsp;either&nbsp;covered&nbsp;by&nbsp;their&nbsp;own&n
 <a href="Dans_Diffraction.classes_crystal.html">classes_crystal</a><br>
 <a href="Dans_Diffraction.classes_fdmnes.html">classes_fdmnes</a><br>
 <a href="Dans_Diffraction.classes_multicrystal.html">classes_multicrystal</a><br>
-</td><td width="25%" valign=top><a href="Dans_Diffraction.classes_orbitals.html">classes_orbitals</a><br>
+<a href="Dans_Diffraction.classes_orbitals.html">classes_orbitals</a><br>
+</td><td width="25%" valign=top><a href="Dans_Diffraction.classes_orientation.html">classes_orientation</a><br>
 <a href="Dans_Diffraction.classes_plotting.html">classes_plotting</a><br>
 <a href="Dans_Diffraction.classes_properties.html">classes_properties</a><br>
 <a href="Dans_Diffraction.classes_scattering.html">classes_scattering</a><br>
-</td><td width="25%" valign=top><a href="Dans_Diffraction.classes_structures.html">classes_structures</a><br>
-<a href="Dans_Diffraction.functions_crystallography.html">functions_crystallography</a><br>
+<a href="Dans_Diffraction.classes_structures.html">classes_structures</a><br>
+</td><td width="25%" valign=top><a href="Dans_Diffraction.functions_crystallography.html">functions_crystallography</a><br>
 <a href="Dans_Diffraction.functions_general.html">functions_general</a><br>
 <a href="Dans_Diffraction.functions_plotting.html">functions_plotting</a><br>
-</td><td width="25%" valign=top><a href="Dans_Diffraction.functions_scattering.html">functions_scattering</a><br>
+<a href="Dans_Diffraction.functions_scattering.html">functions_scattering</a><br>
 <a href="Dans_Diffraction.multiple_scattering.html">multiple_scattering</a><br>
-<a href="Dans_Diffraction.tensor_scattering.html">tensor_scattering</a><br>
+</td><td width="25%" valign=top><a href="Dans_Diffraction.tensor_scattering.html">tensor_scattering</a><br>
 <a href="Dans_Diffraction.tkgui.html"><strong>tkgui</strong>&nbsp;(package)</a><br>
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -118,7 +134,9 @@ Other&nbsp;files&nbsp;are&nbsp;either&nbsp;covered&nbsp;by&nbsp;their&nbsp;own&n
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl><dt><a name="-activate_fdmnes"><strong>activate_fdmnes</strong></a>()</dt><dd><tt>To&nbsp;activate&nbsp;FDMNES&nbsp;functionality</tt></dd></dl>
+ <dl><dt><a name="-module_info"><strong>module_info</strong></a>()</dt></dl>
  <dl><dt><a name="-start_gui"><strong>start_gui</strong></a>(xtl=None)</dt><dd><tt>Start&nbsp;GUI&nbsp;window&nbsp;(requires&nbsp;tkinter)</tt></dd></dl>
+ <dl><dt><a name="-version_info"><strong>version_info</strong></a>()</dt></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">

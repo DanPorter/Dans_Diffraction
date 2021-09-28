@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_scattering</strong></big></big> (version 1.7)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_scattering</strong></big></big> (version 2.0.1)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Cdropbox%5Cpython%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_scattering.py">c:\users\dgpor\dropbox\python\dans_diffraction\dans_diffraction\classes_scattering.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_scattering.py">c:\users\dgpor\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\classes_scattering.py</a></font></td></tr></table>
     <p><tt><a href="#Scattering">Scattering</a>&nbsp;Class&nbsp;"classes_scattering.py"<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Scattering">Scattering</a>&nbsp;functions&nbsp;for&nbsp;Crystal&nbsp;class.<br>
 &nbsp;<br>
@@ -16,8 +16,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;1.7<br>
-Last&nbsp;updated:&nbsp;26/05/20<br>
+Version&nbsp;2.0.1<br>
+Last&nbsp;updated:&nbsp;28/09/21<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 10/09/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -30,6 +30,13 @@ Version&nbsp;History:<br>
 20/03/20&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;Increased&nbsp;powder&nbsp;gauss&nbsp;width&nbsp;from&nbsp;2fwhm&nbsp;to&nbsp;6fwhm,&nbsp;added&nbsp;powder&nbsp;averaging<br>
 14/04/20&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;powder_correction<br>
 26/05/20&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;Removed&nbsp;tensor_scattering<br>
+16/06/20&nbsp;1.7.1&nbsp;&nbsp;Added&nbsp;output&nbsp;option&nbsp;of&nbsp;setup_scatter<br>
+04/01/21&nbsp;1.7.2&nbsp;&nbsp;Added&nbsp;structure_factor&nbsp;function<br>
+21/01/21&nbsp;1.8&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;xray_dispersion&nbsp;scattering&nbsp;function<br>
+10/06/21&nbsp;1.9&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;x_ray&nbsp;calculation&nbsp;using&nbsp;Waasmaier&nbsp;and&nbsp;Kirfel&nbsp;scattering&nbsp;factors.<br>
+09/07/21&nbsp;1.9&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;new&nbsp;scattering&nbsp;factors&nbsp;as&nbsp;option&nbsp;on&nbsp;normal&nbsp;scattering&nbsp;functions<br>
+20/08/21&nbsp;2.0&nbsp;&nbsp;&nbsp;&nbsp;Switched&nbsp;over&nbsp;to&nbsp;new&nbsp;scattering&nbsp;module,&nbsp;added&nbsp;self.powder()<br>
+28/09/21&nbsp;2.0.1&nbsp;&nbsp;Added&nbsp;__repr__<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -39,13 +46,15 @@ Version&nbsp;History:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="Dans_Diffraction.functions_crystallography.html">Dans_Diffraction.functions_crystallography</a><br>
-<a href="Dans_Diffraction.functions_general.html">Dans_Diffraction.functions_general</a><br>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="datetime.html">datetime</a><br>
+<a href="Dans_Diffraction.functions_crystallography.html">Dans_Diffraction.functions_crystallography</a><br>
+</td><td width="25%" valign=top><a href="Dans_Diffraction.functions_general.html">Dans_Diffraction.functions_general</a><br>
+<a href="Dans_Diffraction.functions_scattering.html">Dans_Diffraction.functions_scattering</a><br>
 </td><td width="25%" valign=top><a href="Dans_Diffraction.multiple_scattering.html">Dans_Diffraction.multiple_scattering</a><br>
 <a href="numpy.html">numpy</a><br>
 </td><td width="25%" valign=top><a href="os.html">os</a><br>
 <a href="sys.html">sys</a><br>
-</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+</td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -81,7 +90,11 @@ Useage:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant'<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="Scattering-__init__"><strong>__init__</strong></a>(self, xtl)</dt><dd><tt>initialise</tt></dd></dl>
+<dl><dt><a name="Scattering-__init__"><strong>__init__</strong></a>(self, xtl)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="Scattering-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
+<dl><dt><a name="Scattering-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>Return&nbsp;str(self).</tt></dd></dl>
 
 <dl><dt><a name="Scattering-find_close_reflections"><strong>find_close_reflections</strong></a>(self, HKL, energy_kev=None, max_twotheta=2, max_angle=10)</dt><dd><tt>Find&nbsp;and&nbsp;print&nbsp;list&nbsp;of&nbsp;reflections&nbsp;close&nbsp;to&nbsp;the&nbsp;given&nbsp;one</tt></dd></dl>
 
@@ -100,26 +113,27 @@ Note:&nbsp;To&nbsp;get&nbsp;two-theta&nbsp;values&nbsp;use:<br>
 Note:&nbsp;To&nbsp;get&nbsp;d-spacing&nbsp;values&nbsp;use:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;dspace&nbsp;=&nbsp;fc.caldspace(Q)</tt></dd></dl>
 
+<dl><dt><a name="Scattering-get_hkl"><strong>get_hkl</strong></a>(self, regenerate=True, remove_symmetric=False, reflection=False, transmission=False, **kwargs)</dt><dd><tt>Return&nbsp;stored&nbsp;hkl&nbsp;or&nbsp;generate<br>
+:param&nbsp;regenerate:&nbsp;if&nbsp;True,&nbsp;hkl&nbsp;list&nbsp;will&nbsp;be&nbsp;regenerated,&nbsp;if&nbsp;False&nbsp;-&nbsp;previous&nbsp;list&nbsp;will&nbsp;be&nbsp;returned<br>
+:param&nbsp;remove_symmetric:&nbsp;generate&nbsp;only&nbsp;non-symmetric&nbsp;hkl&nbsp;values<br>
+:param&nbsp;reflection:&nbsp;generate&nbsp;only&nbsp;reflections&nbsp;possible&nbsp;in&nbsp;reflection&nbsp;geometry<br>
+:param&nbsp;transmission:&nbsp;generate&nbsp;only&nbsp;reflections&nbsp;possible&nbsp;in&nbsp;transmission&nbsp;geometry<br>
+:param&nbsp;kwargs:&nbsp;additional&nbsp;options&nbsp;to&nbsp;pass&nbsp;to&nbsp;<a href="#Scattering-setup_scatter">setup_scatter</a>()<br>
+:return:&nbsp;array</tt></dd></dl>
+
 <dl><dt><a name="Scattering-hkl"><strong>hkl</strong></a>(self, HKL, energy_kev=None)</dt><dd><tt>Calculate&nbsp;the&nbsp;two-theta&nbsp;and&nbsp;intensity&nbsp;of&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;display&nbsp;the&nbsp;result</tt></dd></dl>
 
-<dl><dt><a name="Scattering-hkl_reflection"><strong>hkl_reflection</strong></a>(self, HKL, energy_kev=None)</dt><dd><tt>Calculate&nbsp;the&nbsp;theta,&nbsp;two-theta&nbsp;and&nbsp;intensity&nbsp;of&nbsp;the&nbsp;given&nbsp;HKL&nbsp;in&nbsp;reflection&nbsp;geometry,&nbsp;display&nbsp;the&nbsp;result</tt></dd></dl>
+<dl><dt><a name="Scattering-hkl_reflection"><strong>hkl_reflection</strong></a>(self, HKL, energy_kev=None)</dt><dd><tt>Calculate&nbsp;the&nbsp;theta,&nbsp;two-theta&nbsp;and&nbsp;intensity&nbsp;of&nbsp;the&nbsp;given&nbsp;HKL&nbsp;in&nbsp;reflection&nbsp;geometry,&nbsp;display&nbsp;the&nbsp;result<br>
+Uses&nbsp;sample&nbsp;orientation&nbsp;set&nbsp;up&nbsp;in&nbsp;setup_scatter<br>
+:param&nbsp;HKL:&nbsp;[h,k,l]&nbsp;or&nbsp;list&nbsp;of&nbsp;hkl<br>
+:param&nbsp;energy_kev:&nbsp;None&nbsp;or&nbsp;float<br>
+:return:&nbsp;str</tt></dd></dl>
 
 <dl><dt><a name="Scattering-hkl_transmission"><strong>hkl_transmission</strong></a>(self, HKL, energy_kev=None)</dt><dd><tt>Calculate&nbsp;the&nbsp;theta,&nbsp;two-theta&nbsp;and&nbsp;intensity&nbsp;of&nbsp;the&nbsp;given&nbsp;HKL&nbsp;in&nbsp;transmission&nbsp;geometry,&nbsp;display&nbsp;the&nbsp;result</tt></dd></dl>
 
-<dl><dt><a name="Scattering-intensity"><strong>intensity</strong></a>(self, HKL, scattering_type=None)</dt><dd><tt>Calculate&nbsp;the&nbsp;squared&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL<br>
-&nbsp;&nbsp;Crystal.<a href="#Scattering-intensity">intensity</a>([1,0,0])<br>
-&nbsp;&nbsp;Crystal.<a href="#Scattering-intensity">intensity</a>([[1,0,0],[2,0,0],[3,0,0])<br>
-Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.<br>
-&nbsp;<br>
-Notes:<br>
--&nbsp;Uses&nbsp;x-ray&nbsp;atomic&nbsp;form&nbsp;factors,&nbsp;calculated&nbsp;from&nbsp;approximated&nbsp;tables&nbsp;in&nbsp;the&nbsp;ITC<br>
--&nbsp;This&nbsp;may&nbsp;be&nbsp;a&nbsp;little&nbsp;slow&nbsp;for&nbsp;large&nbsp;numbers&nbsp;of&nbsp;reflections,&nbsp;as&nbsp;it&nbsp;is&nbsp;not&nbsp;currently<br>
-&nbsp;possible&nbsp;to&nbsp;use&nbsp;accelerated&nbsp;calculation&nbsp;methods&nbsp;in&nbsp;Jython.<br>
--&nbsp;Debye-Waller&nbsp;factor&nbsp;(atomic&nbsp;displacement)&nbsp;is&nbsp;applied&nbsp;for&nbsp;isotropic&nbsp;ADPs<br>
--&nbsp;Crystal.scale&nbsp;is&nbsp;used&nbsp;to&nbsp;scale&nbsp;the&nbsp;complex&nbsp;structure&nbsp;factor,&nbsp;so&nbsp;the&nbsp;intensity&nbsp;is&nbsp;&nbsp;<br>
-&nbsp;reduced&nbsp;by&nbsp;(Crystal.scale)^2<br>
--&nbsp;Testing&nbsp;against&nbsp;structure&nbsp;factors&nbsp;calculated&nbsp;by&nbsp;Vesta.exe&nbsp;is&nbsp;very&nbsp;close,&nbsp;though&nbsp;there<br>
-&nbsp;&nbsp;are&nbsp;some&nbsp;discrepancies,&nbsp;probably&nbsp;due&nbsp;to&nbsp;the&nbsp;method&nbsp;of&nbsp;calculation&nbsp;of&nbsp;the&nbsp;form&nbsp;factor.</tt></dd></dl>
+<dl><dt><a name="Scattering-intensity"><strong>intensity</strong></a>(self, hkl=None, scattering_type=None, **options)</dt><dd><tt>:param&nbsp;hkl:<br>
+:param&nbsp;scattering_type:&nbsp;str&nbsp;:&nbsp;one&nbsp;of&nbsp;['xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant']<br>
+:return:</tt></dd></dl>
 
 <dl><dt><a name="Scattering-magnetic_neutron"><strong>magnetic_neutron</strong></a>(self, HKL)</dt><dd><tt>Calculate&nbsp;the&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;neutron&nbsp;rules&nbsp;and&nbsp;form&nbsp;factor<br>
 &nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-magnetic_neutron">magnetic_neutron</a>([1,0,0])<br>
@@ -163,6 +177,53 @@ See&nbsp;multiple_scattering.py&nbsp;for&nbsp;more&nbsp;details.&nbsp;Code&nbsp;
 &nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-neutron">neutron</a>([1,0,0])<br>
 &nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-neutron">neutron</a>([[1,0,0],[2,0,0],[3,0,0])<br>
 Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.</tt></dd></dl>
+
+<dl><dt><a name="Scattering-new_intensity"><strong>new_intensity</strong></a> = <a href="#Scattering-intensity">intensity</a>(self, hkl=None, scattering_type=None, **options)</dt></dl>
+
+<dl><dt><a name="Scattering-new_structure_factor"><strong>new_structure_factor</strong></a> = <a href="#Scattering-structure_factor">structure_factor</a>(self, hkl=None, scattering_type=None, **kwargs)</dt></dl>
+
+<dl><dt><a name="Scattering-old_intensity"><strong>old_intensity</strong></a>(self, HKL, scattering_type=None)</dt><dd><tt>Calculate&nbsp;the&nbsp;squared&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL<br>
+&nbsp;&nbsp;Crystal.<a href="#Scattering-intensity">intensity</a>([1,0,0])<br>
+&nbsp;&nbsp;Crystal.<a href="#Scattering-intensity">intensity</a>([[1,0,0],[2,0,0],[3,0,0])<br>
+Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.<br>
+&nbsp;<br>
+Notes:<br>
+-&nbsp;Uses&nbsp;x-ray&nbsp;atomic&nbsp;form&nbsp;factors,&nbsp;calculated&nbsp;from&nbsp;approximated&nbsp;tables&nbsp;in&nbsp;the&nbsp;ITC<br>
+-&nbsp;This&nbsp;may&nbsp;be&nbsp;a&nbsp;little&nbsp;slow&nbsp;for&nbsp;large&nbsp;numbers&nbsp;of&nbsp;reflections,&nbsp;as&nbsp;it&nbsp;is&nbsp;not&nbsp;currently<br>
+&nbsp;possible&nbsp;to&nbsp;use&nbsp;accelerated&nbsp;calculation&nbsp;methods&nbsp;in&nbsp;Jython.<br>
+-&nbsp;Debye-Waller&nbsp;factor&nbsp;(atomic&nbsp;displacement)&nbsp;is&nbsp;applied&nbsp;for&nbsp;isotropic&nbsp;ADPs<br>
+-&nbsp;Crystal.scale&nbsp;is&nbsp;used&nbsp;to&nbsp;scale&nbsp;the&nbsp;complex&nbsp;structure&nbsp;factor,&nbsp;so&nbsp;the&nbsp;intensity&nbsp;is&nbsp;&nbsp;<br>
+&nbsp;reduced&nbsp;by&nbsp;(Crystal.scale)^2<br>
+-&nbsp;Testing&nbsp;against&nbsp;structure&nbsp;factors&nbsp;calculated&nbsp;by&nbsp;Vesta.exe&nbsp;is&nbsp;very&nbsp;close,&nbsp;though&nbsp;there<br>
+&nbsp;&nbsp;are&nbsp;some&nbsp;discrepancies,&nbsp;probably&nbsp;due&nbsp;to&nbsp;the&nbsp;method&nbsp;of&nbsp;calculation&nbsp;of&nbsp;the&nbsp;form&nbsp;factor.</tt></dd></dl>
+
+<dl><dt><a name="Scattering-old_structure_factor"><strong>old_structure_factor</strong></a>(self, HKL, scattering_type=None)</dt><dd><tt>Calculate&nbsp;the&nbsp;complex&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL<br>
+&nbsp;&nbsp;Crystal.<a href="#Scattering-structure_factor">structure_factor</a>([1,0,0])<br>
+&nbsp;&nbsp;Crystal.<a href="#Scattering-structure_factor">structure_factor</a>([[1,0,0],[2,0,0],[3,0,0])<br>
+Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;complex&nbsp;structure&nbsp;factor&nbsp;at&nbsp;each&nbsp;reflection.<br>
+&nbsp;<br>
+Notes:<br>
+-&nbsp;Uses&nbsp;x-ray&nbsp;atomic&nbsp;form&nbsp;factors,&nbsp;calculated&nbsp;from&nbsp;approximated&nbsp;tables&nbsp;in&nbsp;the&nbsp;ITC<br>
+-&nbsp;This&nbsp;may&nbsp;be&nbsp;a&nbsp;little&nbsp;slow&nbsp;for&nbsp;large&nbsp;numbers&nbsp;of&nbsp;reflections,&nbsp;as&nbsp;it&nbsp;is&nbsp;not&nbsp;currently<br>
+&nbsp;possible&nbsp;to&nbsp;use&nbsp;accelerated&nbsp;calculation&nbsp;methods&nbsp;in&nbsp;Jython.<br>
+-&nbsp;Debye-Waller&nbsp;factor&nbsp;(atomic&nbsp;displacement)&nbsp;is&nbsp;applied&nbsp;for&nbsp;isotropic&nbsp;ADPs<br>
+-&nbsp;Crystal.scale&nbsp;is&nbsp;used&nbsp;to&nbsp;scale&nbsp;the&nbsp;complex&nbsp;structure&nbsp;factor,&nbsp;so&nbsp;the&nbsp;intensity&nbsp;is<br>
+&nbsp;reduced&nbsp;by&nbsp;(Crystal.scale)^2<br>
+-&nbsp;Testing&nbsp;against&nbsp;structure&nbsp;factors&nbsp;calculated&nbsp;by&nbsp;Vesta.exe&nbsp;is&nbsp;very&nbsp;close,&nbsp;though&nbsp;there<br>
+&nbsp;&nbsp;are&nbsp;some&nbsp;discrepancies,&nbsp;probably&nbsp;due&nbsp;to&nbsp;the&nbsp;method&nbsp;of&nbsp;calculation&nbsp;of&nbsp;the&nbsp;form&nbsp;factor.</tt></dd></dl>
+
+<dl><dt><a name="Scattering-powder"><strong>powder</strong></a>(self, scattering_type=None, units=None, peak_width=None, background=None, pixels=None, powder_average=None, **options)</dt><dd><tt>Generates&nbsp;array&nbsp;of&nbsp;intensities&nbsp;along&nbsp;a&nbsp;spaced&nbsp;grid,&nbsp;equivalent&nbsp;to&nbsp;a&nbsp;powder&nbsp;pattern.<br>
+&nbsp;&nbsp;tth,&nbsp;iten&nbsp;=&nbsp;<a href="#Scattering-generate_powder">generate_powder</a>('xray',&nbsp;units='tth',&nbsp;energy_kev=8)<br>
+&nbsp;<br>
+:param&nbsp;scattering_type:&nbsp;str&nbsp;:&nbsp;one&nbsp;of&nbsp;['xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant']<br>
+:param&nbsp;units:&nbsp;str&nbsp;:&nbsp;one&nbsp;of&nbsp;['tth',&nbsp;'dspace',&nbsp;'q']<br>
+:param&nbsp;peak_width:&nbsp;float&nbsp;:&nbsp;Peak&nbsp;with&nbsp;in&nbsp;units&nbsp;of&nbsp;inverse&nbsp;wavevector&nbsp;(Q)<br>
+:param&nbsp;background:&nbsp;float&nbsp;:&nbsp;if&nbsp;&gt;0,&nbsp;a&nbsp;normal&nbsp;background&nbsp;around&nbsp;this&nbsp;value&nbsp;will&nbsp;be&nbsp;added<br>
+:param&nbsp;pixels:&nbsp;int&nbsp;:&nbsp;number&nbsp;of&nbsp;pixels&nbsp;to&nbsp;add&nbsp;to&nbsp;the&nbsp;resulting&nbsp;mesh<br>
+:param&nbsp;powder_average:&nbsp;Bool&nbsp;:&nbsp;if&nbsp;True,&nbsp;intensities&nbsp;will&nbsp;be&nbsp;reduced&nbsp;for&nbsp;the&nbsp;powder&nbsp;average<br>
+:param&nbsp;options:&nbsp;additional&nbsp;arguments&nbsp;to&nbsp;pass&nbsp;to&nbsp;intensity&nbsp;calculation<br>
+:return&nbsp;xval:&nbsp;arrray&nbsp;:&nbsp;x-axis&nbsp;of&nbsp;powder&nbsp;scan&nbsp;(units)<br>
+:return&nbsp;yval:&nbsp;array&nbsp;:&nbsp;&nbsp;intensity&nbsp;values&nbsp;at&nbsp;each&nbsp;point&nbsp;in&nbsp;x-axis</tt></dd></dl>
 
 <dl><dt><a name="Scattering-powder_correction"><strong>powder_correction</strong></a>(self, HKL, intensities, symmetric_multiplyer=True, powder_average=True)</dt><dd><tt>Averages&nbsp;symmetric&nbsp;reflections&nbsp;and&nbsp;applies&nbsp;symmetry&nbsp;multipliers&nbsp;and&nbsp;1/q^2&nbsp;correction<br>
 Ic&nbsp;=&nbsp;I0*C<br>
@@ -256,9 +317,9 @@ Returned&nbsp;values&nbsp;are&nbsp;[n,3]&nbsp;arrays<br>
 The&nbsp;basis&nbsp;is&nbsp;chosen&nbsp;such&nbsp;that&nbsp;Q&nbsp;defines&nbsp;the&nbsp;scattering&nbsp;plane,&nbsp;sigma&nbsp;and&nbsp;pi&nbsp;directions&nbsp;are&nbsp;normal&nbsp;to&nbsp;this&nbsp;plane.<br>
 Q&nbsp;is&nbsp;defined&nbsp;as&nbsp;Q&nbsp;=&nbsp;kout&nbsp;-&nbsp;kin,&nbsp;with&nbsp;kout&nbsp;+ve&nbsp;along&nbsp;the&nbsp;projection&nbsp;of&nbsp;azim_zero</tt></dd></dl>
 
-<dl><dt><a name="Scattering-setup_scatter"><strong>setup_scatter</strong></a>(self, type=None, energy_kev=None, wavelength_a=None, powder_units=None, specular=None, parallel=None, theta_offset=None, min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None)</dt><dd><tt>Simple&nbsp;way&nbsp;to&nbsp;set&nbsp;scattering&nbsp;parameters,&nbsp;each&nbsp;parameter&nbsp;is&nbsp;internal&nbsp;to&nbsp;xtl&nbsp;(self)<br>
+<dl><dt><a name="Scattering-setup_scatter"><strong>setup_scatter</strong></a>(self, scattering_type=None, energy_kev=None, wavelength_a=None, powder_units=None, specular=None, parallel=None, theta_offset=None, min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None, output=True, scattering_factors=None, magnetic_formfactor=None, polarisation=None, polarisation_vector=None, azimuthal_reference=None, azimuth=None, flm=None)</dt><dd><tt>Simple&nbsp;way&nbsp;to&nbsp;set&nbsp;scattering&nbsp;parameters,&nbsp;each&nbsp;parameter&nbsp;is&nbsp;internal&nbsp;to&nbsp;xtl&nbsp;(self)<br>
 &nbsp;<br>
-type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering</strong>&nbsp;type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;'xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant'<br>
+scattering_type:&nbsp;self.<strong>_scattering</strong>&nbsp;type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;'xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant',&nbsp;'xray&nbsp;dispersion'<br>
 energy_kev&nbsp;&nbsp;:&nbsp;self.<strong>_energy_kev</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;radiation&nbsp;energy&nbsp;in&nbsp;keV<br>
 wavelength_a:&nbsp;self.<strong>_wavelength_a</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;radiation&nbsp;wavelength&nbsp;in&nbsp;Angstrom<br>
 powder_units:&nbsp;self.<strong>_powder_units</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;units&nbsp;to&nbsp;use&nbsp;when&nbsp;displaying/&nbsp;plotting&nbsp;['twotheta',&nbsp;'d','&nbsp;'q']<br>
@@ -268,7 +329,30 @@ min_theta&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_min_theta</strong>&nb
 max_theta&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_max_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;opening&nbsp;angle<br>
 theta_offset:&nbsp;self.<strong>_scattering_theta_offset</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;sample&nbsp;offset&nbsp;angle<br>
 specular&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_specular_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface<br>
-parallel&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_parallel_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface</tt></dd></dl>
+parallel&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_parallel_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface<br>
+scattering_factors:&nbsp;self.<strong>_use_waaskirf_scattering_factor</strong>&nbsp;:&nbsp;xray&nbsp;scattering&nbsp;factor&nbsp;['waaskirf',&nbsp;'itc']<br>
+magnetic_formfactor:&nbsp;self.<strong>_use_magnetic_form_factor</strong>:&nbsp;True/False&nbsp;magnetic&nbsp;form&nbsp;factor&nbsp;for&nbsp;magnetic&nbsp;SF<br>
+polarisation:&nbsp;self.<strong>_polarisation</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;beam&nbsp;polarisation&nbsp;setting&nbsp;['ss',&nbsp;'sp'*,&nbsp;'sp',&nbsp;'pp']<br>
+polarisation_vector:&nbsp;_polarisation_vector_incident:&nbsp;[x,y,z]&nbsp;incident&nbsp;polarisation&nbsp;vector<br>
+azimuthal_reference:&nbsp;self.<strong>_azimuthal_reference</strong>&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;[h,k,l]&nbsp;direction&nbsp;of&nbsp;azimuthal&nbsp;zero&nbsp;angle<br>
+azimuth&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_azimuthal_angle</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;azimuthal&nbsp;angle&nbsp;in&nbsp;deg<br>
+flm&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_resonant_flm</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;Resonant&nbsp;settings&nbsp;(flm1,&nbsp;flm2,&nbsp;flm3)</tt></dd></dl>
+
+<dl><dt><a name="Scattering-structure_factor"><strong>structure_factor</strong></a>(self, hkl=None, scattering_type=None, **kwargs)</dt><dd><tt>Calculate&nbsp;the&nbsp;structure&nbsp;factor&nbsp;at&nbsp;reflection&nbsp;indexes&nbsp;(h,k,l)<br>
+&nbsp;<br>
+Notes:<br>
+-&nbsp;Uses&nbsp;x-ray&nbsp;atomic&nbsp;form&nbsp;factors,&nbsp;calculated&nbsp;from&nbsp;approximated&nbsp;tables&nbsp;in&nbsp;the&nbsp;ITC<br>
+-&nbsp;This&nbsp;may&nbsp;be&nbsp;a&nbsp;little&nbsp;slow&nbsp;for&nbsp;large&nbsp;numbers&nbsp;of&nbsp;reflections,&nbsp;as&nbsp;it&nbsp;is&nbsp;not&nbsp;currently<br>
+&nbsp;possible&nbsp;to&nbsp;use&nbsp;accelerated&nbsp;calculation&nbsp;methods&nbsp;in&nbsp;Jython.<br>
+-&nbsp;Debye-Waller&nbsp;factor&nbsp;(atomic&nbsp;displacement)&nbsp;is&nbsp;applied&nbsp;for&nbsp;isotropic&nbsp;ADPs<br>
+-&nbsp;Crystal.scale&nbsp;is&nbsp;used&nbsp;to&nbsp;scale&nbsp;the&nbsp;complex&nbsp;structure&nbsp;factor,&nbsp;so&nbsp;the&nbsp;intensity&nbsp;is<br>
+&nbsp;reduced&nbsp;by&nbsp;(Crystal.scale)^2<br>
+-&nbsp;Testing&nbsp;against&nbsp;structure&nbsp;factors&nbsp;calculated&nbsp;by&nbsp;Vesta.exe&nbsp;is&nbsp;exactly&nbsp;the&nbsp;same&nbsp;when&nbsp;using&nbsp;Waasmaier&nbsp;structure&nbsp;factors.<br>
+&nbsp;<br>
+:param&nbsp;hkl:&nbsp;array[n,3]&nbsp;:&nbsp;reflection&nbsp;indexes&nbsp;(h,&nbsp;k,&nbsp;l)<br>
+:param&nbsp;scattering_type:&nbsp;str&nbsp;:&nbsp;one&nbsp;of&nbsp;['xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant']<br>
+:param&nbsp;kwargs:&nbsp;additional&nbsp;options&nbsp;to&nbsp;pass&nbsp;to&nbsp;scattering&nbsp;function<br>
+:return:&nbsp;complex&nbsp;array[n]&nbsp;:&nbsp;structure&nbsp;factors</tt></dd></dl>
 
 <dl><dt><a name="Scattering-x_ray"><strong>x_ray</strong></a>(self, HKL)</dt><dd><tt>Calculate&nbsp;the&nbsp;squared&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;x-ray&nbsp;scattering&nbsp;factors<br>
 &nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-x_ray">x_ray</a>([1,0,0])<br>
@@ -279,6 +363,14 @@ Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp
 &nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-x_ray_fast">x_ray_fast</a>([1,0,0])<br>
 &nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-x_ray_fast">x_ray_fast</a>([[1,0,0],[2,0,0],[3,0,0])<br>
 Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.</tt></dd></dl>
+
+<dl><dt><a name="Scattering-xray_dispersion"><strong>xray_dispersion</strong></a>(self, HKL, energy_kev)</dt><dd><tt>Calculate&nbsp;the&nbsp;squared&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL,<br>
+using&nbsp;x-ray&nbsp;scattering&nbsp;factors&nbsp;with&nbsp;dispersion&nbsp;corrections<br>
+&nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-xray_dispersion">xray_dispersion</a>([1,0,0],&nbsp;9.71)<br>
+&nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-xray_dispersion">xray_dispersion</a>([[1,0,0],[2,0,0],[3,0,0]],&nbsp;2.838)<br>
+&nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-xray_dispersion">xray_dispersion</a>([[1,0,0],[2,0,0],[3,0,0]],&nbsp;np.arange(2.83,&nbsp;2.86,&nbsp;0.001))<br>
+Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.<br>
+if&nbsp;energy_kev&nbsp;is&nbsp;an&nbsp;array,&nbsp;the&nbsp;returned&nbsp;array&nbsp;will&nbsp;have&nbsp;shape&nbsp;[len(HKL),&nbsp;len(energy_kev)]</tt></dd></dl>
 
 <dl><dt><a name="Scattering-xray_magnetic"><strong>xray_magnetic</strong></a>(self, HKL)</dt><dd><tt>Calculate&nbsp;the&nbsp;non-resonant&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor&nbsp;<br>
 for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;x-ray&nbsp;rules&nbsp;and&nbsp;form&nbsp;factor<br>
@@ -407,5 +499,5 @@ Data and other attributes defined here:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>__scattering_types__</strong> = {'neutron': ['neutron', 'n', 'nuclear'], 'neutron magnetic': ['neutron magnetic', 'magnetic neutron', 'magnetic'], 'xray': ['xray', 'x', 'x-ray', 'thomson', 'charge'], 'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'], 'xray resonant': ['xray resonant', 'resonant', 'resonant xray', 'rxs']}</td></tr></table>
+<td width="100%"><strong>__scattering_types__</strong> = {'neutron': ['neutron', 'n', 'nuclear'], 'neutron magnetic': ['neutron magnetic', 'magnetic neutron', 'magnetic'], 'xray': ['xray', 'x', 'x-ray', 'thomson', 'charge'], 'xray dispersion': ['dispersion', 'xray dispersion'], 'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'], 'xray resonant': ['xray resonant', 'resonant', 'resonant xray', 'rxs']}</td></tr></table>
 </body></html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module Dans_Diffraction.functions_scattering</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_scattering</strong></big></big> (version 0.9)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_scattering.py">c:\users\dgpor\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_scattering.py</a></font></td></tr></table>
+    <p><tt>Module:&nbsp;functions_scattering.py<br>
+&nbsp;<br>
+Functions:<br>
+<a href="#-intensity">intensity</a>(structurefactor)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;the&nbsp;squared&nbsp;structure&nbsp;factor<br>
+<a href="#-phase_factor">phase_factor</a>(hkl,&nbsp;uvw)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Return&nbsp;the&nbsp;complex&nbsp;phase&nbsp;factor:<br>
+<a href="#-phase_factor_qr">phase_factor_qr</a>(q,&nbsp;r)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Return&nbsp;the&nbsp;complex&nbsp;phase&nbsp;factor:<br>
+<a href="#-scatteringbasis">scatteringbasis</a>(q,&nbsp;azi_ref_q=(1,&nbsp;0,&nbsp;0),&nbsp;psi=0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Determine&nbsp;the&nbsp;scattering&nbsp;and&nbsp;polarisation&nbsp;vectors&nbsp;of&nbsp;a&nbsp;reflection&nbsp;based&nbsp;on&nbsp;energy,&nbsp;azimuth&nbsp;and&nbsp;polarisation.<br>
+<a href="#-scatteringcomponents">scatteringcomponents</a>(moment,&nbsp;q,&nbsp;azi_ref_q=(1,&nbsp;0,&nbsp;0),&nbsp;psi=0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Transform&nbsp;magnetic&nbsp;vector&nbsp;into&nbsp;components&nbsp;within&nbsp;the&nbsp;scattering&nbsp;plane<br>
+<a href="#-scatteringvectors">scatteringvectors</a>(q,&nbsp;energy_kev,&nbsp;azi_ref_q=(1,&nbsp;0,&nbsp;0),&nbsp;psi=0,&nbsp;polarisation='s-p')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Determine&nbsp;the&nbsp;scattering&nbsp;and&nbsp;polarisation&nbsp;vectors&nbsp;of&nbsp;a&nbsp;reflection&nbsp;based&nbsp;on&nbsp;energy,&nbsp;azimuth&nbsp;and&nbsp;polarisation.<br>
+<a href="#-sf_magnetic_neutron">sf_magnetic_neutron</a>(q,&nbsp;r,&nbsp;occ,&nbsp;moment,&nbsp;magnetic_formfactor=None,&nbsp;debyewaller=False)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Calculate&nbsp;the&nbsp;magnetic&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;neutron&nbsp;magnetic&nbsp;form&nbsp;factor<br>
+<a href="#-sf_magnetic_neutron_polarised">sf_magnetic_neutron_polarised</a>(q,&nbsp;r,&nbsp;occ,&nbsp;moment,&nbsp;incident_polarisation_vector=(1,&nbsp;0,&nbsp;0),&nbsp;magnetic_formfactor=None,&nbsp;debyewaller=False)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Calculate&nbsp;the&nbsp;magnetic&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;neutron&nbsp;magnetic&nbsp;form&nbsp;factor<br>
+<a href="#-sf_magnetic_xray">sf_magnetic_xray</a>(q,&nbsp;r,&nbsp;occ,&nbsp;moment,&nbsp;magnetic_formfactor=None,&nbsp;debyewaller=False)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Calculate&nbsp;the&nbsp;non-resonant&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor<br>
+<a href="#-sf_magnetic_xray_beamline">sf_magnetic_xray_beamline</a>(q,&nbsp;r,&nbsp;occ,&nbsp;moment,&nbsp;energy_kev,&nbsp;magnetic_formfactor=None,&nbsp;debyewaller=False,&nbsp;azi_ref_q=(1,&nbsp;0,&nbsp;0),&nbsp;psi=0,&nbsp;polarisation='s-p')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Calculate&nbsp;the&nbsp;non-resonant&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor<br>
+<a href="#-sf_magnetic_xray_polarised">sf_magnetic_xray_polarised</a>(q,&nbsp;r,&nbsp;occ,&nbsp;moment,&nbsp;incident_polarisation_vector=(1,&nbsp;0,&nbsp;0),&nbsp;magnetic_formfactor=None,&nbsp;debyewaller=False)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Calculate&nbsp;the&nbsp;non-resonant&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor<br>
+<a href="#-sf_magnetic_xray_resonant">sf_magnetic_xray_resonant</a>(q,&nbsp;r,&nbsp;occ,&nbsp;moment,&nbsp;energy_kev,&nbsp;debyewaller=False,&nbsp;azi_ref_q=(1,&nbsp;0,&nbsp;0),&nbsp;psi=0,&nbsp;polarisation='s-p',&nbsp;f0=0,&nbsp;f1=1,&nbsp;f2=0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Calculate&nbsp;the&nbsp;non-resonant&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor<br>
+<a href="#-sf_magnetic_xray_resonant_alternate">sf_magnetic_xray_resonant_alternate</a>(q,&nbsp;r,&nbsp;occ,&nbsp;moment,&nbsp;energy_kev,&nbsp;debyewaller=False,&nbsp;polarisation='sp',&nbsp;azi_ref_q=(1,&nbsp;0,&nbsp;0),&nbsp;psi=0,&nbsp;f0=1,&nbsp;f1=1,&nbsp;f2=1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Calculate&nbsp;structure&nbsp;factors&nbsp;using&nbsp;resonant&nbsp;scattering&nbsp;factors&nbsp;in&nbsp;the&nbsp;dipolar&nbsp;approximation<br>
+<a href="#-structure_factor">structure_factor</a>(scattering_factor,&nbsp;occupancy,&nbsp;debyewaller,&nbsp;phase)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Return&nbsp;the&nbsp;complex&nbsp;structure&nbsp;factor:<br>
+<a href="#-xray_resonant_scattering_factor">xray_resonant_scattering_factor</a>(q,&nbsp;moment,&nbsp;energy_kev,&nbsp;polarisation='sp',&nbsp;flm=(1,&nbsp;1,&nbsp;1),&nbsp;psi=0,&nbsp;azi_ref_q=(1,&nbsp;0,&nbsp;0))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Calcualte&nbsp;fxres,&nbsp;the&nbsp;resonant&nbsp;x-ray&nbsp;scattering&nbsp;factor<br>
+&nbsp;<br>
+&nbsp;<br>
+By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
+Diamond<br>
+2018<br>
+&nbsp;<br>
+Version&nbsp;0.9<br>
+Last&nbsp;updated:&nbsp;13/07/21<br>
+&nbsp;<br>
+Version&nbsp;History:<br>
+11/11/18&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
+13/07/21&nbsp;0.9&nbsp;&nbsp;&nbsp;&nbsp;Functions&nbsp;re-written&nbsp;and&nbsp;tested<br>
+&nbsp;<br>
+@author:&nbsp;DGPorter</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="datetime.html">datetime</a><br>
+</td><td width="25%" valign=top><a href="Dans_Diffraction.functions_crystallography.html">Dans_Diffraction.functions_crystallography</a><br>
+</td><td width="25%" valign=top><a href="Dans_Diffraction.functions_general.html">Dans_Diffraction.functions_general</a><br>
+</td><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-autointensity"><strong>autointensity</strong></a>(scattering_type, q, r, *args, **kwargs)</dt><dd><tt>Choose&nbsp;a&nbsp;scattering&nbsp;type&nbsp;can&nbsp;calcuate&nbsp;the&nbsp;scattered&nbsp;intensity<br>
+:param&nbsp;scattering_type:&nbsp;named&nbsp;scattering&nbsp;function,&nbsp;see&nbsp;"<a href="#-get_scattering_function">get_scattering_function</a>()"<br>
+:param&nbsp;q:&nbsp;array&nbsp;[n,3]&nbsp;reflection&nbsp;positions&nbsp;in&nbsp;A^-1<br>
+:param&nbsp;r:&nbsp;array&nbsp;[m,3]&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;A<br>
+:param&nbsp;args:&nbsp;additional&nbsp;arguments&nbsp;to&nbsp;pass&nbsp;to&nbsp;choosen&nbsp;scattering&nbsp;function<br>
+:param&nbsp;kwargs:&nbsp;named&nbsp;arguments&nbsp;to&nbsp;pass&nbsp;to&nbsp;choosen&nbsp;scattering&nbsp;function<br>
+:return:&nbsp;float&nbsp;array&nbsp;[n]</tt></dd></dl>
+ <dl><dt><a name="-autostructurefactor"><strong>autostructurefactor</strong></a>(scattering_type, q, r, *args, **kwargs)</dt><dd><tt>Choose&nbsp;a&nbsp;scattering&nbsp;type&nbsp;can&nbsp;calcuate&nbsp;the&nbsp;structure&nbsp;factor<br>
+:param&nbsp;scattering_type:<br>
+:param&nbsp;q:&nbsp;array&nbsp;[n,3]&nbsp;reflection&nbsp;positions&nbsp;in&nbsp;A^-1<br>
+:param&nbsp;r:&nbsp;array&nbsp;[m,3]&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;A<br>
+:param&nbsp;args:&nbsp;additional&nbsp;arguments&nbsp;to&nbsp;pass&nbsp;to&nbsp;choosen&nbsp;scattering&nbsp;function<br>
+:param&nbsp;kwargs:&nbsp;named&nbsp;arguments&nbsp;to&nbsp;pass&nbsp;to&nbsp;choosen&nbsp;scattering&nbsp;function<br>
+:return:&nbsp;complex&nbsp;array&nbsp;[n]</tt></dd></dl>
+ <dl><dt><a name="-get_scattering_function"><strong>get_scattering_function</strong></a>(scattering_type)</dt><dd><tt>Return&nbsp;function&nbsp;for&nbsp;given&nbsp;scattering&nbsp;type<br>
+Function&nbsp;will&nbsp;return&nbsp;structure&nbsp;factor&nbsp;function<br>
+:param&nbsp;scattering_type:&nbsp;str&nbsp;:&nbsp;scattering&nbsp;name&nbsp;as&nbsp;defined&nbsp;in&nbsp;SCATTERING_NAMES<br>
+:return:&nbsp;function</tt></dd></dl>
+ <dl><dt><a name="-intensity"><strong>intensity</strong></a>(structurefactor)</dt><dd><tt>Returns&nbsp;the&nbsp;squared&nbsp;structure&nbsp;factor<br>
+:param&nbsp;structurefactor:&nbsp;complex&nbsp;array&nbsp;[n]&nbsp;structure&nbsp;factor<br>
+:return:&nbsp;array&nbsp;[n]</tt></dd></dl>
+ <dl><dt><a name="-options"><strong>options</strong></a>(occ=None, debyewaller=None, scattering_factor=None, moment=None, incident_polarisation_vector=(1, 0, 0), magnetic_formfactor=None, energy_kev=8, polarisation='sp', azi_ref_q=(1, 0, 0), psi=0, f0=0, f1=1, f2=0)</dt><dd><tt>Create&nbsp;an&nbsp;input&nbsp;dict&nbsp;that&nbsp;will&nbsp;work&nbsp;with&nbsp;all&nbsp;structure&nbsp;factor&nbsp;(sf_)&nbsp;functions<br>
+:param&nbsp;occ:&nbsp;[m,1]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;occupancies<br>
+:param&nbsp;debyewaller:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;thermal&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;reflection<br>
+:param&nbsp;scattering_factor:&nbsp;array&nbsp;[n,m]&nbsp;or&nbsp;[n]:&nbsp;radiation&nbsp;dependent&nbsp;scattering&nbsp;factor/&nbsp;form&nbsp;factor,/&nbsp;scattering&nbsp;length<br>
+:param&nbsp;moment:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;moment&nbsp;direction&nbsp;in&nbsp;orthogonal&nbsp;basis<br>
+:param&nbsp;incident_polarisation_vector:&nbsp;[1,3]&nbsp;direction&nbsp;of&nbsp;incident&nbsp;polarisation<br>
+:param&nbsp;magnetic_formfactor:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;form&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;relection<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;value&nbsp;of&nbsp;incident&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;azi_ref_q:&nbsp;[1,3]&nbsp;azimuthal&nbsp;refence,&nbsp;in&nbsp;cartesian&nbsp;basis&nbsp;(Q)<br>
+:param&nbsp;psi:&nbsp;float&nbsp;value&nbsp;of&nbsp;the&nbsp;azimthal&nbsp;angle&nbsp;-&nbsp;the&nbsp;rotation&nbsp;out&nbsp;of&nbsp;the&nbsp;scattering&nbsp;plane.<br>
+:param&nbsp;polarisation:&nbsp;str&nbsp;definition&nbsp;of&nbsp;the&nbsp;polarisation&nbsp;can&nbsp;be:&nbsp;['ss','sp','ps','pp']&nbsp;with&nbsp;'s'=sigma,&nbsp;'p'=pi<br>
+:param&nbsp;f0:&nbsp;float&nbsp;Flm&nbsp;value&nbsp;0&nbsp;(charge)<br>
+:param&nbsp;f1:&nbsp;float&nbsp;Flm&nbsp;value&nbsp;1<br>
+:param&nbsp;f2:&nbsp;float&nbsp;Flm&nbsp;value&nbsp;2<br>
+:return:&nbsp;dict</tt></dd></dl>
+ <dl><dt><a name="-phase_factor"><strong>phase_factor</strong></a>(hkl, uvw)</dt><dd><tt>Return&nbsp;the&nbsp;complex&nbsp;phase&nbsp;factor:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;phase_factor&nbsp;=&nbsp;exp(i.2.pi.HKL.UVW')<br>
+:param&nbsp;hkl:&nbsp;array&nbsp;[n,3]&nbsp;integer&nbsp;reflections<br>
+:param&nbsp;uvw:&nbsp;array&nbsp;[m,3]&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;atomic&nbsp;basis&nbsp;units<br>
+:return:&nbsp;complex&nbsp;array&nbsp;[n,m]</tt></dd></dl>
+ <dl><dt><a name="-phase_factor_qr"><strong>phase_factor_qr</strong></a>(q, r)</dt><dd><tt>Return&nbsp;the&nbsp;complex&nbsp;phase&nbsp;factor:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;phase_factor&nbsp;=&nbsp;exp(i.Q.R')<br>
+:param&nbsp;q:&nbsp;array&nbsp;[n,3]&nbsp;reflection&nbsp;positions&nbsp;in&nbsp;A^-1<br>
+:param&nbsp;r:&nbsp;array&nbsp;[m,3]&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;A<br>
+:return:&nbsp;complex&nbsp;array&nbsp;[n,m]</tt></dd></dl>
+ <dl><dt><a name="-scatteringbasis"><strong>scatteringbasis</strong></a>(q, azi_ref_q=(1, 0, 0), psi=0)</dt><dd><tt>Determine&nbsp;the&nbsp;scattering&nbsp;and&nbsp;polarisation&nbsp;vectors&nbsp;of&nbsp;a&nbsp;reflection&nbsp;based&nbsp;on&nbsp;energy,&nbsp;azimuth&nbsp;and&nbsp;polarisation.<br>
+:param&nbsp;q:&nbsp;[1*3]&nbsp;reflection&nbsp;vector&nbsp;in&nbsp;a&nbsp;cartesian&nbsp;basis<br>
+:param&nbsp;azi_ref_q:&nbsp;[1,3]&nbsp;direction&nbsp;along&nbsp;which&nbsp;the&nbsp;azimuthal&nbsp;zero&nbsp;angle&nbsp;is&nbsp;determind<br>
+:param&nbsp;psi:&nbsp;float&nbsp;azimuthal&nbsp;angle&nbsp;about&nbsp;U3&nbsp;in&nbsp;degrees<br>
+:return:&nbsp;U1,&nbsp;U2,&nbsp;U3<br>
+The&nbsp;basis&nbsp;is&nbsp;chosen&nbsp;such&nbsp;that&nbsp;Q&nbsp;defines&nbsp;the&nbsp;scattering&nbsp;plane,&nbsp;the&nbsp;sigma&nbsp;direction&nbsp;is&nbsp;normal&nbsp;to&nbsp;this&nbsp;plane,<br>
+the&nbsp;pi&nbsp;direction&nbsp;is&nbsp;always&nbsp;within&nbsp;this&nbsp;plane.<br>
+The&nbsp;azimuthal&nbsp;angle&nbsp;defines&nbsp;a&nbsp;rotation&nbsp;about&nbsp;the&nbsp;Q&nbsp;axis&nbsp;in&nbsp;a&nbsp;clockwise&nbsp;mannor,&nbsp;matching&nbsp;I16.<br>
+At&nbsp;an&nbsp;azimuth&nbsp;of&nbsp;0degrees,&nbsp;U1&nbsp;is&nbsp;perpendicular&nbsp;to&nbsp;Q,&nbsp;along&nbsp;the&nbsp;direction&nbsp;of&nbsp;azim_zero.</tt></dd></dl>
+ <dl><dt><a name="-scatteringcomponents"><strong>scatteringcomponents</strong></a>(moment, q, azi_ref_q=(1, 0, 0), psi=0)</dt><dd><tt>Transform&nbsp;magnetic&nbsp;vector&nbsp;into&nbsp;components&nbsp;within&nbsp;the&nbsp;scattering&nbsp;plane<br>
+:param&nbsp;moment:&nbsp;[n*3]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;moments&nbsp;in&nbsp;a&nbsp;cartesian&nbsp;basis<br>
+:param&nbsp;q:&nbsp;[1*3]&nbsp;reflection&nbsp;vector&nbsp;in&nbsp;a&nbsp;cartesian&nbsp;basis<br>
+:param&nbsp;azi_ref_q:&nbsp;[1*3]&nbsp;azimuthal&nbsp;reference&nbsp;in&nbsp;a&nbsp;cartesian&nbsp;basis<br>
+:param&nbsp;psi:&nbsp;float&nbsp;azimuthal&nbsp;angle<br>
+:return:&nbsp;(z1,&nbsp;z2,&nbsp;z3)&nbsp;components&nbsp;of&nbsp;the&nbsp;magnetic&nbsp;moment&nbsp;along&nbsp;the&nbsp;reflection&nbsp;direction</tt></dd></dl>
+ <dl><dt><a name="-scatteringvectors"><strong>scatteringvectors</strong></a>(q, energy_kev, azi_ref_q=(1, 0, 0), psi=0, polarisation='s-p')</dt><dd><tt>Determine&nbsp;the&nbsp;scattering&nbsp;and&nbsp;polarisation&nbsp;vectors&nbsp;of&nbsp;a&nbsp;reflection&nbsp;based&nbsp;on&nbsp;energy,&nbsp;azimuth&nbsp;and&nbsp;polarisation.<br>
+:param&nbsp;q:&nbsp;[n,3]&nbsp;reflection&nbsp;vector&nbsp;in&nbsp;a&nbsp;cartesian&nbsp;basis<br>
+:param&nbsp;energy_kev:&nbsp;x-ray&nbsp;scattering&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;azi_ref_q:&nbsp;[1,3]&nbsp;direction&nbsp;along&nbsp;which&nbsp;the&nbsp;azimuthal&nbsp;zero&nbsp;angle&nbsp;is&nbsp;determind<br>
+:param&nbsp;psi:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees&nbsp;about&nbsp;the&nbsp;azimuth<br>
+:param&nbsp;polarisation:&nbsp;polarisation&nbsp;with&nbsp;respect&nbsp;to&nbsp;the&nbsp;scattering&nbsp;plane,&nbsp;options:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'ss'&nbsp;:&nbsp;sigma-sigma&nbsp;polarisation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'sp'&nbsp;:&nbsp;sigma-pi&nbsp;polarisation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'ps'&nbsp;:&nbsp;pi-sigma&nbsp;polarisation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'pp'&nbsp;:&nbsp;pi-pi&nbsp;polarisation<br>
+:return:&nbsp;kin,&nbsp;kout,&nbsp;ein,&nbsp;eout<br>
+Returned&nbsp;values&nbsp;are&nbsp;[n,3]&nbsp;arrays<br>
+&nbsp;&nbsp;&nbsp;&nbsp;kin&nbsp;:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;incident&nbsp;wavevectors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;kout:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;scattered&nbsp;wavevectors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ein&nbsp;:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;incident&nbsp;polarisation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;eout:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;scattered&nbsp;polarisation<br>
+&nbsp;<br>
+The&nbsp;basis&nbsp;is&nbsp;chosen&nbsp;such&nbsp;that&nbsp;Q&nbsp;defines&nbsp;the&nbsp;scattering&nbsp;plane,&nbsp;sigma&nbsp;and&nbsp;pi&nbsp;directions&nbsp;are&nbsp;normal&nbsp;to&nbsp;this&nbsp;plane.</tt></dd></dl>
+ <dl><dt><a name="-sf_atom"><strong>sf_atom</strong></a>(q, r, scattering_factor=None, occ=None, debyewaller=None, **kwargs)</dt><dd><tt>:param&nbsp;q:&nbsp;array&nbsp;[n,3]&nbsp;reflection&nbsp;positions&nbsp;in&nbsp;A^-1<br>
+:param&nbsp;r:&nbsp;array&nbsp;[m,3]&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;A<br>
+:param&nbsp;scattering_factor:&nbsp;array&nbsp;[n,m]&nbsp;or&nbsp;[n]:&nbsp;radiation&nbsp;dependent&nbsp;scattering&nbsp;factor/&nbsp;form&nbsp;factor,/&nbsp;scattering&nbsp;length<br>
+:param&nbsp;occ:&nbsp;array&nbsp;[m]:&nbsp;occupancy&nbsp;of&nbsp;each&nbsp;atom<br>
+:param&nbsp;debyewaller:&nbsp;array&nbsp;[n,m]:&nbsp;thermal&nbsp;vibration&nbsp;factor&nbsp;of&nbsp;each&nbsp;atom&nbsp;and&nbsp;reflection<br>
+:param&nbsp;kwargs:&nbsp;additional&nbsp;options[*unused]<br>
+:return:&nbsp;complex&nbsp;array&nbsp;[n]</tt></dd></dl>
+ <dl><dt><a name="-sf_magnetic_neutron"><strong>sf_magnetic_neutron</strong></a>(q, r, moment, magnetic_formfactor=None, occ=None, debyewaller=None, **kwargs)</dt><dd><tt>Calculate&nbsp;the&nbsp;magnetic&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;neutron&nbsp;magnetic&nbsp;form&nbsp;factor<br>
+Assumes&nbsp;an&nbsp;unpolarised&nbsp;incident&nbsp;beam.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Reference:&nbsp;G.&nbsp;L.&nbsp;Squires,&nbsp;Introduction&nbsp;to&nbsp;the&nbsp;Theory&nbsp;of&nbsp;Thermal&nbsp;Neutron&nbsp;Scattering&nbsp;(Cambridge&nbsp;University&nbsp;Press,&nbsp;1997).<br>
+:param&nbsp;q:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;reflections&nbsp;in&nbsp;cartesian&nbsp;coordinate&nbsp;system&nbsp;in&nbsp;units&nbsp;of&nbsp;inverse-A<br>
+:param&nbsp;r:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;A<br>
+:param&nbsp;moment:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;moment&nbsp;direction&nbsp;in&nbsp;orthogonal&nbsp;basis<br>
+:param&nbsp;magnetic_formfactor:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;form&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;relection<br>
+:param&nbsp;occ:&nbsp;[m,1]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;occupancies<br>
+:param&nbsp;debyewaller:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;thermal&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;reflection,&nbsp;or&nbsp;False&nbsp;to&nbsp;omit<br>
+:param&nbsp;kwargs:&nbsp;additional&nbsp;options[*unused]<br>
+:return&nbsp;sf:&nbsp;[n]&nbsp;complex&nbsp;array&nbsp;of&nbsp;structure&nbsp;factors</tt></dd></dl>
+ <dl><dt><a name="-sf_magnetic_neutron_polarised"><strong>sf_magnetic_neutron_polarised</strong></a>(q, r, moment, incident_polarisation_vector=(1, 0, 0), magnetic_formfactor=None, occ=None, debyewaller=None, **kwargs)</dt><dd><tt>Calculate&nbsp;the&nbsp;magnetic&nbsp;structure&nbsp;factor&nbsp;for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;neutron&nbsp;magnetic&nbsp;form&nbsp;factor<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Reference:&nbsp;G.&nbsp;L.&nbsp;Squires,&nbsp;Introduction&nbsp;to&nbsp;the&nbsp;Theory&nbsp;of&nbsp;Thermal&nbsp;Neutron&nbsp;Scattering&nbsp;(Cambridge&nbsp;University&nbsp;Press,&nbsp;1997).<br>
+:param&nbsp;q:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;hkl&nbsp;reflections<br>
+:param&nbsp;r:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;r.l.u.<br>
+:param&nbsp;moment:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;moment&nbsp;direction&nbsp;in&nbsp;orthogonal&nbsp;basis<br>
+:param&nbsp;incident_polarisation_vector:&nbsp;[1,3]&nbsp;direction&nbsp;of&nbsp;incident&nbsp;polarisation<br>
+:param&nbsp;magnetic_formfactor:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;form&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;relection<br>
+:param&nbsp;occ:&nbsp;[m,1]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;occupancies<br>
+:param&nbsp;debyewaller:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;thermal&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;reflection,&nbsp;or&nbsp;False&nbsp;to&nbsp;omit<br>
+:param&nbsp;kwargs:&nbsp;additional&nbsp;options[*unused]<br>
+:return&nbsp;sf:&nbsp;[n]&nbsp;complex&nbsp;array&nbsp;of&nbsp;structure&nbsp;factors</tt></dd></dl>
+ <dl><dt><a name="-sf_magnetic_xray"><strong>sf_magnetic_xray</strong></a>(q, r, moment, magnetic_formfactor=None, occ=None, debyewaller=None, **kwargs)</dt><dd><tt>Calculate&nbsp;the&nbsp;non-resonant&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor<br>
+:param&nbsp;q:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;hkl&nbsp;reflections<br>
+:param&nbsp;r:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;r.l.u.<br>
+:param&nbsp;moment:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;moment&nbsp;direction&nbsp;in&nbsp;orthogonal&nbsp;basis<br>
+:param&nbsp;magnetic_formfactor:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;form&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;relection<br>
+:param&nbsp;occ:&nbsp;[m,1]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;occupancies<br>
+:param&nbsp;debyewaller:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;thermal&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;reflection<br>
+:param&nbsp;kwargs:&nbsp;additional&nbsp;options[*unused]<br>
+:return&nbsp;sf:&nbsp;[n]&nbsp;complex&nbsp;array&nbsp;of&nbsp;structure&nbsp;factors<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;f_non-res_mag&nbsp;=&nbsp;i.r0.(hw/mc^2).fD.[.5.L.A&nbsp;+&nbsp;S.B]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;B&nbsp;=&nbsp;e_o&nbsp;X&nbsp;e_i&nbsp;+&nbsp;(k_o&nbsp;X&nbsp;e_o)&nbsp;*&nbsp;k_o.e_i&nbsp;-&nbsp;(k_i&nbsp;X&nbsp;e_i)&nbsp;*&nbsp;k_i.e_o&nbsp;-&nbsp;(k_o&nbsp;X&nbsp;e_o)&nbsp;X&nbsp;(k_i&nbsp;X&nbsp;e_i)<br>
+-&nbsp;ignore&nbsp;orbital&nbsp;moment&nbsp;L<br>
+-&nbsp;fD&nbsp;=&nbsp;magnetic&nbsp;form&nbsp;factor<br>
+-&nbsp;S&nbsp;=&nbsp;spin&nbsp;moment<br>
+-&nbsp;k_i,&nbsp;k_o&nbsp;=&nbsp;wavevector&nbsp;in,&nbsp;out<br>
+-&nbsp;e_i,&nbsp;e_o&nbsp;=&nbsp;polarisation&nbsp;in,&nbsp;out<br>
+From&nbsp;Hill+McMorrow&nbsp;Acta&nbsp;Cryst.&nbsp;1996&nbsp;A52,&nbsp;236-244&nbsp;Equ.&nbsp;(2)<br>
+Book:&nbsp;"X-ray&nbsp;Scattering&nbsp;and&nbsp;Absorption&nbsp;by&nbsp;Magnetic&nbsp;Materials"&nbsp;by&nbsp;Loevesy&nbsp;and&nbsp;Collins.&nbsp;Ch&nbsp;2.&nbsp;Eqn.2.21+1<br>
+No&nbsp;orbital&nbsp;component&nbsp;assumed<br>
+magnetic&nbsp;moments&nbsp;assumed&nbsp;to&nbsp;be&nbsp;in&nbsp;the&nbsp;same&nbsp;reference&nbsp;frame&nbsp;as&nbsp;the&nbsp;polarisation</tt></dd></dl>
+ <dl><dt><a name="-sf_magnetic_xray_beamline"><strong>sf_magnetic_xray_beamline</strong></a>(q, r, moment, energy_kev, magnetic_formfactor=None, occ=None, debyewaller=None, azi_ref_q=(1, 0, 0), psi=0, polarisation='s-p', **kwargs)</dt><dd><tt>Calculate&nbsp;the&nbsp;non-resonant&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor<br>
+:param&nbsp;q:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;hkl&nbsp;reflections<br>
+:param&nbsp;r:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;r.l.u.<br>
+:param&nbsp;moment:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;moment&nbsp;direction&nbsp;in&nbsp;orthogonal&nbsp;basis<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;value&nbsp;of&nbsp;incident&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;magnetic_formfactor:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;form&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;relection<br>
+:param&nbsp;occ:&nbsp;[m,1]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;occupancies<br>
+:param&nbsp;debyewaller:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;thermal&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;reflection<br>
+:param&nbsp;azi_ref_q:&nbsp;[1,3]&nbsp;azimuthal&nbsp;refence,&nbsp;in&nbsp;cartesian&nbsp;basis&nbsp;(Q)<br>
+:param&nbsp;psi:&nbsp;[p]&nbsp;array&nbsp;of&nbsp;azimthal&nbsp;angles&nbsp;-&nbsp;the&nbsp;rotation&nbsp;out&nbsp;of&nbsp;the&nbsp;scattering&nbsp;plane.<br>
+:param&nbsp;polarisation:&nbsp;str&nbsp;definition&nbsp;of&nbsp;the&nbsp;polarisation&nbsp;can&nbsp;be:&nbsp;['ss','sp','ps','pp']&nbsp;with&nbsp;'s'=sigma,&nbsp;'p'=pi<br>
+:param&nbsp;kwargs:&nbsp;additional&nbsp;options[*unused]<br>
+:return&nbsp;sf:&nbsp;[n,&nbsp;p]&nbsp;complex&nbsp;array&nbsp;of&nbsp;structure&nbsp;factors&nbsp;for&nbsp;different&nbsp;reflections&nbsp;and&nbsp;azimuths<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;f_non-res_mag&nbsp;=&nbsp;i.r0.(hw/mc^2).fD.[.5.L.A&nbsp;+&nbsp;S.B]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;B&nbsp;=&nbsp;e_o&nbsp;X&nbsp;e_i&nbsp;+&nbsp;(k_o&nbsp;X&nbsp;e_o)&nbsp;*&nbsp;k_o.e_i&nbsp;-&nbsp;(k_i&nbsp;X&nbsp;e_i)&nbsp;*&nbsp;k_i.e_o&nbsp;-&nbsp;(k_o&nbsp;X&nbsp;e_o)&nbsp;X&nbsp;(k_i&nbsp;X&nbsp;e_i)<br>
+-&nbsp;ignore&nbsp;orbital&nbsp;moment&nbsp;L<br>
+-&nbsp;fD&nbsp;=&nbsp;magnetic&nbsp;form&nbsp;factor<br>
+-&nbsp;S&nbsp;=&nbsp;spin&nbsp;moment<br>
+-&nbsp;k_i,&nbsp;k_o&nbsp;=&nbsp;wavevector&nbsp;in,&nbsp;out<br>
+-&nbsp;e_i,&nbsp;e_o&nbsp;=&nbsp;polarisation&nbsp;in,&nbsp;out<br>
+&nbsp;<br>
+From&nbsp;Hill+McMorrow&nbsp;Acta&nbsp;Cryst.&nbsp;1996&nbsp;A52,&nbsp;236-244&nbsp;Equ.&nbsp;(2)<br>
+Book:&nbsp;"X-ray&nbsp;Scattering&nbsp;and&nbsp;Absorption&nbsp;by&nbsp;Magnetic&nbsp;Materials"&nbsp;by&nbsp;Loevesy&nbsp;and&nbsp;Collins.&nbsp;Ch&nbsp;2.&nbsp;Eqn.2.21+1<br>
+No&nbsp;orbital&nbsp;component&nbsp;assumed<br>
+magnetic&nbsp;moments&nbsp;assumed&nbsp;to&nbsp;be&nbsp;in&nbsp;the&nbsp;same&nbsp;reference&nbsp;frame&nbsp;as&nbsp;the&nbsp;polarisation</tt></dd></dl>
+ <dl><dt><a name="-sf_magnetic_xray_polarised"><strong>sf_magnetic_xray_polarised</strong></a>(q, r, moment, incident_polarisation_vector=(1, 0, 0), magnetic_formfactor=None, occ=None, debyewaller=None, **kwargs)</dt><dd><tt>Calculate&nbsp;the&nbsp;non-resonant&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor<br>
+:param&nbsp;q:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;hkl&nbsp;reflections<br>
+:param&nbsp;r:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;r.l.u.<br>
+:param&nbsp;moment:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;moment&nbsp;direction&nbsp;in&nbsp;orthogonal&nbsp;basis<br>
+:param&nbsp;incident_polarisation_vector:&nbsp;[1,3]&nbsp;direction&nbsp;of&nbsp;incident&nbsp;polarisation<br>
+:param&nbsp;magnetic_formfactor:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;form&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;relection<br>
+:param&nbsp;occ:&nbsp;[m,1]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;occupancies<br>
+:param&nbsp;debyewaller:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;thermal&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;reflection<br>
+:param&nbsp;kwargs:&nbsp;additional&nbsp;options[*unused]<br>
+:return&nbsp;sf:&nbsp;[n]&nbsp;complex&nbsp;array&nbsp;of&nbsp;structure&nbsp;factors<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;f_non-res_mag&nbsp;=&nbsp;i.r0.(hw/mc^2).fD.[.5.L.A&nbsp;+&nbsp;S.B]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;B&nbsp;=&nbsp;e_o&nbsp;X&nbsp;e_i&nbsp;+&nbsp;(k_o&nbsp;X&nbsp;e_o)&nbsp;*&nbsp;k_o.e_i&nbsp;-&nbsp;(k_i&nbsp;X&nbsp;e_i)&nbsp;*&nbsp;k_i.e_o&nbsp;-&nbsp;(k_o&nbsp;X&nbsp;e_o)&nbsp;X&nbsp;(k_i&nbsp;X&nbsp;e_i)<br>
+-&nbsp;ignore&nbsp;orbital&nbsp;moment&nbsp;L<br>
+-&nbsp;fD&nbsp;=&nbsp;magnetic&nbsp;form&nbsp;factor<br>
+-&nbsp;S&nbsp;=&nbsp;spin&nbsp;moment<br>
+-&nbsp;k_i,&nbsp;k_o&nbsp;=&nbsp;wavevector&nbsp;in,&nbsp;out<br>
+-&nbsp;e_i,&nbsp;e_o&nbsp;=&nbsp;polarisation&nbsp;in,&nbsp;out<br>
+From&nbsp;Hill+McMorrow&nbsp;Acta&nbsp;Cryst.&nbsp;1996&nbsp;A52,&nbsp;236-244&nbsp;Equ.&nbsp;(2)<br>
+Book:&nbsp;"X-ray&nbsp;Scattering&nbsp;and&nbsp;Absorption&nbsp;by&nbsp;Magnetic&nbsp;Materials"&nbsp;by&nbsp;Loevesy&nbsp;and&nbsp;Collins.&nbsp;Ch&nbsp;2.&nbsp;Eqn.2.21+1<br>
+No&nbsp;orbital&nbsp;component&nbsp;assumed<br>
+magnetic&nbsp;moments&nbsp;assumed&nbsp;to&nbsp;be&nbsp;in&nbsp;the&nbsp;same&nbsp;reference&nbsp;frame&nbsp;as&nbsp;the&nbsp;polarisation</tt></dd></dl>
+ <dl><dt><a name="-sf_magnetic_xray_resonant"><strong>sf_magnetic_xray_resonant</strong></a>(q, r, moment, energy_kev, occ=None, debyewaller=None, azi_ref_q=(1, 0, 0), psi=0, polarisation='sp', f0=0, f1=1, f2=0, **kwargs)</dt><dd><tt>Calculate&nbsp;the&nbsp;non-resonant&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor<br>
+:param&nbsp;q:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;hkl&nbsp;reflections<br>
+:param&nbsp;r:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;r.l.u.<br>
+:param&nbsp;moment:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;moment&nbsp;direction&nbsp;in&nbsp;orthogonal&nbsp;basis<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;value&nbsp;of&nbsp;incident&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;occ:&nbsp;[m,1]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;occupancies<br>
+:param&nbsp;debyewaller:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;thermal&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;reflection<br>
+:param&nbsp;azi_ref_q:&nbsp;[1,3]&nbsp;azimuthal&nbsp;refence,&nbsp;in&nbsp;cartesian&nbsp;basis&nbsp;(Q)<br>
+:param&nbsp;psi:&nbsp;[p]&nbsp;array&nbsp;of&nbsp;azimthal&nbsp;angles&nbsp;-&nbsp;the&nbsp;rotation&nbsp;out&nbsp;of&nbsp;the&nbsp;scattering&nbsp;plane.<br>
+:param&nbsp;polarisation:&nbsp;str&nbsp;definition&nbsp;of&nbsp;the&nbsp;polarisation&nbsp;can&nbsp;be:&nbsp;['ss','sp','ps','pp']&nbsp;with&nbsp;'s'=sigma,&nbsp;'p'=pi<br>
+:param&nbsp;f0:&nbsp;float&nbsp;Flm&nbsp;value&nbsp;0&nbsp;(charge)<br>
+:param&nbsp;f1:&nbsp;float&nbsp;Flm&nbsp;value&nbsp;1<br>
+:param&nbsp;f2:&nbsp;float&nbsp;Flm&nbsp;value&nbsp;2<br>
+:param&nbsp;kwargs:&nbsp;additional&nbsp;options[*unused]<br>
+:return&nbsp;sf:&nbsp;[n,&nbsp;p]&nbsp;complex&nbsp;array&nbsp;of&nbsp;structure&nbsp;factors&nbsp;for&nbsp;different&nbsp;reflections&nbsp;and&nbsp;azimuths<br>
+&nbsp;<br>
+f_res_mag&nbsp;=&nbsp;[(e'.e)F0&nbsp;-&nbsp;i(e'xe).Z*F1&nbsp;+&nbsp;(e'.Z)*(e.Z)*F2]<br>
+&nbsp;<br>
+From&nbsp;Hill+McMorrow&nbsp;Acta&nbsp;Cryst.&nbsp;1996&nbsp;A52,&nbsp;236-244&nbsp;Equ.&nbsp;(2)<br>
+Book:&nbsp;"X-ray&nbsp;Scattering&nbsp;and&nbsp;Absorption&nbsp;by&nbsp;Magnetic&nbsp;Materials"&nbsp;by&nbsp;Loevesy&nbsp;and&nbsp;Collins.&nbsp;Ch&nbsp;2.&nbsp;Eqn.2.21+1<br>
+No&nbsp;orbital&nbsp;component&nbsp;assumed<br>
+magnetic&nbsp;moments&nbsp;assumed&nbsp;to&nbsp;be&nbsp;in&nbsp;the&nbsp;same&nbsp;reference&nbsp;frame&nbsp;as&nbsp;the&nbsp;polarisation</tt></dd></dl>
+ <dl><dt><a name="-sf_magnetic_xray_resonant_alternate"><strong>sf_magnetic_xray_resonant_alternate</strong></a>(q, r, moment, energy_kev, occ=None, debyewaller=None, polarisation='sp', azi_ref_q=(1, 0, 0), psi=0, f0=0, f1=1, f2=0, **kwargs)</dt><dd><tt>Calculate&nbsp;structure&nbsp;factors&nbsp;using&nbsp;resonant&nbsp;scattering&nbsp;factors&nbsp;in&nbsp;the&nbsp;dipolar&nbsp;approximation<br>
+:param&nbsp;q:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;hkl&nbsp;reflections<br>
+:param&nbsp;r:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;r.l.u.<br>
+:param&nbsp;moment:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;moment&nbsp;direction&nbsp;in&nbsp;orthogonal&nbsp;basis<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;value&nbsp;of&nbsp;incident&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;occ:&nbsp;[m,1]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;occupancies<br>
+:param&nbsp;debyewaller:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;thermal&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;reflection<br>
+:param&nbsp;azi_ref_q:&nbsp;[1,3]&nbsp;azimuthal&nbsp;refence,&nbsp;in&nbsp;cartesian&nbsp;basis&nbsp;(Q)<br>
+:param&nbsp;psi:&nbsp;[p]&nbsp;array&nbsp;of&nbsp;azimthal&nbsp;angles&nbsp;-&nbsp;the&nbsp;rotation&nbsp;out&nbsp;of&nbsp;the&nbsp;scattering&nbsp;plane.<br>
+:param&nbsp;polarisation:&nbsp;str&nbsp;definition&nbsp;of&nbsp;the&nbsp;polarisation&nbsp;can&nbsp;be:&nbsp;['ss','sp','ps','pp']&nbsp;with&nbsp;'s'=sigma,&nbsp;'p'=pi<br>
+:param&nbsp;f0:&nbsp;float&nbsp;Flm&nbsp;value&nbsp;0&nbsp;(charge)<br>
+:param&nbsp;f1:&nbsp;float&nbsp;Flm&nbsp;value&nbsp;1<br>
+:param&nbsp;f2:&nbsp;float&nbsp;Flm&nbsp;value&nbsp;2<br>
+:param&nbsp;kwargs:&nbsp;additional&nbsp;options[*unused]<br>
+:return&nbsp;sf:&nbsp;[n,&nbsp;p]&nbsp;complex&nbsp;array&nbsp;of&nbsp;structure&nbsp;factors&nbsp;for&nbsp;different&nbsp;reflections&nbsp;and&nbsp;azimuths<br>
+&nbsp;<br>
+&nbsp;&nbsp;I&nbsp;=&nbsp;Scattering.xray_resonant(HKL,energy_kev,polarisation,F0,F1,F2)<br>
+Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp;HKL,&nbsp;giving&nbsp;the&nbsp;real&nbsp;intensity&nbsp;at&nbsp;each&nbsp;reflection.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;f0/1/2&nbsp;=&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth<br>
+&nbsp;&nbsp;&nbsp;&nbsp;psi&nbsp;=&nbsp;azimuthal&nbsp;angle&nbsp;defining&nbsp;the&nbsp;scattering&nbsp;plane<br>
+&nbsp;<br>
+Uses&nbsp;the&nbsp;E1E1&nbsp;resonant&nbsp;x-ray&nbsp;scattering&nbsp;amplitude:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fxr_n&nbsp;=&nbsp;(ef.ei)*f0&nbsp;-i(ef&nbsp;X&nbsp;ei).z_n*f1&nbsp;+&nbsp;(ef.z_n)(ei.z_n)f2<br>
+&nbsp;<br>
+Where&nbsp;ei&nbsp;and&nbsp;ef&nbsp;are&nbsp;the&nbsp;initial&nbsp;and&nbsp;final&nbsp;polarisation&nbsp;states,&nbsp;respectively,<br>
+and&nbsp;z_n&nbsp;is&nbsp;a&nbsp;unit&nbsp;vector&nbsp;in&nbsp;the&nbsp;direction&nbsp;of&nbsp;the&nbsp;magnetic&nbsp;moment&nbsp;of&nbsp;the&nbsp;nth&nbsp;ion.<br>
+The&nbsp;polarisation&nbsp;states&nbsp;are&nbsp;determined&nbsp;to&nbsp;be&nbsp;one&nbsp;of&nbsp;the&nbsp;natural&nbsp;synchrotron<br>
+states,&nbsp;where&nbsp;sigma&nbsp;(s)&nbsp;is&nbsp;perpendicular&nbsp;to&nbsp;the&nbsp;scattering&nbsp;plane&nbsp;and&nbsp;pi&nbsp;(p)&nbsp;is<br>
+parallel&nbsp;to&nbsp;it.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;s-s&nbsp;&nbsp;s-p&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;p-s&nbsp;&nbsp;p-p&nbsp;)<br>
+&nbsp;<br>
+From&nbsp;Hill+McMorrow&nbsp;Acta&nbsp;Cryst.&nbsp;1996&nbsp;A52,&nbsp;236-244&nbsp;Equ.&nbsp;(15)</tt></dd></dl>
+ <dl><dt><a name="-sf_xray_dispersion"><strong>sf_xray_dispersion</strong></a>(q, r, scattering_factor, energy_kev=None, occ=None, debyewaller=None, **kwargs)</dt><dd><tt>Calculate&nbsp;the&nbsp;resonant&nbsp;x-ray&nbsp;structure&nbsp;factor<br>
+:param&nbsp;q:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;hkl&nbsp;reflections<br>
+:param&nbsp;r:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;r.l.u.<br>
+:param&nbsp;scattering_factor:&nbsp;array&nbsp;[n,m,e]:&nbsp;energy&nbsp;dependent&nbsp;complex&nbsp;atomic&nbsp;form&nbsp;factor<br>
+:param&nbsp;energy_kev:&nbsp;[e]&nbsp;array&nbsp;of&nbsp;incident&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;occ:&nbsp;[m,1]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;occupancies<br>
+:param&nbsp;debyewaller:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;thermal&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;reflection<br>
+:param&nbsp;kwargs:&nbsp;additional&nbsp;options[*unused]<br>
+:return&nbsp;sf:&nbsp;[n,&nbsp;e]&nbsp;complex&nbsp;array&nbsp;of&nbsp;structure&nbsp;factors</tt></dd></dl>
+ <dl><dt><a name="-structure_factor"><strong>structure_factor</strong></a>(scattering_factor, occupancy, debyewaller, phase)</dt><dd><tt>Return&nbsp;the&nbsp;complex&nbsp;structure&nbsp;factor:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;structure_factor&nbsp;=&nbsp;sum_i(&nbsp;f.occ.dw.phase&nbsp;)<br>
+:param&nbsp;scattering_factor:&nbsp;array&nbsp;[n,m]&nbsp;or&nbsp;[n]:&nbsp;radiation&nbsp;dependent&nbsp;scattering&nbsp;factor/&nbsp;form&nbsp;factor,/&nbsp;scattering&nbsp;length<br>
+:param&nbsp;occupancy:&nbsp;array&nbsp;[m]:&nbsp;occupancy&nbsp;of&nbsp;each&nbsp;atom<br>
+:param&nbsp;debyewaller:&nbsp;array&nbsp;[n,m]:&nbsp;thermal&nbsp;vibration&nbsp;factor&nbsp;of&nbsp;each&nbsp;atom&nbsp;and&nbsp;reflection<br>
+:param&nbsp;phase:&nbsp;complex&nbsp;array&nbsp;[n,m]:&nbsp;complex&nbsp;phase&nbsp;factor&nbsp;exp(-i.Q.R)<br>
+:return:&nbsp;complex&nbsp;array&nbsp;[n]</tt></dd></dl>
+ <dl><dt><a name="-xray_resonant_scattering_factor"><strong>xray_resonant_scattering_factor</strong></a>(q, moment, energy_kev, polarisation='sp', flm=(1, 1, 1), psi=0, azi_ref_q=(1, 0, 0))</dt><dd><tt>Calcualte&nbsp;fxres,&nbsp;the&nbsp;resonant&nbsp;x-ray&nbsp;scattering&nbsp;factor<br>
+&nbsp;&nbsp;fxres&nbsp;=&nbsp;Scattering.<a href="#-xray_resonant_scattering_factor">xray_resonant_scattering_factor</a>(HKL,energy_kev,polarisation,flm,azim_zero,psi)<br>
+energy_kev&nbsp;=&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+&nbsp;&nbsp;&nbsp;&nbsp;polarisation&nbsp;=&nbsp;x-ray&nbsp;polarisation:&nbsp;'ss',{'sp'},'ps','pp'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;flm&nbsp;=&nbsp;(f0,&nbsp;f1,&nbsp;f2)&nbsp;Resonance&nbsp;factor&nbsp;Flm,&nbsp;f0/1/2&nbsp;should&nbsp;be&nbsp;0&nbsp;or&nbsp;1&nbsp;each<br>
+&nbsp;&nbsp;&nbsp;&nbsp;azim_zero&nbsp;=&nbsp;[h,k,l]&nbsp;vector&nbsp;parallel&nbsp;to&nbsp;the&nbsp;origin&nbsp;of&nbsp;the&nbsp;azimuth&nbsp;{[1,0,0]}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;psi&nbsp;=&nbsp;azimuthal&nbsp;angle&nbsp;defining&nbsp;the&nbsp;scattering&nbsp;plane&nbsp;{0}<br>
+&nbsp;<br>
+:param&nbsp;q:&nbsp;[n*3]&nbsp;array&nbsp;of&nbsp;reflection&nbsp;coordinates&nbsp;in&nbsp;cartesian&nbsp;basis&nbsp;(Q)<br>
+:param&nbsp;moment:&nbsp;[mx3]&nbsp;array&nbsp;of&nbsp;magnetic&nbsp;moments&nbsp;in&nbsp;cartesian&nbsp;basis<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;polarisation:&nbsp;polarisation&nbsp;condition:&nbsp;'sp',&nbsp;'ss',&nbsp;'ps',&nbsp;'pp'.&nbsp;s=sigma,&nbsp;p=pi<br>
+:param&nbsp;flm:&nbsp;(f0,&nbsp;f1,&nbsp;f2)&nbsp;Resonance&nbsp;factor&nbsp;Flm,&nbsp;f0/1/2&nbsp;should&nbsp;be&nbsp;0&nbsp;or&nbsp;1&nbsp;each<br>
+:param&nbsp;azi_ref_q:&nbsp;azimuthal&nbsp;refence,&nbsp;in&nbsp;cartesian&nbsp;basis&nbsp;(Q)<br>
+:param&nbsp;psi:&nbsp;float,&nbsp;azimuthal&nbsp;angle<br>
+:return:&nbsp;fxres&nbsp;[n*1]&nbsp;array&nbsp;of&nbsp;resonant&nbsp;x-ray&nbsp;scattering&nbsp;factors<br>
+&nbsp;<br>
+Uses&nbsp;the&nbsp;E1E1&nbsp;resonant&nbsp;x-ray&nbsp;scattering&nbsp;amplitude:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fxr_n&nbsp;=&nbsp;(ef.ei)*F0&nbsp;-i(ef&nbsp;X&nbsp;ei).z_n*F1&nbsp;+&nbsp;(ef.z_n)(ei.z_n)F2<br>
+&nbsp;<br>
+Where&nbsp;ei&nbsp;and&nbsp;ef&nbsp;are&nbsp;the&nbsp;initial&nbsp;and&nbsp;final&nbsp;polarisation&nbsp;states,&nbsp;respectively,<br>
+and&nbsp;z_n&nbsp;is&nbsp;a&nbsp;unit&nbsp;vector&nbsp;in&nbsp;the&nbsp;direction&nbsp;of&nbsp;the&nbsp;magnetic&nbsp;moment&nbsp;of&nbsp;the&nbsp;nth&nbsp;ion.<br>
+The&nbsp;polarisation&nbsp;states&nbsp;are&nbsp;determined&nbsp;to&nbsp;be&nbsp;one&nbsp;of&nbsp;the&nbsp;natural&nbsp;synchrotron<br>
+states,&nbsp;where&nbsp;sigma&nbsp;(s)&nbsp;is&nbsp;perpendicular&nbsp;to&nbsp;the&nbsp;scattering&nbsp;plane&nbsp;and&nbsp;pi&nbsp;(p)&nbsp;is<br>
+parallel&nbsp;to&nbsp;it.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;s-s&nbsp;&nbsp;s-p&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;p-s&nbsp;&nbsp;p-p&nbsp;)<br>
+&nbsp;<br>
+From&nbsp;Hill+McMorrow&nbsp;Acta&nbsp;Cryst.&nbsp;1996&nbsp;A52,&nbsp;236-244&nbsp;Equ.&nbsp;(15)</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>DEBUG_MODE</strong> = False<br>
+<strong>MAX_QR_ARRAY</strong> = 10000000.0<br>
+<strong>SCATTERING_TYPES</strong> = {'neutron': ['neutron', 'n', 'nuclear'], 'neutron magnetic': ['neutron magnetic', 'magnetic neutron', 'magnetic'], 'xray': ['xray', 'x', 'x-ray', 'thomson', 'charge'], 'xray dispersion': ['dispersion', 'xray dispersion'], 'xray fast': ['xray fast', 'xfast'], 'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'], 'xray resonant': ['xray resonant', 'resonant', 'resonant xray', 'rxs']}<br>
+<strong>TIME_REPORT</strong> = True</td></tr></table>
+</body></html>

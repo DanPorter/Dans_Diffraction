@@ -1,7 +1,7 @@
 # Dans_Diffaction
 Reads crystallographic cif files and simulates diffraction, among other things.
 
-**Version 2.0**
+**Version 2.1**
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3859501.svg)](https://doi.org/10.5281/zenodo.3859501)
 
@@ -61,7 +61,7 @@ Dans_Diffraction is best run within an interactive python environment:
 $ ipython -i -m Dans_Diffraction
 ```
 
-Dans_Diffraction can also be run in scripts as an import, example scripts are provided in the [Examples](Examples) folder.
+Dans_Diffraction can also be run in scripts as an import, example scripts are provided in the [Examples](https://github.com/DanPorter/Dans_Diffraction/blob/master/Examples) folder.
 ### Read CIF file
 ```python
 import Dans_Diffraction as dif
@@ -87,7 +87,7 @@ xtl.Structure.addatom(idx=0, u=0, v=0, w=0, type='Co', label='Co1')
 xtl.Plot.plot_crystal() # 3D plot
 xtl.Plot.plot_layers() # 2D plot for layered materials
 ```
-![3D Plot](Screenshots/3Dstructrue_Ca3CoMnO6.png)
+![3D Plot](https://github.com/DanPorter/Dans_Diffraction/blob/master/Screenshots/3Dstructrue_Ca3CoMnO6.png?raw=true)
 
 
 ### Alter crystal symmetry
@@ -122,8 +122,8 @@ xtl.print_all_refelctions() # Returns formated string of all allowed reflections
 xtl.Plot.simulate_powder() # Powder pattern
 xtl.Plot.simulate_hk0() # Reciprocal space plane
 ```
-![Powder Pattern](Screenshots/powder_diamond.png)
-![HK0 Simulation](Screenshots/supercell_diffraction.png)
+![Powder Pattern](https://github.com/DanPorter/Dans_Diffraction/blob/master/Screenshots/powder_diamond.png?raw=true)
+![HK0 Simulation](https://github.com/DanPorter/Dans_Diffraction/blob/master/Screenshots/supercell_diffraction.png?raw=true)
 
 
 ### Magnetic Structrues
@@ -199,11 +199,11 @@ Simulations of multiple scattering at different azimuths for a particular energy
 azimuth, intensity = xtl.Scatter.ms_azimuth([h,k,l], energy_kev=8)
 ```
 
-![Multiple Scattering](Screenshots/ms_azimuth_silicon.png)
+![Multiple Scattering](https://github.com/DanPorter/Dans_Diffraction/blob/master/Screenshots/ms_azimuth_silicon.png?raw=true)
 
 
 ### Graphical Front End
-![All GUI elements](Screenshots/GUI_all.png)
+![All GUI elements](https://github.com/DanPorter/Dans_Diffraction/blob/master/Screenshots/GUI_all.png?raw=true)
 
 Start a new GUI, then select a cif file:
 ```text
@@ -236,8 +236,8 @@ See class documentation for more information.
 
 Once activated, FDMNES GUI elements become available from the main window, emulating functionality of the classes.
 
-![FDMNES Run](Screenshots/GUI_08.png)
-![FDMNES Analyse](Screenshots/GUI_09.png)
+![FDMNES Run](https://github.com/DanPorter/Dans_Diffraction/blob/master/Screenshots/GUI_08.png?raw=true)
+![FDMNES Analyse](https://github.com/DanPorter/Dans_Diffraction/blob/master/Screenshots/GUI_09.png?raw=true)
 
 
 -----------------------------------------------------------------------------
@@ -261,9 +261,11 @@ Files in this package covered by this licence:
 * classes_plotting.py
 * classes_properties.py
 * classes_multicrystal.py
+* classes_orientation.py
 * classes_orbitals.py
 * functions_general.py
 * functions_plotting.py
+* functions_scattering.py
 * functions_crystallography.py
 * tkgui/*.py
 
