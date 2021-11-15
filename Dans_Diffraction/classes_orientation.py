@@ -87,6 +87,23 @@ class Orientation:
         """Set orientation matrix from directions of crystal axes"""
         self.umatrix = fc.umatrix(a_axis, b_axis, c_axis)
 
+    def random_orientation(self, a_axis=None, b_axis=None, c_axis=None):
+        """Set a random orientation matrix"""
+        ax1 = np.random.rand(3)
+        try:
+            if a_axis is not None:
+                self.umatrix = fc.umatrix(a_axis=a_axis, c_axis=ax1)
+            elif b_axis is not None:
+                self.umatrix = fc.umatrix(a_axis=ax1, b_axis=b_axis)
+            elif c_axis is not None:
+                self.umatrix = fc.umatrix(a_axis=ax1, c_axis=c_axis)
+            else:
+                ax2 = np.random.rand(3)
+                self.umatrix = fc.umatrix(a_axis=ax1, b_axis=ax2)
+        except Exception:
+            # Catch parallel vectors
+            self.random_orientation(a_axis, b_axis, c_axis)
+
     def set_r(self, rotation):
         """Set rotation matrix in diffractometer frame"""
         self.rotation = np.asarray(rotation, dtype=float).reshape(3, 3)
@@ -103,9 +120,29 @@ class Orientation:
         """Set lab transformation matrix for beamline I16 at Diamond Light Source"""
         self.set_lab([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
 
+    def clear(self):
+        """Clear orientation"""
+        self.umatrix = np.eye(3)
+        self.rotation = np.eye(3)
+        self.labframe = np.eye(3)
+
     def vector(self, vec):
         """Return vector transformed by orientation, rotation and lab transformation"""
         return fc.labvector(vec, self.umatrix, self.rotation, self.labframe)
+
+    def diff6circle(self, delta=0, gamma=0, energy_kev=None, wavelength=1.0):
+        """
+        Calcualte wavevector in diffractometer axis using detector angles
+        :param delta: float angle in degrees in vertical direction (about diff-z)
+        :param gamma: float angle in degrees in horizontal direction (about diff-x)
+        :param energy_kev: float energy in KeV
+        :param wavelength: float wavelength in A
+        :param lab: [3*3] lab transformation matrix
+        :return: q[1*3], ki[1*3], kf[1*3]
+        """
+        q = fc.diff6circleq(delta, gamma, energy_kev, wavelength, lab=self.labframe)
+        ki, kf = fc.diff6circlek(delta, gamma, energy_kev, wavelength, lab=self.labframe)
+        return q, ki, kf
 
     def __call__(self, vec):
         return self.vector(vec)
@@ -207,7 +244,7 @@ class CrystalOrientation:
 
     def ubmatrix(self):
         """Return UB matrix from Busing & Levy in the diffractometer frame"""
-        return fc.ubmatrix(self._uv(), self.umatrix)
+        return fc.ubmatrix(self._uv(), self.orientation.umatrix)
 
     def realspace(self, uvw):
         """Generate vector in real space from uvw = [u*a, v*b, w*c]"""
@@ -222,4 +259,21 @@ class CrystalOrientation:
         uvs = self._uvstar()
         q = np.dot(hkl, uvs)
         return self.orientation(q)
+
+    def diff6circle2hkl(self, phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0, energy_kev=None, wavelength=1.0):
+        """
+        Return [h,k,l] position of diffractometer axes at given energy
+        :param phi: float sample angle in degrees
+        :param chi: float sample angle in degrees
+        :param eta: float sample angle in degrees
+        :param mu: float sample angle in degrees
+        :param delta: float detector angle in degrees
+        :param gamma: float detector angle in degrees
+        :param energy_kev: float energy in KeV
+        :param wavelength: float wavelength in A
+        :return: [h,k,l]
+        """
+        ub = self.ubmatrix()
+        lab = self.orientation.labframe
+        return fc.diff6circle2hkl(ub, phi, chi, eta, mu, delta, gamma, energy_kev, wavelength, lab)
 

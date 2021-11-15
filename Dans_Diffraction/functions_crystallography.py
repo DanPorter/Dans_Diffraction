@@ -12,7 +12,7 @@ Usage:
     - from Dans_Diffraction import functions_crystallography as fc
 
 Version 3.7
-Last updated: 27/09/21
+Last updated: 15/11/21
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -37,7 +37,7 @@ Version History:
 26/01/21 3.4    Added xray attenuation, transmission and refractive index
 31/03/21 3.5    Added point groups, gen_sym_unique
 10/06/21 3.6    Corrected mistake in DebyeWaller function. Added x-ray scattering factors from Waasmaier and Kirfel
-27/09/21 3.7    Added diffractometer orientation commands from Busing & Levy, H. You
+15/11/21 3.7    Added diffractometer orientation commands from Busing & Levy, H. You
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -1982,10 +1982,13 @@ def umatrix(a_axis=None, b_axis=None, c_axis=None):
     :param c_axis: direction of c in the diffractometer frame
     :return: [3*3] array
     """
-    a_axis = np.cross(b_axis, c_axis) if a_axis is None else fg.norm(a_axis)
-    b_axis = np.cross(c_axis, a_axis) if b_axis is None else fg.norm(b_axis)
-    c_axis = np.cross(a_axis, b_axis) if c_axis is None else fg.norm(c_axis)
-    return np.array([a_axis, b_axis, c_axis], dtype=float)
+    a_axis = fg.norm(np.cross(b_axis, c_axis)) if a_axis is None else fg.norm(a_axis)
+    b_axis = fg.norm(np.cross(c_axis, a_axis)) if b_axis is None else fg.norm(b_axis)
+    c_axis = fg.norm(np.cross(a_axis, b_axis)) if c_axis is None else fg.norm(c_axis)
+    #return np.array([a_axis, b_axis, c_axis], dtype=float)
+    if np.abs(np.dot(c_axis, a_axis)) > 0.99:
+        raise Exception('Axes must not be parallel')
+    return fg.normal_basis(c_axis, a_axis)
 
 
 def ubmatrix(uv, u):
@@ -2156,25 +2159,29 @@ def diff6circlek(delta, gamma, energy_kev=None, wavelength=1.0, lab=None):
     return ki, kf
 
 
-def diff6circle2hkl(Qdiff, UV, U=None, R=None):
+def diff6circle2hkl(ub, phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0, energy_kev=None, wavelength=1.0, lab=None):
     """
-    Calculate (h,k,l) position from
-    :param UV: [3*3] Unit-vector matrix (see latpar2ub_rot)
-    :param delta: float angle in degrees in vertical direction (about diff-z)
-    :param gamma: float angle in degrees in horizontal direction (about diff-x)
-    :param U: [3*3] oritenation matrix (see umatrix)
-    :param R: [3x3] rotation matrix (see diffractometer_rotation)
-    :return:
+    Return [h,k,l] position of diffractometer axes with given UB and energy
+    :param ub: [3*3] array UB orientation matrix following Busing & Levy
+    :param phi: float sample angle in degrees
+    :param chi: float sample angle in degrees
+    :param eta: float sample angle in degrees
+    :param mu: float sample angle in degrees
+    :param delta: float detector angle in degrees
+    :param gamma: float detector angle in degrees
+    :param energy_kev: float energy in KeV
+    :param wavelength: float wavelength in A
+    :param lab: [3*3] lab transformation matrix
+    :return: [h,k,l]
     """
-    if U is None:
-        U = np.eye(3)
-    if R is None:
-        R = np.eye(3)
-    B = Bmatrix(UV)
-    invR = np.linalg.inv(R)
-    hphi = np.dot(invR, np.transpose(Qdiff))
-    invUB = np.linalg.inv(np.dot(U, B))
-    return np.dot(invUB, hphi).T
+    q = diff6circleq(delta, gamma, energy_kev, wavelength, lab)  # You Ql (12)
+    z = diffractometer_rotation(phi, chi, eta, mu)  # You Z (13)
+
+    inv_ub = np.linalg.inv(ub)
+    inv_z = np.linalg.inv(z)
+
+    hphi = np.dot(inv_z, q)
+    return np.dot(inv_ub, hphi).T
 
 
 def maxHKL(Qmax, UV):
@@ -2943,6 +2950,13 @@ def energy2wave(energy_kev):
     lam = fg.h * fg.c / E
     wavelength = lam / fg.A
     return wavelength
+
+
+def wavevector(energy_kev=None, wavelength=None):
+    """Return wavevector = 2pi/lambda"""
+    if wavelength is None:
+        wavelength = energy2wave(energy_kev)
+    return 2 * np.pi / wavelength
 
 
 def biso2uiso(biso):

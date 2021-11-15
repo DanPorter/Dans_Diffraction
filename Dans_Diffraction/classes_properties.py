@@ -574,9 +574,10 @@ class Properties:
         out += self.xtl.Cell.info()
 
         if energy_kev is not None:
-            out += '\nEnergy = %s\n' % energy_kev
+            out += '\n    Energy = %7.4f keV\n' % energy_kev
+            out += 'Wavelength = %6.3f A\n' % fc.energy2wave(energy_kev)
             # Xray edges
-            out += '  Near X-Ray Edges:\n'
+            out += '\nNear X-Ray Edges:\n'
             for edge_str, edge_en in zip(*self.xray_edges()):
                 if abs(edge_en - energy_kev) < 1:
                     out += '    %5s : %7.4f keV\n' % (edge_str, edge_en)

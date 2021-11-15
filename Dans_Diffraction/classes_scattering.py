@@ -1886,6 +1886,26 @@ class Scattering:
         outstr+= 'Reflections: %1.0f\n'%count
         return outstr
 
+    def diff6circle_intensity(self, phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0,
+                              energy_kev=None, wavelength=1.0, fwhm=0.5):
+        """
+        Return the closest hkl and intensity factor
+        :param phi: float sample angle in degrees
+        :param chi: float sample angle in degrees
+        :param eta: float sample angle in degrees
+        :param mu: float sample angle in degrees
+        :param delta: float detector angle in degrees
+        :param gamma: float detector angle in degrees
+        :param energy_kev: float energy in KeV
+        :param wavelength: float wavelength in A
+        :param fwhm: float peak width in A-1
+        :return: [h,k,l], If
+        """
+        hkl, factor = self.xtl.Cell.diff6circle_match(phi, chi, eta, mu, delta, gamma, energy_kev, wavelength, fwhm)
+        #self.setup_scatter(energy_kev=energy_kev, wavelength_a=wavelength)
+        inten = self.intensity(hkl, energy_kev=energy_kev)
+        return inten * factor
+
     def multiple_scattering(self, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], numsteps=60,
                             full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False):
         """

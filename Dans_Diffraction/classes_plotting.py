@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9.3
-Last updated: 15/02/21
+Version 1.9.5
+Last updated: 15/11/21
 
 Version History:
 18/08/17 0.1    Program created
@@ -29,6 +29,8 @@ Version History:
 26/11/20 1.9.1  Added layers input to plot_layers
 21/01/21 1.9.2  Added plot_xray_resonance
 15/02/21 1.9.3  Added axis_reciprocal_lattice_points/lines/vectors
+11/10/21 1.9.4  Centered crystal in plot_crystal
+15/11/21 1.9.5  Added plot_diffractometer_reciprocal_space
 
 @author: DGPorter
 """
@@ -42,7 +44,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.9.3'
+__version__ = '1.9.5'
 
 
 class Plotting:
@@ -80,6 +82,8 @@ class Plotting:
         
         # Get atomic positions
         R = self.xtl.Cell.calculateR(uvw)
+        cen = np.mean(R, axis=0)
+        R = R - cen
         #I = np.all(np.logical_and(uvw<1+tol, uvw>0-tol, occ>0.2),1)
         I = np.all(np.hstack([uvw<(1+tol),uvw>(0-tol),occ.reshape([-1,1])>0.2]),1)
         
@@ -95,26 +99,26 @@ class Plotting:
             # don't plot unoccupied positions
             tot_occ = np.array([occ[m] for m in range(len(R)) if invidx[m] == n])
             if sum(tot_occ) == 0: continue
-            
-            xyz = np.array([R[m,:] for m in range(len(R)) if invidx[m] == n])
+
+            xyz = np.array([R[m, :] for m in range(len(R)) if invidx[m] == n])
             iii = np.array([I[m] for m in range(len(R)) if invidx[m] == n])
-            col = np.tile(colors[n], (len(xyz[iii,:]),1) )
-            ax.scatter(xyz[iii,0], xyz[iii,1], xyz[iii,2], s=2*sizes[n], c=col, label=labels[n], cmap=colors)
+            col = np.tile(colors[n], (len(xyz[iii, :]), 1))
+            ax.scatter(xyz[iii, 0], xyz[iii, 1], xyz[iii, 2], s=2 * sizes[n], c=col, label=labels[n], cmap=colors)
             
             #mxyz = np.array([mxmymz[m,:] for m in range(len(R)) if invidx[m] == n])
             
             for m in range(len(R)): 
                 if invidx[m] == n and I[m]:
-                    xyz = R[m,:]
-                    vec = V[m,:]
+                    xyz = R[m, :]
+                    vec = V[m, :]
                     if fg.mag(vec) < 0.1: continue
-                    vx,vy,vz = np.asarray([xyz - vec/2, xyz + vec/2]).T
-                    fp.plot_arrow(vx,vy,vz,col='r',arrow_size=20,width=3)
+                    vx, vy, vz = np.asarray([xyz - vec / 2, xyz + vec / 2]).T
+                    fp.plot_arrow(vx, vy, vz, col='r', arrow_size=20, width=3)
         
         # Labels
         if show_labels:
             uvw_st, type_st, label_st, occ_st, uiso_st, mxmymz_st = self.xtl.Structure.get()
-            R_st = self.xtl.Cell.calculateR(uvw_st)
+            R_st = self.xtl.Cell.calculateR(uvw_st) - cen
             for n in range(len(R_st)):
                 ax.text(R_st[n, 0], R_st[n, 1], R_st[n, 2], '%2d: %s' % (n, label_st[n]), fontsize=10)
         
@@ -122,15 +126,15 @@ class Plotting:
         uvw = np.array([[0., 0, 0], [1, 0, 0], [1, 0, 1], [1, 1, 1], [1, 1, 0], [0, 1, 0], [0, 1, 1],
                         [0, 0, 1], [1, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1], [0, 1, 1], [0, 1, 0], [0, 0, 0],
                         [0, 0, 1]])
-        bpos = np.dot(uvw, self.xtl.Cell.UV())
+        bpos = self.xtl.Cell.calculateR(uvw) - cen
         ax.plot(bpos[:, 0], bpos[:, 1], bpos[:, 2], c='k')  # cell box
         fp.plot_arrow(bpos[[0, 1], 0], bpos[[0, 1], 1], bpos[[0, 1], 2], col='r', width=4)  # a
         fp.plot_arrow(bpos[[0, 5], 0], bpos[[0, 5], 1], bpos[[0, 5], 2], col='g', width=4)  # b
         fp.plot_arrow(bpos[[0, 7], 0], bpos[[0, 7], 1], bpos[[0, 7], 2], col='b', width=4)  # c
         lim = np.max(self.xtl.Cell.lp()[:3])
-        ax.set_xlim(-lim / 10, lim)
-        ax.set_ylim(-lim / 10, lim)
-        ax.set_zlim(-lim / 10, lim)
+        ax.set_xlim(-lim/2, lim/2)
+        ax.set_ylim(-lim/2, lim/2)
+        ax.set_zlim(-lim/2, lim/2)
         # ax.axis('equal')
         ax.set_axis_off()
         
@@ -697,7 +701,46 @@ class Plotting:
         
         ttl = '%s\nE = %1.3f keV' % (self.xtl.name,energy_kev)
         fp.labels(ttl)
-    
+
+    def plot_diffractometer_reciprocal_space(self, energy_kev, delta=0, gamma=0):
+        """
+        Plot diffractometer angles using orientation
+        :param energy_kev:
+        :param delta:
+        :param gamma:
+        :return: None
+        """
+        uv = self.xtl.Cell.UV()
+        uvstar = fc.RcSp(uv)
+        maxhkl = fc.maxHKL(2, uvstar)
+        hkl = fc.genHKL(*maxhkl)
+        qdet, ki, kf = self.xtl.Cell.diff6circle(delta, gamma, energy_kev=energy_kev)
+        qlab = self.xtl.Cell.calculateQ(hkl)
+        astar = self.xtl.Cell.calculateQ([1, 0, 0])[0]
+        bstar = self.xtl.Cell.calculateQ([0, 1, 0])[0]
+        cstar = self.xtl.Cell.calculateQ([0, 0, 1])[0]
+
+        fig = plt.figure(figsize=fp.FIGURE_SIZE, dpi=fp.FIGURE_DPI)
+        ax = fig.add_subplot(111, projection='3d')
+
+        def pltvec(vec, *args, **kwargs):
+            vec = np.reshape(vec, (-1, 3))
+            return plt.plot(vec[:, 1], vec[:, 2], vec[:, 0], *args, **kwargs)
+
+        pltvec(qlab, 'r+', ms=12, label='hkl')
+        pltvec([-ki, [0, 0, 0], kf, [0, 0, 0], qdet], 'k-', lw=5, label='q = kf - ki')
+        pltvec([[0, 0, 0], qdet], 'm-', lw=5, label='q = kf - ki')
+        pltvec([[0, 0, 0], astar], 'b-', lw=5, label='astar')
+        pltvec([[0, 0, 0], bstar], 'g-', lw=5, label='bstar')
+        pltvec([[0, 0, 0], cstar], 'y-', lw=5, label='cstar')
+        fp.labels(None, 'Y', 'Z', 'X', legend=True)
+        ax.set_xlim([2, -2])
+        ax.set_ylim([2, -2])
+        ax.set_zlim([-2, 2])
+        # ax.invert_xaxis()
+        # ax.invert_yaxis()
+        plt.show()
+
     def plot_3Dlattice(self,q_max=4.0,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],cut_width=0.05):
         """
         Plot lattice points in 3D

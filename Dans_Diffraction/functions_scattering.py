@@ -160,13 +160,12 @@ def sf_atom(q, r, scattering_factor=None, occ=None, debyewaller=None, **kwargs):
     return structure_factor(scattering_factor, occ, debyewaller, phase)
 
 
-def sf_xray_dispersion(q, r, scattering_factor, energy_kev=None, occ=None, debyewaller=None, **kwargs):
+def sf_xray_dispersion(q, r, scattering_factor, occ=None, debyewaller=None, **kwargs):
     """
     Calculate the resonant x-ray structure factor
     :param q: [n,3] array of hkl reflections
     :param r: [m,3] array of atomic positions in r.l.u.
     :param scattering_factor: array [n,m,e]: energy dependent complex atomic form factor
-    :param energy_kev: [e] array of incident x-ray energy in keV
     :param occ: [m,1] array of atomic occupancies
     :param debyewaller: [n,m] array of thermal factors for each atom and reflection
     :param kwargs: additional options[*unused]
@@ -793,7 +792,7 @@ def scatteringvectors(q, energy_kev, azi_ref_q=(1, 0, 0), psi=0, polarisation='s
 
 
 ########################################################################################################################
-# ----------------------------------------  ScatteringTypes Class  --------------------------------------------------- #
+# ----------------------------------------  ScatteringTypes  --------------------------------------------------------- #
 ########################################################################################################################
 
 

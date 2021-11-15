@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.1.0
-Last updated: 27/09/21
+Version 2.1.1
+Last updated: 15/11/21
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -60,6 +60,7 @@ Version History:
 09/07/21 1.9.9  Added new scattering factors to scattering factor settings
 20/08/21 2.0.0  Added functions_scattering module with updated, more consistent scattering formula
 27/09/21 2.1.0  Added classes_orientation and diffractometer orientation functions
+15/11/21 2.1.1  Updated Plot.plot_crystal, added additional orientation functions
 
 -----------------------------------------------------------------------------
    Copyright 2020 Diamond Light Source Ltd.
@@ -113,8 +114,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '2.1.0'
-__date__ = '27/09/21'
+__version__ = '2.1.1'
+__date__ = '15/11/21'
 
 
 # Build

@@ -25,7 +25,7 @@ Diamond
 2017
 
 Version 3.2.2
-Last updated: 27/09/21
+Last updated: 15/11/21
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -46,7 +46,7 @@ Version History:
 10/06/20 3.1    Updated Symmetry to include time operators
 02/09/20 3.2.0  Added Cell.reflection_hkl and transmission_hkl, added __str__ methods
 22/10/20 3.2.1  Added Cell.moment, updated Cell.latt()
-27/09/21 3.2.2  Added Cell.orientation, updated Cell.UV()
+15/11/21 3.2.2  Added Cell.orientation, updated Cell.UV()
 
 @author: DGPorter
 """
@@ -299,6 +299,41 @@ class Crystal:
         super = Superstructure(self, P)
         super.generate_super_positions()
         return super
+
+    def transform(self, P):
+        """
+        Transform the current cell
+            a' = n1a + n2b + n3c
+            b' = m1a + m2b + m3c
+            c' = o1a + o2b + o3c
+                    OR
+            [a',b',c'] = P[a,b,c]
+                    Where
+            P = [[n1,n2,n3],
+                 [m1,m2,m3],
+                 [o1,o2,o3]]
+        Returns a superstructure Crystal class:
+            su = xtl.transform([[0,1,0],[1,0,0],[0,0,1]])
+
+        Superstructure Crystal classes have additional attributes:
+            su.P = P as given
+            su.Parent = the parent Crystal Class
+
+        Use >>hasattr(su,'Parent') to check if the current object is a
+        superstructure Crystal class
+        """
+
+        super = Superstructure(self, P)
+        super.generate_super_positions()
+        return super
+
+    def invert_structure(self):
+        """
+        Convert handedness of structure, transform from left-handed to right handed, or visa-versa
+        Equivlent to xtl.transform([[-1,0,0], [0,-1,0], [0,0,-1]])
+        :return: Superstructure Crystal class
+        """
+        return self.transform([[-1, 0, 0], [0, -1, 0], [0, 0, -1]])
 
     def add_parent(self, parent, P):
         """
@@ -798,6 +833,73 @@ class Cell:
             return np.zeros((0,)), np.zeros((0,)), np.zeros((0, 3))
         plane_coord = 2 * q_max * box_coord[incell, :]
         return plane_coord[:, 0], plane_coord[:, 1], HKL[incell, :]
+
+    def ubmatrix(self):
+        """Return UB matrix from Busing & Levy in the diffractometer frame"""
+        return fc.ubmatrix(self.UV(), self.orientation.umatrix)
+
+    def labwavevector(self, hkl):
+        """
+        Calculate the lab wavevector using the unit-vector, oritenation matrix and rotation matrix
+        Returns vectors in the lab coordinate system, by default defined like Diamond Light Source:
+          x-axis : away from synchrotron ring, towards wall
+          y-axis : towards ceiling
+          z-axis : along beam direction
+        :param hkl: [3xn] array of (h, k, l) reciprocal lattice vectors
+        :return: [3xn] array of Q vectors in the lab coordinate system
+        """
+        uv = self.UV()
+        u = self.orientation.umatrix
+        r = self.orientation.rotation
+        lab = self.orientation.labframe
+        return fc.labwavevector(hkl, uv, U=u, R=r, LAB=lab)
+
+    def diff6circle(self, delta=0, gamma=0, energy_kev=None, wavelength=1.0):
+        """
+        Calcualte wavevector in diffractometer axis using detector angles
+        :param delta: float angle in degrees in vertical direction (about diff-z)
+        :param gamma: float angle in degrees in horizontal direction (about diff-x)
+        :param energy_kev: float energy in KeV
+        :param wavelength: float wavelength in A
+        :return: q[1*3], ki[1*3], kf[1*3]
+        """
+        return self.orientation.diff6circle(delta, gamma, energy_kev, wavelength)
+
+    def diff6circle2hkl(self, phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0, energy_kev=None, wavelength=1.0):
+        """
+        Return [h,k,l] position of diffractometer axes at given energy
+        :param phi: float sample angle in degrees
+        :param chi: float sample angle in degrees
+        :param eta: float sample angle in degrees
+        :param mu: float sample angle in degrees
+        :param delta: float detector angle in degrees
+        :param gamma: float detector angle in degrees
+        :param energy_kev: float energy in KeV
+        :param wavelength: float wavelength in A
+        :return: [h,k,l]
+        """
+        ub = self.ubmatrix()
+        lab = self.orientation.labframe
+        return fc.diff6circle2hkl(ub, phi, chi, eta, mu, delta, gamma, energy_kev, wavelength, lab)
+
+    def diff6circle_match(self, phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0, energy_kev=None, wavelength=1.0, fwhm=0.5):
+        """
+        Return the closest hkl and intensity factor
+        :param phi: float sample angle in degrees
+        :param chi: float sample angle in degrees
+        :param eta: float sample angle in degrees
+        :param mu: float sample angle in degrees
+        :param delta: float detector angle in degrees
+        :param gamma: float detector angle in degrees
+        :param energy_kev: float energy in KeV
+        :param wavelength: float wavelength in A
+        :param fwhm: float peak width in A-1
+        :return: [h,k,l], If
+        """
+        hkl = self.diff6circle2hkl(phi, chi, eta, mu, delta, gamma, energy_kev, wavelength)
+        close_hkl = np.round(hkl)
+        dist = fg.mag(self.calculateQ(close_hkl) - self.calculateQ(hkl))
+        return close_hkl, fg.gauss(dist, fwhm=fwhm)[0]
 
 
 class Atom:

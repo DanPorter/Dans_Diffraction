@@ -9,8 +9,8 @@ By Dan Porter, PhD
 Diamond
 2021
 
-Version 2.0.0
-Last updated: 02/02/21
+Version 2.1.0
+Last updated: 15/11/21
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -25,6 +25,7 @@ Version History:
 01/12/20 1.8.1  Added get_methods function
 26/01/21 1.8.2  Added shortstr and squaredata
 02/02/21 2.0.0  Merged changes in other versions, added vector_intersection and you_normal_vector
+15/11/21 2.1.0  Added normal_basis
 
 @author: DGPorter
 """
@@ -281,6 +282,32 @@ def you_normal_vector(eta=0, chi=90, mu=0):
                        np.cos(eta) * np.sin(chi),
                        -np.cos(mu) * np.sin(eta) * np.sin(chi) - np.sin(mu) * np.cos(chi)])
     return normal
+
+
+def normal_basis(vec, normal=(1, 0, 0), azi=0):
+    """
+    Return a vector basis with 3 normal vectors such that:
+        [|normal x vec|, |vec x (normal x vec)|, |vec|]
+    if azi is given, the resulting vectors [0,1] will be rotated about [2]
+    :param vec: [3*1] array of vector
+    :param normal: [3*1] array of normal vector
+    :param azi: float azimuthal rotation about vec in degrees
+    :return: array [3*3] as unit vectors [vec1, vec2, vec3]
+    """
+    # U1 || projection of normal vector
+    # U2 _|_ U1,U3
+    # U3 || vec
+    vec = norm(vec)  # || vec
+    AxQ = norm(np.cross(normal, vec))
+    Ihat = norm(np.cross(vec, AxQ))  # || to normal
+    Jhat = norm(np.cross(vec, Ihat))  # -| to I and vec
+
+    # Rotate psi about Qhat
+    razi = np.deg2rad(azi)
+    # -ve sin makes clockwise rotation
+    Ihat_psi = norm(np.cos(razi) * Ihat - np.sin(razi) * Jhat)
+    Jhat_psi = norm(np.cross(vec, Ihat_psi))
+    return np.vstack([Ihat_psi, Jhat_psi, vec])
 
 
 def group(A, tolerance=0.0001):
