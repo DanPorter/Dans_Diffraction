@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.0.1
-Last updated: 28/09/21
+Version 2.0.2
+Last updated: 07/02/22
 
 Version History:
 10/09/17 0.1    Program created
@@ -28,6 +28,7 @@ Version History:
 09/07/21 1.9    Added new scattering factors as option on normal scattering functions
 20/08/21 2.0    Switched over to new scattering module, added self.powder()
 28/09/21 2.0.1  Added __repr__
+07/02/22 2.0.2  Corrected error in powder of wrong tth values. Thanks Mirko!
 
 @author: DGPorter
 """
@@ -42,7 +43,7 @@ from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '2.0.1'
+__version__ = '2.0.2'
 __scattering_types__ = {'xray': ['xray','x','x-ray','thomson','charge'],
                         'neutron': ['neutron','n','nuclear'],
                         'xray magnetic': ['xray magnetic','magnetic xray','spin xray','xray spin'],
@@ -471,6 +472,9 @@ class Scattering:
         Generates array of intensities along a spaced grid, equivalent to a powder pattern.
           tth, iten = generate_powder('xray', units='tth', energy_kev=8)
 
+        Note: This function is the new replacement for generate_power and uses both _scattering_min_twotheta
+        and _scattering_max_twotheta.
+
         :param scattering_type: str : one of ['xray','neutron','xray magnetic','neutron magnetic','xray resonant']
         :param units: str : one of ['tth', 'dspace', 'q']
         :param peak_width: float : Peak with in units of inverse wavevector (Q)
@@ -495,6 +499,8 @@ class Scattering:
             powder_average = self._powder_average
         if 'energy_kev' in options:
             energy_kev = options['energy_kev']
+        if 'wavelength_a' in options:
+            energy_kev = fc.wave2energy(options['wavelength_a'])
         else:
             energy_kev = self._energy_kev
 
@@ -528,7 +534,8 @@ class Scattering:
         mesh_q = np.linspace(q_min, q_max, pixels)
 
         # add reflections to background
-        pixel_coord = Qmag / (1.0 * q_max)
+        # pixel_coord = Qmag / (1.0 * q_max)
+        pixel_coord = (Qmag - q_min) / (1.0 * q_max - q_min)
         pixel_coord = (pixel_coord * (pixels - 1)).astype(int)
 
         for n in range(1, len(I)):

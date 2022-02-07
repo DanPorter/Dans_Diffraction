@@ -82,6 +82,14 @@ class Properties:
         weight = self.xtl.Structure.weight()/fg.Na # g
         return weight/vol
 
+    def atoms_per_volume(self):
+        """Return no. atoms per volume in atoms per A^3"""
+
+        occ = self.xtl.Structure.occupancy
+        natoms = np.sum(occ)
+        vol = self.volume()  # A^3
+        return natoms / vol
+
     def weight(self):
         """Return the molecular weight in g/mol"""
         return self.xtl.Structure.weight()

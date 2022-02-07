@@ -61,6 +61,7 @@ Version History:
 20/08/21 2.0.0  Added functions_scattering module with updated, more consistent scattering formula
 27/09/21 2.1.0  Added classes_orientation and diffractometer orientation functions
 15/11/21 2.1.1  Updated Plot.plot_crystal, added additional orientation functions
+07/02/22 2.1.2  Corrected error in classes_scattering.powder() of wrong tth values. Thanks Mirko!
 
 -----------------------------------------------------------------------------
    Copyright 2020 Diamond Light Source Ltd.
@@ -114,8 +115,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '2.1.1'
-__date__ = '15/11/21'
+__version__ = '2.1.2'
+__date__ = '07/02/22'
 
 
 # Build

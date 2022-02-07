@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.7
-Last updated: 15/11/21
+Version 3.7.1
+Last updated: 12/01/22
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -38,6 +38,7 @@ Version History:
 31/03/21 3.5    Added point groups, gen_sym_unique
 10/06/21 3.6    Corrected mistake in DebyeWaller function. Added x-ray scattering factors from Waasmaier and Kirfel
 15/11/21 3.7    Added diffractometer orientation commands from Busing & Levy, H. You
+12/01/22 3.7.1  Added gen_sym_axial_vector
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -52,7 +53,7 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.7'
+__version__ = '3.7.1'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -2276,6 +2277,9 @@ def fitincell(uvw):
     return uvw
 
 
+'---------------------------Symmetry-------------------------------------'
+
+
 def gen_sym_pos(sym_ops, x, y, z):
     """
     Generate positions from symmetry operations
@@ -2448,8 +2452,7 @@ def gen_sym_mat(sym_ops):
                    [ 0.,   0.,   0.,   1.]]
     """
 
-    if type(sym_ops) is str:
-        sym_ops = [sym_ops]
+    sym_ops = np.asarray(sym_ops, dtype=str).reshape(-1)
 
     sym_mat = []
     for sym in sym_ops:
@@ -2521,6 +2524,47 @@ def sym_mat2str(sym_mat, time=None):
     return ','.join(out)
 
 
+def sym_op_recogniser(sym_ops):
+    """
+    Evaluates symmetry operations and returns str name of operation
+
+    Doesn't work yet - works on simple systems but not trigonal or hexagonal operations - for example sg167
+    """
+    print('Doesnt work yet!!!')
+    sym_ops = np.asarray(sym_ops, dtype=str).reshape(-1)
+    sym_mats = gen_sym_mat(sym_ops)
+    DEBUG = True
+    out = []
+    for op, m in zip(sym_ops, sym_mats):
+        ns = op.count('-')  # 0=translation, 1=mirror, 2=rotation, 3=inversion
+        parity = np.linalg.det(m[:3, :3])  # determinant of operation - +/-1
+        translation = np.sum(np.abs(m[:3, 3]))
+        msum = np.sum(m[:3, :3])
+        asum = np.sum(np.abs(m[:3, :3]))
+        if DEBUG:
+            print(f"{op:20s}: ns={ns}, parity={parity}, translation={translation}, sum={msum}, abssum={asum}")
+        if ns == 0:  # translation
+            if translation < 0.01:
+                out += ['1']
+            else:
+                out += ['t(%.2g,%.2g,%.2g)' % (m[3, 0], m[3, 1], m[3, 2])]
+        elif ns == 3:  # inversion
+            out += ['-1']
+        elif parity > 0:  # rotation
+            if translation < 0.01:
+                out += ['Rotation']
+            else:
+                out += ['Screw']
+        elif parity < 1:  # mirror
+            if translation < 0.01:
+                out += ['Mirror']
+            else:
+                out += ['Glide']
+        else:
+            out += ['Unknown']
+    return out
+
+
 def sym_op_det(sym_ops):
     """
     Return the determinant of a symmetry operation
@@ -2531,6 +2575,29 @@ def sym_op_det(sym_ops):
     if len(mat) == 1:
         return np.linalg.det(mat[0][:3, :3])
     return [np.linalg.det(m[:3, :3]) for m in mat]
+
+
+def gen_sym_axial_vector(sym_ops, x, y, z):
+    """
+     Transform axial vector by symmetry operations
+    Usage:
+      uvw = gen_symcen_pos(sym_ops,cen_ops,x,y,z)
+      sym_ops = [n*'x,y,z'] array of string symmetry operations
+      cen_ops = [m*'x,y,z'] array of string centring operations
+      x,y,z = fractional coordinates of atomic posiiton to be modified by symmetry
+      uvw = [[nx3]] array of symmetry defined factional coordinates [u,v,w]
+
+    E.G.
+      uvw = gen_symcen_pos(['x,y,z','y,-x,z+1/2'],['x,y,z','x+1/3,y+1/3,z'],0.1,0.2,0.3)
+      uvw >> [[0.1,0.2,0.3] , [0.433,0.533,0.3] , [0.2,-0.1,0.8] , [0.533,-0.233,0.8]]
+    :param sym_ops:
+    :param x:
+    :param y:
+    :param z:
+    :return:
+    """
+    mat = gen_sym_mat(sym_ops)
+    return [np.linalg.det(m[:3, :3]) * np.dot(m[:3, :3], (x, y, z)) for m in mat]
 
 
 def invert_sym(sym_op):

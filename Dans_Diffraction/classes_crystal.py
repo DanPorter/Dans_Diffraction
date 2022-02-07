@@ -24,8 +24,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.2.2
-Last updated: 15/11/21
+Version 3.2.3
+Last updated: 12/01/21
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -47,6 +47,7 @@ Version History:
 02/09/20 3.2.0  Added Cell.reflection_hkl and transmission_hkl, added __str__ methods
 22/10/20 3.2.1  Added Cell.moment, updated Cell.latt()
 15/11/21 3.2.2  Added Cell.orientation, updated Cell.UV()
+12/01/21 3.2.3  Added Symmetry.axial_vector
 
 @author: DGPorter
 """
@@ -59,12 +60,12 @@ from . import functions_general as fg, functions_crystallography as fc
 from . import functions_crystallography as fc
 from .classes_orientation import Orientation
 from .classes_properties import Properties
-#from .classes_orbitals import CrystalOrbitals
+# from .classes_orbitals import CrystalOrbitals
 from .classes_scattering import Scattering
 from .classes_multicrystal import MultiCrystal
 from .classes_plotting import Plotting, PlottingSuperstructure
 
-__version__ = '3.2.2'
+__version__ = '3.2.3'
 
 
 class Crystal:
@@ -137,7 +138,7 @@ class Crystal:
         self.Plot = Plotting(self)
         self.Scatter = Scattering(self)
         self.Properties = Properties(self)
-        #self.Orbitals = CrystalOrbitals(self) # slows down cif parsing a lot!
+        # self.Orbitals = CrystalOrbitals(self) # slows down cif parsing a lot!
         # self.Fdmnes = Fdmnes(self)
 
     def generate_structure(self):
@@ -766,7 +767,7 @@ class Cell:
         :return: correction
         """
         q = self.Qmag(hkl)
-        return 1/(q+0.001)**2
+        return 1 / (q + 0.001) ** 2
 
     def find_close_reflections(self, hkl, energy_kev, max_twotheta=2, max_angle=10):
         """
@@ -907,6 +908,7 @@ class Atom:
     Atom class
     Contains site information
     """
+
     def __init__(self, u, v, w, atom_type, label, occupancy=1.0, uiso=0.001, mxmymz=None):
         self.u = u
         self.v = v
@@ -1128,7 +1130,7 @@ class Atoms:
         mag_z = []
         mag_sym = []
         for n in range(len(self.label)):
-            if self.mx[n]**2 + self.my[n]**2 + self.mz[n]**2 > 0.01:
+            if self.mx[n] ** 2 + self.my[n] ** 2 + self.mz[n] ** 2 > 0.01:
                 mag_label += [self.label[n]]
                 mag_x += [self.mx[n]]
                 mag_y += [self.my[n]]
@@ -1139,7 +1141,7 @@ class Atoms:
         cifvals['_atom_site_moment.crystalaxis_x'] = mag_x
         cifvals['_atom_site_moment.crystalaxis_y'] = mag_y
         cifvals['_atom_site_moment.crystalaxis_z'] = mag_z
-        #cifvals['_atom_site_moment.symmform'] = mag_sym
+        # cifvals['_atom_site_moment.symmform'] = mag_sym
         return cifvals
 
     def atom(self, idx):
@@ -1310,13 +1312,13 @@ class Atoms:
         uvw = self.uvw()
         type = self.type
         rem_atom_idx = []
-        for n in range(0, len(type)-1):
-            match_position = fg.mag(uvw[n, :] - uvw[n+1:, :]) < min_distance
-            match_type = type[n] == type[n+1:]
+        for n in range(0, len(type) - 1):
+            match_position = fg.mag(uvw[n, :] - uvw[n + 1:, :]) < min_distance
+            match_type = type[n] == type[n + 1:]
             if all_types:
-                rem_atom_idx += list(1+n+np.where(match_position)[0])
+                rem_atom_idx += list(1 + n + np.where(match_position)[0])
             else:
-                rem_atom_idx += list(1+n+np.where(match_position * match_type)[0])
+                rem_atom_idx += list(1 + n + np.where(match_position * match_type)[0])
         # remove atoms
         print('Removing %d atoms' % len(rem_atom_idx))
         self.removeatom(rem_atom_idx)
@@ -1383,9 +1385,13 @@ class Atoms:
         """
         return np.asarray([self.mx, self.my, self.mz], dtype=np.float).T
 
+    def total_moment(self):
+        """Return the total moment along a, b, c directions"""
+        return np.sum(self.mxmymz(), axis=0)
+
     def ismagnetic(self):
         """ Returns True if any ions have magnetic moments assigned"""
-        return np.any(np.abs(self.mxmymz())>0)
+        return np.any(np.abs(self.mxmymz()) > 0)
 
     def get(self):
         """
@@ -1594,7 +1600,7 @@ class Symmetry:
             ops = self.symmetry_operations[n].split(',')
             ops += ['%+g' % self.symmetry_operations_time[n]]
             time_ops += [','.join(ops[:4])]  # use the current value first
-        cifvals['_space_group_symop_magn_operation.id'] = range(1, len(self.symmetry_operations)+1)
+        cifvals['_space_group_symop_magn_operation.id'] = range(1, len(self.symmetry_operations) + 1)
         cifvals['_space_group_symop_magn_operation.xyz'] = time_ops
         cifvals['_space_group_symop_magn_operation.mxmymz'] = self.symmetry_operations_magnetic
         cifvals['_space_group_symop_magn_centering.id'] = ['1']
@@ -1625,7 +1631,7 @@ class Symmetry:
         symops = spacegroup['general positions']
         self.symmetry_operations = symops
         self.symmetry_operations_magnetic = fc.symmetry_ops2magnetic(symops)
-        self.symmetry_operations_time = [1]*len(symops)
+        self.symmetry_operations_time = [1] * len(symops)
 
     def load_magnetic_spacegroup(self, msg_number):
         """
@@ -2006,9 +2012,9 @@ class Symmetry:
                 continue
             symref = self.symmetric_reflections(hkl_list[n])
             symmetric_hkl = np.vstack([symmetric_hkl, symref])
-            hkl_idx = np.append(hkl_idx, [n]*len(symref))
+            hkl_idx = np.append(hkl_idx, [n] * len(symref))
             symmetric_idx[n] = True
-        return hkl_list[symmetric_idx], intensity_list[symmetric_idx]/intensity_tot[symmetric_idx]
+        return hkl_list[symmetric_idx], intensity_list[symmetric_idx] / intensity_tot[symmetric_idx]
 
     def print_symmetric_vectors(self, HKL):
         """
@@ -2035,8 +2041,8 @@ class Symmetry:
         NOT COMPLETE
         """
 
+        """
         for n, (mx, my, mz) in enumerate(MXMYMZ):
-            """
             # Apply symmetry constraints
             if len(contraints) > 0:
                 C = constraints
@@ -2053,10 +2059,29 @@ class Symmetry:
                 S = [s.replace('a',C[0]).replace('b',C[1]).replace('c',C[2]) for s in S]
             else:
                 S = symmag
-            """
+        """
 
-            # mag_uvw = fc.gen_symcen_pos(S,mx,my,mz)
-            pass
+        mx, my, mz = MXMYMZ
+        sym_xyz = fc.gen_sym_pos(self.symmetry_operations_magnetic, mx, my, mz)
+        return sym_xyz
+
+    def axial_vector(self, uvw, remove_identical=True):
+        """
+        Perform symmetry operations on an axial vector uvw
+        :param uvw: 3 element array/ list in cell coordinates
+        :param remove_identical: True/ False, if True, identical operations are removed
+        :return: [S*3]  array of transformed coordinates
+        """
+
+        u, v, w = uvw
+        sym_uvw = fc.gen_sym_axial_vector(self.symmetry_operations, u, v, w)
+        sym_uvw = fc.fitincell(sym_uvw)
+
+        # Remove identical positions
+        unique_uvw, uniqueidx, matchidx = fg.unique_vector(sym_uvw, tol=0.01)
+
+        if remove_identical is None:
+            return np.array(self.symmetry_operations)[uniqueidx]
 
     def reflection_multiplyer(self, HKL):
         """
@@ -2161,8 +2186,8 @@ class Superstructure(Crystal):
     superstructure Crystal class
     """
 
-    #Parent = Crystal()
-    #P = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    # Parent = Crystal()
+    # P = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 
     def __init__(self, Parent, P):
         """Initialise"""
