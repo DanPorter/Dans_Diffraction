@@ -116,7 +116,7 @@ if fdmnes_checker():
 
 
 __version__ = '2.1.2'
-__date__ = '07/02/22'
+__date__ = '08/02/22'
 
 
 # Build

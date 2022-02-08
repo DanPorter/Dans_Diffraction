@@ -307,7 +307,7 @@ class Plotting:
             I = I/(Qmag+0.001)**2
         
         # create plotting mesh
-        pixels = int(2000*q_max)  # reduce this to make convolution faster
+        pixels = int(self.xtl.Scatter._powder_pixels * q_max)  # reduce this to make convolution faster
         pixel_size = q_max/(1.0*pixels)
         peak_width_pixels = peak_width/(1.0*pixel_size)
         mesh = np.zeros([pixels])
@@ -331,15 +331,16 @@ class Plotting:
         
         # add reflections to background
         # scipy.interpolate.griddata?
-        mesh_x = np.linspace(0, max_x, pixels)
-        pixel_coord = xx/ max_x
-        pixel_coord = (pixel_coord*(pixels-1)).astype(int)
+        mesh_x = np.linspace(min_x, max_x, pixels)
+        #pixel_coord = xx/ max_x
+        pixel_coord = (xx - min_x) / (max_x - min_x)
+        pixel_coord = (pixel_coord * pixels).astype(int)
 
-        ref_n = [0]
-        ref_txt = ['']
+        ref_n = []
+        ref_txt = []
         ext_n = []
         ext_txt = []
-        for n in range(1, len(I)):
+        for n in range(len(I)):
             if xx[n] > max_x or xx[n] < min_x:
                 continue
             mesh[pixel_coord[n]] = mesh[pixel_coord[n]] + I[n]
@@ -351,10 +352,10 @@ class Plotting:
                 # generate label if not too close to another reflection
                 if I[n] > 0.1:
                     ref_n += [pixel_coord[n]]
-                    ref_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])]
+                    ref_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n, 0], HKL[n, 1], HKL[n, 2])]
                 else:
                     ext_n += [pixel_coord[n]]
-                    ext_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n,0],HKL[n,1],HKL[n,2])]
+                    ext_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n, 0], HKL[n, 1], HKL[n, 2])]
         
         # Convolve with a gaussian (if >0 or not None)
         if peak_width:

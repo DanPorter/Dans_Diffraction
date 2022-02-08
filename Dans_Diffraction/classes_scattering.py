@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.0.2
-Last updated: 07/02/22
+Version 2.0.3
+Last updated: 08/02/22
 
 Version History:
 10/09/17 0.1    Program created
@@ -28,7 +28,7 @@ Version History:
 09/07/21 1.9    Added new scattering factors as option on normal scattering functions
 20/08/21 2.0    Switched over to new scattering module, added self.powder()
 28/09/21 2.0.1  Added __repr__
-07/02/22 2.0.2  Corrected error in powder of wrong tth values. Thanks Mirko!
+08/02/22 2.0.3  Corrected error in powder of wrong tth values. Thanks Mirko!
 
 @author: DGPorter
 """
@@ -43,7 +43,7 @@ from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '2.0.2'
+__version__ = '2.0.3'
 __scattering_types__ = {'xray': ['xray','x','x-ray','thomson','charge'],
                         'neutron': ['neutron','n','nuclear'],
                         'xray magnetic': ['xray magnetic','magnetic xray','spin xray','xray spin'],
@@ -84,7 +84,7 @@ class Scattering:
     _powder_background = 0.0
     _powder_peak_width = 0.01  # in Deg
     _powder_average = True
-    _powder_pixels = 2000
+    _powder_pixels = 2000  # no. pixels per inverse angstrom (in q)
     
     # Complex Structure factor
     _return_structure_factor = False
@@ -479,7 +479,7 @@ class Scattering:
         :param units: str : one of ['tth', 'dspace', 'q']
         :param peak_width: float : Peak with in units of inverse wavevector (Q)
         :param background: float : if >0, a normal background around this value will be added
-        :param pixels: int : number of pixels to add to the resulting mesh
+        :param pixels: int : number of pixels per inverse-anstrom to add to the resulting mesh
         :param powder_average: Bool : if True, intensities will be reduced for the powder average
         :param options: additional arguments to pass to intensity calculation
         :return xval: arrray : x-axis of powder scan (units)
@@ -499,7 +499,7 @@ class Scattering:
             powder_average = self._powder_average
         if 'energy_kev' in options:
             energy_kev = options['energy_kev']
-        if 'wavelength_a' in options:
+        elif 'wavelength_a' in options:
             energy_kev = fc.wave2energy(options['wavelength_a'])
         else:
             energy_kev = self._energy_kev
@@ -510,14 +510,16 @@ class Scattering:
         max_twotheta = self._scattering_max_twotheta
         q_min = fc.calqmag(min_twotheta, energy_kev)
         q_max = fc.calqmag(max_twotheta, energy_kev)
+        q_range = q_max - q_min
 
         # Get reflections
         hmax, kmax, lmax = fc.maxHKL(q_max, self.xtl.Cell.UVstar())
         HKL = fc.genHKL([hmax, -hmax], [kmax, -kmax], [lmax, -lmax])
         HKL = self.xtl.Cell.sort_hkl(HKL)  # required for labels
         Qmag = self.xtl.Cell.Qmag(HKL)
-        HKL = HKL[Qmag < q_max, :]
-        Qmag = self.xtl.Cell.Qmag(HKL)
+        select = (Qmag < q_max) * (Qmag > q_min)
+        HKL = HKL[select, :]
+        Qmag = Qmag[select]
 
         # Calculate intensities
         I = self.intensity(HKL, scattering_type, **options)
@@ -527,18 +529,17 @@ class Scattering:
             I = I/(Qmag+0.001)**2
 
         # create plotting mesh
-        pixels = int(pixels * q_max)  # reduce this to make convolution faster
-        pixel_size = q_max / (1.0 * pixels)
-        peak_width_pixels = peak_width / (1.0 * pixel_size)
-        mesh = np.zeros([pixels])
-        mesh_q = np.linspace(q_min, q_max, pixels)
+        tot_pixels = int(pixels * q_range)  # reduce this to make convolution faster
+        pixel_size = q_range / float(tot_pixels)
+        peak_width_pixels = peak_width / pixel_size
+        mesh = np.zeros([tot_pixels])
+        mesh_q = np.linspace(q_min, q_max, tot_pixels)
 
         # add reflections to background
-        # pixel_coord = Qmag / (1.0 * q_max)
-        pixel_coord = (Qmag - q_min) / (1.0 * q_max - q_min)
-        pixel_coord = (pixel_coord * (pixels - 1)).astype(int)
+        pixel_coord = (Qmag - q_min) / q_range
+        pixel_coord = (pixel_coord * tot_pixels).round().astype(int)
 
-        for n in range(1, len(I)):
+        for n in range(len(I)):
             mesh[pixel_coord[n]] = mesh[pixel_coord[n]] + I[n]
 
         # Convolve with a gaussian (if >0 or not None)
@@ -1480,6 +1481,7 @@ class Scattering:
 
     def generate_powder(self, q_max=8, peak_width=0.01, background=0, powder_average=True):
         """
+        *DEPRECIATED*
         Generates array of intensities along a spaced grid, equivalent to a powder pattern.
           Q,I = generate_powder(energy_kev=8.0,peak_width=0.05,background=0)
             q_max = maximum Q, in A-1
@@ -1490,6 +1492,7 @@ class Scattering:
             Q = [1000x1] array of wave-vector values
             I = [1000x1] array of intensity values
 
+        Note: This function is depreciated, use self.powder() instead.
         Note: To get two-theta values use:
             tth = fc.cal2theta(Q, energy_kev)
         Note: To get d-spacing values use:
@@ -2314,3 +2317,154 @@ class ScatteringTypes:
 
         def __call__(self):
             self.parent._scattering_type = self.typename
+
+
+class Reflections:
+    """
+    Contains h,k,l indices, intensity
+
+    masking doesn't work currently
+    """
+    _energy_kev = 8.0
+    _hkl_format = '(%3.0f,%3.0f,%3.0f)'
+
+    def __init__(self, hkl, q_mag, intensity, energy_kev=None, wavelength_a=None):
+        self.hkl = np.asarray(hkl).reshape([-1, 3])
+        self.q_mag = np.asarray(q_mag).reshape([-1])
+        self.intensity = np.asarray(intensity).reshape([-1])
+        self.sort_qmag()
+        self._mask = np.zeros_like(self.q_mag, dtype=int)
+
+        if energy_kev is not None:
+            self.set_energy(energy_kev)
+
+        if wavelength_a is not None:
+            self.set_wavelength(wavelength_a)
+
+    def __repr__(self):
+        return "Reflections( %d reflections, energy_kev=%1.5g )" % (len(self.hkl), self._energy_kev)
+
+    def __str__(self):
+        out = '  hkl           Q [A^-1]    d [A] 2theta [Deg]  Intensity\n'
+        dspace = self.dspacing()
+        tth = self.two_theta()
+        labels = self.labels()
+        for n in range(len(self.hkl)):
+            if self._mask[n] == 0:
+                out += '%14s %8.3f %8.3f %12.2f %10.2f\n' % (labels[n], self.q_mag[n], dspace[n], tth[n], self.intensity[n])
+        return out
+
+    def __getitem__(self, item):
+        return self.hkl[item], self.q_mag[item], self.intensity[item]
+
+    def set_energy(self, energy_kev):
+        self._energy_kev = energy_kev
+
+    def set_wavelength(self, wavelength_a):
+        self.set_energy(fc.wave2energy(wavelength_a))
+
+    def limits(self, min_val=None, max_val=None, limit_type='q'):
+        """
+        Adds limits
+        :param min_val: float, minimum value in units determined by overlap_type
+        :param max_val: float, maximum value
+        :param limit_type: str 'q', 'tth' or 'd'
+        :return: None
+        """
+
+        limit_type = limit_type.lower().replace(' ', '').replace(' ', '').replace('-', '').replace('_', '')
+        if limit_type in ['tth', 'twotheta', '2theta']:
+            min_val = 0 if min_val is None else fc.calqmag(min_val, self._energy_kev)
+            max_val = np.max(self.q_mag) if max_val is None else fc.calqmag(max_val, self._energy_kev)
+        elif limit_type in ['d', 'dspacing', 'dspace']:
+            min_val = 0 if min_val is None else fc.dspace2q(min_val)
+            max_val = np.max(self.q_mag) if max_val is None else fc.dspace2q(max_val)
+        else:
+            min_val = 0 if min_val is None else min_val
+            max_val = np.max(self.q_mag) if max_val is None else max_val
+
+        self._mask = np.zeros_like(self.q_mag, dtype=int)
+        self._mask[self.q_mag < min_val] = 1
+        self._mask[self.q_mag > max_val] = 1
+
+    def mask(self, center=None, width=None, mask_type='q'):
+        """
+        Adds mask
+        :param center: float, centre of mask in units determined by overlap_type
+        :param width: float, width of mask
+        :param limit_type: str 'q', 'tth' or 'd'
+        :return: None
+        """
+
+        mask_type = mask_type.lower().replace(' ', '').replace(' ', '').replace('-', '').replace('_', '')
+        if mask_type in ['tth', 'twotheta', '2theta']:
+            center = -1 if center is None else fc.calqmag(center, self._energy_kev)
+            width = 0 if width is None else fc.calqmag(width, self._energy_kev)
+        elif mask_type in ['d', 'dspacing', 'dspace']:
+            center = -1 if center is None else fc.dspace2q(center)
+            width = 0 if width is None else fc.dspace2q(width)
+        else:
+            center = -1 if center is None else center
+            width = 0 if width is None else width
+
+        idx = np.abs(self.q_mag - center) <= width
+        self._mask[idx] = 1
+
+    def sort_qmag(self):
+        """Sort arrays by qmag"""
+        #idx = np.argsort(self.q_mag)
+        qmag = np.round(self.q_mag, 4)
+        inten = np.round(self.intensity, 4)
+        idx = np.lexsort((self.hkl[:, 1], self.hkl[:, 0], self.hkl[:, 2], inten, qmag))
+        self.hkl = self.hkl[idx, :]
+        self.q_mag = self.q_mag[idx]
+        self.intensity = self.intensity[idx]
+
+    def sort_intensity(self):
+        idx = np.argsort(self.intensity)
+        self.hkl = self.hkl[idx, :]
+        self.q_mag = self.q_mag[idx]
+        self.intensity = self.intensity[idx]
+
+    def sort_hkl(self):
+        idx = np.lexsort((self.hkl[:, 1], self.hkl[:, 0], self.hkl[:, 2]))
+        self.hkl = self.hkl[idx, :]
+        self.q_mag = self.q_mag[idx]
+        self.intensity = self.intensity[idx]
+
+    def two_theta(self):
+        return fc.cal2theta(self.q_mag, self._energy_kev)
+
+    def dspacing(self):
+        return fc.q2dspace(self.q_mag)
+
+    def labels(self):
+        """Return list of str labels "(h,k,l)" """
+        return [self._hkl_format % (h[0], h[1], h[2]) for h in self.hkl]
+
+    def non_overlapping_refs(self, min_overlap=0.05, overlap_type='q'):
+        """
+        Return list of non-overlapping label
+        :param min_overlap: float, minimum overlap in units determined by overlap_type
+        :param overlap_type: str 'q', 'tth' or 'd'
+        :return:
+        """
+
+        self.sort_qmag()
+        # Group the qmag array
+        overlap_type = overlap_type.lower().replace(' ', '').replace(' ', '').replace('-', '').replace('_', '')
+        if overlap_type in ['tth', 'twotheta', '2theta']:
+            groups, array_index, group_index, counts = fg.group(self.two_theta(), min_overlap)
+        elif overlap_type in ['d', 'dspacing', 'dspace']:
+            groups, array_index, group_index, counts = fg.group(self.dspacing(), min_overlap)
+        else:
+            groups, array_index, group_index, counts = fg.group(self.q_mag, min_overlap)
+
+        # loop over groups and select reflection with largest intensity
+        ref_n = np.zeros(len(groups), dtype=int)
+        for n in range(len(groups)):
+            args = np.where(array_index == n)[0]
+            # find max intensity
+            ref_n[n] = args[np.argmax(self.intensity[args])]
+        return ref_n
+
