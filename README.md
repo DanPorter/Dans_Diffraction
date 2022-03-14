@@ -1,12 +1,12 @@
 # Dans_Diffaction
 Reads crystallographic cif files and simulates diffraction, among other things.
 
-**Version 2.1**
+**Version 2.2**
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3859501.svg)](https://doi.org/10.5281/zenodo.3859501)
 
 By Dan Porter, Diamond Light Source
-2020
+2022
 
 #### TL;DR:
 ```text
@@ -37,7 +37,7 @@ For comments, queries or bugs - email [dan.porter@diamond.ac.uk](mailto:dan.port
 
 # Installation
 **Requirements:** 
-Python 2.7+/3+ with packages: *Numpy*, *Matplotlib*, *Scipy*, *Tkinter*.
+Python 3+ with packages: *Numpy*, *Matplotlib*, *Tkinter*.
 BuiltIn packages used: *sys*, *os*, *re*, *glob*, *warnings*, *json*, *itertools*
 
 Stable version from PyPI:
@@ -116,8 +116,9 @@ form-factors (x-rays) or coherent scattering lengths (neutrons).
 xtl.Scatter.setup_scatter(type='x-ray', energy_keV=8.0)
 # Allowed radiation types:
 #    'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
-xtl.intensity([h,k,l]) # Returns intensity
-xtl.print_all_refelctions() # Returns formated string of all allowed reflections
+xtl.Scatter.print_all_refelctions() # Returns formated string of all allowed reflections
+inten = xtl.Scatter.intensity([h,k,l]) # Returns intensity
+twotheta, iten, reflections = xtl.Scatter.powder(units='twotheta')
 # Plot Experimental Intensities
 xtl.Plot.simulate_powder() # Powder pattern
 xtl.Plot.simulate_hk0() # Reciprocal space plane
@@ -241,7 +242,7 @@ Once activated, FDMNES GUI elements become available from the main window, emula
 
 
 -----------------------------------------------------------------------------
-   Copyright 2020 Diamond Light Source Ltd.
+   Copyright 2022 Diamond Light Source Ltd.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.

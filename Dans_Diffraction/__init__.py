@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.1.1
-Last updated: 15/11/21
+Version 2.2.0
+Last updated: 14/03/21
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -62,9 +62,10 @@ Version History:
 27/09/21 2.1.0  Added classes_orientation and diffractometer orientation functions
 15/11/21 2.1.1  Updated Plot.plot_crystal, added additional orientation functions
 07/02/22 2.1.2  Corrected error in classes_scattering.powder() of wrong tth values. Thanks Mirko!
+14/03/22 2.2.0  Sactter.powder() updated for new inputs and outputs for pVoight and custom peak shapes. Thanks yevgenyr!
 
 -----------------------------------------------------------------------------
-   Copyright 2020 Diamond Light Source Ltd.
+   Copyright 2022 Diamond Light Source Ltd.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -115,8 +116,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '2.1.2'
-__date__ = '08/02/22'
+__version__ = '2.2.0'
+__date__ = '14/03/22'
 
 
 # Build

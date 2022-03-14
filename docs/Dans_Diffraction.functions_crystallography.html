@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_crystallography</strong></big></big> (version 3.7)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_crystallography</strong></big></big> (version 3.7.1)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_crystallography.py">c:\users\dgpor\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_crystallography.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;functions_crystallography.py<br>
@@ -20,8 +20,8 @@ Usage:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;OR<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;from&nbsp;Dans_Diffraction&nbsp;import&nbsp;functions_crystallography&nbsp;as&nbsp;fc<br>
 &nbsp;<br>
-Version&nbsp;3.7<br>
-Last&nbsp;updated:&nbsp;27/09/21<br>
+Version&nbsp;3.7.1<br>
+Last&nbsp;updated:&nbsp;12/01/22<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 09/07/15&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
@@ -46,7 +46,8 @@ Version&nbsp;History:<br>
 26/01/21&nbsp;3.4&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;xray&nbsp;attenuation,&nbsp;transmission&nbsp;and&nbsp;refractive&nbsp;index<br>
 31/03/21&nbsp;3.5&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;point&nbsp;groups,&nbsp;gen_sym_unique<br>
 10/06/21&nbsp;3.6&nbsp;&nbsp;&nbsp;&nbsp;Corrected&nbsp;mistake&nbsp;in&nbsp;DebyeWaller&nbsp;function.&nbsp;Added&nbsp;x-ray&nbsp;scattering&nbsp;factors&nbsp;from&nbsp;Waasmaier&nbsp;and&nbsp;Kirfel<br>
-27/09/21&nbsp;3.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;diffractometer&nbsp;orientation&nbsp;commands&nbsp;from&nbsp;Busing&nbsp;&amp;&nbsp;Levy,&nbsp;H.&nbsp;You<br>
+15/11/21&nbsp;3.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;diffractometer&nbsp;orientation&nbsp;commands&nbsp;from&nbsp;Busing&nbsp;&amp;&nbsp;Levy,&nbsp;H.&nbsp;You<br>
+12/01/22&nbsp;3.7.1&nbsp;&nbsp;Added&nbsp;gen_sym_axial_vector<br>
 &nbsp;<br>
 Acknoledgements:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;April&nbsp;2020&nbsp;&nbsp;Thanks&nbsp;to&nbsp;ChunHai&nbsp;Wang&nbsp;for&nbsp;helpful&nbsp;suggestions&nbsp;in&nbsp;readcif!<br>
@@ -245,13 +246,18 @@ Diffractometer&nbsp;frame&nbsp;according&nbsp;to&nbsp;Fig.&nbsp;1,&nbsp;H.&nbsp;
 :param&nbsp;vec:&nbsp;[3*n]&nbsp;array&nbsp;of&nbsp;vectors<br>
 :param&nbsp;lab:&nbsp;[3*3]&nbsp;transformation&nbsp;matrix,&nbsp;None=((0,1,0),(0,0,1),(1,0,0))<br>
 :return:&nbsp;[3*n]&nbsp;array&nbsp;of&nbsp;vectors</tt></dd></dl>
- <dl><dt><a name="-diff6circle2hkl"><strong>diff6circle2hkl</strong></a>(Qdiff, UV, U=None, R=None)</dt><dd><tt>Calculate&nbsp;(h,k,l)&nbsp;position&nbsp;from<br>
-:param&nbsp;UV:&nbsp;[3*3]&nbsp;Unit-vector&nbsp;matrix&nbsp;(see&nbsp;latpar2ub_rot)<br>
-:param&nbsp;delta:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees&nbsp;in&nbsp;vertical&nbsp;direction&nbsp;(about&nbsp;diff-z)<br>
-:param&nbsp;gamma:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees&nbsp;in&nbsp;horizontal&nbsp;direction&nbsp;(about&nbsp;diff-x)<br>
-:param&nbsp;U:&nbsp;[3*3]&nbsp;oritenation&nbsp;matrix&nbsp;(see&nbsp;umatrix)<br>
-:param&nbsp;R:&nbsp;[3x3]&nbsp;rotation&nbsp;matrix&nbsp;(see&nbsp;diffractometer_rotation)<br>
-:return:</tt></dd></dl>
+ <dl><dt><a name="-diff6circle2hkl"><strong>diff6circle2hkl</strong></a>(ub, phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0, energy_kev=None, wavelength=1.0, lab=None)</dt><dd><tt>Return&nbsp;[h,k,l]&nbsp;position&nbsp;of&nbsp;diffractometer&nbsp;axes&nbsp;with&nbsp;given&nbsp;UB&nbsp;and&nbsp;energy<br>
+:param&nbsp;ub:&nbsp;[3*3]&nbsp;array&nbsp;UB&nbsp;orientation&nbsp;matrix&nbsp;following&nbsp;Busing&nbsp;&amp;&nbsp;Levy<br>
+:param&nbsp;phi:&nbsp;float&nbsp;sample&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;chi:&nbsp;float&nbsp;sample&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;eta:&nbsp;float&nbsp;sample&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;mu:&nbsp;float&nbsp;sample&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;delta:&nbsp;float&nbsp;detector&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;gamma:&nbsp;float&nbsp;detector&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;energy&nbsp;in&nbsp;KeV<br>
+:param&nbsp;wavelength:&nbsp;float&nbsp;wavelength&nbsp;in&nbsp;A<br>
+:param&nbsp;lab:&nbsp;[3*3]&nbsp;lab&nbsp;transformation&nbsp;matrix<br>
+:return:&nbsp;[h,k,l]</tt></dd></dl>
  <dl><dt><a name="-diff6circlek"><strong>diff6circlek</strong></a>(delta, gamma, energy_kev=None, wavelength=1.0, lab=None)</dt><dd><tt>Calcualte&nbsp;incident&nbsp;and&nbsp;final&nbsp;wavevectors&nbsp;in&nbsp;diffractometer&nbsp;axis&nbsp;using&nbsp;detector&nbsp;angles<br>
 :param&nbsp;delta:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees&nbsp;in&nbsp;vertical&nbsp;direction&nbsp;(about&nbsp;diff-z)<br>
 :param&nbsp;gamma:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees&nbsp;in&nbsp;horizontal&nbsp;direction&nbsp;(about&nbsp;diff-x)<br>
@@ -355,6 +361,22 @@ args:<br>
 :param&nbsp;args:&nbsp;floats<br>
 :param&nbsp;kwargs:&nbsp;lattice&nbsp;parameters<br>
 :return:&nbsp;a,b,c,alpha,beta,gamma</tt></dd></dl>
+ <dl><dt><a name="-gen_sym_axial_vector"><strong>gen_sym_axial_vector</strong></a>(sym_ops, x, y, z)</dt><dd><tt>&nbsp;Transform&nbsp;axial&nbsp;vector&nbsp;by&nbsp;symmetry&nbsp;operations<br>
+Usage:<br>
+&nbsp;&nbsp;uvw&nbsp;=&nbsp;<a href="#-gen_symcen_pos">gen_symcen_pos</a>(sym_ops,cen_ops,x,y,z)<br>
+&nbsp;&nbsp;sym_ops&nbsp;=&nbsp;[n*'x,y,z']&nbsp;array&nbsp;of&nbsp;string&nbsp;symmetry&nbsp;operations<br>
+&nbsp;&nbsp;cen_ops&nbsp;=&nbsp;[m*'x,y,z']&nbsp;array&nbsp;of&nbsp;string&nbsp;centring&nbsp;operations<br>
+&nbsp;&nbsp;x,y,z&nbsp;=&nbsp;fractional&nbsp;coordinates&nbsp;of&nbsp;atomic&nbsp;posiiton&nbsp;to&nbsp;be&nbsp;modified&nbsp;by&nbsp;symmetry<br>
+&nbsp;&nbsp;uvw&nbsp;=&nbsp;[[nx3]]&nbsp;array&nbsp;of&nbsp;symmetry&nbsp;defined&nbsp;factional&nbsp;coordinates&nbsp;[u,v,w]<br>
+&nbsp;<br>
+E.G.<br>
+&nbsp;&nbsp;uvw&nbsp;=&nbsp;<a href="#-gen_symcen_pos">gen_symcen_pos</a>(['x,y,z','y,-x,z+1/2'],['x,y,z','x+1/3,y+1/3,z'],0.1,0.2,0.3)<br>
+&nbsp;&nbsp;uvw&nbsp;&gt;&gt;&nbsp;[[0.1,0.2,0.3]&nbsp;,&nbsp;[0.433,0.533,0.3]&nbsp;,&nbsp;[0.2,-0.1,0.8]&nbsp;,&nbsp;[0.533,-0.233,0.8]]<br>
+:param&nbsp;sym_ops:<br>
+:param&nbsp;x:<br>
+:param&nbsp;y:<br>
+:param&nbsp;z:<br>
+:return:</tt></dd></dl>
  <dl><dt><a name="-gen_sym_mat"><strong>gen_sym_mat</strong></a>(sym_ops)</dt><dd><tt>Generate&nbsp;transformation&nbsp;matrix&nbsp;from&nbsp;symmetry&nbsp;operation<br>
 Currently&nbsp;very&nbsp;ugly&nbsp;but&nbsp;it&nbsp;seems&nbsp;to&nbsp;work<br>
 Tested&nbsp;in&nbsp;Test/test_gen_sym_mat&nbsp;-&nbsp;found&nbsp;to&nbsp;be&nbsp;fast&nbsp;and&nbsp;reliable.<br>
@@ -413,6 +435,11 @@ E.G.<br>
 &nbsp;&nbsp;uvw&nbsp;=&nbsp;<a href="#-gen_symcen_pos">gen_symcen_pos</a>(['x,y,z','y,-x,z+1/2'],['x,y,z','x+1/3,y+1/3,z'],0.1,0.2,0.3)<br>
 &nbsp;&nbsp;uvw&nbsp;&gt;&gt;&nbsp;[[0.1,0.2,0.3]&nbsp;,&nbsp;[0.433,0.533,0.3]&nbsp;,&nbsp;[0.2,-0.1,0.8]&nbsp;,&nbsp;[0.533,-0.233,0.8]]</tt></dd></dl>
  <dl><dt><a name="-getenergy"><strong>getenergy</strong></a>()</dt></dl>
+ <dl><dt><a name="-group_intensities"><strong>group_intensities</strong></a>(q_values, intensity, min_overlap=0.01)</dt><dd><tt>Group&nbsp;reflections&nbsp;within&nbsp;the&nbsp;overlap,&nbsp;returning&nbsp;the&nbsp;index&nbsp;max&nbsp;intensity&nbsp;of&nbsp;each&nbsp;group<br>
+:param&nbsp;q_values:&nbsp;[1*n]&nbsp;array&nbsp;of&nbsp;floats,&nbsp;position&nbsp;parameter&nbsp;of&nbsp;each&nbsp;reflection<br>
+:param&nbsp;intensity:&nbsp;[1*n]&nbsp;array&nbsp;of&nbsp;floats,&nbsp;intensity&nbsp;parameter&nbsp;of&nbsp;each&nbsp;reflection<br>
+:param&nbsp;min_overlap:&nbsp;float,&nbsp;how&nbsp;close&nbsp;the&nbsp;reflections&nbsp;are&nbsp;to&nbsp;be&nbsp;grouped<br>
+:return:&nbsp;group_idx:&nbsp;[1*m]&nbsp;array&nbsp;of&nbsp;int&nbsp;index</tt></dd></dl>
  <dl><dt><a name="-hkl2Q"><strong>hkl2Q</strong></a>(hkl, UVstar)</dt><dd><tt>Convert&nbsp;reflection&nbsp;indices&nbsp;(hkl)&nbsp;to&nbsp;orthogonal&nbsp;basis&nbsp;in&nbsp;A-1<br>
 :param&nbsp;hkl:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;reflections<br>
 :param&nbsp;UV:&nbsp;[3x3]&nbsp;array&nbsp;of&nbsp;unit&nbsp;cell&nbsp;vectors&nbsp;[[a1,a2,a3],[b1,b2,b3],[c1,c2,c3]]<br>
@@ -617,6 +644,11 @@ See:&nbsp;https://henke.lbl.gov/optical_constants/intro.html<br>
 :return:&nbsp;str</tt></dd></dl>
  <dl><dt><a name="-q2dspace"><strong>q2dspace</strong></a>(qmag)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;|Q|<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dspace&nbsp;=&nbsp;<a href="#-q2dspace">q2dspace</a>(Qmag)</tt></dd></dl>
+ <dl><dt><a name="-q2units"><strong>q2units</strong></a>(qmag, units='tth', energy_kev=None)</dt><dd><tt>Convert&nbsp;|Q|&nbsp;in&nbsp;A^-1&nbsp;to&nbsp;choice&nbsp;of&nbsp;units<br>
+:param&nbsp;qmag:&nbsp;float&nbsp;or&nbsp;array&nbsp;in&nbsp;inverse-Angstrom<br>
+:param&nbsp;units:&nbsp;str:&nbsp;'tth',&nbsp;'dspace',&nbsp;'q'&nbsp;(raises&nbsp;ValueError&nbsp;if&nbsp;wrong)<br>
+:param&nbsp;energy_kev:&nbsp;float<br>
+:return:&nbsp;float&nbsp;or&nbsp;array</tt></dd></dl>
  <dl><dt><a name="-read_atom_properties_file"><strong>read_atom_properties_file</strong></a>(filedir)</dt><dd><tt>Reads&nbsp;the&nbsp;text&nbsp;file&nbsp;"Dans&nbsp;Element&nbsp;Properties.txt"<br>
 Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;dicts&nbsp;containing&nbsp;atomic&nbsp;properites&nbsp;from&nbsp;multiple&nbsp;sources<br>
 &nbsp;&nbsp;data&nbsp;=&nbsp;<a href="#-read_atom_properties_file">read_atom_properties_file</a>(filedir)<br>
@@ -747,6 +779,9 @@ e.g.&nbsp;&nbsp;&nbsp;&nbsp;element&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;&nbsp
  <dl><dt><a name="-sym_op_mx"><strong>sym_op_mx</strong></a>(operations)</dt><dd><tt>Convert&nbsp;each&nbsp;operation&nbsp;from&nbsp;x,y,z&nbsp;to&nbsp;mx,my,mz<br>
 :param&nbsp;operations:&nbsp;['x,y,z',]<br>
 :return:&nbsp;['mx,my,mz',]</tt></dd></dl>
+ <dl><dt><a name="-sym_op_recogniser"><strong>sym_op_recogniser</strong></a>(sym_ops)</dt><dd><tt>Evaluates&nbsp;symmetry&nbsp;operations&nbsp;and&nbsp;returns&nbsp;str&nbsp;name&nbsp;of&nbsp;operation<br>
+&nbsp;<br>
+Doesn't&nbsp;work&nbsp;yet&nbsp;-&nbsp;works&nbsp;on&nbsp;simple&nbsp;systems&nbsp;but&nbsp;not&nbsp;trigonal&nbsp;or&nbsp;hexagonal&nbsp;operations&nbsp;-&nbsp;for&nbsp;example&nbsp;sg167</tt></dd></dl>
  <dl><dt><a name="-sym_op_time"><strong>sym_op_time</strong></a>(operations)</dt><dd><tt>Return&nbsp;the&nbsp;time&nbsp;symmetry&nbsp;of&nbsp;a&nbsp;symmetry&nbsp;operation<br>
 :param&nbsp;operations:&nbsp;list(str)&nbsp;e.g.&nbsp;['x,-y,z+1/2',&nbsp;'y,&nbsp;x+y,&nbsp;-z,&nbsp;-1']<br>
 :return:&nbsp;list,&nbsp;+/-1</tt></dd></dl>
@@ -779,6 +814,7 @@ Diffractometer&nbsp;frame&nbsp;according&nbsp;to&nbsp;Fig.&nbsp;1,&nbsp;H.&nbsp;
  <dl><dt><a name="-warn"><strong>warn</strong></a>(message, category=None, stacklevel=1, source=None)</dt><dd><tt>Issue&nbsp;a&nbsp;warning,&nbsp;or&nbsp;maybe&nbsp;ignore&nbsp;it&nbsp;or&nbsp;raise&nbsp;an&nbsp;exception.</tt></dd></dl>
  <dl><dt><a name="-wave2energy"><strong>wave2energy</strong></a>(wavelength)</dt><dd><tt>Converts&nbsp;wavelength&nbsp;in&nbsp;A&nbsp;to&nbsp;energy&nbsp;in&nbsp;keV<br>
 &nbsp;Energy&nbsp;=&nbsp;<a href="#-wave2energy">wave2energy</a>(wavelength)</tt></dd></dl>
+ <dl><dt><a name="-wavevector"><strong>wavevector</strong></a>(energy_kev=None, wavelength=None)</dt><dd><tt>Return&nbsp;wavevector&nbsp;=&nbsp;2pi/lambda</tt></dd></dl>
  <dl><dt><a name="-write_cif"><strong>write_cif</strong></a>(cifvals, filename=None, comments=None)</dt><dd><tt>Write&nbsp;.cif&nbsp;file&nbsp;with&nbsp;values&nbsp;from&nbsp;a&nbsp;cif&nbsp;dict,<br>
 Only&nbsp;basic&nbsp;items&nbsp;are&nbsp;saved,&nbsp;rather&nbsp;than&nbsp;returning&nbsp;the&nbsp;orginal&nbsp;file<br>
 :param&nbsp;cifvals:&nbsp;dict&nbsp;from&nbsp;readcif<br>

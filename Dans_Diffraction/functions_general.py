@@ -9,8 +9,8 @@ By Dan Porter, PhD
 Diamond
 2021
 
-Version 2.1.0
-Last updated: 15/11/21
+Version 2.2.0
+Last updated: 11/03/22
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -26,6 +26,7 @@ Version History:
 26/01/21 1.8.2  Added shortstr and squaredata
 02/02/21 2.0.0  Merged changes in other versions, added vector_intersection and you_normal_vector
 15/11/21 2.1.0  Added normal_basis
+11/03/22 2.2.0  Added Lorentzian, pVoight, peak_function functions
 
 @author: DGPorter
 """
@@ -34,8 +35,8 @@ import sys, os, re
 import numpy as np
 import inspect
 
-__version__ = '2.0.0'
-__date__ = '02/Feb/2021'
+__version__ = '2.2.0'
+__date__ = '11/March/2022'
 
 # File directory
 directory = os.path.abspath(os.path.dirname(__file__))
@@ -1007,29 +1008,117 @@ def nice_print(precision=4, linewidth=300):
 '----------------------------------Others-------------------------------'
 
 
-def gauss(x, y=None, height=1, cen=0, fwhm=0.5, bkg=0):
+def gauss(x, y=None, height=1, centre=0, fwhm=0.5, bkg=0, centre_y=None, fwhm_y=None):
     """
-    Define Gaussian distribution in 1 or 2 dimensions
+    Define a Gaussian distribution in 1 or 2 dimensions
+
+        g = height * exp( -ln2 (x-centre)^2 / (fwhm/2)^2 ) + bkg
     From http://fityk.nieto.pl/model.html
+
         x = [1xn] array of values, defines size of gaussian in dimension 1
         y = None* or [1xm] array of values, defines size of gaussian in dimension 2
         height = peak height
-        cen = peak centre
+        centre = peak centre
         fwhm = peak full width at half-max
         bkg = background
+        centre_y = if 2D, centre along the y-axis (defaults to centre)
+        fwhm_y = if 2D, fwhm along the y-axis (defaults to fwhm)
     """
 
+    if centre_y is None:
+        centre_y = centre
+    if fwhm_y is None:
+        fwhm_y = fwhm
     if y is None:
-        y = cen
+        y = centre_y
 
     x = np.asarray(x, dtype=np.float).reshape([-1])
     y = np.asarray(y, dtype=np.float).reshape([-1])
     X, Y = np.meshgrid(x, y)
-    g = height * np.exp(-np.log(2) * (((X - cen) ** 2 + (Y - cen) ** 2) / (fwhm / 2) ** 2)) + bkg
+    Px = (X - centre) ** 2 / (fwhm / 2) ** 2
+    Py = (Y - centre_y) ** 2 / (fwhm_y / 2) ** 2
+    g = height * np.exp(-np.log(2) * (Px + Py)) + bkg
 
     if len(y) == 1:
         g = g.reshape([-1])
     return g
+
+
+def lorentz(x, y=None, height=1, centre=0, fwhm=0.5, bkg=0, centre_y=None, fwhm_y=None):
+    """
+    Define a Lorentzian distribution in 1 or 2 dimensions
+
+        l = height / ( 1 + (x - centre)^2 / (fwhm/2)^2 + bkg
+
+        x = [1xn] array of values, defines size of gaussian in dimension 1
+        y = None* or [1xm] array of values, defines size of gaussian in dimension 2
+        height = peak height
+        centre = peak centre
+        fwhm = peak full width at half-max
+        bkg = background
+        centre_y = if 2D, centre along the y-axis (defaults to centre)
+        fwhm_y = if 2D, fwhm along the y-axis (defaults to fwhm)
+    """
+
+    if centre_y is None:
+        centre_y = centre
+    if fwhm_y is None:
+        fwhm_y = fwhm
+    if y is None:
+        y = centre_y
+
+    sigma_x = fwhm / 2.
+    sigma_y = fwhm_y / 2.
+
+    x = np.asarray(x, dtype=np.float).reshape([-1])
+    y = np.asarray(y, dtype=np.float).reshape([-1])
+    X, Y = np.meshgrid(x, y)
+    Px = (X - centre) ** 2 / sigma_x ** 2
+    Py = (Y - centre_y) ** 2 / sigma_y ** 2
+    lz = height / (1 + Px + Py) + bkg
+
+    if len(y) == 1:
+        lz = lz.reshape([-1])
+    return lz
+
+
+def pvoight(x, y=None, height=1, centre=0, fwhm=0.5, bkg=0, l_fraction=0.5, centre_y=None, fwhm_y=None):
+    """
+    Define psuedo-voight distribution in 1 or 2 dimensions
+
+        v = fraction * lorentz() + (1 - fraction) * gauss()
+
+        x = [1xn] array of values, defines size of gaussian in dimension 1
+        y = None* or [1xm] array of values, defines size of gaussian in dimension 2
+        height = peak height
+        centre = peak centre
+        fwhm = peak full width at half-max
+        bkg = background
+        l_fraction = Lorentzian fraction (0-1)
+        centre_y = if 2D, centre along the y-axis (defaults to centre)
+        fwhm_y = if 2D, fwhm along the y-axis (defaults to fwhm)
+    """
+    g = gauss(x, y, height=height, centre=centre, fwhm=fwhm, bkg=bkg, centre_y=centre_y, fwhm_y=fwhm_y)
+    l = lorentz(x, y, height=height, centre=centre, fwhm=fwhm, bkg=bkg, centre_y=centre_y, fwhm_y=fwhm_y)
+    return (1 - l_fraction) * g + l_fraction * l
+
+
+def peak_function(func_name, *args, **kwargs):
+    """
+    Choose & create peak function, using either gaussian, lorentzian or pseudo-voight
+    :param func_name: 'gaussian', 'lorentzian', 'psudovoight' (raise ValueError if wrong)
+    :param args: x, y, height, centre, fwhm, bkg, (fraction), centre_y, fwhm_y
+    :param kwargs:
+    :return: array()
+    """
+    func_name = func_name.lower().replace(' ', '').replace('-', '')
+    if 'gauss' in func_name:
+        return gauss(*args, **kwargs)
+    if 'lorentz' in func_name:
+        return lorentz(*args, **kwargs)
+    if 'voight' in func_name:
+        return pvoight(*args, **kwargs)
+    raise ValueError('%s not available as peak function.' % func_name)
 
 
 def frange(start, stop=None, step=1):
@@ -1107,7 +1196,7 @@ def grid_intensity(points, values, resolution=0.01, peak_width=0.1, background=0
     # Convolve with a gaussian (if >0 or not None)
     if peak_width:
         gauss_x = np.arange(-3 * peak_width_pixels, 3 * peak_width_pixels + 1)  # gaussian width = 2*FWHM
-        g = gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
+        g = gauss(gauss_x, None, height=1, centre=0, fwhm=peak_width_pixels, bkg=0)
         grid_values = np.convolve(grid_values, g, mode='same')
 
     # Add background (if >0 or not None)
@@ -1140,7 +1229,7 @@ def map2grid(grid, points, values, widths=None, background=0):
     grid_values = np.zeros([pixels])
 
     for point, value, width in zip(points, values, widths):
-        g = gauss(grid, None, height=value, cen=point, fwhm=width, bkg=0)
+        g = gauss(grid, None, height=value, centre=point, fwhm=width, bkg=0)
         grid_values += g
 
     # Add background (if >0 or not None)

@@ -321,9 +321,15 @@ direct=True,&nbsp;BLstyle=False:&nbsp;Real&nbsp;space&nbsp;B&nbsp;matrix&nbsp;co
  <dl><dt><a name="-msg"><strong>msg</strong></a>(num, txt=['plus', 'minus', 'zero', 'other'])</dt><dd><tt>return&nbsp;message&nbsp;text&nbsp;for&nbsp;+1,-1,&nbsp;0,&nbsp;other&nbsp;(e.g.&nbsp;None)</tt></dd></dl>
  <dl><dt><a name="-norm_array"><strong>norm_array</strong></a>(Array, Minval=0.001)</dt><dd><tt>Normalise&nbsp;array&nbsp;by&nbsp;largest&nbsp;abs&nbsp;value&nbsp;if&nbsp;&gt;Minval&nbsp;(avoids&nbsp;trying&nbsp;to&nbsp;renormalise&nbsp;zero&nbsp;array)</tt></dd></dl>
  <dl><dt><a name="-print_tensors"><strong>print_tensors</strong></a>(B, sitevec, sglist, hkl=array([0, 0, 0]), K=None, Parity=1, Time=1)</dt><dd><tt>return&nbsp;str&nbsp;of&nbsp;tensors</tt></dd></dl>
- <dl><dt><a name="-rand"><strong>rand</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of <a href="numpy.random.mtrand.html#RandomState">mtrand.RandomState</a> instance</font></font></dt><dd><tt><a href="#-rand">rand</a>(d0,&nbsp;d1,&nbsp;...,&nbsp;dn)<br>
+ <dl><dt><a name="-rand"><strong>rand</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of <a href="numpy.random.mtrand.html#RandomState">numpy.random.mtrand.RandomState</a> instance</font></font></dt><dd><tt><a href="#-rand">rand</a>(d0,&nbsp;d1,&nbsp;...,&nbsp;dn)<br>
 &nbsp;<br>
 Random&nbsp;values&nbsp;in&nbsp;a&nbsp;given&nbsp;shape.<br>
+&nbsp;<br>
+..&nbsp;note::<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;is&nbsp;a&nbsp;convenience&nbsp;function&nbsp;for&nbsp;users&nbsp;porting&nbsp;code&nbsp;from&nbsp;Matlab,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;wraps&nbsp;`random_sample`.&nbsp;That&nbsp;function&nbsp;takes&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tuple&nbsp;to&nbsp;specify&nbsp;the&nbsp;size&nbsp;of&nbsp;the&nbsp;output,&nbsp;which&nbsp;is&nbsp;consistent&nbsp;with<br>
+&nbsp;&nbsp;&nbsp;&nbsp;other&nbsp;NumPy&nbsp;functions&nbsp;like&nbsp;`numpy.zeros`&nbsp;and&nbsp;`numpy.ones`.<br>
 &nbsp;<br>
 Create&nbsp;an&nbsp;array&nbsp;of&nbsp;the&nbsp;given&nbsp;shape&nbsp;and&nbsp;populate&nbsp;it&nbsp;with<br>
 random&nbsp;samples&nbsp;from&nbsp;a&nbsp;uniform&nbsp;distribution<br>
@@ -332,7 +338,7 @@ over&nbsp;``[0,&nbsp;1)``.<br>
 Parameters<br>
 ----------<br>
 d0,&nbsp;d1,&nbsp;...,&nbsp;dn&nbsp;:&nbsp;int,&nbsp;optional<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;dimensions&nbsp;of&nbsp;the&nbsp;returned&nbsp;array,&nbsp;should&nbsp;all&nbsp;be&nbsp;positive.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;dimensions&nbsp;of&nbsp;the&nbsp;returned&nbsp;array,&nbsp;must&nbsp;be&nbsp;non-negative.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;no&nbsp;argument&nbsp;is&nbsp;given&nbsp;a&nbsp;single&nbsp;Python&nbsp;float&nbsp;is&nbsp;returned.<br>
 &nbsp;<br>
 Returns<br>
@@ -343,12 +349,6 @@ out&nbsp;:&nbsp;ndarray,&nbsp;shape&nbsp;``(d0,&nbsp;d1,&nbsp;...,&nbsp;dn)``<br
 See&nbsp;Also<br>
 --------<br>
 random<br>
-&nbsp;<br>
-Notes<br>
------<br>
-This&nbsp;is&nbsp;a&nbsp;convenience&nbsp;function.&nbsp;If&nbsp;you&nbsp;want&nbsp;an&nbsp;interface&nbsp;that<br>
-takes&nbsp;a&nbsp;shape-tuple&nbsp;as&nbsp;the&nbsp;first&nbsp;argument,&nbsp;refer&nbsp;to<br>
-np.random.random_sample&nbsp;.<br>
 &nbsp;<br>
 Examples<br>
 --------<br>

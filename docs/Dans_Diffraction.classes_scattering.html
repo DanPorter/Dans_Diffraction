@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_scattering</strong></big></big> (version 2.0.1)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_scattering</strong></big></big> (version 2.1.0)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_scattering.py">c:\users\dgpor\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\classes_scattering.py</a></font></td></tr></table>
     <p><tt><a href="#Scattering">Scattering</a>&nbsp;Class&nbsp;"classes_scattering.py"<br>
@@ -16,8 +16,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;2.0.1<br>
-Last&nbsp;updated:&nbsp;28/09/21<br>
+Version&nbsp;2.1.0<br>
+Last&nbsp;updated:&nbsp;14/03/22<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 10/09/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -37,6 +37,8 @@ Version&nbsp;History:<br>
 09/07/21&nbsp;1.9&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;new&nbsp;scattering&nbsp;factors&nbsp;as&nbsp;option&nbsp;on&nbsp;normal&nbsp;scattering&nbsp;functions<br>
 20/08/21&nbsp;2.0&nbsp;&nbsp;&nbsp;&nbsp;Switched&nbsp;over&nbsp;to&nbsp;new&nbsp;scattering&nbsp;module,&nbsp;added&nbsp;self.powder()<br>
 28/09/21&nbsp;2.0.1&nbsp;&nbsp;Added&nbsp;__repr__<br>
+08/02/22&nbsp;2.0.3&nbsp;&nbsp;Corrected&nbsp;error&nbsp;in&nbsp;powder&nbsp;of&nbsp;wrong&nbsp;tth&nbsp;values.&nbsp;Thanks&nbsp;Mirko!<br>
+14/03/22&nbsp;2.1.0&nbsp;&nbsp;&nbsp;powder()&nbsp;updated&nbsp;for&nbsp;new&nbsp;inputs&nbsp;and&nbsp;outputs&nbsp;for&nbsp;pVoight&nbsp;and&nbsp;custom&nbsp;peak&nbsp;shapes.&nbsp;Thanks&nbsp;yevgenyr!<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -65,12 +67,76 @@ Version&nbsp;History:<br>
 <dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
 </font></dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_scattering.html#Scattering">Scattering</a>
+<dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_scattering.html#Reflections">Reflections</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_scattering.html#Scattering">Scattering</a>
 </font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.classes_scattering.html#ScatteringTypes">ScatteringTypes</a>
 </font></dt></dl>
 </dd>
 </dl>
  <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Reflections">class <strong>Reflections</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Reflections">Reflections</a>(hkl,&nbsp;q_mag,&nbsp;intensity,&nbsp;energy_kev=None,&nbsp;wavelength_a=None)<br>
+&nbsp;<br>
+Contains&nbsp;h,k,l&nbsp;indices,&nbsp;intensity<br>
+&nbsp;<br>
+masking&nbsp;doesn't&nbsp;work&nbsp;currently<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Reflections-__getitem__"><strong>__getitem__</strong></a>(self, item)</dt></dl>
+
+<dl><dt><a name="Reflections-__init__"><strong>__init__</strong></a>(self, hkl, q_mag, intensity, energy_kev=None, wavelength_a=None)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="Reflections-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
+<dl><dt><a name="Reflections-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>Return&nbsp;str(self).</tt></dd></dl>
+
+<dl><dt><a name="Reflections-dspacing"><strong>dspacing</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Reflections-labels"><strong>labels</strong></a>(self)</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;str&nbsp;labels&nbsp;"(h,k,l)"</tt></dd></dl>
+
+<dl><dt><a name="Reflections-limits"><strong>limits</strong></a>(self, min_val=None, max_val=None, limit_type='q')</dt><dd><tt>Adds&nbsp;limits<br>
+:param&nbsp;min_val:&nbsp;float,&nbsp;minimum&nbsp;value&nbsp;in&nbsp;units&nbsp;determined&nbsp;by&nbsp;overlap_type<br>
+:param&nbsp;max_val:&nbsp;float,&nbsp;maximum&nbsp;value<br>
+:param&nbsp;limit_type:&nbsp;str&nbsp;'q',&nbsp;'tth'&nbsp;or&nbsp;'d'<br>
+:return:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Reflections-mask"><strong>mask</strong></a>(self, center=None, width=None, mask_type='q')</dt><dd><tt>Adds&nbsp;mask<br>
+:param&nbsp;center:&nbsp;float,&nbsp;centre&nbsp;of&nbsp;mask&nbsp;in&nbsp;units&nbsp;determined&nbsp;by&nbsp;overlap_type<br>
+:param&nbsp;width:&nbsp;float,&nbsp;width&nbsp;of&nbsp;mask<br>
+:param&nbsp;limit_type:&nbsp;str&nbsp;'q',&nbsp;'tth'&nbsp;or&nbsp;'d'<br>
+:return:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Reflections-non_overlapping_refs"><strong>non_overlapping_refs</strong></a>(self, min_overlap=0.05, overlap_type='q')</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;non-overlapping&nbsp;label<br>
+:param&nbsp;min_overlap:&nbsp;float,&nbsp;minimum&nbsp;overlap&nbsp;in&nbsp;units&nbsp;determined&nbsp;by&nbsp;overlap_type<br>
+:param&nbsp;overlap_type:&nbsp;str&nbsp;'q',&nbsp;'tth'&nbsp;or&nbsp;'d'<br>
+:return:</tt></dd></dl>
+
+<dl><dt><a name="Reflections-set_energy"><strong>set_energy</strong></a>(self, energy_kev)</dt></dl>
+
+<dl><dt><a name="Reflections-set_wavelength"><strong>set_wavelength</strong></a>(self, wavelength_a)</dt></dl>
+
+<dl><dt><a name="Reflections-sort_hkl"><strong>sort_hkl</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Reflections-sort_intensity"><strong>sort_intensity</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Reflections-sort_qmag"><strong>sort_qmag</strong></a>(self)</dt><dd><tt>Sort&nbsp;arrays&nbsp;by&nbsp;qmag</tt></dd></dl>
+
+<dl><dt><a name="Reflections-two_theta"><strong>two_theta</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -96,9 +162,22 @@ Useage:<br>
 
 <dl><dt><a name="Scattering-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>Return&nbsp;str(self).</tt></dd></dl>
 
+<dl><dt><a name="Scattering-diff6circle_intensity"><strong>diff6circle_intensity</strong></a>(self, phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0, energy_kev=None, wavelength=1.0, fwhm=0.5)</dt><dd><tt>Return&nbsp;the&nbsp;closest&nbsp;hkl&nbsp;and&nbsp;intensity&nbsp;factor<br>
+:param&nbsp;phi:&nbsp;float&nbsp;sample&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;chi:&nbsp;float&nbsp;sample&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;eta:&nbsp;float&nbsp;sample&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;mu:&nbsp;float&nbsp;sample&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;delta:&nbsp;float&nbsp;detector&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;gamma:&nbsp;float&nbsp;detector&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;energy&nbsp;in&nbsp;KeV<br>
+:param&nbsp;wavelength:&nbsp;float&nbsp;wavelength&nbsp;in&nbsp;A<br>
+:param&nbsp;fwhm:&nbsp;float&nbsp;peak&nbsp;width&nbsp;in&nbsp;A-1<br>
+:return:&nbsp;[h,k,l],&nbsp;If</tt></dd></dl>
+
 <dl><dt><a name="Scattering-find_close_reflections"><strong>find_close_reflections</strong></a>(self, HKL, energy_kev=None, max_twotheta=2, max_angle=10)</dt><dd><tt>Find&nbsp;and&nbsp;print&nbsp;list&nbsp;of&nbsp;reflections&nbsp;close&nbsp;to&nbsp;the&nbsp;given&nbsp;one</tt></dd></dl>
 
-<dl><dt><a name="Scattering-generate_powder"><strong>generate_powder</strong></a>(self, q_max=8, peak_width=0.01, background=0, powder_average=True)</dt><dd><tt>Generates&nbsp;array&nbsp;of&nbsp;intensities&nbsp;along&nbsp;a&nbsp;spaced&nbsp;grid,&nbsp;equivalent&nbsp;to&nbsp;a&nbsp;powder&nbsp;pattern.<br>
+<dl><dt><a name="Scattering-generate_powder"><strong>generate_powder</strong></a>(self, q_max=8, peak_width=0.01, background=0, powder_average=True)</dt><dd><tt>*DEPRECIATED*<br>
+Generates&nbsp;array&nbsp;of&nbsp;intensities&nbsp;along&nbsp;a&nbsp;spaced&nbsp;grid,&nbsp;equivalent&nbsp;to&nbsp;a&nbsp;powder&nbsp;pattern.<br>
 &nbsp;&nbsp;Q,I&nbsp;=&nbsp;<a href="#Scattering-generate_powder">generate_powder</a>(energy_kev=8.0,peak_width=0.05,background=0)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;q_max&nbsp;=&nbsp;maximum&nbsp;Q,&nbsp;in&nbsp;A-1<br>
 &nbsp;&nbsp;&nbsp;&nbsp;peak_width&nbsp;=&nbsp;width&nbsp;of&nbsp;convolution,&nbsp;in&nbsp;A-1<br>
@@ -108,10 +187,15 @@ Useage:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Q&nbsp;=&nbsp;[1000x1]&nbsp;array&nbsp;of&nbsp;wave-vector&nbsp;values<br>
 &nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;=&nbsp;[1000x1]&nbsp;array&nbsp;of&nbsp;intensity&nbsp;values<br>
 &nbsp;<br>
+Note:&nbsp;This&nbsp;function&nbsp;is&nbsp;depreciated,&nbsp;use&nbsp;self.<a href="#Scattering-powder">powder</a>()&nbsp;instead.<br>
 Note:&nbsp;To&nbsp;get&nbsp;two-theta&nbsp;values&nbsp;use:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;tth&nbsp;=&nbsp;fc.cal2theta(Q,&nbsp;energy_kev)<br>
 Note:&nbsp;To&nbsp;get&nbsp;d-spacing&nbsp;values&nbsp;use:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;dspace&nbsp;=&nbsp;fc.caldspace(Q)</tt></dd></dl>
+
+<dl><dt><a name="Scattering-get_energy"><strong>get_energy</strong></a>(self, **kwargs)</dt><dd><tt>Return&nbsp;energy<br>
+:param&nbsp;kwargs:&nbsp;energy_kev,&nbsp;wavelength_a<br>
+:return:&nbsp;energy_kev</tt></dd></dl>
 
 <dl><dt><a name="Scattering-get_hkl"><strong>get_hkl</strong></a>(self, regenerate=True, remove_symmetric=False, reflection=False, transmission=False, **kwargs)</dt><dd><tt>Return&nbsp;stored&nbsp;hkl&nbsp;or&nbsp;generate<br>
 :param&nbsp;regenerate:&nbsp;if&nbsp;True,&nbsp;hkl&nbsp;list&nbsp;will&nbsp;be&nbsp;regenerated,&nbsp;if&nbsp;False&nbsp;-&nbsp;previous&nbsp;list&nbsp;will&nbsp;be&nbsp;returned<br>
@@ -212,18 +296,25 @@ Notes:<br>
 -&nbsp;Testing&nbsp;against&nbsp;structure&nbsp;factors&nbsp;calculated&nbsp;by&nbsp;Vesta.exe&nbsp;is&nbsp;very&nbsp;close,&nbsp;though&nbsp;there<br>
 &nbsp;&nbsp;are&nbsp;some&nbsp;discrepancies,&nbsp;probably&nbsp;due&nbsp;to&nbsp;the&nbsp;method&nbsp;of&nbsp;calculation&nbsp;of&nbsp;the&nbsp;form&nbsp;factor.</tt></dd></dl>
 
-<dl><dt><a name="Scattering-powder"><strong>powder</strong></a>(self, scattering_type=None, units=None, peak_width=None, background=None, pixels=None, powder_average=None, **options)</dt><dd><tt>Generates&nbsp;array&nbsp;of&nbsp;intensities&nbsp;along&nbsp;a&nbsp;spaced&nbsp;grid,&nbsp;equivalent&nbsp;to&nbsp;a&nbsp;powder&nbsp;pattern.<br>
-&nbsp;&nbsp;tth,&nbsp;iten&nbsp;=&nbsp;<a href="#Scattering-generate_powder">generate_powder</a>('xray',&nbsp;units='tth',&nbsp;energy_kev=8)<br>
+<dl><dt><a name="Scattering-powder"><strong>powder</strong></a>(self, scattering_type=None, units=None, peak_width=None, background=None, pixels=None, powder_average=None, lorentz_fraction=None, custom_peak=None, min_overlap=None, **options)</dt><dd><tt>Generates&nbsp;array&nbsp;of&nbsp;intensities&nbsp;along&nbsp;a&nbsp;spaced&nbsp;grid,&nbsp;equivalent&nbsp;to&nbsp;a&nbsp;powder&nbsp;pattern.<br>
+&nbsp;&nbsp;tth,&nbsp;inten,&nbsp;reflections&nbsp;=&nbsp;Scatter.<a href="#Scattering-powder">powder</a>('xray',&nbsp;units='tth',&nbsp;energy_kev=8)<br>
+&nbsp;<br>
+Note:&nbsp;This&nbsp;function&nbsp;is&nbsp;the&nbsp;new&nbsp;replacement&nbsp;for&nbsp;generate_power&nbsp;and&nbsp;uses&nbsp;both&nbsp;_scattering_min_twotheta<br>
+and&nbsp;_scattering_max_twotheta.<br>
 &nbsp;<br>
 :param&nbsp;scattering_type:&nbsp;str&nbsp;:&nbsp;one&nbsp;of&nbsp;['xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant']<br>
 :param&nbsp;units:&nbsp;str&nbsp;:&nbsp;one&nbsp;of&nbsp;['tth',&nbsp;'dspace',&nbsp;'q']<br>
 :param&nbsp;peak_width:&nbsp;float&nbsp;:&nbsp;Peak&nbsp;with&nbsp;in&nbsp;units&nbsp;of&nbsp;inverse&nbsp;wavevector&nbsp;(Q)<br>
 :param&nbsp;background:&nbsp;float&nbsp;:&nbsp;if&nbsp;&gt;0,&nbsp;a&nbsp;normal&nbsp;background&nbsp;around&nbsp;this&nbsp;value&nbsp;will&nbsp;be&nbsp;added<br>
-:param&nbsp;pixels:&nbsp;int&nbsp;:&nbsp;number&nbsp;of&nbsp;pixels&nbsp;to&nbsp;add&nbsp;to&nbsp;the&nbsp;resulting&nbsp;mesh<br>
+:param&nbsp;pixels:&nbsp;int&nbsp;:&nbsp;number&nbsp;of&nbsp;pixels&nbsp;per&nbsp;inverse-anstrom&nbsp;to&nbsp;add&nbsp;to&nbsp;the&nbsp;resulting&nbsp;mesh<br>
 :param&nbsp;powder_average:&nbsp;Bool&nbsp;:&nbsp;if&nbsp;True,&nbsp;intensities&nbsp;will&nbsp;be&nbsp;reduced&nbsp;for&nbsp;the&nbsp;powder&nbsp;average<br>
+:param&nbsp;lorentz_fraction:&nbsp;float&nbsp;0-1:&nbsp;sets&nbsp;the&nbsp;Lorentzian&nbsp;fraction&nbsp;of&nbsp;the&nbsp;psuedo-Voight&nbsp;peak&nbsp;functions<br>
+:param&nbsp;custom_peak:&nbsp;array:&nbsp;if&nbsp;not&nbsp;None,&nbsp;the&nbsp;array&nbsp;will&nbsp;be&nbsp;convolved&nbsp;with&nbsp;delta-functions&nbsp;at&nbsp;each&nbsp;reflection.<br>
+:param&nbsp;min_overlap:&nbsp;minimum&nbsp;overlap&nbsp;of&nbsp;neighboring&nbsp;reflections.<br>
 :param&nbsp;options:&nbsp;additional&nbsp;arguments&nbsp;to&nbsp;pass&nbsp;to&nbsp;intensity&nbsp;calculation<br>
 :return&nbsp;xval:&nbsp;arrray&nbsp;:&nbsp;x-axis&nbsp;of&nbsp;powder&nbsp;scan&nbsp;(units)<br>
-:return&nbsp;yval:&nbsp;array&nbsp;:&nbsp;&nbsp;intensity&nbsp;values&nbsp;at&nbsp;each&nbsp;point&nbsp;in&nbsp;x-axis</tt></dd></dl>
+:return&nbsp;inten:&nbsp;array&nbsp;:&nbsp;&nbsp;intensity&nbsp;values&nbsp;at&nbsp;each&nbsp;point&nbsp;in&nbsp;x-axis<br>
+:return&nbsp;reflections:&nbsp;(h,&nbsp;k,&nbsp;l,&nbsp;xval,&nbsp;intensity)&nbsp;array&nbsp;of&nbsp;reflection&nbsp;positions,&nbsp;grouped&nbsp;by&nbsp;min_overlap</tt></dd></dl>
 
 <dl><dt><a name="Scattering-powder_correction"><strong>powder_correction</strong></a>(self, HKL, intensities, symmetric_multiplyer=True, powder_average=True)</dt><dd><tt>Averages&nbsp;symmetric&nbsp;reflections&nbsp;and&nbsp;applies&nbsp;symmetry&nbsp;multipliers&nbsp;and&nbsp;1/q^2&nbsp;correction<br>
 Ic&nbsp;=&nbsp;I0*C<br>
@@ -317,12 +408,15 @@ Returned&nbsp;values&nbsp;are&nbsp;[n,3]&nbsp;arrays<br>
 The&nbsp;basis&nbsp;is&nbsp;chosen&nbsp;such&nbsp;that&nbsp;Q&nbsp;defines&nbsp;the&nbsp;scattering&nbsp;plane,&nbsp;sigma&nbsp;and&nbsp;pi&nbsp;directions&nbsp;are&nbsp;normal&nbsp;to&nbsp;this&nbsp;plane.<br>
 Q&nbsp;is&nbsp;defined&nbsp;as&nbsp;Q&nbsp;=&nbsp;kout&nbsp;-&nbsp;kin,&nbsp;with&nbsp;kout&nbsp;+ve&nbsp;along&nbsp;the&nbsp;projection&nbsp;of&nbsp;azim_zero</tt></dd></dl>
 
-<dl><dt><a name="Scattering-setup_scatter"><strong>setup_scatter</strong></a>(self, scattering_type=None, energy_kev=None, wavelength_a=None, powder_units=None, specular=None, parallel=None, theta_offset=None, min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None, output=True, scattering_factors=None, magnetic_formfactor=None, polarisation=None, polarisation_vector=None, azimuthal_reference=None, azimuth=None, flm=None)</dt><dd><tt>Simple&nbsp;way&nbsp;to&nbsp;set&nbsp;scattering&nbsp;parameters,&nbsp;each&nbsp;parameter&nbsp;is&nbsp;internal&nbsp;to&nbsp;xtl&nbsp;(self)<br>
+<dl><dt><a name="Scattering-setup_scatter"><strong>setup_scatter</strong></a>(self, scattering_type=None, energy_kev=None, wavelength_a=None, powder_units=None, powder_pixels=None, powder_lorentz=None, powder_overlap=None, specular=None, parallel=None, theta_offset=None, min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None, output=True, scattering_factors=None, magnetic_formfactor=None, polarisation=None, polarisation_vector=None, azimuthal_reference=None, azimuth=None, flm=None)</dt><dd><tt>Simple&nbsp;way&nbsp;to&nbsp;set&nbsp;scattering&nbsp;parameters,&nbsp;each&nbsp;parameter&nbsp;is&nbsp;internal&nbsp;to&nbsp;xtl&nbsp;(self)<br>
 &nbsp;<br>
 scattering_type:&nbsp;self.<strong>_scattering</strong>&nbsp;type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;'xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant',&nbsp;'xray&nbsp;dispersion'<br>
 energy_kev&nbsp;&nbsp;:&nbsp;self.<strong>_energy_kev</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;radiation&nbsp;energy&nbsp;in&nbsp;keV<br>
 wavelength_a:&nbsp;self.<strong>_wavelength_a</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;radiation&nbsp;wavelength&nbsp;in&nbsp;Angstrom<br>
 powder_units:&nbsp;self.<strong>_powder_units</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;units&nbsp;to&nbsp;use&nbsp;when&nbsp;displaying/&nbsp;plotting&nbsp;['twotheta',&nbsp;'d','&nbsp;'q']<br>
+powder_pixels:&nbsp;self.<strong>_powder_pixels</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;number&nbsp;of&nbsp;bins&nbsp;per&nbsp;inverse-angstrom&nbsp;in&nbsp;the&nbsp;powder&nbsp;spectrum<br>
+powder_lorentz:&nbsp;self.<strong>_powder_lorentz_fraction</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;the&nbsp;fraction&nbsp;of&nbsp;Lorentzian&nbsp;in&nbsp;the&nbsp;peak&nbsp;function&nbsp;psuedo-Voight<br>
+powder_overlap:&nbsp;self.<strong>_powder_min_overlap</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;minimum&nbsp;overlap&nbsp;of&nbsp;grouped&nbsp;reflections&nbsp;in&nbsp;powder<br>
 min_twotheta:&nbsp;self.<strong>_scattering_min_two_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;minimum&nbsp;detector&nbsp;(two-theta)&nbsp;angle<br>
 max_twotheta:&nbsp;self.<strong>_scattering_max_two_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;maximum&nbsp;detector&nbsp;(two-theta)&nbsp;angle<br>
 min_theta&nbsp;&nbsp;&nbsp;:&nbsp;self.<strong>_scattering_min_theta</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;minimum&nbsp;sample&nbsp;angle&nbsp;=&nbsp;-opening&nbsp;angle<br>

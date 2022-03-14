@@ -16,7 +16,7 @@ TEST_FDMNES = False
 
 # Write output to file
 ranon = datetime.datetime.now()
-out_name = ranon.strftime('result_%Y_%m_%d_V2.1.txt')
+out_name = ranon.strftime('result_%Y_%m_%d_V2.2.txt')
 outfile = open(os.path.join('unit_test_results', out_name), 'wt')
 original_stdout = sys.stdout
 sys.stdout = outfile
@@ -138,14 +138,20 @@ xtlm.info()
 xtl2.name = 'Testing Testing'
 xtl2.write_cif('Test.cif', comments='This is a test\n it is not interesting')
 print('\nWriting CIF to: test.cif')
-xtl2 = dif.Crystal('Test.cif')
+xtl3 = dif.Crystal('Test.cif')
 print('Test.cif loaded succesfully')
 
 # 9) X-ray scattering
 print('\nTest x-ray scattering:')
-xtl2.Scatter.hkl([[1,0,0],[2,0,0],[1,1,0],[0,0,1]],8.0)
+xtl2.Scatter.hkl([[1, 0, 0], [2, 0, 0], [1, 1, 0], [0, 0, 1]], 8.0)
 
-# 10) Magnetic scattering
+# 10) Powder spectrum
+print('\nTest calculation of powder pattern:')
+tth_mesh, i_mesh, refs = xtl2.Scatter.powder(units='twotheta', energy_kev=8)
+for ref in refs:
+    print('(%3.0f,%3.0f,%3.0f)  tth=%5.2f  inten=%8.2f' % (ref[0], ref[1], ref[2], ref[3], ref[4]))
+
+# 11) Magnetic scattering
 print('\nTest Magnetic scattering:')
 xtlm.Scatter.print_intensity([0,0,3])
 
@@ -158,17 +164,17 @@ en = xtl2.Properties.Co.K
 inten = xtl2.Scatter.xray_dispersion([0, 0, 2], en)
 print('\nX-ray scattering with dispersion correction (002) at %s keV: %s' % (en, inten))
 
-# 12) Multiple scattering
+# 13) Multiple scattering
 if TEST_MULTIPLE_SCATTERING:
     psi, ms_intensity = xtlm.Scatter.ms_azimuth([0,0,2], 2.967, [1,0,0])
     print('\nMultiple scattering (0,0,2) RuL2, max(intensity) = %s' % ms_intensity.max())
 
-# 13) Tensor scattering
+# 14) Tensor scattering
 if TEST_TENSOR_SCATTERING:
     ss, sp, ps, pp = xtlm.Scatter.tensor_scattering('Ru1_1', [0,0,3], 2.838, [0,1,0], psideg=np.arange(-180, 180, 1))
     print('\nTensor scattering from Ru1_1 at (003), RuL3, max sp = %s' % sp.max())
 
-# 14) Generate superstructure
+# 15) Generate superstructure
 if TEST_SUPERSTRUCTURE:
     P = [[3,0,0],[4,5,0],[0,0,1]] # Stripe Supercell
     xtl2.Atoms.occupancy[2]=0
@@ -179,16 +185,22 @@ if TEST_SUPERSTRUCTURE:
     sup.Structure.occupancy[[8 ,18,38,28,48,58, 139, 119, 149, 109, 89,79]] = 0 # Na2
     print('\nSuperstructure:\n%s' % sup)
 
-# 15) Multicrystal
+# 16) Multicrystal
 if TEST_MULTICRYSTAL:
     xtls = xtl2 + dif.structure_list.Diamond() + dif.structure_list.Aluminium()
     print('\nMulticrystal:\n%s' % xtls)
 
-# 16) Plotting
+# 17) Plotting
 if TEST_PLOTTING:
     print('\nStarting Plotting Tests...')
     print('  Plotting Powder')
     xtl2.Plot.simulate_powder(energy_kev=8, peak_width=0.01)
+    plt.figure(figsize=[14, 6], dpi=60)
+    plt.plot(tth_mesh, i_mesh)
+    dif.fp.labels('Scatter.powder()', 'Two-Theta [deg]', 'Intensity')
+    for ref in refs:
+        if ref[-1] > 10:
+            plt.text(ref[-2], ref[-1], '(%1.0f,%1.0f,%1.0f)' % (ref[0], ref[1], ref[2]))
     plt.show()
     print('  Plotting hk0 plane')
     xtl2.Plot.simulate_hk0()
@@ -213,10 +225,10 @@ if TEST_PLOTTING:
     plt.clim([0,10])
     plt.show()
     print('  Plotting multicrystal powder')
-    xtls.Plot.simulate_powder(energy_kev = 5.0, peak_width=0.001)
+    xtls.Plot.simulate_powder(energy_kev=5.0, peak_width=0.001)
     plt.show()
 
-# 17) FDMNES
+# 18) FDMNES
 if TEST_FDMNES:
     print('\nTest FDMNES code')
     fdm = dif.Fdmnes(xtl2)  # this might take a while the first time as the fdmnes_win64.exe file is found
@@ -253,3 +265,6 @@ print('\nUnit Test Completed!\nTime taken: %s' % time_took)
 
 sys.stdout = original_stdout
 outfile.close()
+print('Finished!')
+plt.ioff()
+plt.show()

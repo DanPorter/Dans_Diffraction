@@ -360,7 +360,7 @@ class Plotting:
         # Convolve with a gaussian (if >0 or not None)
         if peak_width:
             gauss_x = np.arange(-3*peak_width_pixels,3*peak_width_pixels+1) # gaussian width = 2*FWHM
-            G = fg.gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
+            G = fg.gauss(gauss_x, None, height=1, centre=0, fwhm=peak_width_pixels, bkg=0)
             mesh = np.convolve(mesh,G, mode='same') 
         
         # Add background (if >0 or not None)
@@ -590,22 +590,22 @@ class Plotting:
              hhl plot:
             xtl.simulate_intensity_cut([1,1,0],[0,0,1],[0,0,0])
         """
-        
+
         # Determine the directions in cartesian space
         x_cart = fg.norm(self.xtl.Cell.calculateQ(x_axis))
         y_cart = fg.norm(self.xtl.Cell.calculateQ(y_axis))
-        z_cart = fg.norm(np.cross( x_cart, y_cart )) # z is perp. to x+y
-        y_cart = np.cross(x_cart,z_cart) # make sure y is perp. to x
+        z_cart = fg.norm(np.cross(x_cart, y_cart))  # z is perp. to x+y
+        y_cart = np.cross(x_cart, z_cart)  # make sure y is perp. to x
         c_cart = self.xtl.Cell.calculateQ(centre)
-        
+
         # Correct y-axis for label - original may not have been perp. to x_axis (e.g. hexagonal)
         y_axis = fg.norm(self.xtl.Cell.indexQ(y_cart))
-        y_axis = -y_axis/np.min(np.abs(y_axis[np.abs(y_axis)>0])) + 0.0 # +0.0 to remove -0
+        y_axis = -y_axis / np.min(np.abs(y_axis[np.abs(y_axis) > 0])) + 0.0  # +0.0 to remove -0
         
         # Determine orthogonal lattice vectors for plotting lines and labels
         vec_a = x_axis
-        vec_c = np.cross(x_axis,y_axis)
-        vec_b = fg.norm(np.cross(vec_c,vec_a))
+        vec_c = np.cross(x_axis, y_axis)
+        vec_b = fg.norm(np.cross(vec_c, vec_a))
         
         # Generate intensity cut
         X, Y, mesh = self.generate_intensity_cut(x_axis, y_axis, centre, q_max, cut_width, background, peak_width)
@@ -613,24 +613,24 @@ class Plotting:
         # create figure
         plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         cmap = plt.get_cmap('hot_r')
-        plt.pcolormesh(X,Y,mesh,cmap=cmap)
+        plt.pcolormesh(X, Y, mesh, cmap=cmap)
         plt.axis('image')
         plt.colorbar()
         plt.clim([background-(np.max(mesh)/200),background+(np.max(mesh)/50)])
-        
+
         # Lattice points and vectors within the plot
         Q_vec_a = self.xtl.Cell.calculateQ(vec_a)
         Q_vec_b = self.xtl.Cell.calculateQ(vec_b)
-        
-        CELL = np.array([2*q_max*x_cart,-2*q_max*y_cart,cut_width*z_cart]) # Plot/mesh unit cell
-        
-        mesh_vec_a = fg.index_coordinates(Q_vec_a, CELL)*2*q_max # coordinates wrt plot axes
-        mesh_vec_b = fg.index_coordinates(Q_vec_b, CELL)*2*q_max
-        
+
+        CELL = np.array([2 * q_max * x_cart, -2 * q_max * y_cart, cut_width * z_cart])  # Plot/mesh unit cell
+
+        mesh_vec_a = fg.index_coordinates(Q_vec_a, CELL) * 2 * q_max  # coordinates wrt plot axes
+        mesh_vec_b = fg.index_coordinates(Q_vec_b, CELL) * 2 * q_max
+
         # Vector arrows and lattice point labels
-        cen_lab = '(%1.3g,%1.3g,%1.3g)' % (centre[0],centre[1],centre[2])
-        vec_a_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_a[0]+centre[0],vec_a[1]+centre[1],vec_a[2]+centre[2])
-        vec_b_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_b[0]+centre[0],vec_b[1]+centre[1],vec_b[2]+centre[2])
+        cen_lab = '(%1.3g,%1.3g,%1.3g)' % (centre[0], centre[1], centre[2])
+        vec_a_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_a[0] + centre[0], vec_a[1] + centre[1], vec_a[2] + centre[2])
+        vec_b_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_b[0] + centre[0], vec_b[1] + centre[1], vec_b[2] + centre[2])
 
         lattQ = fp.axis_lattice_points(mesh_vec_a, mesh_vec_b, plt.axis())
         fp.plot_lattice_lines(lattQ, mesh_vec_a, mesh_vec_b)
@@ -1554,7 +1554,7 @@ class MultiPlotting:
             # Convolve with a gaussian
             if peak_width:
                 gauss_x = np.arange(-3*peak_width_pixels,3*peak_width_pixels+1) # gaussian width = 2*FWHM
-                G = fg.gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
+                G = fg.gauss(gauss_x, None, height=1, centre=0, fwhm=peak_width_pixels, bkg=0)
                 mesh = np.convolve(mesh, G, mode='same')
             
             # Add background

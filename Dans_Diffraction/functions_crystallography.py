@@ -2978,6 +2978,24 @@ def dspace2q(dspace):
     return 2 * np.pi / dspace
 
 
+def q2units(qmag, units='tth', energy_kev=None):
+    """
+    Convert |Q| in A^-1 to choice of units
+    :param qmag: float or array in inverse-Angstrom
+    :param units: str: 'tth', 'dspace', 'q' (raises ValueError if wrong)
+    :param energy_kev: float
+    :return: float or array
+    """
+    units = units.lower().replace(' ', '').replace('-', '')
+    if 'q' in units:
+        return qmag
+    if units in ['d', 'dspace', 'dspacing', 'angstrom', 'A']:
+        return q2dspace(qmag)
+    if units in ['tth', 'angle', 'twotheta', 'theta', 'deg', 'degrees']:
+        return cal2theta(qmag, energy_kev)
+    raise ValueError('%s is not a valid unit' % units)
+
+
 def resolution2energy(res, twotheta=180.):
     """
     Calcualte the energy required to achieve a specific resolution at a given two-theta
@@ -3161,6 +3179,26 @@ def powder_average(tth, energy_kev):
     """
     q = calqmag(tth, energy_kev)
     return 1 / q ** 2
+
+
+def group_intensities(q_values, intensity, min_overlap=0.01):
+    """
+    Group reflections within the overlap, returning the index max intensity of each group
+    :param q_values: [1*n] array of floats, position parameter of each reflection
+    :param intensity: [1*n] array of floats, intensity parameter of each reflection
+    :param min_overlap: float, how close the reflections are to be grouped
+    :return: group_idx: [1*m] array of int index
+    """
+
+    groups, array_index, group_index, counts = fg.group(q_values, min_overlap)
+
+    # loop over groups and select reflection with largest intensity
+    ref_n = np.zeros(len(groups), dtype=int)
+    for n in range(len(groups)):
+        args = np.where(array_index == n)[0]
+        # find max intensity
+        ref_n[n] = args[np.argmax(intensity[args])]
+    return ref_n
 
 
 def calc_vol(UV):

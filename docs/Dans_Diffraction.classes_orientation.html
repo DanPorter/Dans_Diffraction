@@ -78,6 +78,17 @@ Diffractometer&nbsp;frame&nbsp;according&nbsp;to&nbsp;Fig.&nbsp;1,&nbsp;H.&nbsp;
 
 <dl><dt><a name="CrystalOrientation-bmatrix"><strong>bmatrix</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;B&nbsp;matrix&nbsp;from&nbsp;Busing&nbsp;&amp;&nbsp;Levy&nbsp;in&nbsp;the&nbsp;diffractometer&nbsp;frame</tt></dd></dl>
 
+<dl><dt><a name="CrystalOrientation-diff6circle2hkl"><strong>diff6circle2hkl</strong></a>(self, phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0, energy_kev=None, wavelength=1.0)</dt><dd><tt>Return&nbsp;[h,k,l]&nbsp;position&nbsp;of&nbsp;diffractometer&nbsp;axes&nbsp;at&nbsp;given&nbsp;energy<br>
+:param&nbsp;phi:&nbsp;float&nbsp;sample&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;chi:&nbsp;float&nbsp;sample&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;eta:&nbsp;float&nbsp;sample&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;mu:&nbsp;float&nbsp;sample&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;delta:&nbsp;float&nbsp;detector&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;gamma:&nbsp;float&nbsp;detector&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;energy&nbsp;in&nbsp;KeV<br>
+:param&nbsp;wavelength:&nbsp;float&nbsp;wavelength&nbsp;in&nbsp;A<br>
+:return:&nbsp;[h,k,l]</tt></dd></dl>
+
 <dl><dt><a name="CrystalOrientation-lp"><strong>lp</strong></a>(self)</dt><dd><tt>Return&nbsp;tuple&nbsp;of&nbsp;lattice&nbsp;parameters&nbsp;in&nbsp;angstroms&nbsp;and&nbsp;degrees</tt></dd></dl>
 
 <dl><dt><a name="CrystalOrientation-lp_star"><strong>lp_star</strong></a>(self)</dt><dd><tt>Return&nbsp;tuple&nbsp;of&nbsp;reciprocal&nbsp;lattice&nbsp;parameters&nbsp;in&nbsp;inverse-angstroms&nbsp;and&nbsp;degrees</tt></dd></dl>
@@ -141,7 +152,19 @@ Diffractometer&nbsp;frame&nbsp;according&nbsp;to&nbsp;Fig.&nbsp;1,&nbsp;H.&nbsp;
 
 <dl><dt><a name="Orientation-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>Return&nbsp;str(self).</tt></dd></dl>
 
+<dl><dt><a name="Orientation-clear"><strong>clear</strong></a>(self)</dt><dd><tt>Clear&nbsp;orientation</tt></dd></dl>
+
+<dl><dt><a name="Orientation-diff6circle"><strong>diff6circle</strong></a>(self, delta=0, gamma=0, energy_kev=None, wavelength=1.0)</dt><dd><tt>Calcualte&nbsp;wavevector&nbsp;in&nbsp;diffractometer&nbsp;axis&nbsp;using&nbsp;detector&nbsp;angles<br>
+:param&nbsp;delta:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees&nbsp;in&nbsp;vertical&nbsp;direction&nbsp;(about&nbsp;diff-z)<br>
+:param&nbsp;gamma:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees&nbsp;in&nbsp;horizontal&nbsp;direction&nbsp;(about&nbsp;diff-x)<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;energy&nbsp;in&nbsp;KeV<br>
+:param&nbsp;wavelength:&nbsp;float&nbsp;wavelength&nbsp;in&nbsp;A<br>
+:param&nbsp;lab:&nbsp;[3*3]&nbsp;lab&nbsp;transformation&nbsp;matrix<br>
+:return:&nbsp;q[1*3],&nbsp;ki[1*3],&nbsp;kf[1*3]</tt></dd></dl>
+
 <dl><dt><a name="Orientation-orient"><strong>orient</strong></a>(self, a_axis=None, b_axis=None, c_axis=None)</dt><dd><tt>Set&nbsp;orientation&nbsp;matrix&nbsp;from&nbsp;directions&nbsp;of&nbsp;crystal&nbsp;axes</tt></dd></dl>
+
+<dl><dt><a name="Orientation-random_orientation"><strong>random_orientation</strong></a>(self, a_axis=None, b_axis=None, c_axis=None)</dt><dd><tt>Set&nbsp;a&nbsp;random&nbsp;orientation&nbsp;matrix</tt></dd></dl>
 
 <dl><dt><a name="Orientation-rotate_6circle"><strong>rotate_6circle</strong></a>(self, phi=0, chi=0, eta=0, mu=0)</dt><dd><tt>Set&nbsp;rotation&nbsp;matrix&nbsp;using&nbsp;6-circle&nbsp;diffractometer&nbsp;axes</tt></dd></dl>
 

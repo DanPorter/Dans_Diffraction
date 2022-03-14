@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_plotting</strong></big></big> (version 1.9.3)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_plotting</strong></big></big> (version 1.9.5)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_plotting.py">c:\users\dgpor\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\classes_plotting.py</a></font></td></tr></table>
     <p><tt><a href="#Plotting">Plotting</a>&nbsp;Class&nbsp;"classes_plotting.py"<br>
@@ -17,8 +17,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;1.9.3<br>
-Last&nbsp;updated:&nbsp;15/02/21<br>
+Version&nbsp;1.9.5<br>
+Last&nbsp;updated:&nbsp;15/11/21<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 18/08/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -38,6 +38,8 @@ Version&nbsp;History:<br>
 26/11/20&nbsp;1.9.1&nbsp;&nbsp;Added&nbsp;layers&nbsp;input&nbsp;to&nbsp;plot_layers<br>
 21/01/21&nbsp;1.9.2&nbsp;&nbsp;Added&nbsp;plot_xray_resonance<br>
 15/02/21&nbsp;1.9.3&nbsp;&nbsp;Added&nbsp;axis_reciprocal_lattice_points/lines/vectors<br>
+11/10/21&nbsp;1.9.4&nbsp;&nbsp;Centered&nbsp;crystal&nbsp;in&nbsp;plot_crystal<br>
+15/11/21&nbsp;1.9.5&nbsp;&nbsp;Added&nbsp;plot_diffractometer_reciprocal_space<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -199,6 +201,12 @@ E.G.&nbsp;hk&nbsp;plane&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br
 &nbsp;&nbsp;&nbsp;&nbsp;Click&nbsp;and&nbsp;drag&nbsp;to&nbsp;rotate&nbsp;the&nbsp;structure&nbsp;in&nbsp;3D<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Atoms&nbsp;are&nbsp;coloured&nbsp;according&nbsp;to&nbsp;their&nbsp;label<br>
 &nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;show_labels=True&nbsp;to&nbsp;show&nbsp;the&nbsp;label&nbsp;of&nbsp;each&nbsp;sphere</tt></dd></dl>
+
+<dl><dt><a name="Plotting-plot_diffractometer_reciprocal_space"><strong>plot_diffractometer_reciprocal_space</strong></a>(self, energy_kev, delta=0, gamma=0)</dt><dd><tt>Plot&nbsp;diffractometer&nbsp;angles&nbsp;using&nbsp;orientation<br>
+:param&nbsp;energy_kev:<br>
+:param&nbsp;delta:<br>
+:param&nbsp;gamma:<br>
+:return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Plotting-plot_exchange_paths"><strong>plot_exchange_paths</strong></a>(self, cen_idx, nearest_neighbor_distance=6.6, exchange_type='O', bond_angle=90.0, search_in_cell=True, group_neighbors=True, disp=False)</dt><dd><tt>Calcualtes&nbsp;exchange&nbsp;paths&nbsp;and&nbsp;adds&nbsp;them&nbsp;to&nbsp;the&nbsp;crystal&nbsp;structure&nbsp;plot<br>
 :param&nbsp;cen_idx:&nbsp;index&nbsp;of&nbsp;central&nbsp;ion&nbsp;in&nbsp;xtl.Structure<br>
@@ -450,6 +458,12 @@ Methods inherited from <a href="Dans_Diffraction.classes_plotting.html#Plotting"
 &nbsp;&nbsp;&nbsp;&nbsp;Click&nbsp;and&nbsp;drag&nbsp;to&nbsp;rotate&nbsp;the&nbsp;structure&nbsp;in&nbsp;3D<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Atoms&nbsp;are&nbsp;coloured&nbsp;according&nbsp;to&nbsp;their&nbsp;label<br>
 &nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;show_labels=True&nbsp;to&nbsp;show&nbsp;the&nbsp;label&nbsp;of&nbsp;each&nbsp;sphere</tt></dd></dl>
+
+<dl><dt><a name="PlottingSuperstructure-plot_diffractometer_reciprocal_space"><strong>plot_diffractometer_reciprocal_space</strong></a>(self, energy_kev, delta=0, gamma=0)</dt><dd><tt>Plot&nbsp;diffractometer&nbsp;angles&nbsp;using&nbsp;orientation<br>
+:param&nbsp;energy_kev:<br>
+:param&nbsp;delta:<br>
+:param&nbsp;gamma:<br>
+:return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="PlottingSuperstructure-plot_exchange_paths"><strong>plot_exchange_paths</strong></a>(self, cen_idx, nearest_neighbor_distance=6.6, exchange_type='O', bond_angle=90.0, search_in_cell=True, group_neighbors=True, disp=False)</dt><dd><tt>Calcualtes&nbsp;exchange&nbsp;paths&nbsp;and&nbsp;adds&nbsp;them&nbsp;to&nbsp;the&nbsp;crystal&nbsp;structure&nbsp;plot<br>
 :param&nbsp;cen_idx:&nbsp;index&nbsp;of&nbsp;central&nbsp;ion&nbsp;in&nbsp;xtl.Structure<br>

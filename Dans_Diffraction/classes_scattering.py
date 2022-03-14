@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.0.3
-Last updated: 08/02/22
+Version 2.1.0
+Last updated: 14/03/22
 
 Version History:
 10/09/17 0.1    Program created
@@ -29,6 +29,7 @@ Version History:
 20/08/21 2.0    Switched over to new scattering module, added self.powder()
 28/09/21 2.0.1  Added __repr__
 08/02/22 2.0.3  Corrected error in powder of wrong tth values. Thanks Mirko!
+14/03/22 2.1.0   powder() updated for new inputs and outputs for pVoight and custom peak shapes. Thanks yevgenyr!
 
 @author: DGPorter
 """
@@ -43,12 +44,12 @@ from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '2.0.3'
-__scattering_types__ = {'xray': ['xray','x','x-ray','thomson','charge'],
-                        'neutron': ['neutron','n','nuclear'],
-                        'xray magnetic': ['xray magnetic','magnetic xray','spin xray','xray spin'],
-                        'neutron magnetic': ['neutron magnetic','magnetic neutron','magnetic'],
-                        'xray resonant': ['xray resonant','resonant','resonant xray','rxs'],
+__version__ = '2.1.0'
+__scattering_types__ = {'xray': ['xray', 'x', 'x-ray', 'thomson', 'charge'],
+                        'neutron': ['neutron', 'n', 'nuclear'],
+                        'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'],
+                        'neutron magnetic': ['neutron magnetic', 'magnetic neutron', 'magnetic'],
+                        'xray resonant': ['xray resonant', 'resonant', 'resonant xray', 'rxs'],
                         'xray dispersion': ['dispersion', 'xray dispersion']}
 
 
@@ -83,8 +84,10 @@ class Scattering:
     _powder_units = 'tth' # tth (two theta), Q, d
     _powder_background = 0.0
     _powder_peak_width = 0.01  # in Deg
+    _powder_lorentz_fraction = 0.5
     _powder_average = True
     _powder_pixels = 2000  # no. pixels per inverse angstrom (in q)
+    _powder_min_overlap = 0.02
     
     # Complex Structure factor
     _return_structure_factor = False
@@ -169,7 +172,8 @@ class Scattering:
         #out += '  use m1m1 approx.: %s\n' % self._resonant_approximation_m1m1
         return out
 
-    def setup_scatter(self, scattering_type=None, energy_kev=None, wavelength_a=None, powder_units=None,
+    def setup_scatter(self, scattering_type=None, energy_kev=None, wavelength_a=None,
+                      powder_units=None, powder_pixels=None, powder_lorentz=None, powder_overlap=None,
                       specular=None, parallel=None, theta_offset=None,
                       min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None,
                       output=True, scattering_factors=None, magnetic_formfactor=None,
@@ -181,6 +185,9 @@ class Scattering:
         energy_kev  : self._energy_kev                    :  radiation energy in keV
         wavelength_a: self._wavelength_a                  :  radiation wavelength in Angstrom
         powder_units: self._powder_units                  :  units to use when displaying/ plotting ['twotheta', 'd',' 'q']
+        powder_pixels: self._powder_pixels                :  number of bins per inverse-angstrom in the powder spectrum
+        powder_lorentz: self._powder_lorentz_fraction     :  the fraction of Lorentzian in the peak function psuedo-Voight
+        powder_overlap: self._powder_min_overlap          :  minimum overlap of grouped reflections in powder
         min_twotheta: self._scattering_min_two_theta      :  minimum detector (two-theta) angle
         max_twotheta: self._scattering_max_two_theta      :  maximum detector (two-theta) angle
         min_theta   : self._scattering_min_theta          :  minimum sample angle = -opening angle
@@ -208,6 +215,15 @@ class Scattering:
 
         if powder_units is not None:
             self._powder_units = powder_units
+
+        if powder_pixels is not None:
+            self._powder_pixels = powder_pixels
+
+        if powder_lorentz is not None:
+            self._powder_lorentz_fraction = powder_lorentz
+
+        if powder_overlap is not None:
+            self._powder_min_overlap = powder_overlap
 
         if specular is not None:
             self._scattering_specular_direction = specular
@@ -273,6 +289,18 @@ class Scattering:
             # print('             Maximum Theta angle : %5.2f' % self._scattering_max_theta)
             # print('         Minimum Two-Theta angle : %5.2f' % self._scattering_min_twotheta)
             # print('         Maximum Two-Theta angle : %5.2f' % self._scattering_max_twotheta)
+
+    def get_energy(self, **kwargs):
+        """
+        Return energy
+        :param kwargs: energy_kev, wavelength_a
+        :return: energy_kev
+        """
+        if 'energy_kev' in kwargs:
+            return kwargs['energy_kev']
+        if 'wavelength_a' in kwargs:
+            return fc.wave2energy(kwargs['wavelength_a'])
+        return self._energy_kev
 
     def get_hkl(self, regenerate=True, remove_symmetric=False, reflection=False, transmission=False,  **kwargs):
         """
@@ -465,12 +493,11 @@ class Scattering:
         return fs.intensity(self.new_structure_factor(hkl, scattering_type, **options))
     new_intensity = intensity
 
-    def powder(self, scattering_type=None, units=None, peak_width=None, background=None,
-               pixels=None, powder_average=None, **options):
+    def powder(self, scattering_type=None, units=None, peak_width=None, background=None, pixels=None,
+               powder_average=None, lorentz_fraction=None, custom_peak=None, min_overlap=None, **options):
         """
-
         Generates array of intensities along a spaced grid, equivalent to a powder pattern.
-          tth, iten = generate_powder('xray', units='tth', energy_kev=8)
+          tth, inten, reflections = Scatter.powder('xray', units='tth', energy_kev=8)
 
         Note: This function is the new replacement for generate_power and uses both _scattering_min_twotheta
         and _scattering_max_twotheta.
@@ -481,9 +508,13 @@ class Scattering:
         :param background: float : if >0, a normal background around this value will be added
         :param pixels: int : number of pixels per inverse-anstrom to add to the resulting mesh
         :param powder_average: Bool : if True, intensities will be reduced for the powder average
+        :param lorentz_fraction: float 0-1: sets the Lorentzian fraction of the psuedo-Voight peak functions
+        :param custom_peak: array: if not None, the array will be convolved with delta-functions at each reflection.
+        :param min_overlap: minimum overlap of neighboring reflections.
         :param options: additional arguments to pass to intensity calculation
         :return xval: arrray : x-axis of powder scan (units)
-        :return yval: array :  intensity values at each point in x-axis
+        :return inten: array :  intensity values at each point in x-axis
+        :return reflections: (h, k, l, xval, intensity) array of reflection positions, grouped by min_overlap
         """
         if scattering_type is None:
             scattering_type = self._scattering_type
@@ -497,12 +528,11 @@ class Scattering:
             pixels = self._powder_pixels
         if powder_average is None:
             powder_average = self._powder_average
-        if 'energy_kev' in options:
-            energy_kev = options['energy_kev']
-        elif 'wavelength_a' in options:
-            energy_kev = fc.wave2energy(options['wavelength_a'])
-        else:
-            energy_kev = self._energy_kev
+        if lorentz_fraction is None:
+            lorentz_fraction = self._powder_lorentz_fraction
+        if min_overlap is None:
+            min_overlap = self._powder_min_overlap
+        energy_kev = self.get_energy(**options)
 
         # Units
         min_twotheta = self._scattering_min_twotheta
@@ -542,11 +572,14 @@ class Scattering:
         for n in range(len(I)):
             mesh[pixel_coord[n]] = mesh[pixel_coord[n]] + I[n]
 
-        # Convolve with a gaussian (if >0 or not None)
-        if peak_width:
-            gauss_x = np.arange(-3*peak_width_pixels, 3*peak_width_pixels + 1)  # gaussian width = 2*FWHM
-            G = fg.gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
-            mesh = np.convolve(mesh, G, mode='same')
+        # Convolve with a function (if > 0)
+        if custom_peak is not None:
+            mesh = np.convolve(mesh, custom_peak, mode='same')
+        elif peak_width > 0:
+            # peak_x = np.arange(-3*peak_width_pixels, 3*peak_width_pixels + 1)  # gaussian width = 2*FWHM
+            peak_x = np.linspace(-tot_pixels/2, tot_pixels/2, tot_pixels)
+            peak_shape = fg.pvoight(peak_x, height=1, centre=0, fwhm=peak_width_pixels, l_fraction=lorentz_fraction)
+            mesh = np.convolve(mesh, peak_shape, mode='same')
 
         # Add background (if >0 or not None)
         if background:
@@ -554,13 +587,17 @@ class Scattering:
             mesh = mesh + bkg
 
         # Change output units
-        if units.lower() in ['tth', 'angle', 'two-theta', 'twotheta', 'theta']:
-            xval = fc.cal2theta(mesh_q, energy_kev)
-        elif units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
-            xval = fc.q2dspace(mesh_q)
-        else:
-            xval = mesh_q
-        return xval, mesh
+        xval = fc.q2units(mesh_q, units, energy_kev)
+
+        # Determine non-overlapping hkl coordinates
+        xvalues = fc.q2units(Qmag, units, energy_kev)
+        ref_n = fc.group_intensities(xvalues, I, min_overlap)
+
+        grp_hkl = HKL[ref_n, :]
+        grp_xval = xvalues[ref_n]
+        grp_inten = mesh[pixel_coord[ref_n]]
+        reflections = np.transpose([grp_hkl[:, 0], grp_hkl[:, 1], grp_hkl[:, 2], grp_xval, grp_inten])
+        return xval, mesh, reflections
 
     def x_ray(self, HKL):
         """
@@ -1532,7 +1569,7 @@ class Scattering:
         # Convolve with a gaussian (if >0 or not None)
         if peak_width:
             gauss_x = np.arange(-3*peak_width_pixels, 3*peak_width_pixels + 1)  # gaussian width = 2*FWHM
-            G = fg.gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
+            G = fg.gauss(gauss_x, None, height=1, centre=0, fwhm=peak_width_pixels, bkg=0)
             mesh = np.convolve(mesh, G, mode='same')
 
             # Add background (if >0 or not None)
@@ -1986,7 +2023,7 @@ class Scattering:
         # Convolve with a gaussian (if >0 or not None)
         if peak_width:
             gauss_x = np.arange(-3 * peak_width_pixels, 3 * peak_width_pixels + 1)  # gaussian width = 2*FWHM
-            G = fg.gauss(gauss_x, None, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
+            G = fg.gauss(gauss_x, None, height=1, centre=0, fwhm=peak_width_pixels, bkg=0)
             mesh = np.convolve(mesh, G, mode='same')
         return mesh_azi, mesh
 

@@ -309,11 +309,10 @@ parallel&nbsp;to&nbsp;it.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;p-s&nbsp;&nbsp;p-p&nbsp;)<br>
 &nbsp;<br>
 From&nbsp;Hill+McMorrow&nbsp;Acta&nbsp;Cryst.&nbsp;1996&nbsp;A52,&nbsp;236-244&nbsp;Equ.&nbsp;(15)</tt></dd></dl>
- <dl><dt><a name="-sf_xray_dispersion"><strong>sf_xray_dispersion</strong></a>(q, r, scattering_factor, energy_kev=None, occ=None, debyewaller=None, **kwargs)</dt><dd><tt>Calculate&nbsp;the&nbsp;resonant&nbsp;x-ray&nbsp;structure&nbsp;factor<br>
+ <dl><dt><a name="-sf_xray_dispersion"><strong>sf_xray_dispersion</strong></a>(q, r, scattering_factor, occ=None, debyewaller=None, **kwargs)</dt><dd><tt>Calculate&nbsp;the&nbsp;resonant&nbsp;x-ray&nbsp;structure&nbsp;factor<br>
 :param&nbsp;q:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;hkl&nbsp;reflections<br>
 :param&nbsp;r:&nbsp;[m,3]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;r.l.u.<br>
 :param&nbsp;scattering_factor:&nbsp;array&nbsp;[n,m,e]:&nbsp;energy&nbsp;dependent&nbsp;complex&nbsp;atomic&nbsp;form&nbsp;factor<br>
-:param&nbsp;energy_kev:&nbsp;[e]&nbsp;array&nbsp;of&nbsp;incident&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
 :param&nbsp;occ:&nbsp;[m,1]&nbsp;array&nbsp;of&nbsp;atomic&nbsp;occupancies<br>
 :param&nbsp;debyewaller:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;thermal&nbsp;factors&nbsp;for&nbsp;each&nbsp;atom&nbsp;and&nbsp;reflection<br>
 :param&nbsp;kwargs:&nbsp;additional&nbsp;options[*unused]<br>
