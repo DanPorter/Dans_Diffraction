@@ -274,21 +274,6 @@ class Scattering:
 
         if output:
             print(self)
-            # print('Scattering Options:')
-            # print('                            Type : %s' % self._scattering_type)
-            # print('                  Default Energy : %6.3f keV' % self._energy_kev)
-            # print('                    Powder Units : %s' % self._powder_units)
-            # print('  Specular Direction (reflection): (%2.0f,%2.0f,%2.0f)' % (
-            #     self._scattering_specular_direction[0], self._scattering_specular_direction[1],
-            #     self._scattering_specular_direction[2]))
-            # print('Parallel Direction (transmission): (%2.0f,%2.0f,%2.0f)' % (
-            #     self._scattering_parallel_direction[0], self._scattering_parallel_direction[1],
-            #     self._scattering_parallel_direction[2]))
-            # print('                   Sample Offset : %5.2f' % self._scattering_theta_offset)
-            # print('             Minimum Theta angle : %5.2f' % self._scattering_min_theta)
-            # print('             Maximum Theta angle : %5.2f' % self._scattering_max_theta)
-            # print('         Minimum Two-Theta angle : %5.2f' % self._scattering_min_twotheta)
-            # print('         Maximum Two-Theta angle : %5.2f' % self._scattering_max_twotheta)
 
     def get_energy(self, **kwargs):
         """

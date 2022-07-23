@@ -66,7 +66,7 @@ class MultiCrystal:
         """
         Simple way to set scattering parameters, each parameter is internal to xtl (self)
 
-        type        : self._scattering type               :  'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
+        scattering_type : self._scattering type               :  'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
         energy_kev  : self._energy_kev                    :  radiation energy in keV
         wavelength_a: self._wavelength_a                  :  radiation wavelength in Angstrom
         powder_units: self._powder_units                  :  units to use when displaying/ plotting ['twotheta', 'd',' 'q']
@@ -79,8 +79,10 @@ class MultiCrystal:
         parallel    : self._scattering_parallel_direction : [h,k,l] : reflections normal to sample surface
         """
 
-        if 'type' in kwargs.keys():
+        if 'type' in kwargs:
             self._scattering_type = kwargs['type']
+        elif 'scattering_type' in kwargs:
+            self._scattering_type = kwargs['scattering_type']
 
         for xtl in self.crystal_list:
             xtl.Scatter.setup_scatter(**kwargs)

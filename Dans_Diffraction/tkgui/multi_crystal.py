@@ -231,13 +231,13 @@ class MultiCrystalGui:
 
     def set_scatter(self):
         """Set up scattering conditions"""
-        type = self.type.get()
+        scattering_type = self.type.get()
         energy_kev = self.energy_kev.get()
         min_two_theta = self.twotheta_min.get()
         max_two_theta = self.twotheta_max.get()
         powder_units = self.powder_units.get()
         self.xtls.setup_scatter(
-            type=type,
+            scattering_type=scattering_type,
             energy_kev=energy_kev,
             min_twotheta=min_two_theta,
             max_twotheta=max_two_theta,

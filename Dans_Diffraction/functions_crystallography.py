@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.7.1
-Last updated: 12/01/22
+Version 3.7.2
+Last updated: 23/04/22
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -39,6 +39,7 @@ Version History:
 10/06/21 3.6    Corrected mistake in DebyeWaller function. Added x-ray scattering factors from Waasmaier and Kirfel
 15/11/21 3.7    Added diffractometer orientation commands from Busing & Levy, H. You
 12/01/22 3.7.1  Added gen_sym_axial_vector
+23/04/22 3.7.2  Corrected magnitude of Q in magnetic_structure_factors
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -53,7 +54,7 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.7.1'
+__version__ = '3.7.2'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -1073,12 +1074,13 @@ def magnetic_form_factor(element, Qmag=0.):
     """
 
     # Qmag should be a 1D array
-    Qmag = np.asarray(Qmag).reshape(-1)
+    # s = sin(th)/lambda = |Q|/4pi
+    s = np.asarray(Qmag).reshape(-1) / (4 * np.pi)
 
     coef = atom_properties(element, ['j0_A', 'j0_a', 'j0_B', 'j0_b', 'j0_C', 'j0_c', 'j0_D'])
 
     # Nqpointings x Nelements
-    Qff = np.zeros([len(Qmag), len(coef)])
+    Qff = np.zeros([len(s), len(coef)])
 
     # Loop over elements
     for n in range(len(coef)):
@@ -1090,9 +1092,9 @@ def magnetic_form_factor(element, Qmag=0.):
         c = coef['j0_c'][n]
         D = coef['j0_D'][n]
 
-        j0 = A * np.exp(-a * Qmag ** 2) + \
-             B * np.exp(-b * Qmag ** 2) + \
-             C * np.exp(-c * Qmag ** 2) + D
+        j0 = A * np.exp(-a * s ** 2) + \
+             B * np.exp(-b * s ** 2) + \
+             C * np.exp(-c * s ** 2) + D
         Qff[:, n] = j0
     return Qff
 
