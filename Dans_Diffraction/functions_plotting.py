@@ -16,8 +16,8 @@ Usage:
 All plots generated require plt.show() call, unless using interactive mode
 
 
-Version 2.0
-Last updated: 27/09/21
+Version 2.1
+Last updated: 10/08/22
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -32,6 +32,7 @@ Version History:
 22/11/20 1.9    Update to labels to fix 3D plotting
 15/02/21 1.9.1  Update to vecplot for plotting on axis
 27/09/21 2.0    Added plot3darray, plot_diffractometer_reciprocal_space
+10/08/22 2.1    Added plot_lattice_points3D, set_plot_defaults, changed default fig size
 
 @author: DGPorter
 """
@@ -46,13 +47,49 @@ from mpl_toolkits.mplot3d import proj3d
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.9'
+__version__ = '2.1'
 
 DEFAULT_FONT = 'Times New Roman'
-FIGURE_SIZE = [12, 10]
-FIGURE_DPI = 60
+DEFAULT_FONTSIZE = 14
+FIGURE_SIZE = [12, 8]
+FIGURE_DPI = 80
+
 
 '----------------------------Plot manipulation--------------------------'
+
+
+def set_plot_defaults(rcdefaults=False):
+    """
+    Set custom matplotlib rcparams, or revert to matplotlib defaults
+    These handle the default look of matplotlib plots
+    See: https://matplotlib.org/stable/tutorials/introductory/customizing.html#the-default-matplotlibrc-file
+    :param rcdefaults: False*/ True, if True, revert to matplotlib defaults
+    :return: None
+    """
+    if rcdefaults:
+        print('Return matplotlib rcparams to default settings.')
+        plt.rcdefaults()
+        return
+
+    plt.rc('figure', figsize=FIGURE_SIZE, dpi=FIGURE_DPI, autolayout=False)
+    plt.rc('lines', marker='o', color='r', linewidth=2, markersize=6)
+    plt.rc('errorbar', capsize=2)
+    plt.rc('legend', loc='best', frameon=False, fontsize=DEFAULT_FONTSIZE)
+    plt.rc('axes', linewidth=2, titleweight='bold', labelsize='large')
+    plt.rc('xtick', labelsize='large')
+    plt.rc('ytick', labelsize='large')
+    plt.rc('axes.formatter', limits=(-3, 3), offset_threshold=6)
+    plt.rc('image', cmap='viridis')  # default colourmap, see https://matplotlib.org/stable/gallery/color/colormap_reference.html
+    # Note font values appear to only be set when plt.show is called
+    plt.rc(
+        'font',
+        family='serif',
+        style='normal',
+        weight='bold',
+        size=DEFAULT_FONTSIZE,
+        serif=['Times New Roman', 'Times', 'DejaVu Serif']
+    )
+    # plt.rcParams["savefig.directory"] = os.path.dirname(__file__) # Default save directory for figures
 
 
 def labels(ttl=None, xvar=None, yvar=None, zvar=None, legend=False, size='Normal', font='Times New Roman'):
@@ -592,6 +629,26 @@ def plot_lattice_points2D(Q, markersize=12, color='b', marker='o'):
 
     ax.plot(Q[:, 0], Q[:, 1], markersize=markersize, color=color, marker=marker)
     ax.axis(axsize)
+
+
+def plot_lattice_points3D(Q, point_size=None, color=None, cmap=None):
+    """
+    Plot lattice points is 3D reciprocal space
+    :param Q: [nx3] array of wavevector transfer positions in reciprocal space, units A^-1
+    :param point_size: scalar or array of length n, determines each point size (for intensity), in pixels
+    :param color: colour specifier, can be a list of values length n
+    :param cmap: str name of colormap to use if color is a list of values
+    :return:
+    """
+
+    fig = plt.figure(figsize=FIGURE_SIZE, dpi=FIGURE_DPI)
+    ax = fig.add_subplot(111, projection='3d')
+
+    ax.scatter(Q[:, 0], Q[:, 1], Q[:, 2], s=point_size, c=color, cmap=cmap)
+    labels(None, 'Q$_x$', 'Q$_y$', 'Q$_z$')
+    ax.set_xlim([4, -4])
+    ax.set_ylim([4, -4])
+    ax.set_zlim([-4, 4])
 
 
 def plot_lattice_lines(latt, vec_a=(1, 0, 0), vec_b=(0, 1, 0), axis=None, *args, **kwargs):
