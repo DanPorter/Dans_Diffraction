@@ -652,7 +652,7 @@ def xtensor(process, rank, time, parity, e0, e1, q0, q1):
     [q0x, q0y, q0z] = q0
     [q1x, q1y, q1z] = q1
 
-    Complex = np.complex  # make it easier to convert Mathematica Fortran output
+    Complex = complex  # make it easier to convert Mathematica Fortran output
     Sqrt = np.sqrt
 
     if process == 'E1E1' and rank == 2 and parity == 1:
@@ -1237,7 +1237,7 @@ def StoneSphericalToCartConversionCoefs(K, Calc=True, k=-1j):
     from FortranForm (No - CForm?) First List->array, del other lists,spaces, extra bracket around first level
     If Calc==False then use these expressions from Mathematica, else calculate them numerically
     """
-    Complex = np.complex  # make it easier to convert Mathematica Fortran output
+    Complex = complex  # make it easier to convert Mathematica Fortran output
     Sqrt = np.sqrt
     if not Calc:
         if K == 0:

@@ -258,13 +258,13 @@ class Scattering:
             self._use_magnetic_form_factor = magnetic_formfactor
 
         if polarisation_vector is not None:
-            self._polarisation_vector_incident = np.array(polarisation_vector, dtype=np.float).reshape(3)
+            self._polarisation_vector_incident = np.array(polarisation_vector, dtype=float).reshape(3)
 
         if polarisation is not None:
             self._polarisation = polarisation
 
         if azimuthal_reference is not None:
-            self._azimuthal_reference = np.array(azimuthal_reference, dtype=np.float).reshape(3)
+            self._azimuthal_reference = np.array(azimuthal_reference, dtype=float).reshape(3)
 
         if azimuth is not None:
             self._azimuthal_angle = azimuth
@@ -365,7 +365,7 @@ class Scattering:
         if scattering_type is None:
             scattering_type = self._scattering_type
 
-        hkl = np.asarray(np.rint(hkl), dtype=np.float).reshape([-1, 3])
+        hkl = np.asarray(np.rint(hkl), dtype=float).reshape([-1, 3])
         uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
 
         q = self.xtl.Cell.calculateQ(hkl)
@@ -380,14 +380,14 @@ class Scattering:
             energy_kev = fc.wave2energy(kwargs.pop('wavelength_a'))
         else:
             energy_kev = self._energy_kev
-        energy_kev = np.asarray(energy_kev, dtype=np.float).reshape(-1)
+        energy_kev = np.asarray(energy_kev, dtype=float).reshape(-1)
         nenergy = len(energy_kev)
 
         if 'psi' in kwargs:
             psi = kwargs.pop('psi')
         else:
             psi = self._azimuthal_angle
-        psi = np.asarray(psi, dtype=np.float).reshape(-1)
+        psi = np.asarray(psi, dtype=float).reshape(-1)
         npsi = len(psi)
 
         options = fs.options(
@@ -410,7 +410,7 @@ class Scattering:
         if n_arrays > 1:
             print('Splitting %d reflections (%d atoms) into %1.0f parts' % (nref, natom, n_arrays))
         q_array = np.array_split(q, n_arrays)
-        sf = np.zeros([nref, nenergy, npsi], dtype=np.complex)
+        sf = np.zeros([nref, nenergy, npsi], dtype=complex)
         start_time = datetime.datetime.now()
         for e, enval in enumerate(energy_kev):
             for p, psival in enumerate(psi):
@@ -592,7 +592,7 @@ class Scattering:
         Returns an array with the same length as HKL, giving the real intensity at each reflection.
         """
         
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1, 3])
+        HKL = np.asarray(np.rint(HKL),dtype=float).reshape([-1, 3])
         Nref = len(HKL)
         
         uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
@@ -620,7 +620,7 @@ class Scattering:
         # Calculate structure factor
         # Broadcasting used on 2D ff
         SF =  np.sum(ff*dw*occ*np.exp(1j*2*np.pi*dot_KR),axis=1)
-        #SF = np.zeros(Nref,dtype=np.complex)
+        #SF = np.zeros(Nref,dtype=complex)
         #for ref in range(Nref):
         #    for at in range(Nat): 
         #        SF[ref] += ff[ref,at]*dw[ref,at]*occ[at]*np.exp(1j*2*np.pi*dot_KR[ref,at])
@@ -641,7 +641,7 @@ class Scattering:
         Returns an array with the same length as HKL, giving the real intensity at each reflection.
         """
         
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
+        HKL = np.asarray(np.rint(HKL),dtype=float).reshape([-1,3])
         
         uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.get()
         
@@ -682,7 +682,7 @@ class Scattering:
         if energy_kev is an array, the returned array will have shape [len(HKL), len(energy_kev)]
         """
 
-        HKL = np.asarray(np.rint(HKL), dtype=np.float).reshape([-1, 3])
+        HKL = np.asarray(np.rint(HKL), dtype=float).reshape([-1, 3])
 
         uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
 
@@ -703,7 +703,7 @@ class Scattering:
         dot_KR = np.dot(HKL, uvw.T)
 
         energy_kev = np.asarray(energy_kev).reshape(-1)
-        sf = np.zeros([len(HKL), len(energy_kev)], dtype=np.complex)
+        sf = np.zeros([len(HKL), len(energy_kev)], dtype=complex)
         for n, en in enumerate(energy_kev):
             # Broadcasting used on 2D ff
             sf[:, n] = np.sum(ff[:, :, n] * dw * occ * np.exp(1j * 2 * np.pi * dot_KR), axis=1)
@@ -728,7 +728,7 @@ class Scattering:
         Returns an array with the same length as HKL, giving the real intensity at each reflection.
         """
         
-        HKL = np.asarray(np.rint(HKL), dtype=np.float).reshape([-1, 3])
+        HKL = np.asarray(np.rint(HKL), dtype=float).reshape([-1, 3])
 
         uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
         
@@ -766,7 +766,7 @@ class Scattering:
         Returns an array with the same length as HKL, giving the real intensity at each reflection.
         """
         
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
+        HKL = np.asarray(np.rint(HKL),dtype=float).reshape([-1,3])
         Nref = len(HKL)
 
         uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
@@ -792,7 +792,7 @@ class Scattering:
         dot_KR = np.dot(HKL,uvw.T)
 
         # Calculate structure factor
-        SF = np.zeros(Nref,dtype=np.complex)
+        SF = np.zeros(Nref,dtype=complex)
         for n,Qh in enumerate(Qhat):
             SFm = [0.,0.,0.]
             for m,mom in enumerate(moment):
@@ -831,7 +831,7 @@ class Scattering:
         magnetic moments assumed to be in the same reference frame as the polarisation
         """
         
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
+        HKL = np.asarray(np.rint(HKL),dtype=float).reshape([-1,3])
         Nref = len(HKL)
         
         uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.get()
@@ -855,7 +855,7 @@ class Scattering:
         dot_KR = np.dot(HKL,uvw.T)
         
         # Calculate structure factor
-        SF = np.zeros(Nref,dtype=np.complex)
+        SF = np.zeros(Nref,dtype=complex)
         for n in range(Nref):
             # Calculate vector structure factor
             SFm = [0.,0.,0.]
@@ -907,10 +907,10 @@ class Scattering:
         if energy_kev is None:
             energy_kev = self._energy_kev
         
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
+        HKL = np.asarray(np.rint(HKL),dtype=float).reshape([-1,3])
         Nref = len(HKL)
         
-        PSI = np.asarray(PSI,dtype=np.float).reshape([-1])
+        PSI = np.asarray(PSI,dtype=float).reshape([-1])
         Npsi = len(PSI)
 
         uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
@@ -928,7 +928,7 @@ class Scattering:
         # Calculate dot product
         dot_KR = np.dot(HKL,uvw.T)
         
-        SF = np.zeros([Nref,Npsi],dtype=np.complex)
+        SF = np.zeros([Nref,Npsi],dtype=complex)
         for psival in range(Npsi):
             # Get resonant form factor
             fxres = self.xray_resonant_scattering_factor(HKL,energy_kev,polarisation,F0,F1,F2,azim_zero,PSI[psival],disp=disp)
@@ -972,7 +972,7 @@ class Scattering:
         if energy_kev is None:
             energy_kev = self._energy_kev
         
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
+        HKL = np.asarray(np.rint(HKL),dtype=float).reshape([-1,3])
         Nref = len(HKL)
         Qmag = self.xtl.Cell.Qmag(HKL)
         tth = fc.cal2theta(Qmag, energy_kev)
@@ -980,7 +980,7 @@ class Scattering:
         mxmymz = self.xtl.Structure.mxmymz()
         Nat = len(mxmymz)
         
-        fxres = np.zeros([Nref,Nat],dtype=np.complex)
+        fxres = np.zeros([Nref,Nat],dtype=complex)
         for ref in range(Nref):
             # Resonant scattering factor
             # Electric Dipole transition at 3d L edge
@@ -1034,7 +1034,7 @@ class Scattering:
         magnetic moments assumed to be in the same reference frame as the polarisation
         """
 
-        HKL = np.asarray(np.rint(HKL), dtype=np.float).reshape([-1, 3])
+        HKL = np.asarray(np.rint(HKL), dtype=float).reshape([-1, 3])
 
         uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
 
@@ -1121,7 +1121,7 @@ class Scattering:
         magnetic moments assumed to be in the same reference frame as the polarisation
         """
 
-        HKL = np.asarray(np.rint(HKL), dtype=np.float).reshape([-1, 3])
+        HKL = np.asarray(np.rint(HKL), dtype=float).reshape([-1, 3])
 
         uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
 
@@ -1142,7 +1142,7 @@ class Scattering:
         momentxyz = self.xtl.Cell.calculateR(mxmymz)  # moment direction in cartesian reference frame
         moment = momentmag * fg.norm(momentxyz)  # broadcast n*1 x n*3 = n*3
         moment[np.isnan(moment)] = 0.
-        fe1e1 = np.zeros([len(HKL), len(uvw)], dtype=np.complex)
+        fe1e1 = np.zeros([len(HKL), len(uvw)], dtype=complex)
         for ref in range(len(HKL)):
             # Magnetic form factor
             # f_res_mag = [(e'.e)F0 - i(e'xe).Z*F1 + (e'.Z)*(e.Z)*F2] #equ 7 Hill+McMorrow 1996
@@ -1336,7 +1336,7 @@ class Scattering:
         Print intensities calcualted in different ways
         """
         
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
+        HKL = np.asarray(np.rint(HKL),dtype=float).reshape([-1,3])
         Qmag =  self.xtl.Cell.Qmag(HKL)
         srt = np.argsort(Qmag)
         HKL = HKL[srt,:]
@@ -1448,7 +1448,7 @@ class Scattering:
         if energy_kev is None:
             energy_kev = self._energy_kev
         
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
+        HKL = np.asarray(np.rint(HKL),dtype=float).reshape([-1,3])
         tth = self.xtl.Cell.tth(HKL,energy_kev)
         inten = self.intensity(HKL)
         
@@ -1469,7 +1469,7 @@ class Scattering:
         if energy_kev is None:
             energy_kev = self._energy_kev
         
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
+        HKL = np.asarray(np.rint(HKL),dtype=float).reshape([-1,3])
         tth = self.xtl.Cell.tth(HKL,energy_kev)
         theta = self.xtl.Cell.theta_reflection(HKL, energy_kev, self._scattering_specular_direction, self._scattering_theta_offset)
         inten = self.intensity(HKL)
@@ -1490,7 +1490,7 @@ class Scattering:
         if energy_kev is None:
             energy_kev = self._energy_kev
         
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
+        HKL = np.asarray(np.rint(HKL),dtype=float).reshape([-1,3])
         tth = self.xtl.Cell.tth(HKL,energy_kev)
         theta = self.xtl.Cell.theta_transmission(HKL, energy_kev, self._scattering_specular_direction,self._scattering_theta_offset)
         inten = self.intensity(HKL)
@@ -1784,7 +1784,7 @@ class Scattering:
         Prints the atomic contributions to the structure factor
         """
         
-        HKL = np.asarray(np.rint(HKL),dtype=np.float).reshape([-1,3])
+        HKL = np.asarray(np.rint(HKL),dtype=float).reshape([-1,3])
         Nref = len(HKL)
         
         # Calculate the full intensity
@@ -1832,7 +1832,7 @@ class Scattering:
         Prints the symmetry contributions to the structure factor for each atomic site
         """
 
-        HKL = np.asarray(np.rint(HKL), dtype=np.float).reshape([-1, 3])
+        HKL = np.asarray(np.rint(HKL), dtype=float).reshape([-1, 3])
         Nref = len(HKL)
 
         # Calculate the full intensity

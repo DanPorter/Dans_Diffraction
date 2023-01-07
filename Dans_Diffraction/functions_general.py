@@ -69,7 +69,7 @@ def mag(A):
      mag([1,1,1]) = 1.732
      mag(array([[1,1,1],[2,2,2]]) = [1.732, 3.464]
     """
-    A = np.asarray(A, dtype=np.float)
+    A = np.asarray(A, dtype=float)
     return np.sqrt(np.sum(A ** 2, axis=len(A.shape) - 1))
 
 
@@ -84,7 +84,7 @@ def norm(A):
      norm(array([[1,1,1],[2,2,2]]) = [ [ 0.57735,  0.57735,  0.57735] , [ 0.57735,  0.57735,  0.57735] ]
      """
 
-    A = np.asarray(A, dtype=np.float).reshape((-1, np.shape(A)[-1]))
+    A = np.asarray(A, dtype=float).reshape((-1, np.shape(A)[-1]))
     mag = np.sqrt(np.sum(A ** 2, axis=A.ndim - 1)).reshape((-1, 1))
     mag[mag == 0] = 1  # stop warning errors
     N = A / mag
@@ -107,7 +107,7 @@ def quad(A):
         [-1,-1,-1]   -1
     """
 
-    A = np.asarray(A, dtype=np.float).reshape((-1, 3))
+    A = np.asarray(A, dtype=float).reshape((-1, 3))
     if A.size == 1:
         # return (np.sum(A,axis=1)>0)[0]*2 - 1
         return (np.sum(A >= 0, axis=1) > 1)[0] * 2 - 1
@@ -130,7 +130,7 @@ def quadmag(A):
         [-1,-1,-1]   -1.732
     """
 
-    A = np.asarray(A, dtype=np.float).reshape((-1, 3))
+    A = np.asarray(A, dtype=float).reshape((-1, 3))
     mag = np.sqrt(np.sum(A ** 2, axis=len(A.shape) - 1)).reshape(-1)
     quad = (np.sum(A, len(A.shape) - 1) > 0) * 2 - 1
     if len(A) == 1:
@@ -197,7 +197,7 @@ def rot3D(A, alpha=0., beta=0., gamma=0.):
             _\/X
     """
 
-    A = np.asarray(A, dtype=np.float).reshape((-1, 3))
+    A = np.asarray(A, dtype=float).reshape((-1, 3))
 
     # Convert to radians
     alpha = alpha * np.pi / 180.
@@ -256,8 +256,8 @@ def rotate_about_axis(point, axis, angle):
     :param angle: angle to rotate in deg
     :return: [x,y,z] rotated point
     """
-    point = np.asarray(point, dtype=np.float)
-    axis = np.asarray(axis, dtype=np.float) / np.sqrt(np.sum(np.square(axis)))
+    point = np.asarray(point, dtype=float)
+    axis = np.asarray(axis, dtype=float) / np.sqrt(np.sum(np.square(axis)))
     rad = np.deg2rad(angle)
     cs = np.cos(rad)
     sn = np.sin(rad)
@@ -324,7 +324,7 @@ def group(A, tolerance=0.0001):
     :param tolerance: values within this number will be grouped
     :return: group_values, array_index, group_index, group_counts
     """
-    A = np.asarray(A, dtype=np.float).reshape(-1)
+    A = np.asarray(A, dtype=float).reshape(-1)
     idx = np.argsort(A)
     rtn_idx = np.argsort(idx)
     A2 = np.round(A / tolerance) * tolerance
@@ -498,7 +498,7 @@ def find_index(A, value):
      For multiple values, use:
      B = [find_index(A,x) for x in values]
     """
-    A = np.asarray(A, dtype=np.float)
+    A = np.asarray(A, dtype=float)
     idx = np.argmin(np.abs(A - value))
     if len(A.shape) < 2:
         return idx
@@ -562,7 +562,7 @@ def detail(A):
     """
     tp = type(A)
     print('Type: {}'.format(tp))
-    A = np.asarray(A, dtype=np.float)
+    A = np.asarray(A, dtype=float)
     size = ' x '.join([str(x) for x in A.shape])
     mem = '%1.3g MB' % (A.nbytes * 1e-6)
     print('Size: {} (elements={}, {})'.format(size, A.size, mem))
@@ -639,7 +639,7 @@ def index_coordinates(A, CELL):
       CELL = [[3x3]] matrix of vectors [a,b,c]
     """
 
-    A = np.asarray(A, dtype=np.float).reshape((-1, 3))
+    A = np.asarray(A, dtype=float).reshape((-1, 3))
     B = np.dot(A, np.linalg.inv(CELL))
     return B
 
@@ -659,7 +659,7 @@ def isincell(A, cell_centre=[0, 0, 0], CELL=cell()):
        >>> [False,True,True]
     """
 
-    A = np.asarray(A, dtype=np.float).reshape((-1, 3))
+    A = np.asarray(A, dtype=float).reshape((-1, 3))
     A = A - cell_centre
     idx = index_coordinates(A, CELL)
     return np.all(np.abs(idx) <= 0.5, axis=1)
@@ -682,7 +682,7 @@ def sphere_array(A, max_angle1=90, max_angle2=90, step1=1, step2=1):
         [len(A) * len(angles1) * len(angles2), 3]
     """
 
-    A = np.asarray(A, dtype=np.float).reshape((-1, 3))
+    A = np.asarray(A, dtype=float).reshape((-1, 3))
 
     angles1 = np.arange(0, max_angle1 + step1, step1)
     angles2 = np.arange(0, max_angle2 + step2, step2)
@@ -1032,8 +1032,8 @@ def gauss(x, y=None, height=1, centre=0, fwhm=0.5, bkg=0, centre_y=None, fwhm_y=
     if y is None:
         y = centre_y
 
-    x = np.asarray(x, dtype=np.float).reshape([-1])
-    y = np.asarray(y, dtype=np.float).reshape([-1])
+    x = np.asarray(x, dtype=float).reshape([-1])
+    y = np.asarray(y, dtype=float).reshape([-1])
     X, Y = np.meshgrid(x, y)
     Px = (X - centre) ** 2 / (fwhm / 2) ** 2
     Py = (Y - centre_y) ** 2 / (fwhm_y / 2) ** 2
@@ -1070,8 +1070,8 @@ def lorentz(x, y=None, height=1, centre=0, fwhm=0.5, bkg=0, centre_y=None, fwhm_
     sigma_x = fwhm / 2.
     sigma_y = fwhm_y / 2.
 
-    x = np.asarray(x, dtype=np.float).reshape([-1])
-    y = np.asarray(y, dtype=np.float).reshape([-1])
+    x = np.asarray(x, dtype=float).reshape([-1])
+    y = np.asarray(y, dtype=float).reshape([-1])
     X, Y = np.meshgrid(x, y)
     Px = (X - centre) ** 2 / sigma_x ** 2
     Py = (Y - centre_y) ** 2 / sigma_y ** 2
@@ -1132,7 +1132,7 @@ def frange(start, stop=None, step=1):
         stop = start
         start = 0
 
-    return list(np.arange(start, stop + 0.00001, step, dtype=np.float))
+    return list(np.arange(start, stop + 0.00001, step, dtype=float))
 
 
 def squaredata(xdata, ydata, data, repeat=None):
@@ -1174,8 +1174,8 @@ def grid_intensity(points, values, resolution=0.01, peak_width=0.1, background=0
     :return: points, values
     """
 
-    points = np.asarray(points, dtype=np.float)
-    values = np.asarray(values, dtype=np.float)
+    points = np.asarray(points, dtype=float)
+    values = np.asarray(values, dtype=float)
 
     # create plotting mesh
     grid_points = np.arange(np.min(points) - 50 * resolution, np.max(points) + 50 * resolution, resolution)
@@ -1217,10 +1217,10 @@ def map2grid(grid, points, values, widths=None, background=0):
     :param background: add a normal (random) background with width sqrt(background)
     :return: points, values
     """
-    grid = np.asarray(grid, dtype=np.float)
-    points = np.asarray(points, dtype=np.float)
-    values = np.asarray(values, dtype=np.float)
-    widths = np.asarray(widths, dtype=np.float)
+    grid = np.asarray(grid, dtype=float)
+    points = np.asarray(points, dtype=float)
+    values = np.asarray(values, dtype=float)
+    widths = np.asarray(widths, dtype=float)
 
     if widths.size == 1:
         widths = widths * np.ones(len(points))

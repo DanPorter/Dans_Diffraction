@@ -108,16 +108,15 @@ class SelectionBox:
     Displays all data fields and returns a selection
     Making a selection returns a list of field strings
 
-    out = SelectionBox(['field1','field2','field3'], current_selection=['field2'], title='', multiselect=False)
+    out = SelectionBox(['field1','field2','field3'], current_selection=['field2'], title='', multiselect=False).show()
     # Make selection and press "Select" > box disappears
-    out.output = ['list','of','strings']
-
+    out = ['list','of','strings']
     """
     "------------------------------------------------------------------------"
     "--------------------------GUI Initilisation-----------------------------"
     "------------------------------------------------------------------------"
 
-    def __init__(self, parent, data_fields, current_selection=[], title='Make a selection', multiselect=True):
+    def __init__(self, parent, data_fields, current_selection=(), title='Make a selection', multiselect=True):
         self.data_fields = data_fields
         self.initial_selection = current_selection
 
@@ -153,6 +152,8 @@ class SelectionBox:
         self.lst_data.configure(exportselection=True)
         if multiselect:
             self.lst_data.configure(selectmode=tk.EXTENDED)
+        self.lst_data.bind('<<ListboxSelect>>', self.fun_listboxselect)
+        self.lst_data.bind('<Double-Button-1>', self.fun_exitbutton)
 
         # Populate list box
         for k in self.data_fields:
@@ -171,16 +172,29 @@ class SelectionBox:
 
         # self.txt_data.config(xscrollcommand=scl_datax.set,yscrollcommand=scl_datay.set)
 
+        "----------------------------Search Field-----------------------------"
+        frm = tk.LabelFrame(frame, text='Search', relief=tk.RIDGE)
+        frm.pack(fill=tk.X, expand=tk.YES, padx=2, pady=2)
+
+        self.searchbox = tk.StringVar(self.root, '')
+        var = tk.Entry(frm, textvariable=self.searchbox, font=TF, bg=ety, fg=ety_txt)
+        var.bind('<Key>', self.fun_search)
+        var.pack(fill=tk.X, expand=tk.YES, padx=2, pady=2)
+
         "----------------------------Exit Button------------------------------"
         frm_btn = tk.Frame(frame)
-        frm_btn.pack()
+        frm_btn.pack(fill=tk.X, expand=tk.YES)
 
-        btn_exit = tk.Button(frm_btn, text='Select', font=BF, command=self.f_exit, bg=btn, activebackground=btn_active)
-        btn_exit.pack()
+        self.numberoffields = tk.StringVar(self.root, '%3d Selected Fields' % len(self.initial_selection))
+        var = tk.Label(frm_btn, textvariable=self.numberoffields, width=20)
+        var.pack(side=tk.LEFT)
+        btn_exit = tk.Button(frm_btn, text='Select', font=BF, command=self.fun_exitbutton, bg=btn,
+                             activebackground=btn_active)
+        btn_exit.pack(side=tk.RIGHT)
 
         "-------------------------Start Mainloop------------------------------"
         self.root.protocol("WM_DELETE_WINDOW", self.f_exit)
-        #self.root.mainloop()
+        # self.root.mainloop()
 
     "------------------------------------------------------------------------"
     "--------------------------General Functions-----------------------------"
@@ -189,13 +203,47 @@ class SelectionBox:
     def show(self):
         """Run the selection box, wait for response"""
 
-        #self.root.deiconify()  # show window
+        # self.root.deiconify()  # show window
         self.root.wait_window()  # wait for window
         return self.output
 
-    def f_exit(self):
-        """Closes the current data window"""
+    def fun_search(self, event=None):
+        """Search the selection for string"""
+        search_str = self.searchbox.get()
+        search_str = search_str + event.char
+        search_str = search_str.strip().lower()
+        if not search_str: return
+
+        # Clear current selection
+        self.lst_data.select_clear(0, tk.END)
+        view_idx = None
+        # Search for whole words first
+        for n, item in enumerate(self.data_fields):
+            if re.search(r'\b%s\b' % search_str, item.lower()):  # whole word search
+                self.lst_data.select_set(n)
+                view_idx = n
+        # if nothing found, search anywhere
+        if view_idx is None:
+            for n, item in enumerate(self.data_fields):
+                if search_str in item.lower():
+                    self.lst_data.select_set(n)
+                    view_idx = n
+        if view_idx is not None:
+            self.lst_data.see(view_idx)
+        self.fun_listboxselect()
+
+    def fun_listboxselect(self, event=None):
+        """Update label on listbox selection"""
+        self.numberoffields.set('%3d Selected Fields' % len(self.lst_data.curselection()))
+
+    def fun_exitbutton(self, event=None):
+        """Closes the current data window and generates output"""
         selection = self.lst_data.curselection()
         self.output = [self.data_fields[n] for n in selection]
+        self.root.destroy()
+
+    def f_exit(self, event=None):
+        """Closes the current data window"""
+        self.output = self.initial_selection
         self.root.destroy()
 

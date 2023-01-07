@@ -555,7 +555,7 @@ class Cell:
             Q = Cell.calculateQ([1,0,0]) # for a hexagonal system, a = 2.85
             > Q = array([[2.2046264, 1.2728417, 0.0000000]])
         """
-        HKL = np.reshape(np.asarray(HKL, dtype=np.float), [-1, 3])
+        HKL = np.reshape(np.asarray(HKL, dtype=float), [-1, 3])
         return np.dot(HKL, self.UVstar())
 
     def indexQ(self, Q):
@@ -568,7 +568,7 @@ class Cell:
             HKL = indexQ([2.2046264, 1.2728417, 0.0000000]) # for a hexagonal system, a = 2.85
             > HKL = [1,0,0]
         """
-        Q = np.reshape(np.asarray(Q, dtype=np.float), [-1, 3])
+        Q = np.reshape(np.asarray(Q, dtype=float), [-1, 3])
         return fc.indx(Q, self.UVstar())
 
     def calculateR(self, UVW):
@@ -581,7 +581,7 @@ class Cell:
             R = Cell.calculateR([0.1,0,0]) # for a hexagonal system, a = 2.85
             > R = array([[0.285, 0, 0]])
         """
-        UVW = np.reshape(np.asarray(UVW, dtype=np.float), [-1, 3])
+        UVW = np.reshape(np.asarray(UVW, dtype=float), [-1, 3])
         return np.dot(UVW, self.UV())
 
     def indexR(self, R):
@@ -594,7 +594,7 @@ class Cell:
             UVW = indexR([0.285, 0, 0]) # for a hexagonal system, a = 2.85
             > UVW = [0.1,0,0]
         """
-        R = np.reshape(np.asarray(R, dtype=np.float), [-1, 3])
+        R = np.reshape(np.asarray(R, dtype=float), [-1, 3])
         return fc.indx(R, self.UV())
 
     def moment(self, mxmymz):
@@ -755,7 +755,7 @@ class Cell:
         :return: HKL[sorted,:]
         """
 
-        hkl = np.reshape(np.asarray(hkl, dtype=np.float), [-1, 3])
+        hkl = np.reshape(np.asarray(hkl, dtype=float), [-1, 3])
         Qm = self.Qmag(hkl)
         idx = np.argsort(Qm)
         return hkl[idx, :]
@@ -971,9 +971,9 @@ class Atoms:
     def __init__(self, u=[0], v=[0], w=[0], type=None,
                  label=None, occupancy=None, uiso=None, mxmymz=None):
         " Initialisation, defines Atoms defaults"
-        self.u = np.asarray(u, dtype=np.float).reshape(-1)
-        self.v = np.asarray(v, dtype=np.float).reshape(-1)
-        self.w = np.asarray(w, dtype=np.float).reshape(-1)
+        self.u = np.asarray(u, dtype=float).reshape(-1)
+        self.v = np.asarray(v, dtype=float).reshape(-1)
+        self.w = np.asarray(w, dtype=float).reshape(-1)
         Natoms = len(u)
 
         # ---Defaults---
@@ -991,19 +991,19 @@ class Atoms:
         if occupancy is None:
             self.occupancy = np.ones(Natoms)
         else:
-            self.occupancy = np.asarray(occupancy, dtype=np.float).reshape(-1)
+            self.occupancy = np.asarray(occupancy, dtype=float).reshape(-1)
         # Uiso
         if uiso is None:
             self.uiso = self._default_uiso * np.ones(Natoms)
         else:
-            self.uiso = np.asarray(uiso, dtype=np.float).reshape(-1)
+            self.uiso = np.asarray(uiso, dtype=float).reshape(-1)
         # Mag vector mxmymz
         if mxmymz is None:
             self.mx = np.zeros(Natoms)
             self.my = np.zeros(Natoms)
             self.mz = np.zeros(Natoms)
         else:
-            mpos = np.asarray(mxmymz, dtype=np.float).reshape(Natoms, 3)
+            mpos = np.asarray(mxmymz, dtype=float).reshape(Natoms, 3)
             self.mx = mpos[:, 0]
             self.my = mpos[:, 1]
             self.mz = mpos[:, 2]
@@ -1075,9 +1075,9 @@ class Atoms:
             occ = np.ones(len(element))
 
         # Get coordinates
-        u = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_fract_x']], dtype=np.float)
-        v = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_fract_y']], dtype=np.float)
-        w = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_fract_z']], dtype=np.float)
+        u = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_fract_x']], dtype=float)
+        v = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_fract_y']], dtype=float)
+        w = np.array([fg.readstfm(x)[0] for x in cifvals['_atom_site_fract_z']], dtype=float)
 
         # Get magnetic vectors
         mx = np.zeros(len(u))
@@ -1193,7 +1193,7 @@ class Atoms:
             self.uiso[idx] = uiso
 
         if mxmymz is not None:
-            mpos = np.asarray(mxmymz, dtype=np.float).reshape(-1, 3)
+            mpos = np.asarray(mxmymz, dtype=float).reshape(-1, 3)
             self.mx[idx] = mpos[:, 0]
             self.my[idx] = mpos[:, 1]
             self.mz[idx] = mpos[:, 2]
@@ -1376,14 +1376,14 @@ class Atoms:
         Returns a [nx3] array of current positions
         :return: np.array([nx3])
         """
-        return np.asarray([self.u, self.v, self.w], dtype=np.float).T
+        return np.asarray([self.u, self.v, self.w], dtype=float).T
 
     def mxmymz(self):
         """
         Returns a [nx3] array of magnetic vectors
         :return: np.array([nx3])
         """
-        return np.asarray([self.mx, self.my, self.mz], dtype=np.float).T
+        return np.asarray([self.mx, self.my, self.mz], dtype=float).T
 
     def total_moment(self):
         """Return the total moment along a, b, c directions"""
@@ -1814,7 +1814,7 @@ class Symmetry:
               2   0.0000  0.1000  0.0000                y,x,z                y,x,z
         """
 
-        UVW = np.asarray(UVW, dtype=np.float).reshape([-1, 3])
+        UVW = np.asarray(UVW, dtype=float).reshape([-1, 3])
 
         out = ''
         for u, v, w in UVW:
@@ -1855,7 +1855,7 @@ class Symmetry:
 
         NsymOps = len(self.symmetry_operations)
 
-        HKL = np.asarray(HKL, dtype=np.float).reshape((-1, 3))
+        HKL = np.asarray(HKL, dtype=float).reshape((-1, 3))
 
         symHKL = np.zeros([len(HKL) * NsymOps, 3])
         ii = 0
@@ -1931,8 +1931,8 @@ class Symmetry:
             > dI = array([2,1])
         """
 
-        HKL = np.asarray(HKL, dtype=np.float).reshape((-1, 3))
-        I = np.asarray(I, dtype=np.float)
+        HKL = np.asarray(HKL, dtype=float).reshape((-1, 3))
+        I = np.asarray(I, dtype=float)
 
         NsymOps = len(self.symmetry_operations)
 
@@ -1953,7 +1953,7 @@ class Symmetry:
         if dI is None:
             return unique_hkl, sum_I
 
-        dI = np.asarray(dI, dtype=np.float)
+        dI = np.asarray(dI, dtype=float)
         sym_dI = np.repeat(dI, NsymOps)  # repeats each element of I
         unique_dI = sym_dI[uniqueidx]
         sum_dI = unique_dI * count  # *np.sqrt(count)?
@@ -2023,7 +2023,7 @@ class Symmetry:
         :return: str
         """
 
-        HKL = np.asarray(HKL, dtype=np.float).reshape((-1, 3))
+        HKL = np.asarray(HKL, dtype=float).reshape((-1, 3))
         ops = np.array(self.symmetry_operations)
         out = ''
         for hkl in HKL:
@@ -2089,7 +2089,7 @@ class Symmetry:
         :param HKL: [nx3] array of [h,k,l]
         :return: [n] array of multiplyers
         """
-        HKL = np.asarray(HKL, dtype=np.float).reshape((-1, 3))
+        HKL = np.asarray(HKL, dtype=float).reshape((-1, 3))
         multiplyers = np.zeros(len(HKL))
         for n, hkl in enumerate(HKL):
             sym_hkl = self.symmetric_reflections_unique(hkl)
@@ -2199,7 +2199,7 @@ class Superstructure(Crystal):
         self.Structure = Atoms()
 
         self.name = Parent.name + ' supercell'
-        self.P = np.asarray(P, dtype=np.float)
+        self.P = np.asarray(P, dtype=float)
         self.Parent = Parent
         newUV = Parent.Cell.calculateR(P)
         self.new_cell(fc.UV2latpar(newUV))

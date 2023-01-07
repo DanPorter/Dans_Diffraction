@@ -248,14 +248,14 @@ class CrystalOrientation:
 
     def realspace(self, uvw):
         """Generate vector in real space from uvw = [u*a, v*b, w*c]"""
-        uvw = np.reshape(np.asarray(uvw, dtype=np.float), [-1, 3])
+        uvw = np.reshape(np.asarray(uvw, dtype=float), [-1, 3])
         uv = self._uv()
         r = np.dot(uvw, uv)
         return self.orientation(r)
 
     def recspace(self, hkl):
         """Generate vector in reciprocal space from hkl = [h*a*, k*b*, l*c*]"""
-        hkl = np.reshape(np.asarray(hkl, dtype=np.float), [-1, 3])
+        hkl = np.reshape(np.asarray(hkl, dtype=float), [-1, 3])
         uvs = self._uvstar()
         q = np.dot(hkl, uvs)
         return self.orientation(q)

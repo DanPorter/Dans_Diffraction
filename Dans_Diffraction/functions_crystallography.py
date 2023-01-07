@@ -1031,7 +1031,7 @@ def xray_scattering_factor_resonant(element, Qmag, energy_kev):
     coef = atom_properties(element, ['a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'c'])
     f1, f2 = xray_dispersion_corrections(element, energy_kev)  # shape (len(energy), len(element))
 
-    Qff = np.zeros([len(Qmag), len(coef), len(energy_kev)], dtype=np.complex)
+    Qff = np.zeros([len(Qmag), len(coef), len(energy_kev)], dtype=complex)
     # Broadcast dispersion corrections
     Qff[:, :, :] = f1.T + 1j * f2.T
 
@@ -2409,7 +2409,7 @@ def gen_sym_ref(sym_ops, hkl):
          symhkl = gen_sym_ref(sym_ops,h,k,l)
     """
 
-    hkl = np.asarray(hkl, dtype=np.float)
+    hkl = np.asarray(hkl, dtype=float)
 
     # Get transformation matrices
     sym_mat = gen_sym_mat(sym_ops)
@@ -3052,7 +3052,7 @@ def biso2uiso(biso):
     :param biso: Biso value or array
     :return: Uiso value or array
     """
-    biso = np.asarray(biso, dtype=np.float)
+    biso = np.asarray(biso, dtype=float)
     return biso / (8 * np.pi ** 2)
 
 
@@ -3062,7 +3062,7 @@ def uiso2biso(uiso):
     :param uiso: Uiso value or array
     :return: Biso value or array
     """
-    uiso = np.asarray(uiso, dtype=np.float)
+    uiso = np.asarray(uiso, dtype=float)
     return uiso * (8 * np.pi ** 2)
 
 
@@ -3125,7 +3125,7 @@ def hkl2str(hkl):
     """
 
     out = '(%1.3g,%1.3g,%1.3g)'
-    hkl = np.asarray(hkl, dtype=np.float).reshape([-1, 3])
+    hkl = np.asarray(hkl, dtype=float).reshape([-1, 3])
     hkl = np.around(hkl, 5)
     return '\n'.join([out % (x[0], x[1], x[2]) for x in hkl])
 
@@ -3163,8 +3163,8 @@ def debyewaller(uiso, Qmag=0):
         T = exp( -Uiso/2 * Q^2 )
     """
 
-    uiso = np.asarray(uiso, dtype=np.float).reshape(1, -1)
-    Qmag = np.asarray(Qmag, dtype=np.float).reshape(-1, 1)
+    uiso = np.asarray(uiso, dtype=float).reshape(1, -1)
+    Qmag = np.asarray(Qmag, dtype=float).reshape(-1, 1)
 
     # Tall = np.exp(-0.5 * np.dot(Qmag, uiso))  # Not sure where this comes from... Jon's notes?
     Tall = np.exp(-0.5 * np.dot(Qmag ** 2, uiso))

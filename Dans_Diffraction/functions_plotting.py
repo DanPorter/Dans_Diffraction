@@ -226,7 +226,7 @@ def multiplot(xvals, yvals=None, datarange=None, cmap='jet', labels=None, marker
 
     if datarange is None:
         datarange = range(len(yvals))
-    datarange = np.asarray(datarange,dtype=np.float)
+    datarange = np.asarray(datarange,dtype=float)
 
     cm = plt.get_cmap(cmap)
     colrange = (datarange - datarange.min()) / (datarange.max() - datarange.min())
@@ -279,9 +279,9 @@ def newplot3(*args, **kwargs):
     fig = plt.figure(figsize=FIGURE_SIZE, dpi=FIGURE_DPI)
     ax = fig.add_subplot(111, projection='3d')
 
-    x = np.asarray(args[0], dtype=np.float)
-    y = np.asarray(args[1], dtype=np.float)
-    z = np.asarray(args[2], dtype=np.float)
+    x = np.asarray(args[0], dtype=float)
+    y = np.asarray(args[1], dtype=float)
+    z = np.asarray(args[2], dtype=float)
 
     if z.ndim == 2:
         if x.ndim < 2:
@@ -325,11 +325,11 @@ def sliderplot(YY, X=None, slidervals=None, *args, **kwargs):
 
     fig = plt.figure(figsize=FIGURE_SIZE, dpi=FIGURE_DPI)
 
-    X = np.asarray(X, dtype=np.float)
-    Y = np.asarray(YY, dtype=np.float)
+    X = np.asarray(X, dtype=float)
+    Y = np.asarray(YY, dtype=float)
     if slidervals is None:
         slidervals = range(Y.shape[0])
-    slidervals = np.asarray(slidervals, dtype=np.float)
+    slidervals = np.asarray(slidervals, dtype=float)
 
     if X.ndim < 2:
         X = np.tile(X, Y.shape[0]).reshape(Y.shape)
@@ -381,18 +381,18 @@ def sliderplot2D(ZZZ, XX=None, YY=None, slidervals=None, *args, **kwargs):
 
     fig = plt.figure(figsize=FIGURE_SIZE, dpi=FIGURE_DPI)
 
-    ZZZ = np.asarray(ZZZ, dtype=np.float)
+    ZZZ = np.asarray(ZZZ, dtype=float)
 
     if slidervals is None:
         slidervals = range(ZZZ.shape[2])
-    slidervals = np.asarray(slidervals, dtype=np.float)
+    slidervals = np.asarray(slidervals, dtype=float)
 
     if XX is None:
         XX = range(ZZZ.shape[1])
     if YY is None:
         YY = range(ZZZ.shape[0])
-    XX = np.asarray(XX, dtype=np.float)
-    YY = np.asarray(YY, dtype=np.float)
+    XX = np.asarray(XX, dtype=float)
+    YY = np.asarray(YY, dtype=float)
     if XX.ndim < 2:
         XX, YY = np.meshgrid(XX, YY)
 

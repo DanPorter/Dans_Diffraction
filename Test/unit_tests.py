@@ -96,7 +96,7 @@ print('Cobalt magnetic form factor @ 0.5A = %6.2f' % mff[0, 0])
 att = dif.fc.attenuation(27, 8)
 print('Cobalt attenuation @ 8.00keV = %6.2f cm^2/g' % att)
 asf1, asf2 = dif.fc.atomic_scattering_factor('Co', 2.838)
-print('Cobalt atomic scattering factor @ 8.000keV: f1+if2 = %s' % np.complex(asf1, asf2))
+print('Cobalt atomic scattering factor @ 8.000keV: f1+if2 = %s' % complex(asf1, asf2))
 
 # 4) Test crystal building
 print('\nBuilding a crystal manually...')

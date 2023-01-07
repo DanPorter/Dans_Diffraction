@@ -85,8 +85,8 @@ def phase_factor(hkl, uvw):
     :return: complex array [n,m]
     """
 
-    hkl = np.asarray(np.rint(hkl), dtype=np.float).reshape([-1, 3])
-    uvw = np.asarray(uvw, dtype=np.float).reshape([-1, 3])
+    hkl = np.asarray(np.rint(hkl), dtype=float).reshape([-1, 3])
+    uvw = np.asarray(uvw, dtype=float).reshape([-1, 3])
 
     dotprod = np.dot(hkl, uvw.T)
     return np.exp(1j * 2 * np.pi * dotprod)
@@ -101,8 +101,8 @@ def phase_factor_qr(q, r):
     :return: complex array [n,m]
     """
 
-    q = np.asarray(q, dtype=np.float).reshape([-1, 3])
-    r = np.asarray(r, dtype=np.float).reshape([-1, 3])
+    q = np.asarray(q, dtype=float).reshape([-1, 3])
+    r = np.asarray(r, dtype=float).reshape([-1, 3])
 
     dotprod = np.dot(q, r.T)
     return np.exp(1j * dotprod)
@@ -172,7 +172,7 @@ def sf_xray_dispersion(q, r, scattering_factor, occ=None, debyewaller=None, **kw
     :return sf: [n, e] complex array of structure factors
     """
     phase = phase_factor_qr(q, r)
-    scattering_factor = np.asarray(scattering_factor, dtype=np.complex).reshape(*phase.shape, -1)
+    scattering_factor = np.asarray(scattering_factor, dtype=complex).reshape(*phase.shape, -1)
     if occ is None:
         occ = np.ones(phase.shape[1])
     if debyewaller is None:
@@ -180,7 +180,7 @@ def sf_xray_dispersion(q, r, scattering_factor, occ=None, debyewaller=None, **kw
 
     neng = scattering_factor.shape[2]
     _debug('sf_xray_dispersion(phase.shape=%s, energies=%s)' % (phase.shape, neng))
-    sf = np.zeros([len(q), neng], dtype=np.complex)
+    sf = np.zeros([len(q), neng], dtype=complex)
     for engval in range(neng):
         sf[:, engval] = structure_factor(scattering_factor[:, :, engval], occ, debyewaller, phase)
     if neng == 1:
@@ -209,7 +209,7 @@ def sf_magnetic_neutron(q, r, moment, magnetic_formfactor=None, occ=None,  debye
     """
 
     phase = phase_factor_qr(q, r)
-    moment = np.asarray(moment, dtype=np.float).reshape((-1, 3))
+    moment = np.asarray(moment, dtype=float).reshape((-1, 3))
     if occ is None:
         occ = np.ones(phase.shape[1])
     if debyewaller is None:
@@ -224,7 +224,7 @@ def sf_magnetic_neutron(q, r, moment, magnetic_formfactor=None, occ=None,  debye
 
     # Calculate structure factor
     _debug('sf_magnetic_neutron(phase.shape=%s)' % (phase.shape,))
-    sf = np.zeros(len(q), dtype=np.complex)
+    sf = np.zeros(len(q), dtype=complex)
     for n, qh in enumerate(qhat):
         sfm = np.array([0., 0., 0.])
         for m, mom in enumerate(moment):
@@ -259,7 +259,7 @@ def sf_magnetic_neutron_polarised(q, r, moment, incident_polarisation_vector=(1,
     """
 
     phase = phase_factor_qr(q, r)
-    moment = np.asarray(moment, dtype=np.float).reshape((-1, 3))
+    moment = np.asarray(moment, dtype=float).reshape((-1, 3))
     if occ is None:
         occ = np.ones(phase.shape[1])
     if debyewaller is None:
@@ -274,7 +274,7 @@ def sf_magnetic_neutron_polarised(q, r, moment, incident_polarisation_vector=(1,
 
     # Calculate structure factor
     _debug('sf_magnetic_neutron_polarised(phase.shape=%s)' % (phase.shape,))
-    sf = np.zeros(len(q), dtype=np.complex)
+    sf = np.zeros(len(q), dtype=complex)
     for n, qh in enumerate(qhat):
         sfm = np.array([0., 0., 0.])
         for m, mom in enumerate(moment):
@@ -315,7 +315,7 @@ def sf_magnetic_xray(q, r, moment, magnetic_formfactor=None, occ=None, debyewall
     """
 
     phase = phase_factor_qr(q, r)
-    moment = np.asarray(moment, dtype=np.float).reshape((-1, 3))
+    moment = np.asarray(moment, dtype=float).reshape((-1, 3))
     if occ is None:
         occ = np.ones(phase.shape[1])
     if debyewaller is None:
@@ -325,7 +325,7 @@ def sf_magnetic_xray(q, r, moment, magnetic_formfactor=None, occ=None, debyewall
 
     # Calculate structure factor
     _debug('sf_magnetic_xray(phase.shape=%s)' % (phase.shape,))
-    sf = np.zeros(len(q), dtype=np.complex)
+    sf = np.zeros(len(q), dtype=complex)
     for n in range(len(q)):
         # Calculate vector structure factor
         sfm = np.array([0., 0., 0.])
@@ -365,7 +365,7 @@ def sf_magnetic_xray_polarised(q, r, moment, incident_polarisation_vector=(1, 0,
     """
 
     phase = phase_factor_qr(q, r)
-    moment = np.asarray(moment, dtype=np.float).reshape((-1, 3))
+    moment = np.asarray(moment, dtype=float).reshape((-1, 3))
     if occ is None:
         occ = np.ones(phase.shape[1])
     if debyewaller is None:
@@ -375,7 +375,7 @@ def sf_magnetic_xray_polarised(q, r, moment, incident_polarisation_vector=(1, 0,
 
     # Calculate structure factor
     _debug('sf_magnetic_xray_polarised(phase.shape=%s)' % (phase.shape,))
-    sf = np.zeros(len(q), dtype=np.complex)
+    sf = np.zeros(len(q), dtype=complex)
     for n in range(len(q)):
         # Calculate vector structure factor
         sfm = np.array([0., 0., 0.])
@@ -421,25 +421,25 @@ def sf_magnetic_xray_beamline(q, r, moment, energy_kev, magnetic_formfactor=None
     """
 
     phase = phase_factor_qr(q, r)
-    moment = np.asarray(moment, dtype=np.float).reshape((-1, 3))
+    moment = np.asarray(moment, dtype=float).reshape((-1, 3))
     if occ is None:
         occ = np.ones(phase.shape[1])
     if debyewaller is None:
         debyewaller = np.ones(phase.shape)
     if magnetic_formfactor is None:
         magnetic_formfactor = np.ones(phase.shape)
-    psi = np.asarray(psi, dtype=np.float).reshape([-1])
+    psi = np.asarray(psi, dtype=float).reshape([-1])
     npsi = len(psi)
 
     _debug('sf_magnetic_xray_beamline(phase.shape=%s, npsi=%d)' % (phase.shape, npsi))
-    sf = np.zeros([len(q), npsi], dtype=np.complex)
+    sf = np.zeros([len(q), npsi], dtype=complex)
     for psival in range(npsi):
         kin, kout, ein, eout = scatteringvectors(q, energy_kev, azi_ref_q, psi, polarisation)
 
         # Magnetic form factor
         # f_non-res_mag = i.r0.(hw/mc^2).fD.[.5.L.A + S.B] #equ 2 Hill+McMorrow 1996
         # ignore orbital moment L
-        fspin = np.zeros([len(q), len(r)], dtype=np.complex)
+        fspin = np.zeros([len(q), len(r)], dtype=complex)
         for n in range(len(q)):
             B = np.cross(eout[n], ein[n]) + \
                 np.cross(kout[n], eout[n]) * np.dot(kout[n], ein[n]) - \
@@ -488,15 +488,15 @@ def sf_magnetic_xray_resonant(q, r, moment, energy_kev, occ=None, debyewaller=No
         debyewaller = np.ones(phase.shape)
     if debyewaller is None:
         debyewaller = np.ones(phase.shape)
-    psi = np.asarray(psi, dtype=np.float).reshape([-1])
+    psi = np.asarray(psi, dtype=float).reshape([-1])
     npsi = len(psi)
 
     _debug('sf_magnetic_xray_resonant(phase.shape=%s, npsi=%d)' % (phase.shape, npsi))
-    sf = np.zeros([len(q), npsi], dtype=np.complex)
+    sf = np.zeros([len(q), npsi], dtype=complex)
     for psival in range(npsi):
         kin, kout, ein, eout = scatteringvectors(q, energy_kev, azi_ref_q, psi[psival], polarisation)
 
-        fe1e1 = np.zeros([len(q), len(r)], dtype=np.complex)
+        fe1e1 = np.zeros([len(q), len(r)], dtype=complex)
         flm0, flm1, flm2 = 0, 0, 0
         for ref in range(len(q)):
             # z = scatteringcomponents(moment, q[ref], azi_ref_q, psi)
@@ -577,11 +577,11 @@ def sf_magnetic_xray_resonant_alternate(q, r, moment, energy_kev, occ=None, deby
         debyewaller = np.ones(phase.shape)
     if debyewaller is None:
         debyewaller = np.ones(phase.shape)
-    psi = np.asarray(psi, dtype=np.float).reshape([-1])
+    psi = np.asarray(psi, dtype=float).reshape([-1])
     npsi = len(psi)
 
     _debug('sf_magnetic_xray_resonant_alternate(phase.shape=%s, npsi=%d)' % (phase.shape, npsi))
-    sf = np.zeros([len(q), npsi], dtype=np.complex)
+    sf = np.zeros([len(q), npsi], dtype=complex)
     for psival in range(npsi):
         # Get resonant form factor
         fxres = xray_resonant_scattering_factor(q, moment, energy_kev, polarisation,
@@ -633,8 +633,8 @@ def xray_resonant_scattering_factor(q, moment, energy_kev, polarisation='sp', fl
     From Hill+McMorrow Acta Cryst. 1996 A52, 236-244 Equ. (15)
     """
 
-    q = np.asarray(q, dtype=np.float).reshape((-1, 3))
-    moment = np.asarray(moment, dtype=np.float).reshape((-1, 3))
+    q = np.asarray(q, dtype=float).reshape((-1, 3))
+    moment = np.asarray(moment, dtype=float).reshape((-1, 3))
     polarisation = polarisation.lower().replace('-', '').replace(' ', '')
     nref = len(q)
     nat = len(moment)
@@ -642,7 +642,7 @@ def xray_resonant_scattering_factor(q, moment, energy_kev, polarisation='sp', fl
     qmag = fg.mag(q)
     bragg = fc.cal2theta(qmag, energy_kev) / 2
 
-    fxres = np.zeros([nref, nat], dtype=np.complex)
+    fxres = np.zeros([nref, nat], dtype=complex)
     for ref in range(nref):
         # Resonant scattering factor
         # Electric Dipole transition at 3d L edge
@@ -741,8 +741,8 @@ def scatteringvectors(q, energy_kev, azi_ref_q=(1, 0, 0), psi=0, polarisation='s
     The basis is chosen such that Q defines the scattering plane, sigma and pi directions are normal to this plane.
     """
 
-    q = np.asarray(q, dtype=np.float).reshape([-1, 3])
-    azi_ref_q = np.asarray(azi_ref_q, dtype=np.float).reshape(3)
+    q = np.asarray(q, dtype=float).reshape([-1, 3])
+    azi_ref_q = np.asarray(azi_ref_q, dtype=float).reshape(3)
     polarisation = polarisation.replace('-', '').replace(' ', '')
 
     out_kin = np.zeros([len(q), 3])
@@ -857,10 +857,10 @@ def autostructurefactor(scattering_type, q, r, *args, **kwargs):
     scatter_fun = get_scattering_function(scattering_type)
     opt = options(*args, **kwargs)
 
-    q = np.asarray(q, dtype=np.float).reshape([-1, 3])
-    r = np.asarray(r, dtype=np.float).reshape([-1, 3])
-    energy_kev = np.asarray(opt['energy_kev'], dtype=np.float).reshape(-1)
-    psi = np.asarray(opt['psi'], dtype=np.float).reshape(-1)
+    q = np.asarray(q, dtype=float).reshape([-1, 3])
+    r = np.asarray(r, dtype=float).reshape([-1, 3])
+    energy_kev = np.asarray(opt['energy_kev'], dtype=float).reshape(-1)
+    psi = np.asarray(opt['psi'], dtype=float).reshape(-1)
 
     nref = q.shape[0]
     natom = r.shape[0]
@@ -892,7 +892,7 @@ def autostructurefactor(scattering_type, q, r, *args, **kwargs):
     debyewaller = np.array_split(debyewaller, n_arrays)
     magff = np.array_split(magff, n_arrays)
 
-    sf = np.zeros([nref, nenergy, npsi], dtype=np.complex)
+    sf = np.zeros([nref, nenergy, npsi], dtype=complex)
     start_time = datetime.datetime.now()
     for e, enval in enumerate(energy_kev):
         opt['energy_kev'] = enval
