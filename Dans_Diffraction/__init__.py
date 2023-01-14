@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.2.2
-Last updated: 06/01/23
+Version 2.2.3
+Last updated: 14/01/23
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -65,6 +65,7 @@ Version History:
 14/03/22 2.2.0  Scatter.powder() updated for new inputs and outputs for pVoight and custom peak shapes. Thanks yevgenyr!
 23/07/22 2.2.1  Fixed error in MultiCrystal.Scatter
 06/01/23 2.2.2  Removed redundent references to np.float
+14/01/23 2.2.3  Corrected background error in xtl.Scatter.powder
 
 -----------------------------------------------------------------------------
    Copyright 2023 Diamond Light Source Ltd.
@@ -118,8 +119,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '2.2.2'
-__date__ = '06/01/23'
+__version__ = '2.2.3'
+__date__ = '14/01/23'
 
 
 # Build

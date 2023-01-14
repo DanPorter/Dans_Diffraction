@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.1.0
-Last updated: 14/03/22
+Version 2.1.1
+Last updated: 14/01/23
 
 Version History:
 10/09/17 0.1    Program created
@@ -30,6 +30,7 @@ Version History:
 28/09/21 2.0.1  Added __repr__
 08/02/22 2.0.3  Corrected error in powder of wrong tth values. Thanks Mirko!
 14/03/22 2.1.0   powder() updated for new inputs and outputs for pVoight and custom peak shapes. Thanks yevgenyr!
+14/01/23 2.1.1  Corrected background error in xtl.Scatter.powder
 
 @author: DGPorter
 """
@@ -44,7 +45,7 @@ from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '2.1.0'
+__version__ = '2.1.1'
 __scattering_types__ = {'xray': ['xray', 'x', 'x-ray', 'thomson', 'charge'],
                         'neutron': ['neutron', 'n', 'nuclear'],
                         'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'],
@@ -568,7 +569,7 @@ class Scattering:
 
         # Add background (if >0 or not None)
         if background:
-            bkg = np.random.normal(background, np.sqrt(background), [pixels])
+            bkg = np.random.normal(background, np.sqrt(background), [tot_pixels])
             mesh = mesh + bkg
 
         # Change output units
