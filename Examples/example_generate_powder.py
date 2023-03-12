@@ -18,9 +18,10 @@ xtl = dif.Crystal(f)
 energy_kev = dif.fc.wave2energy(1.5498)  # 8 keV
 max_twotheta = 180
 
-xtl.Scatter.setup_scatter('xray')  # 'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
-max_wavevector = dif.fc.calqmag(max_twotheta, energy_kev)
-q, intensity = xtl.Scatter.generate_powder(max_wavevector, peak_width=0.01, background=0, powder_average=True)
+# xtl.Scatter.setup_scatter('xray')  # 'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
+# max_wavevector = dif.fc.calqmag(max_twotheta, energy_kev)
+# q, intensity = xtl.Scatter.generate_powder(max_wavevector, peak_width=0.01, background=0, powder_average=True)
+q, intensity, reflections = xtl.Scatter.powder('xray', units='Q', energy_kev=energy_kev, peak_width=0.01, background=0)
 
 # convert wavevector, q=2pi/d to two-theta:
 twotheta = dif.fc.cal2theta(q, energy_kev)

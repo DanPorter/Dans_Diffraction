@@ -9,7 +9,7 @@ def readme():
 setup(
     name='Dans_Diffraction',
     packages=['Dans_Diffraction', 'Dans_Diffraction.tkgui'],
-    version='2.2.0',
+    version='2.2.3',
     description='Generate diffracted intensities from crystals',
     long_description_content_type='text/markdown',
     long_description=readme(),
@@ -22,13 +22,12 @@ setup(
         'fdmnes', 'super structure', 'spacegroup', 'space group'
         ],
     classifiers=[
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.7',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Physics',
         'License :: OSI Approved :: Apache Software License',
         'Development Status :: 3 - Alpha',
         ],
-    install_requires=['numpy', 'matplotlib', 'scipy'],
+    install_requires=['numpy', 'matplotlib'],
     package_data={'': ['data/*.txt', 'data/*.dat', 'data/*.json', 'data/*.npy', 'Structures/*.cif', 'Structures/*.mcif']}
     )
