@@ -42,19 +42,25 @@
 <font color="#000000" face="helvetica, arial"><a name="SelectionBox">class <strong>SelectionBox</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#SelectionBox">SelectionBox</a>(parent,&nbsp;data_fields,&nbsp;current_selection=[],&nbsp;title='Make&nbsp;a&nbsp;selection',&nbsp;multiselect=True)<br>
+<td colspan=2><tt><a href="#SelectionBox">SelectionBox</a>(parent,&nbsp;data_fields,&nbsp;current_selection=(),&nbsp;title='Make&nbsp;a&nbsp;selection',&nbsp;multiselect=True)<br>
 &nbsp;<br>
 Displays&nbsp;all&nbsp;data&nbsp;fields&nbsp;and&nbsp;returns&nbsp;a&nbsp;selection<br>
 Making&nbsp;a&nbsp;selection&nbsp;returns&nbsp;a&nbsp;list&nbsp;of&nbsp;field&nbsp;strings<br>
 &nbsp;<br>
-out&nbsp;=&nbsp;<a href="#SelectionBox">SelectionBox</a>(['field1','field2','field3'],&nbsp;current_selection=['field2'],&nbsp;title='',&nbsp;multiselect=False)<br>
+out&nbsp;=&nbsp;<a href="#SelectionBox">SelectionBox</a>(['field1','field2','field3'],&nbsp;current_selection=['field2'],&nbsp;title='',&nbsp;multiselect=False).<a href="#SelectionBox-show">show</a>()<br>
 #&nbsp;Make&nbsp;selection&nbsp;and&nbsp;press&nbsp;"Select"&nbsp;&gt;&nbsp;box&nbsp;disappears<br>
-out.output&nbsp;=&nbsp;['list','of','strings']<br>&nbsp;</tt></td></tr>
+out&nbsp;=&nbsp;['list','of','strings']<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="SelectionBox-__init__"><strong>__init__</strong></a>(self, parent, data_fields, current_selection=[], title='Make a selection', multiselect=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+<dl><dt><a name="SelectionBox-__init__"><strong>__init__</strong></a>(self, parent, data_fields, current_selection=(), title='Make a selection', multiselect=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
-<dl><dt><a name="SelectionBox-f_exit"><strong>f_exit</strong></a>(self)</dt><dd><tt>Closes&nbsp;the&nbsp;current&nbsp;data&nbsp;window</tt></dd></dl>
+<dl><dt><a name="SelectionBox-f_exit"><strong>f_exit</strong></a>(self, event=None)</dt><dd><tt>Closes&nbsp;the&nbsp;current&nbsp;data&nbsp;window</tt></dd></dl>
+
+<dl><dt><a name="SelectionBox-fun_exitbutton"><strong>fun_exitbutton</strong></a>(self, event=None)</dt><dd><tt>Closes&nbsp;the&nbsp;current&nbsp;data&nbsp;window&nbsp;and&nbsp;generates&nbsp;output</tt></dd></dl>
+
+<dl><dt><a name="SelectionBox-fun_listboxselect"><strong>fun_listboxselect</strong></a>(self, event=None)</dt><dd><tt>Update&nbsp;label&nbsp;on&nbsp;listbox&nbsp;selection</tt></dd></dl>
+
+<dl><dt><a name="SelectionBox-fun_search"><strong>fun_search</strong></a>(self, event=None)</dt><dd><tt>Search&nbsp;the&nbsp;selection&nbsp;for&nbsp;string</tt></dd></dl>
 
 <dl><dt><a name="SelectionBox-show"><strong>show</strong></a>(self)</dt><dd><tt>Run&nbsp;the&nbsp;selection&nbsp;box,&nbsp;wait&nbsp;for&nbsp;response</tt></dd></dl>
 

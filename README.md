@@ -1,12 +1,15 @@
 # Dans_Diffaction
-Reads crystallographic cif files and simulates diffraction, among other things.
+Reads crystallographic cif files, calculates crystal properties and simulates diffraction.
 
 **Version 2.2**
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3859501.svg)](https://doi.org/10.5281/zenodo.3859501)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/DanPorter/Dans_Diffraction/6be78ef800167276d61d3e73da3b74a8367dbbe7?urlpath=lab%2Ftree%2FDans_Diffraction.ipynb) 
+[![](https://img.shields.io/github/forks/DanPorter/Dans_Diffraction?label=GitHub%20Repo&style=social)](https://github.com/DanPorter/Dans_Diffraction)
+
 
 By Dan Porter, Diamond Light Source
-2022
+2023
 
 #### TL;DR:
 ```text
@@ -30,6 +33,8 @@ xtl.start_gui()
 ```
 
 Full code documentation available [here](https://danporter.github.io/Dans_Diffraction/).
+
+Try it out on [mybinder!](https://mybinder.org/v2/gh/DanPorter/Dans_Diffraction/6be78ef800167276d61d3e73da3b74a8367dbbe7?urlpath=lab%2Ftree%2FDans_Diffraction.ipynb)
 
 For comments, queries or bugs - email [dan.porter@diamond.ac.uk](mailto:dan.porter@diamond.ac.uk)
 

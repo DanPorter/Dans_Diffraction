@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_plotting</strong></big></big> (version 1.9)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_plotting</strong></big></big> (version 2.1)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_plotting.py">c:\users\dgpor\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_plotting.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;Handy&nbsp;plotting&nbsp;functions&nbsp;"functions_plotting.py"<br>
@@ -25,8 +25,8 @@ Usage:&nbsp;<br>
 All&nbsp;plots&nbsp;generated&nbsp;require&nbsp;plt.show()&nbsp;call,&nbsp;unless&nbsp;using&nbsp;interactive&nbsp;mode<br>
 &nbsp;<br>
 &nbsp;<br>
-Version&nbsp;2.0<br>
-Last&nbsp;updated:&nbsp;27/09/21<br>
+Version&nbsp;2.1<br>
+Last&nbsp;updated:&nbsp;10/08/22<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 06/01/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created&nbsp;from&nbsp;DansGeneralProgs.py&nbsp;V2.3<br>
@@ -41,6 +41,7 @@ Version&nbsp;History:<br>
 22/11/20&nbsp;1.9&nbsp;&nbsp;&nbsp;&nbsp;Update&nbsp;to&nbsp;labels&nbsp;to&nbsp;fix&nbsp;3D&nbsp;plotting<br>
 15/02/21&nbsp;1.9.1&nbsp;&nbsp;Update&nbsp;to&nbsp;vecplot&nbsp;for&nbsp;plotting&nbsp;on&nbsp;axis<br>
 27/09/21&nbsp;2.0&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;plot3darray,&nbsp;plot_diffractometer_reciprocal_space<br>
+10/08/22&nbsp;2.1&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;plot_lattice_points3D,&nbsp;set_plot_defaults,&nbsp;changed&nbsp;default&nbsp;fig&nbsp;size<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -1152,6 +1153,12 @@ Includes&nbsp;boundaries&nbsp;for&nbsp;theta=0,&nbsp;twotheta=180&nbsp;and&nbsp;
 :param&nbsp;color:&nbsp;default&nbsp;'b'<br>
 :param&nbsp;marker:&nbsp;default&nbsp;'o'<br>
 :return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-plot_lattice_points3D"><strong>plot_lattice_points3D</strong></a>(Q, point_size=None, color=None, cmap=None)</dt><dd><tt>Plot&nbsp;lattice&nbsp;points&nbsp;is&nbsp;3D&nbsp;reciprocal&nbsp;space<br>
+:param&nbsp;Q:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;wavevector&nbsp;transfer&nbsp;positions&nbsp;in&nbsp;reciprocal&nbsp;space,&nbsp;units&nbsp;A^-1<br>
+:param&nbsp;point_size:&nbsp;scalar&nbsp;or&nbsp;array&nbsp;of&nbsp;length&nbsp;n,&nbsp;determines&nbsp;each&nbsp;point&nbsp;size&nbsp;(for&nbsp;intensity),&nbsp;in&nbsp;pixels<br>
+:param&nbsp;color:&nbsp;colour&nbsp;specifier,&nbsp;can&nbsp;be&nbsp;a&nbsp;list&nbsp;of&nbsp;values&nbsp;length&nbsp;n<br>
+:param&nbsp;cmap:&nbsp;str&nbsp;name&nbsp;of&nbsp;colormap&nbsp;to&nbsp;use&nbsp;if&nbsp;color&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;values<br>
+:return:</tt></dd></dl>
  <dl><dt><a name="-plot_magnetic_form_factor"><strong>plot_magnetic_form_factor</strong></a>(elements, maxq=10)</dt><dd><tt>Plot&nbsp;magnetic&nbsp;form&nbsp;factor&nbsp;for&nbsp;1&nbsp;or&nbsp;more&nbsp;elements<br>
 :param&nbsp;elements:<br>
 :return:&nbsp;None</tt></dd></dl>
@@ -1206,6 +1213,11 @@ E.G.<br>
 <a href="#-saveplot">saveplot</a>('test')<br>
 E.G.<br>
 <a href="#-saveplot">saveplot</a>('c:\somedirpicture.jpg',&nbsp;dpi=600,&nbsp;figure=3)</tt></dd></dl>
+ <dl><dt><a name="-set_plot_defaults"><strong>set_plot_defaults</strong></a>(rcdefaults=False)</dt><dd><tt>Set&nbsp;custom&nbsp;matplotlib&nbsp;rcparams,&nbsp;or&nbsp;revert&nbsp;to&nbsp;matplotlib&nbsp;defaults<br>
+These&nbsp;handle&nbsp;the&nbsp;default&nbsp;look&nbsp;of&nbsp;matplotlib&nbsp;plots<br>
+See:&nbsp;https://matplotlib.org/stable/tutorials/introductory/customizing.html#the-default-matplotlibrc-file<br>
+:param&nbsp;rcdefaults:&nbsp;False*/&nbsp;True,&nbsp;if&nbsp;True,&nbsp;revert&nbsp;to&nbsp;matplotlib&nbsp;defaults<br>
+:return:&nbsp;None</tt></dd></dl>
  <dl><dt><a name="-sliderplot"><strong>sliderplot</strong></a>(YY, X=None, slidervals=None, *args, **kwargs)</dt><dd><tt>Shortcut&nbsp;to&nbsp;creating&nbsp;a&nbsp;simple&nbsp;2D&nbsp;plot&nbsp;with&nbsp;a&nbsp;slider&nbsp;to&nbsp;go&nbsp;through&nbsp;a&nbsp;third&nbsp;dimension<br>
 YY&nbsp;=&nbsp;[nxm]:&nbsp;y&nbsp;axis&nbsp;data&nbsp;(initially&nbsp;plots&nbsp;Y[0,:])<br>
 &nbsp;X&nbsp;=&nbsp;[n]&nbsp;or&nbsp;[nxm]:&nbsp;&nbsp;x&nbsp;axis&nbsp;data&nbsp;(can&nbsp;be&nbsp;1D&nbsp;or&nbsp;2D,&nbsp;either&nbsp;same&nbsp;length&nbsp;or&nbsp;shape&nbsp;as&nbsp;Y)<br>
@@ -1237,6 +1249,7 @@ E.G.<br>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>DEFAULT_FONT</strong> = 'Times New Roman'<br>
-<strong>FIGURE_DPI</strong> = 60<br>
-<strong>FIGURE_SIZE</strong> = [12, 10]</td></tr></table>
+<strong>DEFAULT_FONTSIZE</strong> = 14<br>
+<strong>FIGURE_DPI</strong> = 80<br>
+<strong>FIGURE_SIZE</strong> = [12, 8]</td></tr></table>
 </body></html>
