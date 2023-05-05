@@ -60,6 +60,8 @@ __version__ = '3.7.2'
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
 datadir = os.path.join(datadir, 'data')
 ATOMFILE = os.path.join(datadir, 'Dans Element Properties.txt')
+PENGFILE = os.path.join(datadir, 'peng.dat')
+
 
 # List of Elements in order sorted by length of name
 ELEMENT_LIST = [
@@ -961,6 +963,62 @@ def xray_scattering_factor(element, Qmag=0):
             a2 * np.exp(-b2 * (Qmag / (4 * np.pi)) ** 2) + \
             a3 * np.exp(-b3 * (Qmag / (4 * np.pi)) ** 2) + \
             a4 * np.exp(-b4 * (Qmag / (4 * np.pi)) ** 2) + c
+        Qff[:, n] = f
+    return Qff
+
+def electron_scattering_factor(element, Qmag=0):
+    """
+    Read X-ray scattering factor table, calculate f(|Q|)
+    Uses the coefficients for analytical approximation to the scattering factors 
+      Peng, L. M.; Acta Crystallogr A  1996, 52 (2), 257–276. 
+      Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485. 
+    Qff = xray_scattering_factor(element, Qmag=[0])
+    :param element: [n*str] list or array of elements
+    :param Qmag: [m] array of wavevector distance, in A^-1
+    :return: [m*n] array of scattering factors
+    """
+
+    # Qmag should be a 1D array
+    Qmag = np.asarray(Qmag).reshape(-1)
+
+    try:
+        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, 
+                             encoding='ascii', delimiter=',')
+    except TypeError:
+        # Numpy version < 1.14
+        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True,
+                             delimiter=',')
+    # elements must be a list e.g. ['Co','O']
+    elements_l = np.asarray(element).reshape(-1)
+    all_elements = [el for el in data['Element']]
+    try:
+        index = [all_elements.index(el) for el in elements_l]
+    except ValueError as ve:
+        raise Exception('Element not available: %s' % ve)
+    data = data[index]
+    coef = data[['a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'a5', 'b5']]
+
+    Qff = np.zeros([len(Qmag), len(coef)])
+
+    # Loop over elements
+    for n in range(len(coef)):
+        a1 = coef['a1'][n]
+        b1 = coef['b1'][n]
+        a2 = coef['a2'][n]
+        b2 = coef['b2'][n]
+        a3 = coef['a3'][n]
+        b3 = coef['b3'][n]
+        a4 = coef['a4'][n]
+        b4 = coef['b4'][n]
+        a5 = coef['a5'][n]
+        b5 = coef['b5'][n]
+
+        # Array multiplication over Qmags
+        f = a1 * np.exp(-b1 * (Qmag / (4 * np.pi)) ** 2) + \
+            a2 * np.exp(-b2 * (Qmag / (4 * np.pi)) ** 2) + \
+            a3 * np.exp(-b3 * (Qmag / (4 * np.pi)) ** 2) + \
+            a4 * np.exp(-b4 * (Qmag / (4 * np.pi)) ** 2) + \
+            a5 * np.exp(-b5 * (Qmag / (4 * np.pi)) ** 2)
         Qff[:, n] = f
     return Qff
 
