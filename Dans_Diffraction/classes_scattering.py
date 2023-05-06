@@ -342,10 +342,9 @@ class Scattering:
             self._debug_mode = True
             fs.DEBUG_MODE = True
 
-    def structure_factor(self, hkl=None, scattering_type=None, **kwargs):
+    def structure_factor(self, hkl=None, scattering_type=None, int_hkl=True, **kwargs):
         """
         Calculate the structure factor at reflection indexes (h,k,l)
-
         Notes:
         - Uses x-ray atomic form factors, calculated from approximated tables in the ITC
         - This may be a little slow for large numbers of reflections, as it is not currently
@@ -365,8 +364,10 @@ class Scattering:
             hkl = self.get_hkl()
         if scattering_type is None:
             scattering_type = self._scattering_type
-
-        hkl = np.asarray(np.rint(hkl), dtype=float).reshape([-1, 3])
+        if int_hkl:
+            hkl = np.asarray(np.rint(hkl), dtype=np.float).reshape([-1, 3])
+        else:
+            hkl = np.asarray(hkl, dtype=np.float).reshape([-1, 3])
         uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
 
         q = self.xtl.Cell.calculateQ(hkl)
@@ -413,13 +414,13 @@ class Scattering:
         q_array = np.array_split(q, n_arrays)
         sf = np.zeros([nref, nenergy, npsi], dtype=complex)
         start_time = datetime.datetime.now()
-        for e, enval in enumerate(energy_kev):
-            for p, psival in enumerate(psi):
+        for e, enval in enumerate(energy_kev): # for all the energy values
+            for p, psival in enumerate(psi):   # for all azimutal angle
                 ls = 0
-                for n, _q in enumerate(q_array):
+                for n, _q in enumerate(q_array): # for all the reflections parts
                     if n_arrays > 1:
                         print(' Starting %2.0f/%2.0f: %d:%d' % (n + 1, n_arrays, ls, ls + len(_q)))
-                    qmag = fg.mag(_q)
+                    qmag = fg.mag(_q)      # q magnitude
                     # Scattering factors
                     if scattering_type in fs.SCATTERING_TYPES['neutron']:
                         ff = fc.atom_properties(atom_type, 'Coh_b')
@@ -429,6 +430,8 @@ class Scattering:
                         ff = fc.xray_scattering_factor_resonant(atom_type, qmag, enval)
                     elif self._use_waaskirf_scattering_factor:
                         ff = fc.xray_scattering_factor_WaasKirf(atom_type, qmag)
+                    elif scattering_type in fs.SCATTERING_TYPES['electron']:
+                        ff = fc.electron_scattering_factor(atom_type, qmag)
                     else:
                         ff = fc.xray_scattering_factor(atom_type, qmag)
 
@@ -469,14 +472,14 @@ class Scattering:
         return sf
     new_structure_factor = structure_factor
 
-    def intensity(self, hkl=None, scattering_type=None, **options):
+    def intensity(self, hkl=None, scattering_type=None, int_hkl=True, **options):
         """
 
         :param hkl:
         :param scattering_type: str : one of ['xray','neutron','xray magnetic','neutron magnetic','xray resonant']
         :return:
         """
-        return fs.intensity(self.new_structure_factor(hkl, scattering_type, **options))
+        return fs.intensity(self.new_structure_factor(hkl, scattering_type, int_hkl, **options))
     new_intensity = intensity
 
     def powder(self, scattering_type=None, units=None, peak_width=None, background=None, pixels=None,
