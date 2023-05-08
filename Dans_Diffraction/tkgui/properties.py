@@ -14,7 +14,7 @@ else:
 from .. import functions_general as fg
 from .. import functions_crystallography as fc
 from .. import functions_plotting as fp
-from .basic_widgets import StringViewer
+from .basic_widgets import StringViewer, SelectionBox
 from .basic_widgets import (TF, BF, SF, LF, HF,
                             bkg, ety, btn, opt, btn2,
                             btn_active, opt_active, txtcol,
@@ -46,12 +46,10 @@ class PropertiesGui:
         # Crystal Atoms
         atoms = np.unique(xtl.Atoms.type)
         atoms = fc.arrange_atom_order(atoms)
-        elements = fc.atom_properties(None, 'Element')
 
         # Variables
         self.zfraction = tk.DoubleVar(frame, 1)
         self.atoms = tk.StringVar(frame, ' '.join(atoms))
-        self.atomopt = tk.StringVar(frame, 'Elements:')
         self.energy_kev = tk.DoubleVar(frame, 8.0)
         self.wavelength = tk.DoubleVar(frame, 1.5498)
         self.edge = tk.StringVar(frame, 'Edge')
@@ -148,11 +146,8 @@ class PropertiesGui:
         var = tk.Entry(line, textvariable=self.atoms, font=TF, width=16, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
 
-        var = tk.OptionMenu(line, self.atomopt, *elements, command=self.fun_element)
-        var.config(font=SF, width=10, bg=opt, activebackground=opt_active)
-        var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
+        var = tk.Button(line, text='Elements', font=BF, command=self.fun_element, bg=btn, activebackground=btn_active)
         var.pack(side=tk.LEFT)
-
         var = tk.Button(line, text='Mass Fraction', font=BF, command=self.fun_frac, bg=btn, activebackground=btn_active)
         var.pack(side=tk.LEFT)
         var = tk.Label(line, text=' Z:', font=TF)
@@ -248,9 +243,19 @@ class PropertiesGui:
         self.twotheta.set(round(tth, 4))
 
     def fun_element(self, event=None):
-        """Dropdown menu"""
-        atom = self.atomopt.get()
-        self.atoms.set(atom)
+        """Element button"""
+        ele_list = ['%3s: %s' % (sym, nm) for sym, nm in fc.atom_properties(None, ['Element', 'Name'])]
+        ele = self.atoms.get().split()
+        cur_ele = ['%3s: %s' % (sym, nm) for sym, nm in fc.atom_properties(ele, ['Element', 'Name'])]
+        choose = SelectionBox(
+            parent=self.root,
+            data_fields=ele_list,
+            current_selection=cur_ele,
+            multiselect=True,
+            title='Select elements'
+        ).show()
+        ch_ele = [ele[:3].strip() for ele in choose]
+        self.atoms.set(' '.join(ch_ele))
 
     def fun_prop(self):
         """Properties button"""

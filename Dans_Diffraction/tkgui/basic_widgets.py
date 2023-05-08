@@ -3,11 +3,14 @@ Basic widgets and gui parameters
 """
 
 import sys
+import re
 
 if sys.version_info[0] < 3:
     import Tkinter as tk
+    import tkMessageBox as messagebox
 else:
     import tkinter as tk
+    from tkinter import messagebox
 
 # Fonts
 TF = ["Times", 12]
@@ -33,6 +36,66 @@ btn_txt = 'black'
 ety_txt = 'black'
 opt_txt = 'black'
 TTFG = 'red'
+
+
+def popup_message(parent, title, message):
+    """Create a message box"""
+    root = tk.Toplevel(parent)
+    root.title(title)
+    #frame = tk.Frame(root)
+    tk.Label(root, text=message, padx=20, pady=20).pack()
+    #root.after(2000, root.destroy)
+    return root
+
+
+def popup_about():
+    """Create about message"""
+    from Dans_Diffraction import version_info, module_info
+    msg = "%s\n\n" \
+          "A Python package for loading crystal structures from " \
+          "cif files and calculating diffraction information.\n\n" \
+          "Module Info:\n%s\n\n" \
+          "By Dan Porter, Diamond Light Source Ltd" % (version_info(), module_info())
+    messagebox.showinfo('About', msg)
+
+
+def popup_help():
+    """Create help message"""
+    from Dans_Diffraction import doc_str
+    return StringViewer(doc_str(), 'Dans_Diffraction Help', width=121)
+
+
+def topmenu(root, menu_dict):
+    """
+    Add a menubar to tkinter frame
+    :param root: tkinter root
+    :param menu_dict: {Menu name: {Item name: function}}
+    :return: None
+    """
+    # Setup menubar
+    menubar = tk.Menu(root)
+
+    for item in menu_dict:
+        men = tk.Menu(menubar, tearoff=0)
+        for label, function in menu_dict[item].items():
+            men.add_command(label=label, command=function)
+        menubar.add_cascade(label=item, menu=men)
+    root.config(menu=menubar)
+
+
+def menu_docs():
+    """Open local docs"""
+    import os
+    import webbrowser
+    docs_dir = os.path.join(os.path.split(__file__)[0], '../../docs/Dans_Diffraction.html')
+    docs_dir = os.path.abspath(docs_dir)
+    webbrowser.open_new_tab(docs_dir)
+
+
+def menu_github():
+    """Open GitHub page"""
+    import webbrowser
+    webbrowser.open_new_tab("https://github.com/DanPorter/Dans_Diffraction#dans_diffaction")
 
 
 class StringViewer:

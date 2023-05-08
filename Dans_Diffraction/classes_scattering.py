@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.1.1
-Last updated: 14/01/23
+Version 2.2.0
+Last updated: 06/05/23
 
 Version History:
 10/09/17 0.1    Program created
@@ -31,6 +31,7 @@ Version History:
 08/02/22 2.0.3  Corrected error in powder of wrong tth values. Thanks Mirko!
 14/03/22 2.1.0   powder() updated for new inputs and outputs for pVoight and custom peak shapes. Thanks yevgenyr!
 14/01/23 2.1.1  Corrected background error in xtl.Scatter.powder
+06/05/23 2.0.0  Merged pull request for non-integer hkl option on SF and electron form factors. Thanks Prestipino!
 
 @author: DGPorter
 """
@@ -45,7 +46,7 @@ from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '2.1.1'
+__version__ = '2.2.0'
 __scattering_types__ = {'xray': ['xray', 'x', 'x-ray', 'thomson', 'charge'],
                         'neutron': ['neutron', 'n', 'nuclear'],
                         'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'],
@@ -356,6 +357,7 @@ class Scattering:
 
         :param hkl: array[n,3] : reflection indexes (h, k, l)
         :param scattering_type: str : one of ['xray','neutron','xray magnetic','neutron magnetic','xray resonant']
+        :param int_hkl: Bool : when True, hkl values are converted to integer.
         :param kwargs: additional options to pass to scattering function
         :return: complex array[n] : structure factors
         """
@@ -365,9 +367,9 @@ class Scattering:
         if scattering_type is None:
             scattering_type = self._scattering_type
         if int_hkl:
-            hkl = np.asarray(np.rint(hkl), dtype=np.float).reshape([-1, 3])
+            hkl = np.asarray(np.rint(hkl), dtype=float).reshape([-1, 3])
         else:
-            hkl = np.asarray(hkl, dtype=np.float).reshape([-1, 3])
+            hkl = np.asarray(hkl, dtype=float).reshape([-1, 3])
         uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
 
         q = self.xtl.Cell.calculateQ(hkl)
@@ -424,14 +426,14 @@ class Scattering:
                     # Scattering factors
                     if scattering_type in fs.SCATTERING_TYPES['neutron']:
                         ff = fc.atom_properties(atom_type, 'Coh_b')
+                    elif scattering_type in fs.SCATTERING_TYPES['electron']:
+                        ff = fc.electron_scattering_factor(atom_type, qmag)
                     elif scattering_type in fs.SCATTERING_TYPES['xray fast']:
                         ff = fc.atom_properties(atom_type, 'Z')
                     elif scattering_type in fs.SCATTERING_TYPES['xray dispersion']:
                         ff = fc.xray_scattering_factor_resonant(atom_type, qmag, enval)
                     elif self._use_waaskirf_scattering_factor:
                         ff = fc.xray_scattering_factor_WaasKirf(atom_type, qmag)
-                    elif scattering_type in fs.SCATTERING_TYPES['electron']:
-                        ff = fc.electron_scattering_factor(atom_type, qmag)
                     else:
                         ff = fc.xray_scattering_factor(atom_type, qmag)
 
@@ -474,10 +476,12 @@ class Scattering:
 
     def intensity(self, hkl=None, scattering_type=None, int_hkl=True, **options):
         """
-
-        :param hkl:
-        :param scattering_type: str : one of ['xray','neutron','xray magnetic','neutron magnetic','xray resonant']
-        :return:
+        Return the structure factor squared
+        :param hkl: array[n,3] : reflection indexes (h, k, l)
+        :param scattering_type: str : one of ['xray','neutron', 'electron', 'xray magnetic','neutron magnetic','xray resonant']
+        :param int_hkl: Bool : when True, hkl values are converted to integer.
+        :param kwargs: additional options to pass to scattering function
+        :return: float array[n] : array of |SF|^2
         """
         return fs.intensity(self.new_structure_factor(hkl, scattering_type, int_hkl, **options))
     new_intensity = intensity
@@ -623,7 +627,7 @@ class Scattering:
         
         # Calculate structure factor
         # Broadcasting used on 2D ff
-        SF =  np.sum(ff*dw*occ*np.exp(1j*2*np.pi*dot_KR),axis=1)
+        SF =  np.sum(ff*dw*occ*np.exp(1j*2*np.pi*dot_KR), axis=1)
         #SF = np.zeros(Nref,dtype=complex)
         #for ref in range(Nref):
         #    for at in range(Nat): 
@@ -723,7 +727,16 @@ class Scattering:
         # Calculate intensity
         I = sf * np.conj(sf)
         return np.real(I)
-    
+
+    def electron(self, HKL):
+        """
+        Calculate the squared structure factor for the given HKL, using electron form factors
+          Scattering.electron([1,0,0])
+          Scattering.electron([[1,0,0],[2,0,0],[3,0,0])
+        Returns an array with the same length as HKL, giving the real intensity at each reflection.
+        """
+        return self.intensity(HKL, scattering_type='electron')
+
     def neutron(self, HKL):
         """
         Calculate the squared structure factor for the given HKL, using neutron scattering length

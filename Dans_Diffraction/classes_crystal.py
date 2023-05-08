@@ -1826,11 +1826,11 @@ class Symmetry:
             unique_uvw, uniqueidx, matchidx = fg.unique_vector(sym_uvw, tol=0.01)
 
             out += ' (%1.3g, %1.3g, %1.3g)\n' % (u, v, w)
-            out += '  n       u       v       w             Symmetry    Magnetic Symmetry\n'
+            out += '  n       u       v       w   Symmetry                        Magnetic Symmetry\n'
             if remove_identical:
                 # Only display distict positions
                 for n in range(len(unique_uvw)):
-                    out += '%3d %7.4f %7.4f %7.4f %20s %20s\n' % (
+                    out += '%3d %7.4f %7.4f %7.4f %30s %20s\n' % (
                         uniqueidx[n], unique_uvw[n, 0], unique_uvw[n, 1], unique_uvw[n, 2],
                         self.symmetry_operations[uniqueidx[n]], self.symmetry_operations_magnetic[uniqueidx[n]])
             else:

@@ -21,7 +21,7 @@ from ..classes_crystal import Crystal
 from ..classes_structures import Structures
 from ..classes_fdmnes import fdmnes_checker
 from .. import functions_crystallography as fc
-from .basic_widgets import StringViewer, SelectionBox
+from .basic_widgets import StringViewer, SelectionBox, popup_help, popup_about, topmenu, menu_github, menu_docs
 from .basic_widgets import (TF, BF, SF, HF, TTF,
                             bkg, ety, btn, opt, btn_active, opt_active, txtcol,
                             ety_txt)
@@ -56,6 +56,31 @@ class CrystalGui:
             activeForeground=txtcol)
 
         self.structure_list = Structures()
+
+        # ---Menu---
+        menu = {
+            'File': {
+                'New Window': self.menu_new,
+                'Exit': self.on_closing,
+            },
+            'Crystal Info': {
+                'Crystal': self.menu_info_crystal,
+                'Symmetric Atom Sites': self.menu_info_atoms,
+                'Symmetry': self.menu_info_symmetry,
+                'All Atom Sites': self.menu_info_structure,
+                'Properties': self.menu_info_properties,
+                'Show CIF': self.menu_info_cif,
+                'Element Info': self.menu_info_elements,
+            },
+            'Help': {
+                'Help': popup_help,
+                'Examples': self.menu_examples,
+                'Documentation': menu_docs,
+                'GitHub Page': menu_github,
+                'About': popup_about,
+            }
+        }
+        topmenu(self.root, menu)
 
         # Create Widget elements from top down
         frame = tk.Frame(self.root)
@@ -155,6 +180,96 @@ class CrystalGui:
         # However sys in this file is not the same as sys in the operating script
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.mainloop()
+
+    ###################################################################################
+    ################################# MENU ############################################
+    ###################################################################################
+    def menu_new(self):
+        """Create a new instance"""
+        CrystalGui()
+
+    def menu_info_crystal(self):
+        """Crystal info"""
+        string = '%s\n%s' % (self.xtl.filename, self.xtl.info())
+        StringViewer(string, self.xtl.name, width=60)
+
+    def menu_info_atoms(self):
+        """Atoms info"""
+        string = '%s\n%s' % (self.xtl.name, self.xtl.Atoms.info())
+        StringViewer(string, self.xtl.name, width=60)
+
+    def menu_info_structure(self):
+        """P1 Structure info"""
+        string = '%s\n%s' % (self.xtl.name, self.xtl.Structure.info())
+        StringViewer(string, self.xtl.name, width=60)
+
+    def menu_info_symmetry(self):
+        """Symmetry info"""
+        string = '%s\n%s' % (self.xtl.name, self.xtl.Symmetry.info())
+        StringViewer(string, self.xtl.name, width=60)
+
+    def menu_info_properties(self):
+        """Properties info"""
+        string = '%s\n%s' % (self.xtl.name, self.xtl.Properties.info())
+        StringViewer(string, self.xtl.name, width=60)
+
+    def menu_info_cif(self):
+        """Print cif"""
+        if self.xtl.filename:
+            with open(self.xtl.filename) as cif:
+                string = cif.read()
+            StringViewer(string, self.xtl.filename, width=120)
+        else:
+            messagebox.showinfo(
+                title='Dans_Diffraction',
+                message='No associated CIF',
+                parent=self.root
+            )
+
+    def menu_info_elements(self):
+        """View atom properties"""
+        ele_list = ['%3s: %s' % (sym, nm) for sym, nm in fc.atom_properties(None, ['Element', 'Name'])]
+        choose = SelectionBox(self.root, ele_list, multiselect=True, title='Select elements').show()
+        ch_ele = [ele[:3].strip() for ele in choose]
+        string = fc.print_atom_properties(ch_ele)
+        StringViewer(string, 'Element Properties: %s' % ' '.join(ch_ele), width=60)
+
+    def menu_examples(self):
+        """List example files, open in system viewer"""
+        import subprocess, platform, ast
+
+        example_dir = os.path.join(os.path.split(__file__)[0], '../../Examples')
+        examples = [nm for nm in os.listdir(example_dir) if nm.endswith('.py') and nm.startswith('example_')]
+
+        file_exp = []
+        for example_file in examples:
+            filename = os.path.join(example_dir, example_file)
+            with open(filename) as f:
+                file_string = f.read()
+            module = ast.parse(file_string)
+            docstring = ast.get_docstring(module)
+            docstring = docstring.replace('Dans_Diffraction Examples\n', '')
+            docstring = ' '.join(docstring.splitlines())
+            name = example_file[8:-3]
+            file_exp += ['%40s:  %s' % (name, docstring)]
+
+        choose = SelectionBox(self.root, file_exp, multiselect=False, title='Select example file').show()
+        if choose:
+            filename = os.path.join(example_dir, 'example_' + choose[0].split(':')[0].strip() + '.py')
+
+            try:
+                if platform.system() == 'Darwin':  # macOS
+                    subprocess.call(('open', filename))
+                elif platform.system() == 'Windows':  # Windows
+                    os.startfile(filename)
+                else:  # linux variants
+                    subprocess.call(('xdg-open', filename))
+            except OSError:
+                messagebox.showinfo(
+                    title='Dans_Diffraction',
+                    message=filename,
+                    parent=self.root
+                )
 
     ###################################################################################
     ############################## FUNCTIONS ##########################################
@@ -711,6 +826,7 @@ class SymmetryGui:
         self.Symmetry.symmetry_operations = sym_ops
         self.Symmetry.symmetry_operations_magnetic = mag_ops
         self.Symmetry.generate_matrices()
+        self.xtl.generate_structure()
 
     def fun_move(self, *args):
         """Move within text frame"""
@@ -761,13 +877,13 @@ class SymmetryGui:
 
     def fun_spacegroup(self, event=None):
         """Load spacegroup symmetry"""
-        sgn = int(self.spacegroup_number.get())
+        sgn = int(float(self.spacegroup_number.get()))
         self.Symmetry.load_spacegroup(sgn)
         self.fun_set()
 
     def fun_ch_spacegroup(self):
         """Button Select Spacegroup"""
-        current = int(self.spacegroup_number.get())
+        current = int(float(self.spacegroup_number.get()))
         sg_list = fc.spacegroup_list().split('\n')
         current_selection = [sg_list[current-1]]
         selection = SelectionBox(self.root, sg_list, current_selection, 'Select SpaceGroup', False).show()
@@ -788,7 +904,7 @@ class SymmetryGui:
 
     def fun_ch_maggroup(self):
         """Button Select Magnetic Spacegroup"""
-        current = int(self.spacegroup_number.get())
+        current = int(float(self.spacegroup_number.get()))
         msg_list = fc.spacegroup_magnetic_list(current).split('\n')
         selection = SelectionBox(self.root, msg_list, [], 'Select Magnetic SpaceGroup', False).show()
         if len(selection) > 0:

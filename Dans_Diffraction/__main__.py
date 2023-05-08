@@ -15,7 +15,7 @@ To Parse a cif:
 
 By Dan Porter, PhD
 Diamond
-2017
+2023
 """
 if __name__ == '__main__':
 
@@ -31,6 +31,9 @@ if __name__ == '__main__':
     for arg in sys.argv:
         if 'cif' in arg.lower():
             xtl = dif.Crystal(arg)
+            print(xtl.info())
+        elif arg in dif.structure_list.list:
+            xtl = getattr(dif.structure_list, arg)()
             print(xtl.info())
         elif 'gui' in arg.lower():
             xtl.start_gui()

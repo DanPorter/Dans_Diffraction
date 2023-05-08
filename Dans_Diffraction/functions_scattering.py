@@ -67,7 +67,8 @@ SCATTERING_TYPES = {
     'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'],
     'neutron magnetic': ['neutron magnetic', 'magnetic neutron', 'magnetic'],
     'xray resonant': ['xray resonant', 'resonant', 'resonant xray', 'rxs'],
-    'xray dispersion': ['dispersion', 'xray dispersion']
+    'xray dispersion': ['dispersion', 'xray dispersion'],
+    'electron': ['electron', 'ele', 'e'],
 }
 
 
@@ -811,6 +812,8 @@ def get_scattering_function(scattering_type):
     if scattering_type in SCATTERING_TYPES['xray dispersion']:
         return sf_xray_dispersion
     if scattering_type in SCATTERING_TYPES['neutron']:
+        return sf_atom
+    if scattering_type in SCATTERING_TYPES['electron']:
         return sf_atom
     if scattering_type in SCATTERING_TYPES['xray magnetic']:
         return sf_magnetic_xray

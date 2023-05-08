@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.7.2
-Last updated: 23/04/22
+Version 3.8.0
+Last updated: 07/05/23
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -40,9 +40,11 @@ Version History:
 15/11/21 3.7    Added diffractometer orientation commands from Busing & Levy, H. You
 12/01/22 3.7.1  Added gen_sym_axial_vector
 23/04/22 3.7.2  Corrected magnitude of Q in magnetic_structure_factors
+07/05/23 3.8.0  Added electron_scattering_factors and electron wavelength formula
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
+    May 2023    Thanks to Carmelo Prestipino for adding electron scattering factors
 
 @author: DGPorter
 """
@@ -966,6 +968,7 @@ def xray_scattering_factor(element, Qmag=0):
         Qff[:, n] = f
     return Qff
 
+
 def electron_scattering_factor(element, Qmag=0):
     """
     Read X-ray scattering factor table, calculate f(|Q|)
@@ -982,12 +985,10 @@ def electron_scattering_factor(element, Qmag=0):
     Qmag = np.asarray(Qmag).reshape(-1)
 
     try:
-        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, 
-                             encoding='ascii', delimiter=',')
+        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, encoding='ascii', delimiter=',')
     except TypeError:
         # Numpy version < 1.14
-        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True,
-                             delimiter=',')
+        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, delimiter=',')
     # elements must be a list e.g. ['Co','O']
     elements_l = np.asarray(element).reshape(-1)
     all_elements = [el for el in data['Element']]
@@ -3102,6 +3103,16 @@ def wavevector(energy_kev=None, wavelength=None):
     if wavelength is None:
         wavelength = energy2wave(energy_kev)
     return 2 * np.pi / wavelength
+
+
+def electron_wavelenth(energy_ev):
+    """
+    Calcualte the electron wavelength in Angstroms using DeBroglie's formula
+      lambda [nm] ~ sqrt( 1.5 / E [eV] )
+    :param energy_ev: electron energy in eV
+    :return: wavelength in Anstroms
+    """
+    return fg.h / np.sqrt(2 * fg.me * energy_ev * fg.e) / fg.A
 
 
 def biso2uiso(biso):

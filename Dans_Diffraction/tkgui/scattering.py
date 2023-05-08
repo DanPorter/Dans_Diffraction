@@ -13,7 +13,7 @@ else:
 
 from .. import functions_general as fg
 from .. import functions_crystallography as fc
-from .basic_widgets import StringViewer
+from .basic_widgets import StringViewer, topmenu
 from .basic_widgets import (TF, BF, SF, LF, HF,
                             bkg, ety, btn, opt, btn2,
                             btn_active, opt_active, txtcol,
@@ -38,6 +38,15 @@ class ScatteringGui:
             foreground=txtcol,
             activeBackground=opt_active,
             activeForeground=txtcol)
+
+        # ---Menu---
+        menu = {
+            'Info': {
+                'Crystal': self.menu_info_crystal,
+                'Scattering Settings': self.menu_info_scattering,
+            },
+        }
+        topmenu(self.root, menu)
 
         frame = tk.Frame(self.root)
         frame.pack(side=tk.LEFT, anchor=tk.N)
@@ -112,7 +121,7 @@ class ScatteringGui:
         # Type
         line = tk.Frame(box)
         line.pack(side=tk.TOP, fill=tk.X, pady=5)
-        types = ['X-Ray', 'Neutron', 'XRay Magnetic', 'Neutron Magnetic', 'XRay Resonant', 'XRay Dispersion']
+        types = ['X-Ray', 'Neutron', 'Electron', 'XRay Magnetic', 'Neutron Magnetic', 'XRay Resonant', 'XRay Dispersion']
         var = tk.Label(line, text='Type:', font=SF)
         var.pack(side=tk.LEFT)
         var = tk.OptionMenu(line, self.type, *types)
@@ -355,6 +364,23 @@ class ScatteringGui:
                             activebackground=btn_active)
             var.pack(side=tk.RIGHT)
 
+    ###################################################################################
+    ################################# MENU ############################################
+    ###################################################################################
+    def menu_info_crystal(self):
+        """Crystal info"""
+        string = '%s\n%s' % (self.xtl.filename, self.xtl.info())
+        StringViewer(string, self.xtl.name, width=60)
+
+    def menu_info_scattering(self):
+        """Scattering info"""
+        self.fun_get()
+        string = '%s\n%s' % (self.xtl.name, self.xtl.Scatter)
+        StringViewer(string, self.xtl.name, width=60)
+
+    ###################################################################################
+    ############################## FUNCTIONS ##########################################
+    ###################################################################################
     def fun_set(self):
         """"Set gui parameters from crystal"""
 

@@ -36,14 +36,18 @@ sup = xtl.generate_superstructure(P)
 # Na2 8,9 18,19 28,29 38,39 48,49 58,59 68,69 78,79 88,89 98,99 108,109 118,119 128,129 138,139 148,149
 sup.Structure.occupancy[[6 ,16,26,77,87,107]] = 1 # Na1
 sup.Structure.occupancy[[8 ,18,38,28,48,58, 139, 119, 149, 109, 89,79]] = 0 # Na2
-stop
+
+# Plot the Na layers showing the ordering
+sup.Plot.plot_layers(layers=[0.25, 0.75], layer_width=0.01, show_labels=True)
+
 # Generate hk0 plane, with overlapping hexagonal superlattice domains
 #plt.ion()
 print('Running simulation:')
-sup.Plot.simulate_hk0(L=0) # (0,0,L) of the parent cell
+sup.Plot.simulate_hk0(L=0)  # (0,0,L) of the parent cell
 plt.clim([0, 100])
 #plt.ioff()
 plt.show()
 
-# Plot the structure in 2D layers
-#sup.Plot.plot_layers(show_labels=True)
+# Create a CIF file
+sup.write_cif('NaCoO2_stripe_supercell', 'Na0.8CoO2 Stripe Supercell. P = %s' % P)
+

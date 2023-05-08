@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_crystallography</strong></big></big> (version 3.7.2)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_crystallography.py">c:\users\dgpor\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_crystallography.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_crystallography.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_crystallography.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;functions_crystallography.py<br>
 &nbsp;<br>
 By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
@@ -20,8 +20,8 @@ Usage:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;OR<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;from&nbsp;Dans_Diffraction&nbsp;import&nbsp;functions_crystallography&nbsp;as&nbsp;fc<br>
 &nbsp;<br>
-Version&nbsp;3.7.2<br>
-Last&nbsp;updated:&nbsp;23/04/22<br>
+Version&nbsp;3.8.0<br>
+Last&nbsp;updated:&nbsp;07/05/23<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 09/07/15&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
@@ -49,9 +49,11 @@ Version&nbsp;History:<br>
 15/11/21&nbsp;3.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;diffractometer&nbsp;orientation&nbsp;commands&nbsp;from&nbsp;Busing&nbsp;&amp;&nbsp;Levy,&nbsp;H.&nbsp;You<br>
 12/01/22&nbsp;3.7.1&nbsp;&nbsp;Added&nbsp;gen_sym_axial_vector<br>
 23/04/22&nbsp;3.7.2&nbsp;&nbsp;Corrected&nbsp;magnitude&nbsp;of&nbsp;Q&nbsp;in&nbsp;magnetic_structure_factors<br>
+07/05/23&nbsp;3.8.0&nbsp;&nbsp;Added&nbsp;electron_scattering_factors&nbsp;and&nbsp;electron&nbsp;wavelength&nbsp;formula<br>
 &nbsp;<br>
 Acknoledgements:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;April&nbsp;2020&nbsp;&nbsp;Thanks&nbsp;to&nbsp;ChunHai&nbsp;Wang&nbsp;for&nbsp;helpful&nbsp;suggestions&nbsp;in&nbsp;readcif!<br>
+&nbsp;&nbsp;&nbsp;&nbsp;May&nbsp;2023&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Carmelo&nbsp;Prestipino&nbsp;for&nbsp;adding&nbsp;electron&nbsp;scattering&nbsp;factors<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -295,6 +297,18 @@ Also&nbsp;called&nbsp;Z&nbsp;in&nbsp;H.&nbsp;You,&nbsp;J.&nbsp;Appl.&nbsp;Cryst&
 :return:&nbsp;&nbsp;[3*3]&nbsp;array</tt></dd></dl>
  <dl><dt><a name="-dspace2q"><strong>dspace2q</strong></a>(dspace)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;|Q|<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qmag&nbsp;=&nbsp;<a href="#-q2dspace">q2dspace</a>(dspace)</tt></dd></dl>
+ <dl><dt><a name="-electron_scattering_factor"><strong>electron_scattering_factor</strong></a>(element, Qmag=0)</dt><dd><tt>Read&nbsp;X-ray&nbsp;scattering&nbsp;factor&nbsp;table,&nbsp;calculate&nbsp;f(|Q|)<br>
+Uses&nbsp;the&nbsp;coefficients&nbsp;for&nbsp;analytical&nbsp;approximation&nbsp;to&nbsp;the&nbsp;scattering&nbsp;factors&nbsp;<br>
+&nbsp;&nbsp;Peng,&nbsp;L.&nbsp;M.;&nbsp;Acta&nbsp;Crystallogr&nbsp;A&nbsp;&nbsp;1996,&nbsp;52&nbsp;(2),&nbsp;257–276.&nbsp;<br>
+&nbsp;&nbsp;Peng,&nbsp;L.-M.&nbsp;&nbsp;Acta&nbsp;Cryst&nbsp;A&nbsp;1998,&nbsp;54&nbsp;(4),&nbsp;481–485.&nbsp;<br>
+Qff&nbsp;=&nbsp;<a href="#-xray_scattering_factor">xray_scattering_factor</a>(element,&nbsp;Qmag=[0])<br>
+:param&nbsp;element:&nbsp;[n*str]&nbsp;list&nbsp;or&nbsp;array&nbsp;of&nbsp;elements<br>
+:param&nbsp;Qmag:&nbsp;[m]&nbsp;array&nbsp;of&nbsp;wavevector&nbsp;distance,&nbsp;in&nbsp;A^-1<br>
+:return:&nbsp;[m*n]&nbsp;array&nbsp;of&nbsp;scattering&nbsp;factors</tt></dd></dl>
+ <dl><dt><a name="-electron_wavelenth"><strong>electron_wavelenth</strong></a>(energy_ev)</dt><dd><tt>Calcualte&nbsp;the&nbsp;electron&nbsp;wavelength&nbsp;in&nbsp;Angstroms&nbsp;using&nbsp;DeBroglie's&nbsp;formula<br>
+&nbsp;&nbsp;lambda&nbsp;[nm]&nbsp;~&nbsp;sqrt(&nbsp;1.5&nbsp;/&nbsp;E&nbsp;[eV]&nbsp;)<br>
+:param&nbsp;energy_ev:&nbsp;electron&nbsp;energy&nbsp;in&nbsp;eV<br>
+:return:&nbsp;wavelength&nbsp;in&nbsp;Anstroms</tt></dd></dl>
  <dl><dt><a name="-element_charge_string"><strong>element_charge_string</strong></a>(symbol, occupancy=1.0, charge=0.0, latex=False)</dt><dd><tt>Return&nbsp;formatted&nbsp;string&nbsp;of&nbsp;element&nbsp;with&nbsp;occupancy&nbsp;and&nbsp;charge<br>
 :param&nbsp;symbol:&nbsp;str&nbsp;-&nbsp;element&nbsp;string<br>
 :param&nbsp;occupancy:&nbsp;float&nbsp;-&nbsp;element&nbsp;occupancy&nbsp;or&nbsp;number&nbsp;of&nbsp;elements<br>
@@ -894,10 +908,11 @@ See:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>ATOMFILE</strong> = r'C:\Users\dgpor\OneDrive - Diamond Light Source L...Dans_Diffraction\data\Dans Element Properties.txt'<br>
+<td width="100%"><strong>ATOMFILE</strong> = r'C:\Users\grp66007\OneDrive - Diamond Light Sourc...Dans_Diffraction\data\Dans Element Properties.txt'<br>
 <strong>CIF_REQUIRES</strong> = ['_cell_length_a', '_cell_length_b', '_cell_length_c', '_cell_angle_alpha', '_cell_angle_beta', '_cell_angle_gamma', '_atom_site_label', '_atom_site_fract_x', '_atom_site_fract_y', '_atom_site_fract_z']<br>
 <strong>ELEMENT_LIST</strong> = ['Zr', 'Mo', 'Es', 'Eu', 'Fe', 'Fl', 'Fm', 'Fr', 'Ga', 'Gd', 'Ge', 'He', 'Hf', 'Hg', 'Ho', 'Hs', 'In', 'Ir', 'Kr', 'La', ...]<br>
+<strong>PENGFILE</strong> = r'C:\Users\grp66007\OneDrive - Diamond Light Sourc...s\Dans_Diffraction\Dans_Diffraction\data\peng.dat'<br>
 <strong>TRANSLATIONS</strong> = ['+1/2', '+1/3', '+2/3', '+1/4', '+3/4', '+1/6', '+5/6', '+5/4', '1/2+', '1/3+', '2/3+', '1/4+', '3/4+', '1/6+', '5/6+', '5/4+', '-1/2', '-1/3', '-2/3', '-1/4', ...]<br>
-<strong>datadir</strong> = r'C:\Users\dgpor\OneDrive - Diamond Light Source L...onProjects\Dans_Diffraction\Dans_Diffraction\data'<br>
+<strong>datadir</strong> = r'C:\Users\grp66007\OneDrive - Diamond Light Sourc...onProjects\Dans_Diffraction\Dans_Diffraction\data'<br>
 <strong>element_regex</strong> = re.compile('Zr|Mo|Es|Eu|Fe|Fl|Fm|Fr|Ga|Gd|Ge|He|...n|Co|Cr|Cs|Cu|Mn|Md|Mt|Rb|Rf|Rh|Rn|Ru|Sb|Sc|Se|S)</td></tr></table>
 </body></html>
