@@ -13,20 +13,20 @@ else:
     from tkinter import messagebox
 
 # Fonts
-TF = ["Times", 12]
-BF = ["Times", 14]
-SF = ["Times New Roman", 14]
-LF = ["Times", 14]
+TF = ['Palatino', 12]  # ["Times", 12]
+BF = ['Palatino', 14]  # ["Times", 14]
+SF = ['Palatino', 14]  # ["Times New Roman", 14]
+LF = ['Palatino', 14]  # ["Times", 14]
 MF = ["Courier", 8]  # fixed distance format
 HF = ['Courier',12]
 TTF = ("Helvetica", 10, "bold italic")
 # Colours - background
-bkg = 'snow'
-ety = 'white'
-btn = 'azure' #'light slate blue'
-opt = 'azure' #'light slate blue'
-btn2 = 'gold'
-TTBG = 'light grey'
+bkg = 'snow'  # background colour
+ety = 'white'  # entry box
+btn = 'azure'  # buttons 'light slate blue'
+opt = 'azure'  # option background  'light slate blue'
+btn2 = 'gold'  # main button
+TTBG = 'light grey'  # Title background
 # Colours - active
 btn_active = 'grey'
 opt_active = 'grey'

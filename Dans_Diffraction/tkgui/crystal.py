@@ -3,7 +3,7 @@ Main crystal gui windows
 """
 
 import sys, os
-import matplotlib.pyplot as plt # Plotting
+import matplotlib.pyplot as plt  # Plotting
 import numpy as np
 
 
@@ -30,6 +30,7 @@ from .scattering import ScatteringGui
 from .multi_crystal import MultiCrystalGui
 from .multiple_scattering import MultipleScatteringGui
 from .tensor_scattering import TensorScatteringGui
+from .periodic_table import PeriodTableGui
 
 
 class CrystalGui:
@@ -70,11 +71,16 @@ class CrystalGui:
                 'All Atom Sites': self.menu_info_structure,
                 'Properties': self.menu_info_properties,
                 'Show CIF': self.menu_info_cif,
+            },
+            'Element Info': {
                 'Element Info': self.menu_info_elements,
+                'Periodic Table': self.menu_info_table,
             },
             'Help': {
                 'Help': popup_help,
                 'Examples': self.menu_examples,
+                'Activate FDMNES option': self.menu_start_fdmnes,
+                'Analyse FDMNES data': self.menu_analyse_fdmnes,
                 'Documentation': menu_docs,
                 'GitHub Page': menu_github,
                 'About': popup_about,
@@ -230,9 +236,14 @@ class CrystalGui:
         """View atom properties"""
         ele_list = ['%3s: %s' % (sym, nm) for sym, nm in fc.atom_properties(None, ['Element', 'Name'])]
         choose = SelectionBox(self.root, ele_list, multiselect=True, title='Select elements').show()
-        ch_ele = [ele[:3].strip() for ele in choose]
-        string = fc.print_atom_properties(ch_ele)
-        StringViewer(string, 'Element Properties: %s' % ' '.join(ch_ele), width=60)
+        if choose:
+            ch_ele = [ele[:3].strip() for ele in choose]
+            string = fc.print_atom_properties(ch_ele)
+            StringViewer(string, 'Element Properties: %s' % ' '.join(ch_ele), width=60)
+
+    def menu_info_table(self):
+        """Open periodic table"""
+        PeriodTableGui()
 
     def menu_examples(self):
         """List example files, open in system viewer"""
@@ -270,6 +281,22 @@ class CrystalGui:
                     message=filename,
                     parent=self.root
                 )
+
+    def menu_start_fdmnes(self):
+        """Search for FDMNES, restart GUI"""
+        from Dans_Diffraction import activate_fdmnes, fdmnes_checker, start_gui
+        activate_fdmnes()
+        if fdmnes_checker():
+            self.on_closing()
+            start_gui(self.xtl)
+        else:
+            messagebox.showinfo('FDMNES Checker', 'FDMNES could not be found')
+
+    def menu_analyse_fdmnes(self):
+        """Open FDMNS analysis GUI"""
+        from .fdmnes import AnaFDMNESgui
+        AnaFDMNESgui()
+
 
     ###################################################################################
     ############################## FUNCTIONS ##########################################
@@ -579,7 +606,7 @@ class AtomsGui:
         scany.config(command=self.text.yview)
 
     def fun_set(self):
-        "Get positions from crystal object, fill text boxes"
+        """Get positions from crystal object, fill text boxes"""
         # Build string
         str = ''
         if self.magnetic_moments:

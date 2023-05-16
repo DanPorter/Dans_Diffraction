@@ -334,6 +334,7 @@ class AnaFDMNESgui:
 
         if output_path is None or not os.path.isfile(os.path.join(output_path, output_name + '.txt')):
             self.fun_loadpath()
+            return
 
         self.fdm = FdmnesAnalysis(output_path, output_name)
 
@@ -477,6 +478,8 @@ class AnaFDMNESgui:
             calc_name = filename.split('.')[0]
             self.root.destroy()
             AnaFDMNESgui(filepath, calc_name)
+        else:
+            self.root.destroy()
 
     def fun_xanes(self, event=None):
         """Button XANES"""
