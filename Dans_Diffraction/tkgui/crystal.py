@@ -75,6 +75,7 @@ class CrystalGui:
             'Element Info': {
                 'Element Info': self.menu_info_elements,
                 'Periodic Table': self.menu_info_table,
+                'X-Ray Interactions': self.menu_xray_interactions,
             },
             'Help': {
                 'Help': popup_help,
@@ -244,6 +245,11 @@ class CrystalGui:
     def menu_info_table(self):
         """Open periodic table"""
         PeriodTableGui()
+
+    def menu_xray_interactions(self):
+        """Open x-ray interactions gui"""
+        from .properties import XrayInteractionsGui
+        XrayInteractionsGui(self.xtl)
 
     def menu_examples(self):
         """List example files, open in system viewer"""

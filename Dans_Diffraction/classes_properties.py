@@ -575,7 +575,7 @@ class Properties:
         out += ' Formula: {}\n'.format(self.molname())
         out += 'Magnetic: {}\n'.format(self.xtl.Structure.ismagnetic())
         out += '  Weight: %5.2f g/mol\n' % (self.weight())
-        out += ' Density: %5.2f g/cm\n' % (self.density())
+        out += ' Density: %5.2f g/cm^3\n' % (self.density())
         # Symmetry
         out += '\nSymmetry: %r\n' % self.xtl.Symmetry
         # Cell info
@@ -612,7 +612,7 @@ class Properties:
         out += '-----------%s-----------\n'%self.xtl.name
         out += ' Weight: %5.2f g/mol\n' %(self.weight())
         out += ' Volume: %5.2f A^3\n' %(self.volume())
-        out += 'Density: %5.2f g/cm\n' %(self.density())
+        out += 'Density: %5.2f g/cm^3\n' %(self.density())
         out += '\nAtoms:\n'
         types = np.unique(self.xtl.Structure.type)
         props = fc.atom_properties(types) # returns a numpy structured array
