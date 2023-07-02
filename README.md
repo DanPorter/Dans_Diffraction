@@ -3,7 +3,7 @@ Reads crystallographic cif files, calculates crystal properties and simulates di
 
 **Version 3.0**
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7725644.svg)](https://doi.org/10.5281/zenodo.7725644)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8106031.svg)](https://doi.org/10.5281/zenodo.8106031)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/DanPorter/Dans_Diffraction/6be78ef800167276d61d3e73da3b74a8367dbbe7?urlpath=lab%2Ftree%2FDans_Diffraction.ipynb) 
 [![](https://img.shields.io/github/forks/DanPorter/Dans_Diffraction?label=GitHub%20Repo&style=social)](https://github.com/DanPorter/Dans_Diffraction)
 
@@ -41,7 +41,7 @@ Try it out on [mybinder!](https://mybinder.org/v2/gh/DanPorter/Dans_Diffraction/
 
 For comments, queries or bugs - email [dan.porter@diamond.ac.uk](mailto:dan.porter@diamond.ac.uk)
 
-**Citation:** If you use this code (great!), please cite the published DOI: [10.5281/zenodo.3859501](https://doi.org/10.5281/zenodo.3859501)
+**Citation:** If you use this code (great!), please cite the published DOI: [10.5281/zenodo.8106031](https://doi.org/10.5281/zenodo.8106031)
 
 # Installation
 **Requirements:** 
