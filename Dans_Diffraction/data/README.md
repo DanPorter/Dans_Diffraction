@@ -41,7 +41,7 @@ and placed in a handy [json file](/SpaceGroups.json) under Dans_Diffraction/Data
 Space group information can be read from the file as follows:
 
 ```python
-sg = dif.fc.spacegroup(61) # space group number
+sg = dif.fc.spacegroup_symbol(61)  # space group number
 print(sg['space group number'])
 print(sg['space group name'])
 print(sg['general positions'])
@@ -59,8 +59,8 @@ and placed in a handy [json file](/SpaceGroupsMagnetic.json) under Dans_Diffract
 Magnetic spacegroup information can be read from the file as follows:
 
 ```python
-sg = dif.fc.spacegroup(61) # space group number
-sg['magnetic space groups'] # returns magnetic spacegroups associated with the spcaegroup
+sg = dif.fc.spacegroup_symbol(61)  # space group number
+sg['magnetic space groups']  # returns magnetic spacegroups associated with the spcaegroup
 msg = dif.fc.spacegroup_magnetic(61.433)
 print(msg['positions magnetic'])
 ```

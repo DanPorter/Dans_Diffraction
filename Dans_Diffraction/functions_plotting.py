@@ -914,6 +914,26 @@ def plot_xray_attenuation_length(chemical_formula, density=8.9, energy_range=Non
     labels(ttl, 'Energy [keV]', 'Atten Length [μm]')
 
 
+def plot_xray_reflectivity(chemical_formula, density=8.9, energy_range=None, grazing_angle=2):
+    """
+    Plot the specular reflectivity of a material
+    From: https://xdb.lbl.gov/Section4/Sec_4-2.html
+    :param chemical_formula: str molecular formula
+    :param density: float, density in g/cm^3
+    :param energy_range: float or array, x-ray energy in keV
+    :param grazing_angle: float, incidence angle relative to the surface, in degrees
+    :return: float or array
+    """
+    if energy_range is None:
+        energy_range = np.arange(0.03, 20, 0.01)
+
+    reflectivity = fc.molecular_reflectivity(chemical_formula, energy_range, density, grazing_angle)
+    ttl = '%s Density=%5.3f, Angle=%3.3g deg' % (chemical_formula, density, grazing_angle)
+
+    newplot(energy_range, reflectivity)
+    labels(ttl, 'Energy [keV]', 'Atten Length [μm]')
+
+
 def plot_xray_refractive_index(chemical_formula, density=8.9, energy_range=None):
     """
     Plot the Complex Index of Refraction of a compound

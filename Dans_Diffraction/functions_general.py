@@ -35,8 +35,8 @@ import sys, os, re
 import numpy as np
 import inspect
 
-__version__ = '2.2.0'
-__date__ = '11/March/2022'
+__version__ = '2.2.1'
+__date__ = '01/June/2023'
 
 # File directory
 directory = os.path.abspath(os.path.dirname(__file__))
@@ -48,6 +48,7 @@ h = 6.62606868E-34  # Js  Plank consant
 c = 299792458  # m/s   Speed of light
 u0 = 4 * pi * 1e-7  # H m-1 Magnetic permeability of free space
 me = 9.109e-31  # kg Electron rest mass
+mn = 1.6749e-27 # kg Neutron rest mass
 Na = 6.022e23  # Avagadro's No
 A = 1e-10  # m Angstrom
 r0 = 2.8179403227e-15  # m classical electron radius = e^2/(4pi*e0*me*c^2)
@@ -155,6 +156,25 @@ def ang(a, b, deg=False):
     if deg:
         return np.rad2deg(angle)
     return angle
+
+
+def vectors_angle_degrees(a, b):
+    """
+    Returns the angle, in degrees between vectors a and b.
+    Gives the absolute angle, negatives are not given for sectors.
+        angle = acos(a.b / |a|.|b|)
+    :param a: [nx3] array of vectors [x,y,z]
+    :param b: [mx3] array of vectors [x,y,z]
+    :return: float angle in degrees is n==m==1
+    :return: [max(n, m)] array of angles in degrees if n or m == 1
+    :return: [n, m] array of angles in degrees if n and m > 1
+    """
+    a = np.asarray(a, dtype=float).reshape([-1, 3])
+    b = np.asarray(b, dtype=float).reshape([-1, 3])
+
+    cosang = np.squeeze(np.dot(a, b.T))
+    sinang = np.squeeze([quadmag(np.cross(a, bb)) for bb in b]).T  # more efficient with larger len(a) and len(b)
+    return np.rad2deg(np.arctan2(sinang, cosang))
 
 
 def cart2sph(xyz, deg=False):
@@ -868,6 +888,14 @@ def findranges(scannos, sep=':'):
             out += ['{}{}{}{}{}'.format(stt[x], sep, stp[x], sep, stt[x + 1])]
             x += 2
     return ','.join(out)
+
+
+def str2array(string):
+    """Convert string to array"""
+    string = string.replace(',', ' ')  # remove commas
+    string = string.replace('(', '').replace(')', '')  # remove brackets
+    string = string.replace('[', '').replace(']', '')  # remove brackets
+    return np.fromstring(string, sep=' ')
 
 
 def numbers2string(scannos, sep=':'):

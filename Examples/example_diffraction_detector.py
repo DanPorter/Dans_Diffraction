@@ -221,13 +221,13 @@ def update_all(val):
     pl_cq.set_ydata(q_check[:, 1])
     pl_cq.set_3d_properties(q_check[:, 2], 'z')
 
-    pl_kf.set_xdata([0, kf[0]])
-    pl_kf.set_ydata([0, kf[2]])
-    pl_kf.set_3d_properties([0, kf[1]], 'z')
+    pl_kf.set_xdata(np.array([0, kf[0]]))
+    pl_kf.set_ydata(np.array([0, kf[2]]))
+    pl_kf.set_3d_properties(np.array([0, kf[1]]), 'z')
 
-    pl_qc.set_xdata([0, q_cen[0]])
-    pl_qc.set_ydata([0, q_cen[2]])
-    pl_qc.set_3d_properties([0, q_cen[1]], 'z')
+    pl_qc.set_xdata(np.array([0, q_cen[0]]))
+    pl_qc.set_ydata(np.array([0, q_cen[2]]))
+    pl_qc.set_3d_properties(np.array([0, q_cen[1]]), 'z')
 
     pl_dt.set_xdata(q_lin[:, 0])
     pl_dt.set_ydata(q_lin[:, 2])

@@ -30,7 +30,6 @@ from .scattering import ScatteringGui
 from .multi_crystal import MultiCrystalGui
 from .multiple_scattering import MultipleScatteringGui
 from .tensor_scattering import TensorScatteringGui
-from .periodic_table import PeriodTableGui
 
 
 class CrystalGui:
@@ -44,6 +43,9 @@ class CrystalGui:
             self.xtl = Crystal()
         else:
             self.xtl = xtl
+
+        # start matplotlib interactive mode
+        plt.ion()
 
         # Create Tk inter instance
         self.root = tk.Tk()
@@ -71,14 +73,18 @@ class CrystalGui:
                 'All Atom Sites': self.menu_info_structure,
                 'Properties': self.menu_info_properties,
                 'Show CIF': self.menu_info_cif,
+                'Latex table': self.menu_latex,
             },
-            'Element Info': {
+            'Databases': {
                 'Element Info': self.menu_info_elements,
                 'Periodic Table': self.menu_info_table,
                 'X-Ray Interactions': self.menu_xray_interactions,
+                'Spacegroup Viewer': self.menu_spacegroups,
+                'Unit Converter': self.menu_converter,
             },
             'Help': {
                 'Help': popup_help,
+                # 'Dark mode': self.menu_darkmode,
                 'Examples': self.menu_examples,
                 'Activate FDMNES option': self.menu_start_fdmnes,
                 'Analyse FDMNES data': self.menu_analyse_fdmnes,
@@ -172,6 +178,9 @@ class CrystalGui:
         var = tk.Button(f_but, text='Multiple\nScattering', bg=btn, activebackground=btn_active, font=BF,
                         command=self.fun_multiple_scattering)
         var.pack(side=tk.LEFT)
+        var = tk.Button(f_but, text='Diffractometer\nSimulator', bg=btn, activebackground=btn_active, font=BF,
+                        command=self.fun_diffractometer)
+        var.pack(side=tk.LEFT)
         # Remove Tensor-Scattering 26/05/20
         #var = tk.Button(f_but, text='Tensor\nScattering', bg=btn, activebackground=btn_active, font=BF,
         #                command=self.fun_tensor_scattering)
@@ -242,8 +251,14 @@ class CrystalGui:
             string = fc.print_atom_properties(ch_ele)
             StringViewer(string, 'Element Properties: %s' % ' '.join(ch_ele), width=60)
 
+    def menu_converter(self):
+        """Open unit converter"""
+        from .converter import UnitConverter
+        UnitConverter()
+
     def menu_info_table(self):
         """Open periodic table"""
+        from .periodic_table import PeriodTableGui
         PeriodTableGui()
 
     def menu_xray_interactions(self):
@@ -251,11 +266,22 @@ class CrystalGui:
         from .properties import XrayInteractionsGui
         XrayInteractionsGui(self.xtl)
 
+    def menu_spacegroups(self):
+        """Open Spacegroup viewer gui"""
+        from .spacegroups import SpaceGroupGui
+        SpaceGroupGui(self.xtl.Symmetry)
+
     def menu_examples(self):
         """List example files, open in system viewer"""
         import subprocess, platform, ast
 
         example_dir = os.path.join(os.path.split(__file__)[0], '../../Examples')
+        if not os.path.isdir(example_dir):
+            messagebox.showwarning(
+                title='Dans_Diffraction',
+                message='Examples Directory does not exist',
+                parent=self.root
+            )
         examples = [nm for nm in os.listdir(example_dir) if nm.endswith('.py') and nm.startswith('example_')]
 
         file_exp = []
@@ -288,6 +314,20 @@ class CrystalGui:
                     parent=self.root
                 )
 
+    def menu_latex(self):
+        """Display latex commands"""
+        formula = self.xtl.Properties.molname(latex=True)
+        s = 'Name: %s\nChemical formula: %s\n\n' % (self.xtl.name, formula)
+        try:
+            s += self.xtl.Properties.latex_table()
+            StringViewer(s, self.xtl.name, width=60)
+        except KeyError:
+            messagebox.showwarning(
+                parent=self.root,
+                title='CIF Table',
+                message='No .cif file associated with this crystal'
+            )
+
     def menu_start_fdmnes(self):
         """Search for FDMNES, restart GUI"""
         from Dans_Diffraction import activate_fdmnes, fdmnes_checker, start_gui
@@ -303,10 +343,19 @@ class CrystalGui:
         from .fdmnes import AnaFDMNESgui
         AnaFDMNESgui()
 
+    def menu_darkmode(self):
+        """Change colour scheme"""
+        # doesn't currently work - doesn't change colours
+        from .basic_widgets import dark_mode
+        dark_mode()
+        self.on_closing()
+        CrystalGui(self.xtl)
+
 
     ###################################################################################
     ############################## FUNCTIONS ##########################################
     ###################################################################################
+
     def fun_set(self):
         self.file.set(self.short_file())
         self.name.set(self.xtl.name)
@@ -392,8 +441,10 @@ class CrystalGui:
             AtomsGui(self.xtl, False, False)
 
     def fun_symmetry(self):
+        from .spacegroups import SpaceGroupGui
         self.fun_set()
-        SymmetryGui(self.xtl)
+        SpaceGroupGui(self.xtl.Symmetry, self.xtl)
+        # SymmetryGui(self.xtl)
 
     def fun_info(self):
         """Display Crystal info"""
@@ -422,6 +473,12 @@ class CrystalGui:
     def fun_multiple_scattering(self):
         self.fun_set()
         rt = MultipleScatteringGui(self.xtl)
+        rt.root.focus_force()
+
+    def fun_diffractometer(self):
+        from .diffractometer import DiffractometerGui
+        self.fun_set()
+        rt = DiffractometerGui(self.xtl)
         rt.root.focus_force()
 
     def fun_tensor_scattering(self):
@@ -555,12 +612,12 @@ class AtomsGui:
             ttl = xtl.name + ' General Atomic Sites'
 
         if magnetic_moments:
-            label_text = '    n   Atom   Label       u              v            w             Occ         Uiso      mx             my           mz             '
-            default_width = 55
+            label_text = '    n   Atom   Label               Site      u              v             w              Occ         Uiso       mx             my           mz             '
+            default_width = 65
             mag_button = 'Hide Magnetic Moments'
         else:
-            label_text = '    n   Atom   Label       u              v            w             Occ         Uiso'
-            default_width = 55
+            label_text = '    n   Atom   Label               Site      u              v             w              Occ         Uiso'
+            default_width = 65
             mag_button = 'Show Magnetic Moments'
 
         # Create Tk inter instance
@@ -613,19 +670,21 @@ class AtomsGui:
 
     def fun_set(self):
         """Get positions from crystal object, fill text boxes"""
+        # Get Wyckoff labels
+        wyckoff = self.xtl.Symmetry.wyckoff_labels(self.Atoms.uvw())
         # Build string
         str = ''
         if self.magnetic_moments:
-            fmt = '%3.0f %4s %5s %7.4f %7.4f %7.4f   %4.2f %6.4f   %7.4f %7.4f %7.4f\n'
+            fmt = '%3.0f %4s %5s %10s  %7.4f %7.4f %7.4f   %4.2f %6.4f   %7.4f %7.4f %7.4f\n'
             for n in range(0, len(self.Atoms.u)):
-                str += fmt % (n, self.Atoms.type[n], self.Atoms.label[n],
+                str += fmt % (n, self.Atoms.type[n], self.Atoms.label[n], wyckoff[n],
                               self.Atoms.u[n], self.Atoms.v[n], self.Atoms.w[n],
                               self.Atoms.occupancy[n], self.Atoms.uiso[n],
                               self.Atoms.mx[n], self.Atoms.my[n], self.Atoms.mz[n])
         else:
-            fmt = '%3.0f %4s %5s %7.4f %7.4f %7.4f   %4.2f %6.4f\n'
+            fmt = '%3.0f %4s %5s %10s  %7.4f %7.4f %7.4f   %4.2f %6.4f\n'
             for n in range(0, len(self.Atoms.u)):
-                str += fmt % (n, self.Atoms.type[n], self.Atoms.label[n],
+                str += fmt % (n, self.Atoms.type[n], self.Atoms.label[n], wyckoff[n],
                               self.Atoms.u[n], self.Atoms.v[n], self.Atoms.w[n],
                               self.Atoms.occupancy[n], self.Atoms.uiso[n])
 
@@ -643,7 +702,7 @@ class AtomsGui:
     def fun_update(self):
         "Update atomic properties, close window"
         # Get string from text box
-        str = self.text.get('1.0', tk.END)
+        s = self.text.get('1.0', tk.END)
 
         # Analyse string
         """
@@ -657,9 +716,9 @@ class AtomsGui:
         occ = values[:,6]
         uiso = values[:,7]
         """
-        lines = str.splitlines()
+        lines = s.splitlines()
         n = []
-        type = []
+        scattering_type = []
         label = []
         u = []
         v = []
@@ -673,19 +732,19 @@ class AtomsGui:
             items = ln.split()
             if len(items) < 8: continue
             n += [int(items[0])]
-            type += [items[1]]
+            scattering_type += [items[1]]
             label += [items[2]]
-            u += [float(items[3])]
-            v += [float(items[4])]
-            w += [float(items[5])]
-            occ += [float(items[6])]
-            uiso += [float(items[7])]
+            u += [float(items[5])]
+            v += [float(items[6])]
+            w += [float(items[7])]
+            occ += [float(items[8])]
+            uiso += [float(items[9])]
             if self.magnetic_moments:
-                mx += [float(items[8])]
-                my += [float(items[9])]
-                mz += [float(items[10])]
+                mx += [float(items[10])]
+                my += [float(items[11])]
+                mz += [float(items[12])]
 
-        self.Atoms.type = type
+        self.Atoms.type = scattering_type
         self.Atoms.label = label
         self.Atoms.u = np.array(u)
         self.Atoms.v = np.array(v)
@@ -905,7 +964,7 @@ class SymmetryGui:
         self.text_3.insert(tk.END, magstr)
 
         # Update spacegroup name + number
-        self.spacegroup.set(self.Symmetry.spacegroup)
+        self.spacegroup.set(self.Symmetry.spacegroup_symbol)
         self.spacegroup_number.set(self.Symmetry.spacegroup_number)
 
     def fun_spacegroup(self, event=None):

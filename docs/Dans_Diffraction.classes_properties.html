@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_properties</strong></big></big> (version 1.7)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_properties</strong></big></big> (version 1.8)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_properties.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\classes_properties.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_properties.py">c:\users\dgpor\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\classes_properties.py</a></font></td></tr></table>
     <p><tt><a href="#Properties">Properties</a>&nbsp;Class&nbsp;"classes_properties.py"<br>
 &nbsp;functions&nbsp;for&nbsp;calculating&nbsp;various&nbsp;properties,&nbsp;working&nbsp;with&nbsp;the&nbsp;Crystal&nbsp;class.<br>
 &nbsp;<br>
@@ -16,8 +16,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;1.7<br>
-Last&nbsp;updated:&nbsp;26/01/21<br>
+Version&nbsp;1.8<br>
+Last&nbsp;updated:&nbsp;17/05/23<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 10/11/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -29,6 +29,7 @@ Version&nbsp;History:<br>
 12/05/20&nbsp;1.5&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;orbitals&nbsp;function,&nbsp;exchange_paths<br>
 15/10/20&nbsp;1.6&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;scattering&nbsp;lengths&nbsp;+&nbsp;factors<br>
 26/01/21&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;calculation&nbsp;of&nbsp;xray&nbsp;attenuation,&nbsp;transmission&nbsp;and&nbsp;refractive&nbsp;index<br>
+16/05/23&nbsp;1.8&nbsp;&nbsp;&nbsp;&nbsp;Fixed&nbsp;reflectivity&nbsp;calculation<br>
 &nbsp;<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
@@ -108,7 +109,7 @@ Example&nbsp;Usage:<br>
 
 <dl><dt><a name="Properties-absorption"><strong>absorption</strong></a>(self, energy_kev=None)</dt><dd><tt>Returns&nbsp;the&nbsp;sample&nbsp;absorption&nbsp;coefficient&nbsp;in&nbsp;um^-1&nbsp;at&nbsp;the&nbsp;requested&nbsp;energy&nbsp;in&nbsp;keV</tt></dd></dl>
 
-<dl><dt><a name="Properties-atomic_neighbours"><strong>atomic_neighbours</strong></a>(self, structure_index=0, radius=2.5, disp=False)</dt><dd><tt>Returns&nbsp;the&nbsp;relative&nbsp;positions&nbsp;of&nbsp;atoms&nbsp;within&nbsp;a&nbsp;radius&nbsp;of&nbsp;the&nbsp;selected&nbsp;atom<br>
+<dl><dt><a name="Properties-atomic_neighbours"><strong>atomic_neighbours</strong></a>(self, structure_index=0, radius=2.5, disp=False, return_str=False)</dt><dd><tt>Returns&nbsp;the&nbsp;relative&nbsp;positions&nbsp;of&nbsp;atoms&nbsp;within&nbsp;a&nbsp;radius&nbsp;of&nbsp;the&nbsp;selected&nbsp;atom<br>
 &nbsp;&nbsp;&nbsp;&nbsp;vector,&nbsp;label&nbsp;=&nbsp;atomic_distances(idx,&nbsp;radius)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;idx&nbsp;=&nbsp;index&nbsp;of&nbsp;central&nbsp;atom,&nbsp;choosen&nbsp;from&nbsp;xtl.Structrue.<a href="#Properties-info">info</a>()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;radius&nbsp;=&nbsp;radius&nbsp;about&nbsp;the&nbsp;central&nbsp;atom&nbsp;to&nbsp;find&nbsp;other&nbsp;ions,&nbsp;in&nbsp;Angstroms<br>
@@ -196,8 +197,7 @@ string&nbsp;=&nbsp;['Ru&nbsp;K',&nbsp;'Ru&nbsp;L1',&nbsp;'Ru&nbsp;L2'&nbsp;...]<
 energies&nbsp;=&nbsp;[22.,&nbsp;...]</tt></dd></dl>
 
 <dl><dt><a name="Properties-xray_reflectivity"><strong>xray_reflectivity</strong></a>(self, energy_kev=None, grazing_angle=2)</dt><dd><tt>Calculate&nbsp;the&nbsp;specular&nbsp;reflectivity&nbsp;of&nbsp;a&nbsp;material<br>
-&nbsp;&nbsp;NOT&nbsp;CURRENTLY&nbsp;WORKING<br>
-:param&nbsp;elements:&nbsp;str&nbsp;or&nbsp;list&nbsp;of&nbsp;str,&nbsp;if&nbsp;list&nbsp;-&nbsp;absorption&nbsp;will&nbsp;be&nbsp;summed&nbsp;over&nbsp;elements<br>
+From:&nbsp;https://xdb.lbl.gov/Section4/Sec_4-2.html<br>
 :param&nbsp;energy_kev:&nbsp;float&nbsp;array<br>
 :param&nbsp;grazing_angle:&nbsp;incidence&nbsp;angle&nbsp;relative&nbsp;to&nbsp;the&nbsp;surface,&nbsp;in&nbsp;degrees<br>
 :return:&nbsp;float&nbsp;or&nbsp;array</tt></dd></dl>

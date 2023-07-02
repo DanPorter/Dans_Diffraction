@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.7
-Last updated: 26/01/21
+Version 1.8
+Last updated: 17/05/23
 
 Version History:
 10/11/17 0.1    Program created
@@ -20,6 +20,7 @@ Version History:
 12/05/20 1.5    Added orbitals function, exchange_paths
 15/10/20 1.6    Added scattering lengths + factors
 26/01/21 1.7    Added calculation of xray attenuation, transmission and refractive index
+16/05/23 1.8    Fixed reflectivity calculation
 
 
 @author: DGPorter
@@ -31,7 +32,7 @@ from . import functions_general as fg
 from . import functions_crystallography as fc
 from .classes_orbitals import CrystalOrbitals
 
-__version__ = '1.7'
+__version__ = '1.8'
 
 
 class Properties:
@@ -294,15 +295,13 @@ class Properties:
     def xray_reflectivity(self, energy_kev=None, grazing_angle=2):
         """
         Calculate the specular reflectivity of a material
-          NOT CURRENTLY WORKING
-        :param elements: str or list of str, if list - absorption will be summed over elements
+        From: https://xdb.lbl.gov/Section4/Sec_4-2.html
         :param energy_kev: float array
         :param grazing_angle: incidence angle relative to the surface, in degrees
         :return: float or array
         """
         if energy_kev is None:
             energy_kev = fc.getenergy()
-        raise Warning("Warning: this doesn\'t work yet")
 
         atom_type = self.xtl.Structure.type
         occ = self.xtl.Structure.occupancy
@@ -310,13 +309,7 @@ class Properties:
         vol = self.volume()
         atom_per_volume = natoms / vol  # atoms per A^3
         elements = ['%s%s' % (at, o) for at, o in zip(atom_type, occ)]
-
-        refindex = fc.xray_refractive_index(elements, energy_kev, atom_per_volume)
-        costh = np.cos(np.deg2rad(grazing_angle))
-        ki = costh
-        kt = np.sqrt(refindex * np.conj(refindex) - costh ** 2)
-        r = (ki - kt) / (ki + kt)
-        return np.real(r * np.conj(r))
+        return fc.xray_reflectivity(elements, energy_kev, atom_per_volume, grazing_angle)
 
     def diamagnetic_susceptibility(self, atom_type='volume'):
         """
@@ -363,7 +356,7 @@ class Properties:
             X += -(N / D) * C * (Zeff * r * r)
         return X
 
-    def atomic_neighbours(self, structure_index=0, radius=2.5, disp=False):
+    def atomic_neighbours(self, structure_index=0, radius=2.5, disp=False, return_str=False):
         """
         Returns the relative positions of atoms within a radius of the selected atom
             vector, label = atomic_distances(idx, radius)
@@ -387,12 +380,18 @@ class Properties:
         diff = diff[jj,:]
         label = label[jj]
         mag = mag[jj]
-        ii = np.where(mag<radius)[0]
+        ii = np.where(mag < radius)[0]
 
-        if disp:
-            for i in ii:
-                print('{:3.0f} {:4s} {:6.3f} {:6.3f} {:6.3f} dist = {:6.3f}'.format(i, label[i], diff[i, 0], diff[i, 1],
-                                                                                    diff[i, 2], mag[i]))
+        if disp or return_str:
+            s = 'idx Label x      y      z     \n'
+            fmt = '{:3.0f} {:4s} {:6.3f} {:6.3f} {:6.3f} dist = {:6.3f} \u212B'
+            s += '\n'.join([
+                fmt.format(jj[i], label[i], diff[i, 0], diff[i, 1], diff[i, 2], mag[i]) for i in ii
+            ])
+            if disp:
+                print(s)
+            if return_str:
+                return s
         return diff[ii,:], label[ii]
 
     def exchange_paths(self, cen_idx=None, nearest_neighbor_distance=7.0, exchange_type='O', bond_angle=90.,

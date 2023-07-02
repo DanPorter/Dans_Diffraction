@@ -29,13 +29,41 @@ btn2 = 'gold'  # main button
 TTBG = 'light grey'  # Title background
 # Colours - active
 btn_active = 'grey'
-opt_active = 'grey'
+opt_active = 'grey'  # activeBackground
 # Colours - Fonts
-txtcol = 'black'
+txtcol = 'black'  # activeForeground, foreground
 btn_txt = 'black'
 ety_txt = 'black'
 opt_txt = 'black'
 TTFG = 'red'
+
+
+def dark_mode():
+    """Change the colour scheme"""
+    global bkg, txtcol, opt_active, opt, ety, ety_txt, btn, btn_active, btn2
+    bkg = '#2b2b2b'
+    txtcol = '#afb1b3'  # activeForeground, foreground
+    opt_active = '#3c3f41'  # activeBackground
+    opt = '#3c3f41'
+    ety = '#3c3f41'
+    ety_txt = 'white'
+    btn = '#3b3e40'
+    btn_active = '#81888c'
+    btn2 = 'black'
+
+
+def light_mode():
+    """Change the colour scheme"""
+    global bkg, txtcol, opt_active, opt, ety, ety_txt, btn, btn_active, btn2
+    bkg = 'snow'
+    txtcol = 'black'  # activeForeground, foreground
+    opt_active = 'grey'  # activeBackground
+    opt = 'azure'
+    ety = 'white'
+    ety_txt = 'black'
+    btn = 'azure'
+    btn_active = 'grey'
+    btn2 = 'gold'
 
 
 def popup_message(parent, title, message):

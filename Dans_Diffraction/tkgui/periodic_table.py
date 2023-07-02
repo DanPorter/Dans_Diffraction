@@ -207,7 +207,7 @@ class ElementButton:
         self.info_widget = info_widget
         self.frame = frame = tk.Frame(
             parent, relief=tk.RAISED,
-            name=f'frame_{self.element.symbol}',
+            name='frame_%s' % self.element.symbol,
             background=self.element.background,
             border=self.BORDER,
         )
@@ -222,7 +222,7 @@ class ElementButton:
             child.bindtags((frame,))
 
     def populate(self) -> None:
-        prefix = f'label_{self.element.symbol}_'
+        prefix = 'label_%s_' % self.element.symbol
 
         tk.Label(
             self.frame, name=prefix + 'number',

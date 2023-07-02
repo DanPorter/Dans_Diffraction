@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.3.0
-Last updated: 08/05/23
+Version 3.0.0
+Last updated: 02/07/23
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -67,6 +67,22 @@ Version History:
 06/01/23 2.2.2  Removed redundent references to np.float
 14/01/23 2.2.3  Corrected background error in xtl.Scatter.powder
 08/05/23 2.3.0  Merged pull request for non-integer hkl option on SF and electron form factors. Thanks Prestipino!
+25/06/23 3.0.0  Added new GUI elements including new Scattering UI and diffractomter simulator, plus other updates
+
+Acknoledgements:
+    2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
+    Dec 2019    Thanks to Gareth Nisbet for allowing me to inlude his multiple scattering siumulation
+    April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
+    May 2020    Thanks to AndreEbel for helpful suggestions on citations
+    Dec 2020    Thanks to Chris Drozdowski for suggestions about reflection families
+    Jan 2021    Thanks to aslarsen for suggestions about outputting the structure factor
+    April 2021  Thanks to Trygve Ræder for suggestions about x-ray scattering factors
+    Feb 2022    Thanks to Mirko for pointing out the error in two-theta values in Scatter.powder
+    March 2022  Thanks to yevgenyr for suggesting new peak profiles in Scatter.powder
+    Jan 2023    Thanks to Anuradha Vibhakar for pointing out the error in f0 + if'-if''
+    Jan 2023    Thanks to Andreas Rosnes for testing the installation in jupyterlab
+    May 2023    Thanks to Carmelo Prestipino for adding electron scattering factors
+    June 2023   Thanks to Sergio I. Rincon for pointing out the rounding error in Scatter.powder
 
 -----------------------------------------------------------------------------
    Copyright 2023 Diamond Light Source Ltd.
@@ -120,8 +136,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '2.3.0'
-__date__ = '16/05/23'
+__version__ = '3.0.0'
+__date__ = '02/07/23'
 
 
 # Build

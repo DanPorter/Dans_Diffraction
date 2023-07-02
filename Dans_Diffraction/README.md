@@ -72,11 +72,12 @@ Contains symmetry information about the crystal, including the symmetry operatio
 Tabulated spacegroup symmetries are found in [data](./data/README.md).
 
 Parameters:
+
 ```python
-xtl.Symmetry.spacegroup # spacegroup name
-xtl.Symmetry.spacegroup_number # spacegroup number
-xtl.Symmetry.symmetry_operations # list of symmetry operations (list of strings e.g. ['-x,-y,-z'])
-xtl.Symmetry.symmetry_operations_magnetic # list of magnetic symmetry operations (list of strings e.g. ['-x,-y,-z'])
+xtl.Symmetry.spacegroup_symbol  # spacegroup name
+xtl.Symmetry.spacegroup_number  # spacegroup number
+xtl.Symmetry.symmetry_operations  # list of symmetry operations (list of strings e.g. ['-x,-y,-z'])
+xtl.Symmetry.symmetry_operations_magnetic  # list of magnetic symmetry operations (list of strings e.g. ['-x,-y,-z'])
 ```
 
 Selected functions (see internal documentation for more):
