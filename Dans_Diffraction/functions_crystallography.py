@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.8.1
-Last updated: 22/05/23
+Version 3.8.2
+Last updated: 02/07/23
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -58,7 +58,7 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.8.1'
+__version__ = '3.8.2'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
