@@ -3,11 +3,11 @@ Dans_Diffraction
 Python package for loading crystal structures from cif files and calculating diffraction information.
 
 Installation:
-$ pip install Dans-Diffraction
+$ python -m pip install Dans-Diffraction
 or
 $ git clone https://github.com/DanPorter/Dans_Diffraction.git
 or
-$ pip install git+https://github.com/DanPorter/Dans_Diffraction.git
+$ python -m pip install git+https://github.com/DanPorter/Dans_Diffraction.git
 
 Requirements:
 Python 2.7+/3+ with packages: Numpy, Matplotlib, Tkinter
@@ -25,14 +25,14 @@ Usage:
     $ ipython -i -m -matplotlib tk Dans_Diffraction
 
 GitHub Repo: https://github.com/DanPorter/Dans_Diffraction
-Citation DOI: https://doi.org/10.5281/zenodo.3859501
+Citation DOI: https://doi.org/10.5281/zenodo.8106031
 
 By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.0.0
-Last updated: 02/07/23
+Version 3.0.1
+Last updated: 11/07/23
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -68,6 +68,7 @@ Version History:
 14/01/23 2.2.3  Corrected background error in xtl.Scatter.powder
 08/05/23 2.3.0  Merged pull request for non-integer hkl option on SF and electron form factors. Thanks Prestipino!
 25/06/23 3.0.0  Added new GUI elements including new Scattering UI and diffractomter simulator, plus other updates
+11/07/23 3.0.1  Some fixes for plotting and additions to diffractometer orientation. Thanks asteppke!
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -83,6 +84,7 @@ Acknoledgements:
     Jan 2023    Thanks to Andreas Rosnes for testing the installation in jupyterlab
     May 2023    Thanks to Carmelo Prestipino for adding electron scattering factors
     June 2023   Thanks to Sergio I. Rincon for pointing out the rounding error in Scatter.powder
+    July 2023   Thanks to asteppke for suggested update to Arrow3D for matplotlib V>3.4
 
 -----------------------------------------------------------------------------
    Copyright 2023 Diamond Light Source Ltd.
@@ -136,8 +138,8 @@ if fdmnes_checker():
     from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
 
-__version__ = '3.0.0'
-__date__ = '02/07/23'
+__version__ = '3.0.1'
+__date__ = '11/07/23'
 
 
 # Build

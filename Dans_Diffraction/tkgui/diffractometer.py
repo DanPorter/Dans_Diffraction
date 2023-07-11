@@ -23,9 +23,10 @@ the sum of the detector at each step
  Diamond Light Source, Chilton, Didcot, Oxon, OX11 0DE, U.K.
 """
 
-import matplotlib.pyplot as plt
 import numpy as np
+from itertools import cycle
 from matplotlib.figure import Figure
+from matplotlib.colors import TABLEAU_COLORS
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk as NavigationToolbar2TkAgg
 
@@ -40,7 +41,9 @@ from .basic_widgets import (TF, BF, SF, LF, HF, TTF,
                             btn_txt, ety_txt, opt_txt)
 
 # Figure DPI
-FIGURE_DPI = 60
+FIGURE_DPI = 80
+FIGURE_3D_SIZE = [8, 4]
+FIGURE_DET_SIZE = [7, 4]
 
 # Help messages
 MSG_PHI = "1st rotation, left handed roation about z'''-axis (crystal axis)"
@@ -63,12 +66,15 @@ DEFAULT_DET_PIXEL = 0.2  # mm
 OPTIONS = {
     '3d_lattice': True,
     '3d_basis': False,
+    '3d_detector_corners': False,
+    '3d_ref_arrows': False,
     'det_labels': True,
     'det_log': False,
     'det_clim': [0.0, 1.0],
     'det_cmap': 'viridis',
-    'fig_dpi': 60,
+    'fig_dpi': FIGURE_DPI,
     'maxq': 4.0,
+    'min_intensity': 0.01
 }
 # Detector Reflection list
 REFLIST = {
@@ -80,7 +86,10 @@ REFLIST = {
     'dety': np.zeros([0], dtype=float),
     'hkl_str': [],
     'fwhm': np.zeros([0], dtype=float),
+    'color': [],
 }
+# Colours
+col_cycle = cycle([TABLEAU_COLORS[c] for c in TABLEAU_COLORS])
 
 
 def default_fun(*args, **kwargs):
@@ -125,6 +134,8 @@ class Lattice:
         self.hkl = np.zeros([0, 3], dtype=float)
         self.initial_qxqyqz = np.zeros([0, 3], dtype=float)
         self.rotated_qxqyqz = np.zeros([0, 3], dtype=float)
+        self.initial_vectors = np.eye(3, dtype=float)
+        self.vectors = np.eye(3, dtype=float)
         self.qmag = np.zeros([0], dtype=float)
         self.tth = np.zeros([0], dtype=float)
         self.fwhm = np.zeros([0], dtype=float)
@@ -162,12 +173,14 @@ class Lattice:
         self._current_mu = mu
         R = fc.diffractometer_rotation(phi, chi, eta, mu)
         self.rotated_qxqyqz = fc.labvector(self.initial_qxqyqz, self._u, R, self._lab)
+        self.vectors = fc.labvector(self.initial_vectors, self._u, R, self._lab)
 
     def generate_hkl(self, wavelength_a, max_q=4):
         """Generate reflection list"""
         self.wavelength_a = wavelength_a
         self.hkl = self.xtl.Cell.all_hkl(maxq=max_q)
         self.initial_qxqyqz = self.xtl.Cell.calculateQ(self.hkl)
+        self.initial_vectors = self.xtl.Cell.calculateQ([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
         self.qmag = fg.mag(self.initial_qxqyqz)
         self.tth = fc.cal2theta(self.qmag, wavelength_a=wavelength_a)
         tth = 1.0 * self.tth
@@ -234,16 +247,6 @@ class Detector:
         self._pixel_size = pixel_size
         self._lab = labmatrix
         self.rotate_to(0, 0)
-
-        # Plot
-        self.fig2 = Figure(figsize=[6, 4], dpi=FIGURE_DPI)
-        self.fig2.patch.set_facecolor('w')
-        self.axd = self.fig2.add_subplot(111)
-        self.axd_image = self.axd.pcolormesh(np.zeros([10, 10]))
-        self.axd_center = self.axd.plot([0], [0], 'k+', ms=6, label='Centre')
-        self.axd_lattice = self.axd.plot([], [], 'k+', ms=6, label='Nearby reflections')
-        self.axd_allowed = self.axd.plot([], [], 'ro', ms=6, label='Reflections')
-        self.toolbar2 = None
 
     def __repr__(self):
         s = "Detector(delta=%.5g, gamma=%.5g)"
@@ -313,6 +316,10 @@ class Detector:
         kf = wv * fg.norm(c)
         return kf - wv * fc.labvector([0, 1, 0], LAB=self._lab)
 
+    def ki(self, wavelength_a):
+        wv = fc.wavevector(wavelength=wavelength_a)
+        return wv * fc.labvector([0, 1, 0], LAB=self._lab)
+
     def kfkiq(self, wavelength_a):
         """Return lines traving kf, ki and Q"""
         wv = fc.wavevector(wavelength=wavelength_a)
@@ -320,6 +327,21 @@ class Detector:
         kf = wv * fg.norm(self.position)
         kikf = np.array([-ki, [0, 0, 0], kf])
         qq = np.array([[0, 0, 0], kf - ki])
+        return kikf, qq
+
+    def kfkiq_corners(self, wavelength_a):
+        """Return lines to corners of kif, ki and Q"""
+        wv = fc.wavevector(wavelength=wavelength_a)
+        ki = wv * fc.labvector([0, 1, 0], LAB=self._lab)
+        kf = wv * fg.norm(self.corners())
+        z = [0, 0, 0]
+        kikf = np.vstack([-ki, z, kf[0], kf[1], z, kf[1],  kf[2], z, kf[2], kf[3], z, kf[3], kf[0]])
+        qq = np.array([
+            z, kf[0] - ki,
+            z, kf[1] - ki,
+            z, kf[2] - ki,
+            z, kf[3] - ki,
+        ])
         return kikf, qq
 
     def twotheta(self):
@@ -1061,10 +1083,20 @@ def tk_scan(parent, angle_dict, latt, det):
             )
             scan_sum[n] = np.sum(mesh)
 
+        # Create new frame
+        newframe = tk.Toplevel(parent)
+        newframe.title('%s Scan' % angle_name)
+        fig = Figure(figsize=FIGURE_3D_SIZE, dpi=OPTIONS['fig_dpi'])
+        canvas = FigureCanvasTkAgg(fig, newframe)
+        canvas.get_tk_widget().configure(bg='black')
+        canvas.draw()
+
         # Plot data
-        fp.newplot(scan_range, scan_sum)
-        fp.labels(None, '%s [Deg]' % angle_name, 'Detector Sum')
-        plt.show()
+        ax = fig.add_subplot(111)
+        ax.plot(scan_range, scan_sum)
+        ax.set_xlabel('%s [Deg]' % angle_name)
+        ax.set_ylabel('Detector Sum')
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=tk.YES)
 
     frm = tk.LabelFrame(parent, text='Scan', relief=tk.RIDGE)
     frm.pack(fill=tk.X, padx=2, pady=2)
@@ -1125,6 +1157,8 @@ def tk_plot_options(parent, callback):
 
     pl_lattice = tk.BooleanVar(root, OPTIONS['3d_lattice'])
     pl_basis = tk.BooleanVar(root, OPTIONS['3d_basis'])
+    pl_det_corners = tk.BooleanVar(root, OPTIONS['3d_detector_corners'])
+    pl_ref_arrows = tk.BooleanVar(root, OPTIONS['3d_ref_arrows'])
     pl_labels = tk.BooleanVar(root, OPTIONS['det_labels'])
     pl_log = tk.BooleanVar(root, OPTIONS['det_log'])
     clim_min = tk.DoubleVar(root, OPTIONS['det_clim'][0])
@@ -1132,6 +1166,7 @@ def tk_plot_options(parent, callback):
     cmap = tk.StringVar(root, OPTIONS['det_cmap'])
     dpi = tk.IntVar(root, OPTIONS['fig_dpi'])
     maxq = tk.DoubleVar(root, OPTIONS['maxq'])
+    mininten = tk.DoubleVar(root, OPTIONS['min_intensity'])
 
     def fun_log(event=None):
         log = pl_log.get()
@@ -1147,12 +1182,15 @@ def tk_plot_options(parent, callback):
     def fun_update():
         OPTIONS['3d_lattice'] = pl_lattice.get()
         OPTIONS['3d_basis'] = pl_basis.get()
+        OPTIONS['3d_detector_corners'] = pl_det_corners.get()
+        OPTIONS['3d_ref_arrows'] = pl_ref_arrows.get()
         OPTIONS['det_labels'] = pl_labels.get()
         OPTIONS['det_log'] = pl_log.get()
         OPTIONS['det_clim'] = [clim_min.get(), clim_max.get()]
         OPTIONS['det_cmap'] = cmap.get()
         OPTIONS['fig_dpi'] = dpi.get()
         OPTIONS['maxq'] = maxq.get()
+        OPTIONS['min_intensity'] = mininten.get()
         callback()
         root.destroy()
 
@@ -1162,10 +1200,14 @@ def tk_plot_options(parent, callback):
     var.pack(side=tk.LEFT, padx=3)
     var = tk.Checkbutton(ln, text='Plot 3D Basis', variable=pl_basis, font=SF)
     var.pack(side=tk.LEFT, padx=3)
+    var = tk.Checkbutton(ln, text='Plot 3D corners', variable=pl_det_corners, font=SF)
+    var.pack(side=tk.LEFT, padx=3)
 
     ln = tk.Frame(root)
     ln.pack(side=tk.TOP, fill=tk.X)
     var = tk.Checkbutton(ln, text='Detector HKL labels', variable=pl_labels, font=SF)
+    var.pack(side=tk.LEFT, padx=3)
+    var = tk.Checkbutton(ln, text='Plot ref arrows', variable=pl_ref_arrows, font=SF)
     var.pack(side=tk.LEFT, padx=3)
 
     ln = tk.Frame(root)
@@ -1196,6 +1238,10 @@ def tk_plot_options(parent, callback):
     var.pack(side=tk.LEFT)
     var = tk.Entry(ln, textvariable=maxq, font=TF, width=8, bg=ety, fg=ety_txt)
     var.pack(side=tk.LEFT)
+    var = tk.Label(ln, text='Min Intensity:', font=SF)
+    var.pack(side=tk.LEFT)
+    var = tk.Entry(ln, textvariable=mininten, font=TF, width=8, bg=ety, fg=ety_txt)
+    var.pack(side=tk.LEFT)
 
     ln = tk.Frame(root)
     ln.pack(side=tk.TOP, fill=tk.X)
@@ -1212,21 +1258,128 @@ def tk_orientation(parent, latt: Lattice, det: Detector, callback):
     ustr = str(latt._u.tolist()).replace('], [', '\n').replace('[', '').replace(']', '')
     lstr = str(latt._lab.tolist()).replace('], [', '\n').replace('[', '').replace(']', '')
 
-    ln = tk.Frame(root)
+    right = tk.Frame(root, relief=tk.RAISED)
+    right.pack(side=tk.RIGHT, fill=tk.Y, expand=tk.YES, padx=6)
+
+    # Tranformation
+    def fun_transform(event=None):
+        mat = transform_optoins[transform.get()]
+        for m in range(3):
+            for n in range(3):
+                matrix_vars[m][n].set(mat[m, n])
+
+    transform_optoins = {
+        'c || z, b || y': np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+        'c || z, b || x': np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]]),
+        'a || z, b || x': np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]]),
+        'a || z, z || x': np.array([[0, 0, 1], [0, 1, 0], [1, 0, 0]]),
+        'b || z, z || x': np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]]),
+        'b || z, a || x': np.array([[1, 0, 0], [0, 0, 1], [0, 1, 0]]),
+    }
+    transform = tk.StringVar(root, 'c || z, b || y')
+    var = tk.OptionMenu(right, transform, *transform_optoins, command=fun_transform)
+    var.config(font=SF, bg=opt, activebackground=opt_active)
+    var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
+    var.pack(side=tk.TOP)
+
+    # Rotation
+    ln = tk.Frame(right)
+    ln.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES, pady=4)
+    var = tk.Label(ln, text='Rotate ', font=SF)
+    var.pack(side=tk.LEFT)
+    angle_deg = tk.DoubleVar(root, 0)
+    var = tk.Entry(ln, textvariable=angle_deg, font=TF, width=3, bg=ety, fg=ety_txt)
+    var.pack(side=tk.LEFT)
+    var = tk.Label(ln, text='Deg, about ', font=SF)
+    var.pack(side=tk.LEFT)
+
+    def fun_rotate():
+        angle = angle_deg.get()
+        rmat = rotate_options[rotate_about.get()](angle)
+        cmat = np.array([[matrix_vars[m][n].get() for n in range(3)] for m in range(3)])
+        nmat = np.dot(rmat, cmat.T).T
+        for m in range(3):
+            for n in range(3):
+                matrix_vars[m][n].set(nmat[m, n])
+
+    rotate_options = {
+        'X': fc.rotmatrixx,
+        'Y': fc.rotmatrixy,
+        'Z': fc.rotmatrixz,
+    }
+    rotate_about = tk.StringVar(root, 'Z')
+    var = tk.OptionMenu(ln, rotate_about, *rotate_options)
+    var.config(font=SF, bg=opt, activebackground=opt_active)
+    var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
+    var.pack(side=tk.LEFT)
+    var = tk.Button(ln, text='Go', font=TF, command=fun_rotate, bg=btn, activebackground=btn_active)
+    var.pack(side=tk.LEFT)
+
+    # Matrix
+    matrix_vars = [[tk.DoubleVar(root, latt._u[m, n]) for n in range(3)] for m in range(3)]
+    ln = tk.Frame(right, relief=tk.RIDGE)
+    ln.pack(side=tk.TOP, fill=tk.Y, expand=tk.YES, pady=4)
+    for m in range(3):
+        mat_ln = tk.Frame(ln)
+        mat_ln.pack(side=tk.TOP, fill=tk.X)
+        for n in range(3):
+            var = tk.Entry(mat_ln, textvariable=matrix_vars[m][n], font=TF, width=3, bg=ety, fg=ety_txt)
+            var.pack(side=tk.LEFT)
+
+    def fun_gen_u():
+        nstr = '\n'.join([' '.join(['%6.4f' % matrix_vars[m][n].get() for n in range(3)]) for m in range(3)])
+        utext.delete('1.0', tk.END)
+        utext.insert(tk.END, nstr)
+
+    def fun_load_u():
+        s = utext.get('1.0', tk.END)
+        uary = fg.str2array(s).reshape(3, 3)
+        for m in range(3):
+            for n in range(3):
+                matrix_vars[m][n].set(uary[m, n])
+
+    def fun_gen_l():
+        nstr = '\n'.join([' '.join(['%6.4f' % matrix_vars[m][n].get() for n in range(3)]) for m in range(3)])
+        ltext.delete('1.0', tk.END)
+        ltext.insert(tk.END, nstr)
+
+    def fun_load_l():
+        s = ltext.get('1.0', tk.END)
+        lary = fg.str2array(s).reshape(3, 3)
+        for m in range(3):
+            for n in range(3):
+                matrix_vars[m][n].set(lary[m, n])
+
+    left = tk.Frame(root)
+    left.pack(side=tk.LEFT, fill=tk.Y, expand=tk.YES)
+
+    ln = tk.Frame(left)
     ln.pack(side=tk.TOP, fill=tk.X)
     var = tk.Label(ln, text='U:', width=10, font=SF)
     var.pack(side=tk.LEFT)
     utext = tk.Text(ln, width=20, height=3, font=HF, wrap=tk.NONE, background=ety)
     utext.pack(side=tk.LEFT, fill=tk.BOTH, expand=tk.YES)
     utext.insert(tk.END, ustr)
+    var = tk.Button(ln, text=u'\u25B6', font=TF, command=fun_load_u, bg=btn,
+                    activebackground=btn_active)
+    var.pack(side=tk.LEFT, fill=tk.Y, expand=tk.YES)
+    var = tk.Button(ln, text=u'\u25C0', font=TF, command=fun_gen_u, bg=btn,
+                    activebackground=btn_active)
+    var.pack(side=tk.LEFT, fill=tk.Y, expand=tk.YES)
 
-    ln = tk.Frame(root)
+    ln = tk.Frame(left)
     ln.pack(side=tk.TOP, fill=tk.X)
     var = tk.Label(ln, text='LabFrame:', width=10, font=SF)
     var.pack(side=tk.LEFT)
     ltext = tk.Text(ln, width=20, height=3, font=HF, wrap=tk.NONE, background=ety)
     ltext.pack(side=tk.LEFT, fill=tk.BOTH, expand=tk.YES)
     ltext.insert(tk.END, lstr)
+    var = tk.Button(ln, text=u'\u25B6', font=TF, command=fun_load_l, bg=btn,
+                    activebackground=btn_active)
+    var.pack(side=tk.LEFT, fill=tk.Y, expand=tk.YES)
+    var = tk.Button(ln, text=u'\u25C0', font=TF, command=fun_gen_l, bg=btn,
+                    activebackground=btn_active)
+    var.pack(side=tk.LEFT, fill=tk.Y, expand=tk.YES)
 
     def fun_update(event=None):
         s = utext.get('1.0', tk.END)
@@ -1238,7 +1391,7 @@ def tk_orientation(parent, latt: Lattice, det: Detector, callback):
         callback()
         root.destroy()
 
-    ln = tk.Frame(root)
+    ln = tk.Frame(left)
     ln.pack(side=tk.TOP, fill=tk.X)
     var = tk.Button(ln, text='Update', font=TF, command=fun_update, bg=btn,
                     activebackground=btn_active)
@@ -1280,6 +1433,7 @@ def generate_reflections(latt: Lattice, det: Detector, minimum_gaussian_intensit
     REFLIST['scaled'] = scaled_inten[good]
     REFLIST['detx'] = det_x * 1000.  # mm
     REFLIST['dety'] = det_y * 1000.  # mm
+    REFLIST['color'] = [next(col_cycle) for n in range(len(det_x))]
     return xx, yy, mesh
 
 
@@ -1295,10 +1449,8 @@ class DiffractometerGui:
     View and edit the symmetry operations
     """
 
-    _figure_dpi = FIGURE_DPI
-    _figure_3d_size = [8, 4]
-    _figure_det_size = [7, 4]
-    _minimum_gaussian_intensity = 0.01
+    _figure_3d_size = FIGURE_3D_SIZE
+    _figure_det_size = FIGURE_DET_SIZE
 
     def __init__(self, xtl: Crystal):
         """"Initialise"""
@@ -1340,18 +1492,19 @@ class DiffractometerGui:
         topmenu(self.root, menu)
 
         # XXXXXXX GUI ELEMENTS XXXXXXX
+        grid = tk.Frame(self.root)
+        grid.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
+        grid.columnconfigure((0, 1), weight=1)
+        grid.rowconfigure((0, 1), weight=1)
+
         # ***--- TOP ---***
         # --- Reciprocal Space Plot ---
-        #line = tk.Frame(self.root)
-        #line.grid(row=1, column=1, sticky=tk.EW, columnspan=2, rowspan=2)
-        # line.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
-        top_left = tk.LabelFrame(self.root, text='Diffractometer')
-        #sec.pack(side=tk.LEFT, expand=tk.YES, padx=4, pady=4)
-        top_left.grid(row=1, column=1, sticky=tk.N+tk.E+tk.S+tk.W)
+        top_left = tk.LabelFrame(grid, text='Diffractometer')
+        top_left.grid(row=1, column=1, sticky=tk.N+tk.W)
         frm = tk.Frame(top_left)
         frm.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
 
-        self.fig1 = Figure(figsize=self._figure_3d_size, dpi=self._figure_dpi)
+        self.fig1 = Figure(figsize=self._figure_3d_size, dpi=OPTIONS['fig_dpi'])
         self.fig1.patch.set_facecolor('w')
 
         canvas = FigureCanvasTkAgg(self.fig1, frm)
@@ -1365,6 +1518,8 @@ class DiffractometerGui:
         self.ax3d_wavevector, = self.ax3d.plot([], [], [], 'r-', lw=3, label='Q')
         self.ax3d_detector, = self.ax3d.plot([], [], [], 'k-', lw=2, label='Beam')
         self.ax3d_qdetector, = self.ax3d.plot([], [], [], 'r-', lw=2, label='Beam')
+        self.ax3d_basis_arrows = []
+        self.ax3d_ref_arrows = []
         self.ax3d.set_xlabel(u'Qx [\u212B\u207B\u00B9]')
         self.ax3d.set_ylabel(u'Qy [\u212B\u207B\u00B9]')
         self.ax3d.set_zlabel(u'Qz [\u212B\u207B\u00B9]')
@@ -1381,13 +1536,13 @@ class DiffractometerGui:
         # self.toolbar1.pack(fill=tk.X, expand=tk.YES)
 
         # --- Detector Plot ---
-        top_right = tk.LabelFrame(self.root, text='Detector')
+        top_right = tk.LabelFrame(grid, text='Detector')
         # sec.pack(side=tk.LEFT, expand=tk.YES, padx=4, pady=4)
-        top_right.grid(row=1, column=2, sticky=tk.N+tk.E+tk.S+tk.W)
+        top_right.grid(row=1, column=2, sticky=tk.N+tk.E)
         frm = tk.Frame(top_right)
         frm.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
 
-        self.fig2 = Figure(figsize=self._figure_det_size, dpi=self._figure_dpi)
+        self.fig2 = Figure(figsize=self._figure_det_size, dpi=OPTIONS['fig_dpi'])
         self.fig2.patch.set_facecolor('w')
         self.axd = self.fig2.add_subplot(111)
         self.axd_image = self.axd.pcolormesh(np.zeros([10, 10]), shading='auto')
@@ -1414,9 +1569,9 @@ class DiffractometerGui:
 
         # ***--- BOTTOM ---***
         # --- Diffractometer axes ---
-        bottom_left = tk.Frame(self.root)
+        bottom_left = tk.Frame(grid)
         # sec.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
-        bottom_left.grid(row=2, column=1, sticky=tk.N+tk.E+tk.S+tk.W)
+        bottom_left.grid(row=2, column=1, sticky=tk.S+tk.W)
 
         sec = tk.LabelFrame(bottom_left, text='Angles (Deg)')
         sec.pack(side=tk.TOP, fill=tk.X, expand=tk.YES, padx=4, pady=4)
@@ -1440,9 +1595,9 @@ class DiffractometerGui:
         }
 
         # --- Beam ---
-        bottom_right = tk.Frame(self.root)
+        bottom_right = tk.Frame(grid)
         # sec.pack(side=tk.LEFT, expand=tk.YES, padx=4, pady=4)
-        bottom_right.grid(row=2, column=2, sticky=tk.N+tk.E+tk.S+tk.W)
+        bottom_right.grid(row=2, column=2, sticky=tk.S+tk.E)
         self.latt = tk_beam(bottom_right, self.xtl, self.update)
 
         # --- Detector ---
@@ -1497,7 +1652,7 @@ class DiffractometerGui:
         xx, yy, mesh = generate_reflections(
             latt=self.latt,
             det=self.det,
-            minimum_gaussian_intensity=self._minimum_gaussian_intensity
+            minimum_gaussian_intensity=OPTIONS['min_intensity']
         )
 
         # --- Update 3D Plot ---
@@ -1505,12 +1660,43 @@ class DiffractometerGui:
             update_3d(self.latt.rotated_qxqyqz, self.ax3d_reciprocal_lattice)
         else:
             update_3d(np.zeros([1, 3]), self.ax3d_reciprocal_lattice)
+
+        [artist.remove() for artist in self.ax3d_basis_arrows]
+        if OPTIONS['3d_basis']:
+            astar, bstar, cstar = self.latt.vectors
+            self.ax3d_basis_arrows = [
+                fp.Arrow3D([0, astar[0]], [0, astar[1]], [0, astar[2]], lw=3, arrowstyle="-|>", color="r"),
+                fp.Arrow3D([0, bstar[0]], [0, bstar[1]], [0, bstar[2]], lw=3, arrowstyle="-|>", color="b"),
+                fp.Arrow3D([0, cstar[0]], [0, cstar[1]], [0, cstar[2]], lw=3, arrowstyle="-|>", color="g"),
+            ]
+            [self.ax3d.add_artist(artist) for artist in self.ax3d_basis_arrows]
+        else:
+            self.ax3d_basis_arrows = []
+
         update_3d(REFLIST['qxqyqz'], self.ax3d_lattice_detector)
+        [artist.remove() for artist in self.ax3d_ref_arrows]
+        if OPTIONS['3d_ref_arrows']:
+            ki = self.det.ki(self.latt.wavelength_a)
+            self.ax3d_ref_arrows = [
+                fp.Arrow3D([0, q[0] + ki[0]], [0, q[1] + ki[1]], [0, q[2] + ki[2]], lw=1, arrowstyle="-|>", color=c)
+                for q, c in zip(REFLIST['qxqyqz'], REFLIST['color'])  # kf arrows
+            ] + [
+                fp.Arrow3D([0, q[0]], [0, q[1]], [0, q[2]], lw=1, arrowstyle="-|>", color=c)
+                for q, c in zip(REFLIST['qxqyqz'], REFLIST['color'])  # q arrows
+            ]
+            [self.ax3d.add_artist(artist) for artist in self.ax3d_ref_arrows]
+        else:
+            self.ax3d_ref_arrows = []
         # update_3d(self.det.corners(), self.ax3d_detector)
         update_3d(self.det.q_shape(self.latt.wavelength_a), self.ax3d_qdetector)
-        kikf, qq = self.det.kfkiq(self.latt.wavelength_a)
-        update_3d(kikf, self.ax3d_beam_lines)
-        update_3d(qq, self.ax3d_wavevector)
+        if OPTIONS['3d_detector_corners']:
+            kikf, qq = self.det.kfkiq_corners(self.latt.wavelength_a)
+            update_3d(kikf, self.ax3d_beam_lines)
+            update_3d(qq, self.ax3d_wavevector)
+        else:
+            kikf, qq = self.det.kfkiq(self.latt.wavelength_a)
+            update_3d(kikf, self.ax3d_beam_lines)
+            update_3d(qq, self.ax3d_wavevector)
 
         self.ax3d.set_xlim([-OPTIONS['maxq'], OPTIONS['maxq']])
         self.ax3d.set_ylim([-OPTIONS['maxq'], OPTIONS['maxq']])

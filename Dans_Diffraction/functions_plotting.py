@@ -16,8 +16,8 @@ Usage:
 All plots generated require plt.show() call, unless using interactive mode
 
 
-Version 2.1
-Last updated: 10/08/22
+Version 2.2
+Last updated: 09/07/23
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -33,6 +33,7 @@ Version History:
 15/02/21 1.9.1  Update to vecplot for plotting on axis
 27/09/21 2.0    Added plot3darray, plot_diffractometer_reciprocal_space
 10/08/22 2.1    Added plot_lattice_points3D, set_plot_defaults, changed default fig size
+09/07/23 2.2    Thanks to asteppke for suggested update to Arrow3D for matplotlib V>3.4
 
 @author: DGPorter
 """
@@ -47,7 +48,7 @@ from mpl_toolkits.mplot3d import proj3d
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '2.1'
+__version__ = '2.2'
 
 DEFAULT_FONT = 'Times New Roman'
 DEFAULT_FONTSIZE = 14
@@ -519,6 +520,13 @@ class Arrow3D(FancyArrowPatch):
         xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, self.axes.M)
         self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
         return np.min(zs)
+
+    # keep this part for older versions of matplotlib
+    def draw(self, renderer):
+        xs3d, ys3d, zs3d = self._verts3d
+        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, self.axes.M)
+        self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
+        super().draw(renderer)
 
 
 '----------------------- Crystal Plotting Programs----------------------'
