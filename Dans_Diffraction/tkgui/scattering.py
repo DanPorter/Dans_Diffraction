@@ -3,40 +3,19 @@ Scattering GUI
 """
 
 import sys, os
+import re
 
-import matplotlib.pyplot as plt # Plotting
+import matplotlib.pyplot as plt
 import numpy as np
-if sys.version_info[0] < 3:
-    import Tkinter as tk
-else:
-    import tkinter as tk
 
 from .. import functions_general as fg
 from .. import functions_crystallography as fc
-from .basic_widgets import StringViewer, topmenu
-from .basic_widgets import (TF, BF, SF, LF, HF,
+from .. import fdmnes_checker
+from .basic_widgets import tk, StringViewer, topmenu, messagebox
+from .basic_widgets import (TF, BF, SF, LF, HF, MF,
                             bkg, ety, btn, opt, btn2,
                             btn_active, opt_active, txtcol,
                             btn_txt, ety_txt, opt_txt)
-
-# Scattering functions
-"""
-
-
-
-
-plot_xray_resonance(self, hkl, energy_kev=None, width=1.0, npoints=200)
-plot_3Dpolarisation(self, hkl, energy_kev=None, polarisation='sp', azim_zero=[1,0,0], psi=0)
-
-
-
-ms_azimuth(self, hkl, energy_kev, azir=[0, 0, 1], pv=[1, 0], numsteps=3, peak_width=0.1,
-                   full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False)
-diff6circle_intensity(self, phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0,
-                              energy_kev=None, wavelength=1.0, fwhm=0.5)
-multiple_scattering(self, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], numsteps=60,
-                            full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False)
-"""
 
 
 class ScatteringGuiOLD:
@@ -1571,6 +1550,11 @@ class ResonantXrayGui:
         var = tk.Button(line, text='Simulate\n Resonance', font=BF, command=self.fun_dispersion, width=10, bg=btn,
                         activebackground=btn_active)
         var.pack(side=tk.RIGHT)
+        # FDMNES Button
+        if fdmnes_checker():
+            var = tk.Button(line, text='FDMNES', font=BF, command=self.fun_fdmnes_ref, height=2, width=10, bg=btn,
+                            activebackground=btn_active)
+            var.pack(side=tk.RIGHT)
 
     def fun_energy(self, event=None):
         """Set wavelength"""
@@ -1621,6 +1605,54 @@ class ResonantXrayGui:
                 polarisation=pol)
 
         self.magresult.set('I = %9.4g' % maginten)
+
+    def fun_fdmnes_ref(self):
+        """Run FDMNES calculation"""
+        from ..classes_fdmnes import Fdmnes, sim_folder
+        edge = self.edge.get()
+        if edge == 'Edge':
+            messagebox.showinfo(
+                parent=self.root,
+                title='FDMNES Calculation',
+                message='Please choose an absorption edge'
+            )
+            return
+        absorber, edge = edge.split()
+        hkl = fg.str2array(self.hkl_magnetic.get())
+        azi = fg.str2array(self.azim_zero.get())
+        pol = self.polval.get().replace('\u03c3', 's').replace('\u03c0', 'p')
+
+        # Create FDMNES calculation
+        fdm = Fdmnes(self.xtl)
+        fdm.setup(
+            output_path=sim_folder('.Dans_Diffraction'),
+            comment='Scattering GUI calculation',
+            energy_range='-10. 1. -5 0.1 -2. 0.05 5 0.1 10. 0.5 25 1 31.',
+            radius=4.0,
+            edge=edge,
+            absorber=absorber,
+            scf=False,
+            quadrupole=True,
+            azi_ref=azi,
+            hkl_reflections=[hkl]
+        )
+        answer = messagebox.askyesnocancel(
+            parent=self.root,
+            title='FDMNES Calculation',
+            message='Run FDMNES calculation?\nThis will take a few minutes.\nClick No to reload a previous calcualtion'
+        )
+        if answer is None:
+            return
+        elif answer:
+            # Create files and run FDMNES
+            fdm.create_files()
+            fdm.write_fdmfile()
+            fdm.run_fdmnes()
+        # Analyse data
+        ana = fdm.analyse()
+        for ref in ana:
+            ref.plot3D()
+        plt.show()
 
     def fun_hklmag_list(self, event=None):
         """"Magnetic scattering"""
@@ -1697,3 +1729,517 @@ class ResonantXrayGui:
         hkl = np.array([hkl, -hkl])
         self.xtl.Plot.plot_xray_resonance(hkl, energy_kev=energy_kev, width=1.0, npoints=200)
         plt.show()
+
+
+class ReflectionSelectionBox:
+    """
+    Displays all data fields and returns a selection
+    Making a selection returns a list of field strings
+
+    out = ReflectionSelectionBox(['field1','field2','field3'], current_selection=['field2'], title='', multiselect=False).show()
+    # Make selection and press "Select" > box disappears
+    out = ['list','of','strings']
+    """
+
+    REF_FMT = '%14s %8.2f  %12.4g'
+
+    def __init__(self, xtl, parent, title='Reflections', multiselect=True,
+                 radiation=None, wavelength_a=None):
+        self.xtl = xtl
+        self.hkl_list = []
+        self.tth_list = []
+        self.sf_list = []
+        self.str_list = []
+        self.current_selection = []
+        self.output = []
+
+        # Create Tk inter instance
+        self.root = tk.Toplevel(parent)
+        self.root.wm_title(title)
+        self.root.minsize(width=100, height=300)
+        self.root.maxsize(width=1200, height=1200)
+        self.root.tk_setPalette(
+            background=bkg,
+            foreground=txtcol,
+            activeBackground=opt_active,
+            activeForeground=txtcol
+        )
+
+        # tk variables
+        radiations = ['X-Ray', 'Neutron', 'Electron']
+        wavelength_types = ['Energy [keV]', 'Energy [eV]', 'Energy [meV]', u'Wavelength [\u212B]', 'Wavelength [nm]']
+        max_types = [u'Max Q [\u212B\u207B\u00B9]', u'Max 2\u03B8 [Deg]', u'min d [\u212B]']
+        self.radiation_type = tk.StringVar(self.root, radiations[0] if radiation is None else radiation)
+        self.check_magnetic = tk.BooleanVar(self.root, False)
+        self.wavelength_type = tk.StringVar(self.root, 'Energy [keV]')
+        self._prev_wavelength_type = tk.StringVar(self.root, 'Energy [keV]')
+        self.wavelength_val = tk.DoubleVar(self.root, 8)
+        self.edge = tk.StringVar(self.root, 'Edge')
+        self.max_gen_type = tk.StringVar(self.root, u'Max Q [\u212B\u207B\u00B9]')
+        self._prev_max_gen_type = tk.StringVar(self.root, u'Max Q [\u212B\u207B\u00B9]')
+        self.max_val = tk.DoubleVar(self.root, 4)
+        self.min_sf = tk.DoubleVar(self.root, 0)
+        self.max_sf = tk.DoubleVar(self.root, np.inf)
+        self.add_hkl = tk.StringVar(self.root, '')
+
+        self.fun_radiation()
+        self.set_wavelength(1.5 if wavelength_a is None else wavelength_a)
+
+        # X-ray edges:
+        self.xr_edges, self.xr_energies = self.xtl.Properties.xray_edges()
+        self.xr_edges.insert(0, 'Cu Ka')
+        self.xr_edges.insert(1, 'Mo Ka')
+        self.xr_energies.insert(0, fg.Cu)
+        self.xr_energies.insert(1, fg.Mo)
+
+        # tk Frames
+        frame = tk.Frame(self.root)
+        frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=tk.YES, anchor=tk.N)
+
+        "---------------------------Scattering------------------------"
+        OPT_WIDTH = 14
+        frm = tk.LabelFrame(frame, text='Radiation', relief=tk.RIDGE)
+        frm.pack(fill=tk.X, padx=4, pady=4)
+
+        # Radiation
+        if radiation is None:
+            ln = tk.Frame(frm)
+            ln.pack(side=tk.TOP, fill=tk.X)
+            var = tk.Label(ln, text='Radiation:', font=SF)
+            var.pack(side=tk.LEFT)
+            var = tk.OptionMenu(ln, self.radiation_type, *radiations, command=self.fun_radiation)
+            var.config(font=SF, width=OPT_WIDTH, bg=opt, activebackground=opt_active)
+            var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
+            var.pack(side=tk.LEFT)
+            var = tk.Checkbutton(ln, text='Magnetic', variable=self.check_magnetic, font=SF)
+            var.pack(side=tk.LEFT, padx=6)
+
+        # Wavelength / Energy
+        ln = tk.Frame(frm)
+        ln.pack(side=tk.TOP, fill=tk.X)
+        if wavelength_a is None:
+            var = tk.OptionMenu(ln, self.wavelength_type, *wavelength_types, command=self.fun_wavelength)
+            var.config(font=SF, width=OPT_WIDTH, bg=opt, activebackground=opt_active)
+            var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
+            var.pack(side=tk.LEFT)
+            var = tk.OptionMenu(ln, self.edge, *self.xr_edges, command=self.fun_edge)
+            var.config(font=SF, width=5, bg=opt, activebackground=opt_active)
+            var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
+            var.pack(side=tk.LEFT)
+            var = tk.Entry(ln, textvariable=self.wavelength_val, font=TF, width=8, bg=ety, fg=ety_txt)
+            var.pack(side=tk.LEFT)
+            var.bind('<Return>', self.fun_wavelength)
+            var.bind('<KP_Enter>', self.fun_wavelength)
+        else:
+            var = tk.Label(ln, textvariable=self.wavelength_type, font=SF)
+            var.pack(side=tk.LEFT)
+            var = tk.Label(ln, textvariable=self.wavelength_val, font=SF)
+            var.pack(side=tk.LEFT)
+
+        # Max Q
+        ln = tk.Frame(frm)
+        ln.pack(side=tk.TOP, fill=tk.X)
+        var = tk.OptionMenu(ln, self.max_gen_type, *max_types, command=self.get_max_q)
+        var.config(font=SF, width=OPT_WIDTH, bg=opt, activebackground=opt_active)
+        var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(ln, textvariable=self.max_val, font=TF, width=8, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_gen_refs)
+        var.bind('<KP_Enter>', self.fun_gen_refs)
+        var = tk.Button(ln, text='?', font=TF, command=self.help_max_q, bg=btn, activebackground=btn_active)
+        var.pack(side=tk.LEFT, pady=2)
+
+        # Intensities
+        ln = tk.Frame(frm)
+        ln.pack(side=tk.TOP, fill=tk.X)
+        var = tk.Label(ln, text=u'Min |SF|\u00B2:', font=SF)
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(ln, textvariable=self.min_sf, font=TF, width=8, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var = tk.Label(ln, text=u'    Max |SF|\u00B2:', font=SF)
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(ln, textvariable=self.max_sf, font=TF, width=8, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+
+        # Add hkl
+        ln = tk.Frame(frm)
+        ln.pack(side=tk.TOP, fill=tk.X)
+        var = tk.Label(ln, text=u'hkl', font=SF)
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(ln, textvariable=self.add_hkl, font=TF, width=8, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_add_hkl)
+        var.bind('<KP_Enter>', self.fun_add_hkl)
+        var = tk.Button(ln, text='Add ref', font=TF, command=self.fun_add_hkl, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT, pady=2)
+
+        # Generate Buttons
+        ln = tk.Frame(frm)
+        ln.pack(side=tk.TOP, fill=tk.X)
+        var = tk.Button(ln, text='Gen Sym', font=TF, command=self.fun_gen_sym_refs, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT, pady=2)
+        var = tk.Button(ln, text='Rem Sym', font=TF, command=self.fun_rem_sym_refs, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT, pady=2)
+        var = tk.Button(ln, text='Gen Refs', font=TF, command=self.fun_gen_refs, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.RIGHT, pady=2)
+        var = tk.Button(ln, text='Clear', font=TF, command=self.clear_reflections, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.RIGHT, pady=2)
+
+        "---------------------------ListBox---------------------------"
+        ln = tk.Frame(frame)
+        ln.pack(side=tk.TOP)
+        var = tk.Label(ln, text='hkl    Two-Theta    Intensity', font=SF)
+        var.pack(side=tk.LEFT)
+
+        # Eval box with scroll bar
+        frm = tk.Frame(frame)
+        frm.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
+
+        sclx = tk.Scrollbar(frm, orient=tk.HORIZONTAL)
+        sclx.pack(side=tk.BOTTOM, fill=tk.BOTH)
+
+        scly = tk.Scrollbar(frm)
+        scly.pack(side=tk.RIGHT, fill=tk.BOTH)
+
+        self.lst_data = tk.Listbox(frm, font=MF, selectmode=tk.SINGLE, width=40, height=20, bg=ety,
+                                   xscrollcommand=sclx.set, yscrollcommand=scly.set)
+        self.lst_data.configure(exportselection=True)
+        if multiselect:
+            self.lst_data.configure(selectmode=tk.EXTENDED)
+        self.lst_data.bind('<<ListboxSelect>>', self.fun_listboxselect)
+        self.lst_data.bind('<Double-Button-1>', self.fun_exitbutton)
+        self.lst_data.pack(side=tk.LEFT, fill=tk.BOTH, expand=tk.YES)
+
+        sclx.config(command=self.lst_data.xview)
+        scly.config(command=self.lst_data.yview)
+
+        # self.txt_data.config(xscrollcommand=scl_datax.set,yscrollcommand=scl_datay.set)
+
+        "----------------------------Search Field-----------------------------"
+        frm = tk.LabelFrame(frame, text='Search', relief=tk.RIDGE)
+        frm.pack(fill=tk.X, expand=tk.YES, padx=2, pady=2)
+
+        self.searchbox = tk.StringVar(self.root, '')
+        var = tk.Entry(frm, textvariable=self.searchbox, font=TF, bg=ety, fg=ety_txt)
+        var.bind('<Key>', self.fun_search)
+        var.pack(fill=tk.X, expand=tk.YES, padx=2, pady=2)
+
+        "----------------------------Exit Button------------------------------"
+        frm_btn = tk.Frame(frame)
+        frm_btn.pack(fill=tk.X, expand=tk.YES)
+
+        self.numberoffields = tk.StringVar(self.root, '%3d Selected Fields' % 0)
+        var = tk.Label(frm_btn, textvariable=self.numberoffields, width=20)
+        var.pack(side=tk.LEFT)
+        btn_exit = tk.Button(frm_btn, text='Select', font=BF, command=self.fun_exitbutton, bg=btn,
+                             activebackground=btn_active)
+        btn_exit.pack(side=tk.RIGHT)
+
+        "-------------------------Start Mainloop------------------------------"
+        self.root.protocol("WM_DELETE_WINDOW", self.f_exit)
+        # self.root.mainloop()
+
+    "------------------------------------------------------------------------"
+    "------------------------Scattering Functions----------------------------"
+    "------------------------------------------------------------------------"
+
+    def get_scattering_type(self):
+        """Get scattering type"""
+        radiation = self.radiation_type.get()
+        magnetic = self.check_magnetic.get()
+        if radiation == 'X-Ray':
+            if magnetic:
+                scattering_type = 'xray magnetic'
+            else:
+                scattering_type = 'xray'
+        elif radiation == 'Neutron':
+            if magnetic:
+                scattering_type = 'neutron magnetic'
+            else:
+                scattering_type = 'neutron'
+        elif radiation == 'Electron':
+            scattering_type = 'electron'
+        else:
+            scattering_type = radiation
+        return scattering_type
+
+    def get_wavelength(self):
+        """Return wavelength in A according to unit"""
+        val = self.wavelength_val.get()
+        rad = self.radiation_type.get()
+        unit = self._prev_wavelength_type.get()
+
+        if unit == 'Energy [keV]':
+            if 'Electron' in rad:
+                wavelength_a = fc.electron_wavelength(val * 1000)
+            elif 'Neutron' in rad:
+                wavelength_a = fc.neutron_wavelength(val * 1e6)
+            else:
+                wavelength_a = fc.energy2wave(val)
+        elif unit == 'Energy [meV]':
+            if 'Electron' in rad:
+                wavelength_a = fc.electron_wavelength(val / 1000.)
+            elif 'Neutron' in rad:
+                wavelength_a = fc.neutron_wavelength(val)
+            else:
+                wavelength_a = fc.energy2wave(val / 1.0e6)
+        elif unit == 'Energy [eV]':
+            if 'Electron' in rad:
+                wavelength_a = fc.electron_wavelength(val)
+            elif 'Neutron' in rad:
+                wavelength_a = fc.neutron_wavelength(val * 1000)
+            else:
+                wavelength_a = fc.energy2wave(val / 1000.)
+        elif unit == 'Wavelength [nm]':
+            wavelength_a = val / 10.
+        else:
+            wavelength_a = val
+        return wavelength_a
+
+    def set_wavelength(self, wavelength_a):
+        """set wavelength according to unit"""
+        rad = self.radiation_type.get()
+        unit = self.wavelength_type.get()
+
+        if unit == 'Energy [keV]':
+            if 'Electron' in rad:
+                val = fc.electron_energy(wavelength_a) / 1000.
+            elif 'Neutron' in rad:
+                val = fc.neutron_energy(wavelength_a) / 1.0e6
+            else:
+                val = fc.wave2energy(wavelength_a)
+        elif unit == 'Energy [meV]':
+            if 'Electron' in rad:
+                val = fc.electron_energy(wavelength_a) * 1000
+            elif 'Neutron' in rad:
+                val = fc.neutron_energy(wavelength_a)
+            else:
+                val = fc.wave2energy(wavelength_a) / 1.0e6
+        elif unit == 'Energy [eV]':
+            if 'Electron' in rad:
+                val = fc.electron_energy(wavelength_a)
+            elif 'Neutron' in rad:
+                val = fc.neutron_energy(wavelength_a) * 1000
+            else:
+                val = fc.wave2energy(wavelength_a) / 1000.
+        elif unit == 'Wavelength [nm]':
+            val = wavelength_a * 10.,
+        else:
+            val = wavelength_a
+        self.wavelength_val.set(round(val, 4))
+        self._prev_wavelength_type.set(unit)
+        # Set max Q
+        max_q = fc.calqmag(180, wavelength_a=wavelength_a)
+        max_gen = self.max_gen_type.get()
+        if max_gen == u'Max Q [\u212B\u207B\u00B9]':
+            self.max_val.set(round(max_q, 4))
+        # elif max_gen == u'Max 2\u03B8 [Deg]':
+        #     energy_kev = fc.wave2energy(wavelength_a)
+        #     max_val.set(round(fc.cal2theta(max_q, energy_kev), 4))
+        elif max_gen == u'min d [\u212B]':
+            self.max_val.set(round(fc.q2dspace(max_q), 4))
+
+    def fun_radiation(self, event=None):
+        """Set radiation"""
+        rad = self.radiation_type.get()
+        wavelength_a = self.get_wavelength()
+        if 'Neutron' in rad:
+            self.wavelength_type.set('Energy [meV]')
+        elif 'Electron' in rad:
+            self.wavelength_type.set('Energy [eV]')
+            self.check_magnetic.set(False)
+        else:
+            self.wavelength_type.set('Energy [keV]')
+        self.set_wavelength(wavelength_a)
+
+    def fun_wavelength(self, event=None):
+        """Convert previous unit"""
+        wavelength_a = self.get_wavelength()
+        self.set_wavelength(wavelength_a)
+
+    def fun_edge(self, event=None):
+        """X-ray edge option menu"""
+        edge_name = self.edge.get()
+        if edge_name in self.xr_edges:
+            idx = self.xr_edges.index(edge_name)
+            self.set_wavelength(fc.energy2wave(self.xr_energies[idx]))
+
+    def get_max_q(self, event=None):
+        """Return max val in inverse angstroms, convert if changed"""
+        val = self.max_val.get()
+        old_max_gen = self._prev_max_gen_type.get()
+        max_gen = self.max_gen_type.get()
+        if old_max_gen == u'Max Q [\u212B\u207B\u00B9]':
+            max_q = val
+        elif old_max_gen == u'Max 2\u03B8 [Deg]':
+            wavelength_a = self.get_wavelength()
+            max_q = fc.calqmag(twotheta=val, wavelength_a=wavelength_a)
+        else:  # max_gen == u'min d [\u212B]'
+            max_q = fc.dspace2q(val)
+        # Convert if changed
+        if max_gen != old_max_gen:
+            if max_gen == u'Max Q [\u212B\u207B\u00B9]':
+                self.max_val.set(round(max_q, 4))
+            elif max_gen == u'Max 2\u03B8 [Deg]':
+                wavelength_a = self.get_wavelength()
+                tth = fc.cal2theta(max_q, wavelength_a=wavelength_a)
+                tth = 180. if np.isnan(tth) else tth
+                self.max_val.set(round(tth, 4))
+            else:  # max_gen == u'min d [\u212B]'
+                self.max_val.set(round(fc.q2dspace(max_q), 4))
+            self._prev_max_gen_type.set(max_gen)
+        return max_q
+
+    def help_max_q(self):
+        msg = "Calculate reflection list upto this value\n  (lower angle is less reflections)."
+        messagebox.showinfo(
+            parent=self.root,
+            title='max-Q',
+            message=msg
+        )
+
+    def fun_add_hkl(self, event=None):
+        """Add additional hkl"""
+        hkl = fg.str2array(self.add_hkl.get())
+        if len(hkl) > 0:
+            self.add_reflection(hkl)
+
+    def fun_gen_sym_refs(self):
+        new_list = []
+        for hkl in self.hkl_list:
+            if not fg.vectorinvector(hkl, new_list):
+                new_list += [hkl]
+            sym_list = self.xtl.Symmetry.symmetric_reflections_unique(hkl)
+            for sym_hkl in sym_list:
+                if not fg.vectorinvector(sym_hkl, new_list):
+                    new_list += [sym_hkl]
+        self.add_reflection_list(new_list)
+
+    def fun_rem_sym_refs(self):
+        new_list = self.xtl.Symmetry.remove_symmetric_reflections(self.hkl_list)
+        self.add_reflection_list(new_list)
+
+    def fun_gen_refs(self):
+        """Generate reflections"""
+        maxq = self.get_max_q()
+        hkl = self.xtl.Cell.all_hkl(maxq=maxq)
+        hkl = self.xtl.Cell.sort_hkl(hkl)[1:]  # remove [0,0,0]
+        self.add_reflection_list(hkl)
+
+    def clear_reflections(self):
+        """Clear reflection list"""
+        self.hkl_list = []
+        self.tth_list = []
+        self.sf_list = []
+        self.str_list = []
+        self.lst_data.delete(0, tk.END)
+
+    def add_reflection(self, hkl):
+        """Add reflection to list"""
+        if not fg.vectorinvector(hkl, self.hkl_list):
+            wavelength_a = self.get_wavelength()
+            scattering_type = self.get_scattering_type()
+            tth = self.xtl.Cell.tth(hkl, wavelength_a=wavelength_a)[0]
+            intensity = self.xtl.Scatter.intensity(
+                hkl=hkl,
+                scattering_type=scattering_type,
+                wavelength_a=wavelength_a
+            )[0]
+            intensity = round(intensity, 2)
+            hkl_str = fc.hkl2str(hkl)
+            ref_str = self.REF_FMT % (hkl_str, tth, intensity)
+            self.hkl_list += [hkl]
+            self.tth_list += [tth]
+            self.sf_list += [intensity]
+            self.str_list += [ref_str]
+            self.lst_data.insert(tk.END, ref_str)
+
+    def add_reflection_list(self, hkl_list):
+        """Replace reflection list"""
+        min_sf = self.min_sf.get()
+        max_sf = self.max_sf.get()
+        self.clear_reflections()
+        wavelength_a = self.get_wavelength()
+        scattering_type = self.get_scattering_type()
+        tth = self.xtl.Cell.tth(hkl_list, wavelength_a=wavelength_a)
+        intensity = self.xtl.Scatter.intensity(
+            hkl=hkl_list,
+            scattering_type=scattering_type,
+            wavelength_a=wavelength_a
+        )
+        for n in range(len(hkl_list)):
+            if min_sf < intensity[n] < max_sf:
+                ii = round(intensity[n], 2)
+                hkl_str = fc.hkl2str(hkl_list[n])
+                ref_str = self.REF_FMT % (hkl_str, tth[n], ii)
+                self.hkl_list += [hkl_list[n]]
+                self.tth_list += [tth[n]]
+                self.sf_list += [ii]
+                self.str_list += [ref_str]
+                self.lst_data.insert(tk.END, ref_str)
+
+    "------------------------------------------------------------------------"
+    "--------------------------ListBox Functions-----------------------------"
+    "------------------------------------------------------------------------"
+
+    def show(self):
+        """Run the selection box, wait for response"""
+
+        # self.root.deiconify()  # show window
+        self.root.wait_window()  # wait for window
+        return self.output
+
+    def fun_search(self, event=None):
+        """Search the selection for string"""
+        search_str = self.searchbox.get()
+        search_str = search_str + event.char
+        search_str = search_str.strip().lower()
+        if not search_str: return
+
+        # Clear current selection
+        self.lst_data.select_clear(0, tk.END)
+        view_idx = None
+        # Search for whole words first
+        for n, item in enumerate(self.str_list):
+            if re.search(r'\b%s\b' % search_str, item.lower()):  # whole word search
+                self.lst_data.select_set(n)
+                view_idx = n
+        # if nothing found, search anywhere
+        if view_idx is None:
+            for n, item in enumerate(self.str_list):
+                if search_str in item.lower():
+                    self.lst_data.select_set(n)
+                    view_idx = n
+        if view_idx is not None:
+            self.lst_data.see(view_idx)
+        self.fun_listboxselect()
+
+    def fun_listboxselect(self, event=None):
+        """Update label on listbox selection"""
+        self.numberoffields.set('%3d Selected Fields' % len(self.lst_data.curselection()))
+
+    def fun_exitbutton(self, event=None):
+        """Closes the current data window and generates output"""
+        selection = self.lst_data.curselection()
+        self.output = {
+            'hkl': np.array([self.hkl_list[n] for n in selection], dtype=int),
+            'tth': np.array([self.tth_list[n] for n in selection]),
+            'sf2': np.array([self.sf_list[n] for n in selection]),
+        }
+        self.root.destroy()
+
+    def f_exit(self, event=None):
+        """Closes the current data window"""
+        self.output = {
+            'hkl': np.array([]),
+            'tth': np.array([]),
+            'sf2': np.array([])
+        }
+        self.root.destroy()
+

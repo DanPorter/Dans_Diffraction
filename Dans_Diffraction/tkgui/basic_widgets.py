@@ -7,9 +7,11 @@ import re
 
 if sys.version_info[0] < 3:
     import Tkinter as tk
+    import tkFileDialog as filedialog
     import tkMessageBox as messagebox
 else:
     import tkinter as tk
+    from tkinter import filedialog
     from tkinter import messagebox
 
 # Fonts
@@ -18,7 +20,7 @@ BF = ['Palatino', 14]  # ["Times", 14]
 SF = ['Palatino', 14]  # ["Times New Roman", 14]
 LF = ['Palatino', 14]  # ["Times", 14]
 MF = ["Courier", 8]  # fixed distance format
-HF = ['Courier',12]
+HF = ['Courier', 12]
 TTF = ("Helvetica", 10, "bold italic")
 # Colours - background
 bkg = 'snow'  # background colour
@@ -70,9 +72,9 @@ def popup_message(parent, title, message):
     """Create a message box"""
     root = tk.Toplevel(parent)
     root.title(title)
-    #frame = tk.Frame(root)
+    # frame = tk.Frame(root)
     tk.Label(root, text=message, padx=20, pady=20).pack()
-    #root.after(2000, root.destroy)
+    # root.after(2000, root.destroy)
     return root
 
 
@@ -126,6 +128,42 @@ def menu_github():
     webbrowser.open_new_tab("https://github.com/DanPorter/Dans_Diffraction#dans_diffaction")
 
 
+def search_re(pattern, text):
+    matches = []
+    text = text.splitlines()
+    for i, line in enumerate(text):
+        for match in re.finditer(pattern, line):
+            if match.groups():
+                matches.append((f"{i + 1}.{match.span(1)[0]}", f"{i + 1}.{match.span(1)[1]}"))
+            else:
+                matches.append((f"{i + 1}.{match.start()}", f"{i + 1}.{match.end()}"))
+    return matches
+
+
+def text_search(text: tk.Text, search_pattern: str, highlight_colour='yellow'):
+    """
+    Find string patterns in tk Text object and highlight them
+    :param text: tk.Text object
+    :param search_pattern: str text to search for or Regular expression
+    :param highlight_colour: str color spec
+    :return: None
+    """
+    # Remove all tags so they can be redrawn
+    for tag in text.tag_names():
+        text.tag_remove(tag, "1.0", tk.END)
+
+    if not search_pattern: return
+
+    # Add tags where the search_re function found the pattern
+    for i, (start, end) in enumerate(search_re(search_pattern, text.get('1.0', tk.END))):
+        text.tag_add(f'{i}', start, end)
+        text.tag_config(f'{i}', background=highlight_colour)
+    # Scroll to first instance
+    index = text.search(search_pattern, '1.0')
+    if index:
+        text.see(index)
+
+
 class StringViewer:
     """
     Simple GUI that displays strings
@@ -135,6 +173,7 @@ class StringViewer:
     def __init__(self, string, title='', width=40):
         """Initialise"""
         # Create Tk inter instance
+        self.title = title
         self.root = tk.Tk()
         self.root.wm_title(title)
         # self.root.minsize(width=640, height=480)
@@ -164,6 +203,19 @@ class StringViewer:
         var = tk.Button(frm1, text='Close', font=BF, command=self.fun_close, bg=btn, activebackground=btn_active)
         var.pack(fill=tk.X)
 
+        # --- Search ---
+        self.search_str = tk.StringVar(self.root, '')
+        frm1 = tk.Frame(frame)
+        frm1.pack(side=tk.BOTTOM, fill=tk.X)
+        var = tk.Entry(frm1, textvariable=self.search_str)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_search)
+        var.bind('<KP_Enter>', self.fun_search)
+        var = tk.Button(frm1, text='Search', font=BF, command=self.fun_search, bg=btn, activebackground=btn_active)
+        var.pack(side=tk.LEFT)
+        var = tk.Button(frm1, text='SaveAs', font=BF, command=self.fun_saveas, bg=btn, activebackground=btn_active)
+        var.pack(side=tk.RIGHT)
+
         # --- Text box ---
         frame_box = tk.Frame(frame)
         frame_box.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
@@ -183,6 +235,23 @@ class StringViewer:
         self.text.config(xscrollcommand=scanx.set, yscrollcommand=scany.set)
         scanx.config(command=self.text.xview)
         scany.config(command=self.text.yview)
+
+    def fun_search(self, event=None):
+        """Search"""
+        text_search(self.text, self.search_str.get())
+
+    def fun_saveas(self):
+        """Save as text file"""
+        filename = filedialog.asksaveasfilename(
+            parent=self.root,
+            title='Save as text file',
+            initialfile='%s.txt' % self.title,
+            filetypes=[('Text file', '*.txt')],
+        )
+        if filename:
+            with open(filename, 'wt') as f:
+                f.write(self.text.get('1.0', tk.END))
+            print('File written: %s' % filename)
 
     def fun_close(self):
         """close window"""
@@ -337,4 +406,3 @@ class SelectionBox:
         """Closes the current data window"""
         self.output = self.initial_selection
         self.root.destroy()
-

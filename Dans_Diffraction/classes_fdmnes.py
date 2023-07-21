@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2018
 
-Version 1.6
-Last updated: 22/04/20
+Version 2.0
+Last updated: 20/07/23
 
 Version History:
 17/04/18 0.9    Program created
@@ -19,6 +19,7 @@ Version History:
 16/08/19 1.4    Added BavFile to read parts of .bav file
 18/03/20 1.5    Corrected density file for new headers
 22/04/20 1.6    Added FdmnesCompare and __add__ method for FdmnesAnalysis
+20/07/23 2.0    Refactored program and updated, added new methods and put indata writer in classes_properties
 
 @author: DGPorter
 """
@@ -30,54 +31,83 @@ from mpl_toolkits.mplot3d import Axes3D  # 3D plotting
 
 from . import functions_general as fg
 from . import functions_crystallography as fc
+from . import Crystal
 
-__version__ = '1.6'
+
+__version__ = '2.0'
 
 
 class Fdmnes:
     """
-    FDMNES Create files and run program
+    FDMNES class: Create input files for the FDMNES software and run the program inside a python console
+
+    FDMNES (Finite Difference Method for Near Edge Structure) is an abinitio DFT program for
+    simulating x-ray absorption spectra and resonant diffraction.
+    FDMNES is developed by Yves Joly at CNRS and can be freely downloaded from here:
+      www.fdmnes.neel.cnrs.fr
+
+    In case of publication, please include the following citation:
+      O. Bunau and Y. Joly "Self-consistent aspects of x-ray absorption calculations"
+      J. Phys.: Condens. Matter 21, 345501 (2009)
+
+    This class creates a simple wrapper to automatically generate input files from Dans_Diffraction
+    Crystal structures. The output files from the calculation can also be automatically plotted.
 
     E.G.
+    xtl = Crystal('Co.cif')
     fdm = Fdmnes(xtl)
-    fdm.setup(comment='Test',
+    fdm.setup(folder_name='New_Calculation',
+              comment='Test',
               absorber='Co',
               edge='K'
               azi_ref=[0,0,1],
               hkl_reflections=[[1,0,0],[0,1,0],[1,1,0]]
-    fdm.create_files('New_Calculation')
+    fdm.create_files()
     fdm.write_fdmfile()
-    output = fdm.run_fdmnes()
+    fdm.run_fdmnes()
     ###Wait for program completion###
     analysis = fdm.analyse()
+    print(analysis)
+    analysis.xanes.plot()
+    analysis.density.plot()
+    for ref in analysis:
+        ref.plot3D()
     """
 
-    def __init__(self, xtl):
-        """
-        initialise
-        :param xtl: object
-        """
+    def __init__(self, xtl=Crystal()):
         self.xtl = xtl
 
         # Options
-        self.exe_path = find_fdmnes()
+        if fdmnes_checker():
+            self.exe_path = find_fdmnes()
+        else:
+            self.exe_path = ''
         self.output_name = 'out'
-        self.output_path = self.generate_output_path()
+        self.folder_name = fg.saveable(self.xtl.name)
         self.input_name = 'FDMNES_%s.txt' % fg.saveable(self.xtl.name)
+        self.output_path = self.generate_output_path()
         self.comment = ''
-        self.range = '-19 0.1 20'
+        self.range = '-19. 1. -5 0.1 -2. 0.05 5 0.1 10. 0.5 25 1 31. '
         self.radius = 4.0
         self.edge = 'K'
-        self.absorber = self.xtl.Atoms.type[0]
+        self.absorber = self.xtl.Properties.resonant_element()
         self.green = True
         self.scf = False
         self.quadrupole = False
+        self.magnetism = True if self.xtl.Structure.ismagnetic() else False
+        self.spinorbit = False
         self.azi_ref = [1, 0, 0]
         self.correct_azi = True
         self.hkl_reflections = [[1, 0, 0]]
 
+    def __repr__(self):
+        return "Fdmnes('%s')" % self.xtl.name
+
+    def __str__(self):
+        return self.info()
+
     def setup(self, exe_path=None, output_path=None, output_name=None, folder_name=None, input_name=None,
-              comment=None, range=None, radius=None, edge=None, absorber=None, green=None, scf=None,
+              comment=None, energy_range=None, radius=None, edge=None, absorber=None, green=None, scf=None,
               quadrupole=None, azi_ref=None, correct_azi=None, hkl_reflections=None):
         """
         Set FDMNES Parameters
@@ -87,7 +117,7 @@ class Fdmnes:
         :param output_name: Name of FDMNES output files
         :param input_name: Name of FDMNES input file
         :param comment: A comment written in the input file
-        :param range: str energy range in eV relative to Fermi energy
+        :param energy_range: str energy range in eV relative to Fermi energy
         :param radius: calculation radius
         :param edge: absorptin edge, 'K', 'L3', 'L2'
         :param absorber: absorbing element, 'Co'
@@ -101,6 +131,7 @@ class Fdmnes:
         """
         if exe_path is not None:
             self.exe_path = exe_path
+            self.output_path = self.generate_output_path()
 
         if output_path is not None:
             self.output_path = output_path
@@ -109,7 +140,8 @@ class Fdmnes:
             self.output_name = output_name
 
         if folder_name is not None:
-            self.output_path = self.generate_output_path(folder_name)
+            self.folder_name = folder_name
+            self.output_path = self.generate_output_path()
 
         if input_name is not None:
             self.input_name = input_name
@@ -117,8 +149,8 @@ class Fdmnes:
         if comment is not None:
             self.comment = comment
 
-        if range is not None:
-            self.range = range
+        if energy_range is not None:
+            self.range = energy_range
 
         if radius is not None:
             self.radius = radius
@@ -145,38 +177,41 @@ class Fdmnes:
             self.correct_azi = correct_azi
 
         if hkl_reflections is not None:
-            self.hkl_reflections = np.asarray(hkl_reflections).reshape(-1,3)
-
-        self.info()
+            self.hkl_reflections = np.asarray(hkl_reflections).reshape(-1, 3)
 
     def info(self):
         """
         Print setup info
-        :return: None
+        :return: str
         """
-
-        print('FDMNES Options')
-        print('exe_path : %s' % self.exe_path)
-        print('output_path : %s' % self.output_path)
-        print('output_name : %s' % self.output_name)
-        print('input_name : %s' % self.input_name)
-        print('comment : %s' % self.comment)
-        print('range : %s' % self.range)
-        print('radius : %s' % self.radius)
-        print('absorber : %s' % self.absorber)
-        print('edge : %s' % self.edge)
-        print('green : %s' % self.green)
-        print('scf : %s' % self.scf)
-        print('quadrupole : %s' % self.quadrupole)
+        s = 'FDMNES Options\n'
+        s += 'Crystal: %s\n' % self.xtl.name
+        s += 'exe_path : %s\n' % self.exe_path
+        s += 'output_path : %s\n' % self.output_path
+        s += 'output_name : %s\n' % self.output_name
+        s += 'input_name : %s\n' % self.input_name
+        s += 'comment : %s\n' % self.comment
+        s += 'range : %s\n' % self.range
+        s += 'radius : %s\n' % self.radius
+        s += 'absorber : %s\n' % self.absorber
+        s += 'edge : %s\n' % self.edge
+        s += 'green : %s\n' % self.green
+        s += 'scf : %s\n' % self.scf
+        s += 'quadrupole : %s\n' % self.quadrupole
         if self.correct_azi:
-            print('azi_ref : %s' % self.azimuthal_reference(self.azi_ref))
+            s += 'azi_ref : %s\n' % self.azimuthal_reference(self.azi_ref)
         else:
-            print('azi_ref : %s' % self.azi_ref)
-        print('hkl_reflections:')
+            s += 'azi_ref : %s\n' % self.azi_ref
+        s += 'hkl_reflections:\n'
         for ref in self.hkl_reflections:
-            print('  (%1.0f,%1.0f,%1.0f)' % (ref[0], ref[1], ref[2]))
+            s += '  (%1.0f,%1.0f,%1.0f)\n' % (ref[0], ref[1], ref[2])
+        return s
 
-    def azimuthal_reference(self, hkl=[1, 0, 0]):
+    def find_fdmnes_exe(self, initial_dir=None, fdmnes_filename='fdmnes_win64.exe', reset=False):
+        """Find fdmnes executable"""
+        self.exe_path = find_fdmnes(reset=reset, fdmnes_filename=fdmnes_filename, initial_dir=initial_dir)
+
+    def azimuthal_reference(self, hkl=(1, 0, 0)):
         """
         Generate the azimuthal reference
         :param hkl: (1*3) array [h,k,l]
@@ -196,134 +231,37 @@ class Fdmnes:
         Create the string of parameters and comments for the input file
         :return: str
         """
-
-        # Get crystal parameters
-        UV = self.xtl.Cell.UV()
-        avUV=self.xtl.Cell.UV()
-        uvw, type, label, occupancy, uiso, mxmymz = self.xtl.Structure.get()
-
-        noat = len(uvw)
-
-        # Lattice parameters
-        a,b,c,alpha,beta,gamma = self.xtl.Cell.lp()
-
-        # element types
-        types,typ_idx = np.unique(type, return_inverse=True)
-        Z = fc.atom_properties(types,'Z')
-
-        absorber_idx = np.where(type == self.absorber)[0]
-        nonabsorber_idx = np.where(type != self.absorber)[0]
-
-        if self.correct_azi:
-            fdm_ar = self.azimuthal_reference(self.azi_ref)
-        else:
-            fdm_ar = self.azi_ref
-
-        if self.scf:
-            SCF = ''
-        else:
-            SCF = '!'
-
-        if self.quadrupole:
-            quadrupole = ''
-        else:
-            quadrupole = '!'
-
-        if self.green:
-            green = ''
-        else:
-            green = '!'
-
-        param_string = ''
-
-        # Write top matter
-        param_string += '! FDMNES indata file\n'
-        param_string += '! {}\n'.format(self.xtl.name)
-        param_string += '! {}\n'.format(self.comment)
-        param_string += '! indata file generated by Dans_Diffraction.classes_fdmnes\n'
-        param_string += '! By Dan Porter, PhD\n'
-        param_string += '\n'
-        param_string += ' Filout\n'
-        param_string += '   {}\n\n'.format(os.path.join(self.output_path,self.output_name))
-        param_string += '  Range                       ! Energy range of calculation (eV). Energy of photoelectron relative to Fermi level.\n'
-        param_string += ' %s \n\n'%self.range
-        param_string += ' Radius                       ! Radius of the cluster where final state calculation is performed\n'
-        param_string += '   {:3.1f}                        ! For a good calculation, this radius must be increased up to 6 or 7 Angstroems\n\n'.format(self.radius)
-        param_string += ' Edge                         ! Threshold type\n'
-        param_string += '  {}\n\n'.format(self.edge)
-        param_string += '%s SCF                          ! Self consistent solution\n' % SCF
-        param_string += '%s Green                        ! Muffin tin potential - faster\n' % green
-        param_string += '%s Quadrupole                   ! Allows quadrupolar E1E2 terms\n' % quadrupole
-        param_string += '! magnetism                    ! performs magnetic calculations\n'
-        param_string += ' Density                      ! Outputs the density of states as _sd1.txt\n'
-        param_string += ' Sphere_all                   ! Outputs the spherical tensors as _sph_.txt\n'
-        param_string += ' Cartesian                    ! Outputs the cartesian tensors as _car_.txt\n'
-        param_string += ' energpho                     ! output the energies in real terms\n'
-        param_string += ' Convolution                  ! Performs the convolution\n\n'
-
-        param_string += ' Zero_azim                    ! Define basis vector for zero psi angle\n'
-        param_string += '  {:6.3f} {:6.3f} {:6.3f}     '.format(fdm_ar[0],fdm_ar[1],fdm_ar[2])
-        if self.correct_azi:
-            param_string += '! Same as I16, Reciprocal ({} {} {}) in units of real SL. \n'.format(self.azi_ref[0],self.azi_ref[1],self.azi_ref[2])
-        else:
-            param_string += '\n'
-
-        param_string += ' rxs                          ! Resonant x-ray scattering at various peaks, peak given by: h k l sigma pi azimuth.\n'
-        for hkl in self.hkl_reflections:
-            param_string += ' {} {} {}    1 1                 ! ({} {} {}) sigma-sigma\n'.format(hkl[0],hkl[1],hkl[2],hkl[0],hkl[1],hkl[2])
-            param_string += ' {} {} {}    1 2                 ! ({} {} {}) sigma-pi\n'.format(hkl[0],hkl[1],hkl[2],hkl[0],hkl[1],hkl[2])
-        param_string += ' \n'
-
-        param_string += ' Atom ! s=0,p=1,d=2,f=3, must be neutral, get d states right by moving e to 2s and 2p sites\n'
-        for n in range(len(types)):
-            param_string += ' {:3.0f} 0 ! {}\n'.format(Z[n],types[n])
-        param_string += ' \n'
-
-        param_string += ' Crystal                      ! Periodic material description (unit cell)\n'
-        param_string += ' {:9.5f} {:9.5f} {:9.5f} {:9.5f} {:9.5f} {:9.5f}\n'.format(a,b,c,alpha,beta,gamma)
-        param_string += '! Coordinates - 1st atom is the absorber\n'
-        # Write atomic coordinates
-        for nn in range(len(absorber_idx)):
-            n = absorber_idx[nn]
-            param_string += '{0:2.0f} {1:20.15f} {2:20.15f} {3:20.15f} ! {4:-3.0f} {5:2s}\n'.format(typ_idx[n]+1,uvw[n,0],uvw[n,1],uvw[n,2],n,type[n])
-        for nn in range(len(nonabsorber_idx)):
-            n = nonabsorber_idx[nn]
-            param_string += '{0:2.0f} {1:20.15f} {2:20.15f} {3:20.15f} ! {4:-3.0f} {5:2s}\n'.format(typ_idx[n]+1,uvw[n,0],uvw[n,1],uvw[n,2],n,type[n])
-        param_string += '\n'
-
-        # Write end matter
-        param_string += ' End\n'
-        return param_string
-
-    def write_runfile(self, param_string=None):
-        """
-        Write FDMNES input data to a file
-        :return: None
-        """
-
-        if param_string is None:
-            param_string = self.generate_parameters_string()
-
-        # Create cell file
-        fname = os.path.join(self.output_path, self.input_name)
-        fdfile = open(fname, 'w')
-        fdfile.write(param_string)
-        fdfile.close()
-        print("FDMNES file written to {}".format(os.path.join(self.output_path, self.input_name)))
+        outstr = self.xtl.Properties.fdmnes_runfile(
+            output_path=os.path.join(self.output_path, self.output_name),
+            comment=self.comment,
+            energy_range=self.range,
+            radius=self.radius,
+            edge=self.edge,
+            absorber=self.absorber,
+            green=self.green,
+            scf=self.scf,
+            quadrupole=self.quadrupole,
+            magnetism=self.magnetism,
+            spinorbit=self.spinorbit,
+            azi_ref=self.azi_ref,
+            correct_azi=self.correct_azi,
+            hkl_reflections=self.hkl_reflections
+        )
+        return outstr
 
     def generate_output_path(self, folder_name=None, overwrite=False):
         """
-        Creates an automatic output path in the FDMNES/Sims directory
+        Creates an automatic output path in the FDMNES/Sim directory
          If overwrite is False and the directory already exists, a number will be appended to the name
         :param folder_name: str or None, if None xtl.name will be used
         :param overwrite: True/False
-        :return: str directory E.G. 'c:\FDMNES\sim\Fe2O3'
+        :return: str directory E.G. 'c:\FDMNES\Sim\Fe2O3'
         """
 
         if folder_name is None:
-            folder_name = fg.saveable(self.xtl.name)
+            folder_name = self.folder_name
 
-        newpath = os.path.join(os.path.dirname(self.exe_path), 'sim', folder_name)
+        newpath = os.path.join(os.path.dirname(self.exe_path), 'Sim', folder_name)
 
         if overwrite:
             return newpath
@@ -331,13 +269,13 @@ class Fdmnes:
         n = 0
         while os.path.isdir(newpath):
             n += 1
-            newpath = os.path.join(os.path.dirname(self.exe_path), 'sim', folder_name+'_%d'%n)
+            newpath = os.path.join(os.path.dirname(self.exe_path), 'Sim', folder_name + '_%d' % n)
         return newpath
 
     def generate_input_path(self):
         """
         Returns the input file pathname
-         E.G. 'c:\FDMNES\sim\Fe2O3\FDMNES_Fe2O3.txt'
+         E.G. 'c:\FDMNES\Sim\Fe2O3\FDMNES_Fe2O3.txt'
         :return: filepath
         """
         return os.path.join(self.output_path, self.input_name)
@@ -347,25 +285,37 @@ class Fdmnes:
         Create a directory in the FDMNES/Sim folder
         :return: None
         """
-
+        if not self.exe_path:
+            raise AttributeError('FDMNES executable path has not been specified')
         if not os.path.isdir(self.output_path):
             os.makedirs(self.output_path)
+            print("Created folder: '{}'".format(self.output_path))
 
-    def create_files(self, folder_name=None, param_string=None):
+    def write_runfile(self, param_string=None):
+        """
+        Write FDMNES input data to a file
+        :param param_string: str text to add to indata file (None will generate)
+        :return: None
+        """
+
+        if param_string is None:
+            param_string = self.generate_parameters_string()
+
+        # Create cell file
+        fname = self.generate_input_path()
+        with open(fname, 'w') as fdfile:
+            fdfile.write(param_string)
+        print("FDMNES file written to '{}'".format(fname))
+
+    def create_files(self, param_string=None):
         """
         Create FDMNES calculation directory and files
          - creates new directory
          - writes the input file to that directory
-        :param folder_name: Set a folder name with the 'sim' folder of fdmnes, or None for default
-        :param param_string: Pass a string of the parameter input file to write
+        :param param_string: str text to add to indata file (None will generate)
         :return: None
         """
-
-        if folder_name is not None:
-            self.output_path = self.generate_output_path(folder_name)
         self.create_directory()
-        if param_string is None:
-            param_string = self.generate_parameters_string()
         self.write_runfile(param_string)
         print('Ready for calculation!')
 
@@ -383,14 +333,15 @@ class Fdmnes:
         fdmstr += '! FDMNES Calculations\n'
         fdmstr += '! List of calculations here\n\n'
 
-        fdmstr += ' %1.0f\n'%len(file_list)
+        fdmstr += ' %1.0f\n' % len(file_list)
         fdmstr += '\n'.join(file_list)
 
         # Create/ overwrite file
+        if not self.exe_path:
+            raise AttributeError('FDMNES executable path has not been specified')
         fdmfile = os.path.join(os.path.dirname(self.exe_path), 'fdmfile.txt')
-        out = open(fdmfile, 'w')
-        out.write(fdmstr)
-        out.close()
+        with open(fdmfile, 'w') as out:
+            out.write(fdmstr)
         print('fdmfile created.')
 
     def run_fdmnes(self):
@@ -399,6 +350,8 @@ class Fdmnes:
         Remember to use self.create_files and self.write_fdmfile first!
         :return: subprocess.call output
         """
+        if not self.exe_path:
+            raise AttributeError('FDMNES executable path has not been specified')
 
         import subprocess
         wd = os.getcwd()
@@ -410,19 +363,22 @@ class Fdmnes:
         print('FDMNES Finished!')
         return output
 
-    def analyse(self,folder_name=None):
+    def analyse(self, folder_name=None):
         """
         Analyse the completed calculation
-        :param folder_name: if not None, loads data from here
+        :param folder_name: str name or directory of calculation (None to use current calculation)
         :return: FdmnesAnalysis Object
         """
 
         analysis_path = self.output_path
 
         if folder_name is not None:
-            analysis_path = self.generate_output_path(folder_name, overwrite=True)
-
-        return FdmnesAnalysis(analysis_path, self.output_name)
+            if os.path.isdir(folder_name):
+                analysis_path = folder_name
+            else:
+                analysis_path = self.generate_output_path(folder_name, overwrite=True)
+        calcname = '%s %s %s' % (self.xtl.name, self.absorber, self.edge)
+        return FdmnesAnalysis(analysis_path, self.output_name, calc_name=calcname)
 
 
 class FdmnesAnalysis:
@@ -448,7 +404,7 @@ class FdmnesAnalysis:
     refkeys = []
     sphkeys = []
 
-    def __init__(self, output_path, output_name='out'):
+    def __init__(self, output_path, output_name='out', calc_name=None):
         """
         Loads data from an FDMNES calculation, allowing plotting and data cuts
          E.G.
@@ -460,14 +416,17 @@ class FdmnesAnalysis:
         :param output_name: base output name for the calculation (default='out')
         """
         output_path = output_path.replace('\\', '/')  # convert windows directories
-        if output_path[-4:].lower() == '.txt':
+        if output_path.endswith('.txt'):
             output_path, filename = os.path.split(output_path)
             filename = filename.replace('_', '.')
             output_name = filename.split('.')[0]
-        calc_name = output_path.split('/')[-1]  # calculation name
-        bav_name = os.path.join(output_path,output_name+'_bav.txt')
-        scan_conv_name = os.path.join(output_path,output_name+'_scan_conv.txt')
-        convname = os.path.join(output_path,output_name+'_conv.txt')
+        elif not os.path.isdir(output_path):
+            output_path = sim_folder(output_path)
+        if calc_name is None:
+            calc_name = output_path.split('/')[-1]  # calculation name
+        bav_name = os.path.join(output_path, output_name + '_bav.txt')
+        scan_conv_name = os.path.join(output_path, output_name + '_scan_conv.txt')
+        convname = os.path.join(output_path, output_name + '_conv.txt')
         densityname = os.path.join(output_path, output_name + '_sd%d.txt')
         spherename = os.path.join(output_path, output_name + '_sph_signal_rxs%d.txt')
 
@@ -492,6 +451,8 @@ class FdmnesAnalysis:
             self.density = Density(densityname % 0)
         elif os.path.isfile(densityname % 1):
             self.density = Density(densityname % 1)
+        else:
+            self.density = None
 
         if os.path.isfile(scan_conv_name):
             # Read reflection files (_scan_conv.txt)
@@ -516,7 +477,7 @@ class FdmnesAnalysis:
                 # Read spherical contribution files
                 sphrefname = 'sph_' + refname
                 if os.path.isfile(spherename % (n + 1)):
-                    data = np.genfromtxt(spherename % (n + 1), skip_header=3, names=True)
+                    data = read_spherical(spherename % (n + 1))
                     sphobj = Spherical(data, ref, calc_name)
                     setattr(self, sphrefname, sphobj)
                     self.sphkeys += [sphrefname]
@@ -535,15 +496,28 @@ class FdmnesAnalysis:
         return out
 
     def __repr__(self):
+        return "FdmnesAnalysis('%s', '%s', calc_name='%s')" % (self.output_path, self.output_name, self.calc_name)
+
+    def __str__(self):
         name = '%s/%s' % (self.calc_name, self.output_name)
         filename = os.path.join(self.output_path, self.output_name+'.txt')
         cycles = self.bavfile.cycles()
         edge = self.bavfile.edge()
         radius = self.bavfile.radius()
-        return 'FDMNES Analysis: %30s, Edge: %20s, Radius: %10s, Cycles: %10s' % (name, edge, radius, cycles)
+        refs = ', '.join(self.refkeys)
+        sphs = ', '.join(self.sphkeys)
+        out = 'FDMNES Analysis: %30s\nEdge: %20s\nRadius: %10s\nCycles: %10s\n' % (name, edge, radius, cycles)
+        out += 'RXS Refs: %s\nSPH Refs: %s\n' % (refs, sphs)
+        return out
 
     def __add__(self, other):
         return FdmnesCompare([self, other])
+
+    def __getitem__(self, item):
+        """Return Reflection"""
+        if item in self.refkeys or item in self.sphkeys:
+            return getattr(self, item)
+        return getattr(self, self.refkeys[item])
 
 
 class FdmnesCompare:
@@ -569,9 +543,9 @@ class FdmnesCompare:
         self.fdm_objects = fdm_objects
         self._gen_refkeys()
 
-    def load(self, bav_files=[]):
+    def load(self, bav_files=()):
         """Load a series of calculation files"""
-        bav_files = np.array(bav_files).reshape(-1)
+        bav_files = np.asarray(bav_files).reshape(-1)
         for file in bav_files:
             self.fdm_objects += [FdmnesAnalysis(file)]
             print(self.fdm_objects[-1])
@@ -796,6 +770,8 @@ class BavFile:
         :return: str
         """
         keys = list(self.potrmt.keys())
+        if len(keys) == 0:
+            return '"Potrmt" charge string not found'
         outstr = ' '.join(['%8s' % key for key in keys]) + '\n'
         for n in range(len(self.potrmt[keys[0]])):
             outstr += ' '.join(['%8s' % self.potrmt[key][n] for key in keys]) + '\n'
@@ -844,6 +820,9 @@ class Reflection:
         self.refname = refname
         self.calc_name = calc_name
 
+    def __repr__(self):
+        return "Reflection('%s', '%s')" % (self.refname, self.calc_name)
+
     def azi_cut(self, cutenergy=None):
         """
         Returns the array of intensitiy values at a particular energy
@@ -872,7 +851,8 @@ class Reflection:
         ax = fig.add_subplot(111, projection='3d')
 
         XX, YY = np.meshgrid(self.angle, self.energy)
-        ax.plot_surface(XX, YY, self.intensity, rstride=3, cstride=3, cmap=plt.cm.coolwarm,
+        cm = plt.get_cmap('coolwarm')
+        ax.plot_surface(XX, YY, self.intensity, rstride=3, cstride=3, cmap=cm,
                         linewidth=0, antialiased=False)
 
         # Axis labels
@@ -922,6 +902,9 @@ class Xanes:
         self.intensity = intensity
         self.calc_name = calc_name
 
+    def __repr__(self):
+        return "Xanes('%s')" % self.calc_name
+
     def plot(self):
         """
         Plot the Xanes spectra
@@ -945,55 +928,24 @@ class Density:
 
         dirname, filetitle = os.path.split(file)  # calculation directory
         self.calc_name = dirname.split('/')[-1]  # calculation name
-        self.data = np.genfromtxt(file, skip_header=0, names=True)
+        self.data = read_density(file)
 
-        self.energy = self.data['Energy']
-        self.s = np.zeros(len(self.energy))
-        self.s_total = np.zeros(len(self.energy))
-        self.px = np.zeros(len(self.energy))
-        self.py = np.zeros(len(self.energy))
-        self.pz = np.zeros(len(self.energy))
-        self.p_total = np.zeros(len(self.energy))
-        self.dxy = np.zeros(len(self.energy))
-        self.dxz = np.zeros(len(self.energy))
-        self.dyz = np.zeros(len(self.energy))
-        self.dx2y2 = np.zeros(len(self.energy))
-        self.dz2r2 = np.zeros(len(self.energy))
-        self.d_total = np.zeros(len(self.energy))
+        self.energy = self.data['energy']
+        self.s = self.data['s']
+        self.s_total = self.data['s_total']
+        self.px = self.data['px']
+        self.py = self.data['py']
+        self.pz = self.data['pz']
+        self.p_total = self.data['p_total']
+        self.dxy = self.data['dxy']
+        self.dxz = self.data['dxz']
+        self.dyz = self.data['dyz']
+        self.dx2y2 = self.data['dx2y2']
+        self.dz2r2 = self.data['dz2r2']
+        self.d_total = self.data['d_total']
 
-        # Calculate real harmonics - old field names
-        if 'n11' in self.data.dtype.fields.keys():
-            self.s = self.data['n00']
-            self.s_total = self.data['n_l0']
-        if 'n11' in self.data.dtype.fields.keys():
-            self.px = self.data['n11_1']
-            self.py = self.data['n11']
-            self.pz = self.data['n10']
-            self.p_total = self.data['n_l1']
-        if 'n22' in self.data.dtype.fields.keys():
-            self.dxy = self.data['n22_1']
-            self.dxz = self.data['n21_1']
-            self.dyz = self.data['n21']
-            self.dx2y2 = self.data['n22']
-            self.dz2r2 = self.data['n20']
-            self.d_total = self.data['n_l2']
-
-        # Calculate real harmonics - new field names fdmnes version 2020+
-        if 's' in self.data.dtype.fields.keys():
-            self.s = self.data['s']
-            self.s_total = self.data['Ints']
-        if 'px' in self.data.dtype.fields.keys():
-            self.px = self.data['px']
-            self.py = self.data['py']
-            self.pz = self.data['pz']
-            self.p_total = self.data['Intp']
-        if 'dxy' in self.data.dtype.fields.keys():
-            self.dxy = self.data['dxy']
-            self.dxz = self.data['dxz']
-            self.dyz = self.data['dyz']
-            self.dx2y2 = self.data['dx2y2']
-            self.dz2r2 = self.data['dz2']
-            self.d_total = self.data['Intd']
+    def __repr__(self):
+        return "Density('%s')" % self.calc_name
 
     def plot(self):
         """
@@ -1023,7 +975,7 @@ class Spherical:
     def __init__(self, data, refname, calc_name):
         """
         Load contribution from spherical harmonics from out_sph_signal_rxs1.txt
-        :param data: data array from genfromtext
+        :param data: data array from read_spherical()
         :param refname: reflection name for plot title
         :param calc_name: calculation name for plot title
         """
@@ -1032,22 +984,16 @@ class Spherical:
         self.calc_name = calc_name
         self.refname = refname
 
-        self.energy = self.data['Energy']
+        self.energy = self.data['energy']
+        self.d_total = self.data['D00']
+        self.dxy = self.data['D_xy']
+        self.dxz = self.data['D_xz']
+        self.dyz = self.data['D_yz']
+        self.dx2y2 = self.data['D_x2y2']
+        self.dz2r2 = self.data['D_z2']
 
-        self.d_total = self.data['D00_r'] + 1j * self.data['D00_i']
-
-        self.dxy = self.data['D_xy_r'] + 1j * self.data['D_xy_i']
-        self.dxz = self.data['D_xz_r'] + 1j * self.data['D_xz_i']
-        self.dyz = self.data['D_yz_r'] + 1j * self.data['D_yz_i']
-        self.dx2y2 = self.data['D_x2y2_r'] + 1j * self.data['D_x2y2_i']
-        self.dz2r2 = self.data['D_z2_r'] + 1j * self.data['D_z2_i']
-
-        self.d_total = np.real(self.d_total * np.conj(self.d_total))
-        self.dxy = np.real(self.dxy * np.conj(self.dxy))
-        self.dxz = np.real(self.dxz * np.conj(self.dxz))
-        self.dyz = np.real(self.dyz * np.conj(self.dyz))
-        self.dx2y2 = np.real(self.dx2y2 * np.conj(self.dx2y2))
-        self.dz2r2 = np.real(self.dz2r2 * np.conj(self.dz2r2))
+    def __repr__(self):
+        return "Spherical('%s', '%s')" % (self.refname, self.calc_name)
 
     def plot(self):
         """
@@ -1074,17 +1020,19 @@ class Spherical:
         plt.ticklabel_format(style='sci', scilimits=(-3, 3))
 
 
-############## FUNCTIONS ########################
+"--------------------------------------------------------"
+"------------------------ FUNCTIONS ---------------------"
+"--------------------------------------------------------"
 
 
-def fdmnes_checker(activate=False):
+def fdmnes_checker(activate=False, fdmnes_filename='fdmnes_win64.exe', initial_dir=None):
     """Returns True if fdmnes available and activated"""
+
+    if activate:
+        find_fdmnes(fdmnes_filename=fdmnes_filename, reset=True, initial_dir=initial_dir)
 
     datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
     pointerfile = os.path.join(datadir, 'data', 'FDMNES_pointer.txt')
-
-    if activate:
-        find_fdmnes(reset=True)
 
     if os.path.isfile(pointerfile):
         with open(pointerfile) as file:
@@ -1095,26 +1043,7 @@ def fdmnes_checker(activate=False):
     return False
 
 
-def fdmnes_location():
-    """
-    Returns the current location of the FDMNES pointer, or None otherwise
-    :return: str
-    """
-
-    # Dans_Diffraction FDMNES pointer file
-    datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
-    pointerfile = os.path.join(datadir, 'data', 'FDMNES_pointer.txt')
-
-    if os.path.isfile(pointerfile):
-        with open(pointerfile) as file:
-            for location in file:
-                loc = location.strip()
-                if os.path.isfile(loc):
-                    return loc
-    return find_fdmnes()
-
-
-def find_fdmnes(fdmnes_filename='fdmnes_win64.exe', reset=False):
+def find_fdmnes(fdmnes_filename='fdmnes_win64.exe', reset=False, initial_dir=None):
     """
     Finds the path of the fdmnes_win64.exe file
      The name of the file is taken from the envrionment varialbe fdmnes_filename
@@ -1123,6 +1052,7 @@ def find_fdmnes(fdmnes_filename='fdmnes_win64.exe', reset=False):
      Subsequent runs will quickly load from this file
     :param fdmnes_filename: name of the executable to search for
     :param reset: if True, pointerfile will be ignored.
+    :param initial_dir: None or str, if directory, look here for file
     :return: str : location of fdmnes executable file
     """
 
@@ -1130,26 +1060,51 @@ def find_fdmnes(fdmnes_filename='fdmnes_win64.exe', reset=False):
     datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
     pointerfile = os.path.join(datadir, 'data', 'FDMNES_pointer.txt')
 
-    if os.path.isfile(pointerfile):
+    if not reset and os.path.isfile(pointerfile):
         with open(pointerfile) as file:
             for location in file:
                 loc = location.strip()
                 if os.path.isfile(loc):
                     return loc
 
+    if os.path.isfile(fdmnes_filename):
+        # Save location
+        with open(pointerfile, 'w') as file:
+            file.write(os.path.abspath(fdmnes_filename))
+        return os.path.abspath(fdmnes_filename)
+
+    initial_dir = os.path.abspath(os.sep) if initial_dir is None else initial_dir
+
     # Find FDMNES
     print('Hang on... just looking for %s...' % fdmnes_filename)
-    for dirName, subdirList, fileList in os.walk(os.path.abspath(os.sep)):
+    for dirName, subdirList, fileList in os.walk(initial_dir):
         if fdmnes_filename in fileList:
-            print('Found FDMNES at: %s'%dirName)
+            print('Found FDMNES at: %s' % dirName)
             location = os.path.join(dirName, fdmnes_filename)
             # Save location
-            file = open(pointerfile, 'w')
-            file.write(location)
-            file.close()
+            with open(pointerfile, 'w') as file:
+                file.write(location)
             return location
     print('%s not found, please enter location manually' % fdmnes_filename)
     return os.path.abspath(os.sep)
+
+
+def sim_folder(folder_name='', new_folder=False):
+    """
+    Generates a calculation path directory in the FDMNES/Sim directory
+      If new_folder is True and the directory already exists, a number will be appended to the name
+    :param folder_name: str folder name
+    :param new_folder: True/False*
+    :return: str directory E.G. 'c:\FDMNES\Sim\folder_name'
+    """
+    exe_path = find_fdmnes()
+    newpath = os.path.join(os.path.dirname(exe_path), 'Sim', folder_name)
+    if new_folder:
+        n = 0
+        while os.path.isdir(newpath):
+            n += 1
+            newpath = os.path.join(os.path.dirname(exe_path), 'Sim', folder_name + '_%d' % n)
+    return newpath
 
 
 def find_fdmnes_files(parent_directory=None, output_name='out'):
@@ -1162,7 +1117,7 @@ def find_fdmnes_files(parent_directory=None, output_name='out'):
     """
 
     if parent_directory is None:
-        parent_directory = fdmnes_location()
+        parent_directory = find_fdmnes()
 
     if '.txt' not in output_name:
         output_name = output_name + '_bav.txt'
@@ -1195,7 +1150,7 @@ def load_fdmnes_files(parent_directory=None, output_name='out'):
 def read_conv(filename='out_conv.txt', plot=False):
     """
     Reads fdmnes output file out_conv.txt, that gives the XANES spectra
-      energy,intensity = read_conv(filename)
+      energy, intensity = read_conv(filename)
     """
 
     filename = filename.replace('\\', '/')  # convert windows directories
@@ -1220,52 +1175,48 @@ def read_conv(filename='out_conv.txt', plot=False):
 def read_scan_conv(filename='out_scan_conv.txt'):
     """
     Read FDMNES _scan_conv.txt files, return simulated azimuthal and energy values
-    energy,angle,intensity = read_scan_conv(filename)
-        filename = directory and name of _scan_conv.txt file
-        energy = [nx1] array of energy values
-        angle = [mx1] array on angle values
-        intensity = {'I(100)ss'}[nxm] dict of arrays of simulated intensities for each reflection
-
+       energy, angle, intensity = read_scan_conv('out_scan_conv.txt')
     You can see all the available reflections with intensity.keys()
+    :param filename: str name of '*_scan_conv.txt' file from FDMNED calculation
+    :return energy: [nx1] array of energy values
+    :return angle: [mx1] array on angle values
+    :return intensity:  {'I(100)ss'}[nxm] dict of arrays of simulated intensities for each reflection
     """
 
     # Open file
-    file = open(filename)
+    with open(filename) as file:
+        # Determine reflections in file
+        filetext = file.read()  # generate string
+        reftext = re.findall(r'I\(-?\d+-?\d+?-?\d+?\)\w+', filetext)  # find reflection strings
 
-    # Determine reflections in file
-    filetext = file.read()  # generate string
-    reftext = re.findall(r'I\(-?\d+-?\d+?-?\d+?\)\w+', filetext)  # find reflection strings
+        refs = np.unique(reftext)  # remove duplicates
+        Npeak = len(refs)
+        Nenergy = len(reftext) // Npeak
+        Nangle = 180
 
-    refs = np.unique(reftext)  # remove duplicates
-    Npeak = len(refs)
-    Nenergy = len(reftext) // Npeak
-    Nangle = 180
+        file.seek(0)  # return to start of file
 
-    file.seek(0)  # return to start of file
+        # pre-define arrays
+        storevals = {}
+        for ref in refs:
+            storevals[ref] = np.zeros([Nenergy, Nangle])
 
-    # pre-define arrays
-    storevals = {}
-    for ref in refs:
-        storevals[ref] = np.zeros([Nenergy, Nangle])
+        storeeng = np.zeros(Nenergy)
+        storeang = np.zeros(Nangle)
 
-    storeeng = np.zeros(Nenergy)
-    storeang = np.zeros(Nangle)
+        # Read file, line by line
+        for E in range(Nenergy):
+            file.readline()  # blank line
+            storeeng[E] = float(file.readline().strip())  # energy
+            for P in range(Npeak):
+                peak = file.readline().strip()  # current reflection
+                # read angle,Intensity lines
+                vals = np.zeros([Nangle, 2])
+                for m in range(Nangle):
+                    vals[m, :] = [float(x) for x in file.readline().split()]
 
-    # Read file, line by line
-    for E in range(Nenergy):
-        file.readline()  # blank line
-        storeeng[E] = float(file.readline().strip())  # energy
-        for P in range(Npeak):
-            peak = file.readline().strip()  # current reflection
-            # read angle,Intensity lines
-            vals = np.zeros([Nangle, 2])
-            for m in range(Nangle):
-                vals[m, :] = [float(x) for x in file.readline().split()]
-
-            storeang = vals[:, 0]  # store angle values
-            storevals[peak][E, :] = vals[:, 1]  # store intensity values
-
-    file.close()
+                storeang = vals[:, 0]  # store angle values
+                storevals[peak][E, :] = vals[:, 1]  # store intensity values
     return storeeng, storeang, storevals
 
 
@@ -1338,7 +1289,7 @@ def potrmt(bav_text):
     idx = bav_text.rfind('ch_ion')  # last occurance of ch_ion
     if idx == -1:
         return {}
-    hline = bav_text[ bav_text[:idx].rfind('\n') : bav_text[idx:].find('\n') + idx ].strip()
+    hline = bav_text[bav_text[:idx].rfind('\n'): bav_text[idx:].find('\n') + idx].strip()
     head = re.split(r'\s\s+', hline.strip())
 
     lines = bav_text[idx:].split('\n')
@@ -1353,4 +1304,54 @@ def potrmt(bav_text):
     out = {}
     for n in range(len(head)):
         out[head[n]] = values[:, n]
+    return out
+
+
+def read_density(filename):
+    """Load Density of states file from FDMNES calculations '..._sd0.txt'"""
+
+    data = np.genfromtxt(filename, skip_header=0, names=True)
+
+    # Old field names + new field names from fdmnes version 2020+
+    key_names = {
+        's': ['n00', 's'],
+        's_total': ['n_l0', 'Ints'],
+        'px': ['n11_1', 'px'],
+        'py': ['n11', 'py'],
+        'pz': ['n10', 'pz'],
+        'p_total': ['n_l1', 'Intp'],
+        'dxy': ['n22_1', 'dxy'],
+        'dxz': ['n21_1', 'dxz'],
+        'dyz': ['n21', 'dyz'],
+        'dx2y2': ['n22', 'dx2y2'],
+        'dz2r2': ['n20', 'dz2'],
+        'd_total': ['n_l2', 'Intd'],
+    }
+
+    def get_data(key):
+        values = np.zeros(len(data))
+        for name in key_names[key]:
+            if name in data.dtype.names:
+                values = data[name]
+        return values
+    out = {
+        key: get_data(key) for key in key_names
+    }
+    out['energy'] = data['Energy']
+    return out
+
+
+def read_spherical(filename):
+    """Load contribution from spherical harmonics to resonant reflection, from e.g. out_sph_signal_rxs1.txt"""
+    keys = ['D00', 'D_xy', 'D_xz', 'D_yz', 'D_x2y2', 'D_z2']
+    data = np.genfromtxt(filename, skip_header=3, names=True)
+    l3 = '_L3' if 'D00_r_L3' in data.dtype.names else ''  # Only load L3 part if "L23" is used
+
+    def modulus(key):
+        value = data[key + '_r' + l3] + 1j * data[key + '_i' + l3]
+        return np.real(value * np.conj(value))
+    out = {
+        key: modulus(key) for key in keys
+    }
+    out['energy'] = data['Energy']
     return out

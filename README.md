@@ -1,7 +1,7 @@
 # Dans_Diffaction
 Reads crystallographic cif files, calculates crystal properties and simulates diffraction.
 
-**Version 3.0**
+**Version 3.1**
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8106031.svg)](https://doi.org/10.5281/zenodo.8106031)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/DanPorter/Dans_Diffraction/6be78ef800167276d61d3e73da3b74a8367dbbe7?urlpath=lab%2Ftree%2FDans_Diffraction.ipynb) 
@@ -237,7 +237,7 @@ control detector location shape and size and lattice orientation.
 
 
 ### FDMNES functionality
-FDMNES is a powerful tool for simulating resonant x-ray diffraction, created by [Y. Joly and O. Bunau.](http://neel.cnrs.fr/spip.php?rubrique1007&lang=en)
+FDMNES is a powerful tool for simulating resonant x-ray diffraction, created by [Y. Joly and O. Bunau.](https://fdmnes.neel.cnrs.fr/)
 
 The Dans_Diffraction FDMNES class allows for the automatic creation of input files and simple analysis of results.
 The following command should be used to activate these features (only needs to be issued once). 
@@ -270,11 +270,12 @@ Once activated, FDMNES GUI elements become available from the main window, emula
 | April 2021 | Thanks to Trygve Ræder for suggestions about x-ray scattering factors                   |
 | Feb 2022   | Thanks to Mirko for pointing out the error in two-theta values in Scatter.powder        |
 | March 2022 | Thanks to yevgenyr for suggesting new peak profiles in Scatter.powder                   |
-| Jan 2023  | Thanks to Anuradha Vibhakar for pointing out the error in f0 + if'-if'' |
+| Jan 2023   | Thanks to Anuradha Vibhakar for pointing out the error in f0 + if'-if'' |
 | Jan 2023   | Thanks to Andreas Rosnes for testing the installation in jupyterlab                     |
 | May 2023   | Thanks to Carmelo Prestipino for adding electron scattering factors                     |
 | June 2023  | Thanks to Sergio I. Rincon for pointing out the rounding error in Scatter.powder        |
-
+| July 2023  | Thanks to asteppke for suggested update to Arrow3D for matplotlib V>3.4|
+| July 2023  | Thanks to Yves Joly for helpful suggestions on FDMNES wrapper |
 
 Copyright
 -----------------------------------------------------------------------------

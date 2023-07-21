@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.8
-Last updated: 17/05/23
+Version 1.9
+Last updated: 20/07/23
 
 Version History:
 10/11/17 0.1    Program created
@@ -21,7 +21,7 @@ Version History:
 15/10/20 1.6    Added scattering lengths + factors
 26/01/21 1.7    Added calculation of xray attenuation, transmission and refractive index
 16/05/23 1.8    Fixed reflectivity calculation
-
+20/07/23 1.9    Added FDMNES indata writer
 
 @author: DGPorter
 """
@@ -32,7 +32,7 @@ from . import functions_general as fg
 from . import functions_crystallography as fc
 from .classes_orbitals import CrystalOrbitals
 
-__version__ = '1.8'
+__version__ = '1.9'
 
 
 class Properties:
@@ -141,6 +141,24 @@ class Properties:
                     out_eng += [energy]
         return out_str, out_eng
 
+    def resonant_element(self):
+        """
+        Returns the likely x-ray absorbing element in this material
+          Returns the first d or f block element,
+          otherwise returns the first element
+        """
+        elements = np.unique(self.xtl.Structure.type)
+        # use the first d or f block element
+        block = fc.atom_properties(elements, 'Block')
+        if 'd' in block:
+            absorber = elements[block == 'd'][0]
+        elif 'f' in block:
+            absorber = elements[block == 'f'][0]
+        else:
+            # otherwise use first element
+            absorber = elements[0]
+        return absorber
+
     def molfraction(self, Z=1):
         """
         Display the molecular weight of a compound and atomic fractions
@@ -153,7 +171,7 @@ class Properties:
 
         # Count elements
         ats = np.unique(atom_type)
-        weights = fc.atom_properties(ats,'Weight')
+        weights = fc.atom_properties(ats, 'Weight')
         atno = np.zeros(len(ats))
         for n,element in enumerate(ats):
             atno[n] = sum([occ[m] for m,x in enumerate(atom_type) if x == element])
@@ -185,7 +203,7 @@ class Properties:
         ats = fc.arrange_atom_order(ats)  # arrange this by alcali/TM/O
         atno = {}
         for a in ats:
-            atno[a] = sum([occ[n] for n,x in enumerate(atom_type) if x == a])
+            atno[a] = sum([occ[n] for n, x in enumerate(atom_type) if x == a])
 
         # default - set max Z atom to it's occupancy
         if element is None:
@@ -603,6 +621,158 @@ class Properties:
                 out += '    %2s : %7.4f keV\n' % (edge_str, edge_en)
         out += '\n'
         return out
+
+    def fdmnes_runfile(self, output_path=None, comment='', energy_range=None, radius=4.0, edge='K',
+                       absorber=None, green=True, scf=False, quadrupole=False, magnetism=False, spinorbit=False,
+                       azi_ref=(1, 0, 0), correct_azi=False, hkl_reflections=(1, 0, 0)):
+        """
+        Write FDMNES run file
+        :param output_path: Specify the output filename, e.g. 'Sim/Crystal/out'
+        :param comment: A comment written in the input file
+        :param energy_range: str energy range in eV relative to Fermi energy
+        :param radius: calculation radius
+        :param edge: absorptin edge, 'K', 'L3', 'L2', 'L23'
+        :param absorber: absorbing element, 'Co'
+        :param green: True/False, Green's function (muffin-tin potential)
+        :param scf: True/False, Self consistent solution
+        :param quadrupole: False/True, E1E2 terms allowed
+        :param magnetism: False/True, allow magnetic calculation
+        :param spinorbit: False/True, allow magnetic calculation with spin-orbit coupling
+        :param azi_ref: azimuthal reference, [1,0,0]
+        :param correct_azi: if True, correct azimuthal reference for real cell (use in hexagonal systems)
+        :param hkl_reflections: list of hkl reflections [[1,0,0],[0,1,0]]
+        :return: None
+        """
+
+        if output_path is None:
+            output_path = 'Sim/%s/out' % fg.saveable(self.xtl.name)
+
+        # Get crystal parameters
+        uvw, element, label, occupancy, uiso, mxmymz = self.xtl.Structure.get()
+        # Convert magnetic structure to euler angles
+        mag_r, mag_theta, mag_phi = fg.cart2sph(mxmymz, True).T
+
+        # Lattice parameters
+        a, b, c, alpha, beta, gamma = self.xtl.Cell.lp()
+
+        if absorber is None:
+            absorber = self.resonant_element()
+        absorber_idx = np.where(element == absorber)[0]
+        nonabsorber_idx = np.where(element != absorber)[0]
+
+        if correct_azi:
+            UV = self.xtl.Cell.UV()
+            UVs = self.xtl.Cell.UVstar()
+            # sl_ar = np.dot(np.dot(azi_ref, UVs), np.linalg.inv(UVs))  # Q*/UV*
+            fdm_ar = np.dot(np.dot(azi_ref, UVs), np.linalg.inv(UV))  # Q*/UV
+            fdm_ar = fdm_ar / np.sqrt(np.sum(fdm_ar ** 2))  # normalise length to 1
+        else:
+            fdm_ar = azi_ref
+
+        if energy_range is None:
+            energy_range = '-19. 1. -5 0.1 -2. 0.05 5 0.1 10. 0.5 25 1 31. '
+
+        if scf:
+            SCF = ''
+        else:
+            SCF = '!'
+
+        if quadrupole:
+            quadrupole = ''
+        else:
+            quadrupole = '!'
+
+        if green:
+            green = ''
+        else:
+            green = '!'
+
+        if magnetism:
+            mag = ' Magnetism                    ! performs magnetic calculations\n'
+            spin = True
+        elif spinorbit:
+            mag = ' Spinorbit                    ! performs magnetic calculations with spin orbit coupling\n'
+            spin = True
+        else:
+            mag = '! magnetism                    ! performs magnetic calculations\n'
+            spin = False
+
+        param_string = ''
+
+        # Write top matter
+        param_string += '! FDMNES indata file\n'
+        param_string += '! {}\n'.format(self.xtl.name)
+        param_string += '! {}\n'.format(comment)
+        param_string += '! indata file generated by crystal_diffraction.classes_properties\n'
+        param_string += '\n'
+
+        # Calculation Parameters
+        param_string += ' Filout\n'
+        param_string += '   {}\n\n'.format(output_path)
+        param_string += '  Range                       ! Energy range of calculation (eV). Energy of photoelectron relative to Fermi level.\n'
+        param_string += ' %s \n\n' % energy_range
+        param_string += ' Radius                       ! Radius of the cluster where final state calculation is performed\n'
+        param_string += '   {:3.1f}                        ! For a good calculation, this radius must be increased up to 6 or 7 Angstroems\n\n'.format(radius)
+        param_string += ' Edge                         ! Threshold type\n'
+        param_string += '  {}\n\n'.format(edge)
+        param_string += '%s SCF                          ! Self consistent solution\n' % SCF
+        param_string += '%s Green                        ! Muffin tin potential - faster\n' % green
+        param_string += '%s Quadrupole                   ! Allows quadrupolar E1E2 terms\n' % quadrupole
+        param_string += mag
+        param_string += ' Density                      ! Outputs the density of states as _sd1.txt\n'
+        param_string += ' Sphere_all                   ! Outputs the spherical tensors as _sph_.txt\n'
+        param_string += ' Cartesian                    ! Outputs the cartesian tensors as _car_.txt\n'
+        param_string += ' energpho                     ! output the energies in real terms\n'
+        param_string += ' Convolution                  ! Performs the convolution\n\n'
+
+        # Azimuthal reference
+        param_string += ' Zero_azim                    ! Define basis vector for zero psi angle\n'
+        param_string += '  {:6.3g} {:6.3g} {:6.3g}        '.format(fdm_ar[0], fdm_ar[1], fdm_ar[2])
+        if correct_azi:
+            param_string += '! Same as I16, Reciprocal ({} {} {}) in units of real SL. \n'.format(azi_ref[0], azi_ref[1], azi_ref[2])
+        else:
+            param_string += '\n'
+
+        # Reflections
+        hkl_reflections = np.reshape(hkl_reflections, [-1, 3])
+        param_string += 'rxs                           ! Resonant x-ray scattering at various peaks, peak given by: h k l sigma pi azimuth.\n'
+        for hkl in hkl_reflections:
+            param_string += ' {} {} {}    1 1                 ! ({} {} {}) sigma-sigma\n'.format(hkl[0], hkl[1], hkl[2],
+                                                                                                 hkl[0], hkl[1], hkl[2])
+            param_string += ' {} {} {}    1 2                 ! ({} {} {}) sigma-pi\n'.format(hkl[0], hkl[1], hkl[2],
+                                                                                              hkl[0], hkl[1], hkl[2])
+        param_string += ' \n'
+
+        # Atom electronic configuration
+        orbitals = self.xtl.Properties.orbitals()
+        param_string += ' Atom ! s=0,p=1,d=2,f=3, must be neutral, get d states right by moving e to 2s and 2p sites\n'
+        orb_str, ele_list = orbitals.generate_string_fdmnes_absorber(absorber, spin)
+        param_string += orb_str
+        param_string += ' \n\n'
+
+        # Atom positions
+        param_string += ' Crystal                      ! Periodic material description (unit cell)\n'
+        param_string += ' {:9.5f} {:9.5f} {:9.5f} {:9.5f} {:9.5f} {:9.5f}\n'.format(a, b, c, alpha, beta, gamma)
+        param_string += '! Coordinates - 1st atom is the absorber\n'
+        # Write atomic coordinates
+        fmt = '{0:2.0f} {1:20.15f} {2:20.15f} {3:20.15f} ! {4:-3.0f} {5:2s}\n'
+        fmag = ' {:3.2f} {:3.2f}  ! moment ({},{},{})\n'
+        for n in absorber_idx:
+            if spin and mag_r[n] > 0:
+                # Add magnetic moment axis in Eulerian angles phi(z), theta(y)
+                param_string += fmag.format(mag_phi[n], mag_theta[n], mxmymz[n, 0], mxmymz[n, 1], mxmymz[n, 2])
+            ele_index = ele_list.index(element[n])
+            param_string += fmt.format(ele_index + 1, uvw[n, 0], uvw[n, 1], uvw[n, 2], n, element[n])
+        for n in nonabsorber_idx:
+            if spin and mag_r[n] > 0:
+                param_string += fmag.format(mag_phi[n], mag_theta[n], mxmymz[n, 0], mxmymz[n, 1], mxmymz[n, 2])
+            ele_index = ele_list.index(element[n])
+            param_string += fmt.format(ele_index + 1, uvw[n, 0], uvw[n, 1], uvw[n, 2], n, element[n])
+        param_string += '\n'
+
+        # Write end matter
+        param_string += ' End\n'
+        return param_string
 
     def info(self):
         """Prints various properties of the crystal"""

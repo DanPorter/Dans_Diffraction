@@ -6,21 +6,12 @@ import sys, os
 import matplotlib.pyplot as plt  # Plotting
 import numpy as np
 
-
-if sys.version_info[0] < 3:
-    import Tkinter as tk
-    import tkFileDialog as filedialog
-    import tkMessageBox as messagebox
-else:
-    import tkinter as tk
-    from tkinter import filedialog
-    from tkinter import messagebox
-
 # Internal functions
 from ..classes_crystal import Crystal
 from ..classes_structures import Structures
 from ..classes_fdmnes import fdmnes_checker
 from .. import functions_crystallography as fc
+from .basic_widgets import tk, filedialog, messagebox
 from .basic_widgets import StringViewer, SelectionBox, popup_help, popup_about, topmenu, menu_github, menu_docs
 from .basic_widgets import (TF, BF, SF, HF, TTF,
                             bkg, ety, btn, opt, btn_active, opt_active, txtcol,
@@ -64,6 +55,7 @@ class CrystalGui:
         menu = {
             'File': {
                 'New Window': self.menu_new,
+                'Copy filename to clipboard': self.menu_file_clipboard,
                 'Exit': self.on_closing,
             },
             'Crystal Info': {
@@ -71,9 +63,11 @@ class CrystalGui:
                 'Symmetric Atom Sites': self.menu_info_atoms,
                 'Symmetry': self.menu_info_symmetry,
                 'All Atom Sites': self.menu_info_structure,
+                'Reflection list': self.menu_ref_list,
                 'Properties': self.menu_info_properties,
                 'Show CIF': self.menu_info_cif,
                 'Latex table': self.menu_latex,
+                'FDMNES indata': self.menu_fdmnes_indata,
             },
             'Databases': {
                 'Element Info': self.menu_info_elements,
@@ -185,10 +179,9 @@ class CrystalGui:
         #var = tk.Button(f_but, text='Tensor\nScattering', bg=btn, activebackground=btn_active, font=BF,
         #                command=self.fun_tensor_scattering)
         #var.pack(side=tk.LEFT)
-        if fdmnes_checker():
-            var = tk.Button(f_but, text='Run\nFDMNES', bg=btn, activebackground=btn_active, font=BF,
-                            command=self.fun_fdmnes)
-            var.pack(side=tk.LEFT)
+        var = tk.Button(f_but, text='FDMNES', bg=btn, activebackground=btn_active, font=BF, height=2,
+                        command=self.fun_fdmnes)
+        var.pack(side=tk.LEFT)
 
         # start mainloop
         # In interactive mode, this freezes the terminal
@@ -203,6 +196,11 @@ class CrystalGui:
     def menu_new(self):
         """Create a new instance"""
         CrystalGui()
+
+    def menu_file_clipboard(self):
+        """Add filename to clipboard"""
+        self.root.clipboard_clear()
+        self.root.clipboard_append(self.xtl.filename)
 
     def menu_info_crystal(self):
         """Crystal info"""
@@ -223,6 +221,12 @@ class CrystalGui:
         """Symmetry info"""
         string = '%s\n%s' % (self.xtl.name, self.xtl.Symmetry.info())
         StringViewer(string, self.xtl.name, width=60)
+
+    def menu_ref_list(self):
+        """Reflection list"""
+        from .scattering import ReflectionSelectionBox
+        out = ReflectionSelectionBox(self.xtl, self.root).show()
+        print(out)
 
     def menu_info_properties(self):
         """Properties info"""
@@ -328,15 +332,25 @@ class CrystalGui:
                 message='No .cif file associated with this crystal'
             )
 
+    def menu_fdmnes_indata(self):
+        """Display FDMNES indata file"""
+        if self.xtl.Structure.ismagnetic():
+            fdm = self.xtl.Properties.fdmnes_runfile(magnetism=True)
+        else:
+            fdm = self.xtl.Properties.fdmnes_runfile()
+        StringViewer(fdm, self.xtl.name, width=120)
+
     def menu_start_fdmnes(self):
         """Search for FDMNES, restart GUI"""
-        from Dans_Diffraction import activate_fdmnes, fdmnes_checker, start_gui
-        activate_fdmnes()
-        if fdmnes_checker():
-            self.on_closing()
-            start_gui(self.xtl)
-        else:
-            messagebox.showinfo('FDMNES Checker', 'FDMNES could not be found')
+        from Dans_Diffraction import activate_fdmnes
+        filename = filedialog.askopenfilename(
+            parent=self.root,
+            title='Select FDMNES Executable',
+            filetypes=[('EXE File', '*.exe'), ('All Files', '*.*')],
+            initialfile='fdmnes_win64.exe',
+        )
+        if filename:
+            activate_fdmnes(fdmnes_filename=filename)
 
     def menu_analyse_fdmnes(self):
         """Open FDMNS analysis GUI"""

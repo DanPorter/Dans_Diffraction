@@ -398,6 +398,21 @@ def unique_vector(vecarray, tol=0.05):
     return newarray, uniqueidx, matchidx
 
 
+def vectorinvector(vecarray1, vecarray2, tol=0.05):
+    """
+    Return True if vecarray1 is replicated in vecarray2
+    :param vecarray1: [1xn] list or array
+    :param vecarray2: [mxn] list or array
+    :param tol: float
+    :return: Bool
+    """
+    vecarray1 = np.asarray(vecarray1)
+    vecarray2 = np.asarray(vecarray2)
+    if len(vecarray2) == 0: return False
+    diff = mag(vecarray1 - vecarray2)
+    return True if np.any(diff < tol) else False
+
+
 def distance2line(line_start, line_end, point):
     """
     Calculate distance from a line between the start and end to an arbitary point in space

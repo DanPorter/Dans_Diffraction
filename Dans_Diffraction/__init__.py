@@ -31,7 +31,7 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.0.1
+Version 3.1.0
 Last updated: 11/07/23
 
 Version History:
@@ -69,6 +69,7 @@ Version History:
 08/05/23 2.3.0  Merged pull request for non-integer hkl option on SF and electron form factors. Thanks Prestipino!
 25/06/23 3.0.0  Added new GUI elements including new Scattering UI and diffractomter simulator, plus other updates
 11/07/23 3.0.1  Some fixes for plotting and additions to diffractometer orientation. Thanks asteppke!
+20/07/23 3.1.0  Refactored FDMNES wrapper with new methods and new defaults. Thanks YvesJoly!
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -85,6 +86,7 @@ Acknoledgements:
     May 2023    Thanks to Carmelo Prestipino for adding electron scattering factors
     June 2023   Thanks to Sergio I. Rincon for pointing out the rounding error in Scatter.powder
     July 2023   Thanks to asteppke for suggested update to Arrow3D for matplotlib V>3.4
+    July 2023   Thanks to Yves Joly for helpful suggestions on FDMNES wrapper
 
 -----------------------------------------------------------------------------
    Copyright 2023 Diamond Light Source Ltd.
@@ -130,16 +132,12 @@ from . import functions_crystallography as fc
 from .classes_crystal import Crystal
 from .classes_multicrystal import MultiCrystal
 from .classes_structures import Structures
+from .classes_fdmnes import fdmnes_checker, Fdmnes, FdmnesAnalysis
 from .functions_crystallography import readcif
 
-# FDMNES
-from .classes_fdmnes import fdmnes_checker
-if fdmnes_checker():
-    from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
-
-__version__ = '3.0.1'
-__date__ = '11/07/23'
+__version__ = '3.1.0'
+__date__ = '20/07/23'
 
 
 # Build
@@ -189,8 +187,11 @@ def start_gui(xtl=None):
 
 
 # FDMNES Activation
-def activate_fdmnes():
-    """To activate FDMNES functionality"""
-    fdmnes_checker(activate=True)
-    if fdmnes_checker():
-        from .classes_fdmnes import Fdmnes, FdmnesAnalysis
+def activate_fdmnes(initial_dir=None, fdmnes_filename='fdmnes_win64.exe'):
+    """
+    Call to activate FDMNES functionality
+    :param fdmnes_filename: name of the executable to search for
+    :param initial_dir: None or str, if directory, look here for file
+    :return: None
+    """
+    fdmnes_checker(activate=True, fdmnes_filename=fdmnes_filename, initial_dir=initial_dir)

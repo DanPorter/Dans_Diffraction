@@ -931,7 +931,7 @@ def plot_xray_reflectivity(chemical_formula, density=8.9, energy_range=None, gra
     :param density: float, density in g/cm^3
     :param energy_range: float or array, x-ray energy in keV
     :param grazing_angle: float, incidence angle relative to the surface, in degrees
-    :return: float or array
+    :return: None
     """
     if energy_range is None:
         energy_range = np.arange(0.03, 20, 0.01)
@@ -940,7 +940,7 @@ def plot_xray_reflectivity(chemical_formula, density=8.9, energy_range=None, gra
     ttl = '%s Density=%5.3f, Angle=%3.3g deg' % (chemical_formula, density, grazing_angle)
 
     newplot(energy_range, reflectivity)
-    labels(ttl, 'Energy [keV]', 'Atten Length [μm]')
+    labels(ttl, 'Energy [keV]', 'Reflectivity')
 
 
 def plot_xray_refractive_index(chemical_formula, density=8.9, energy_range=None):

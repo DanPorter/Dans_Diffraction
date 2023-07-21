@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_plotting</strong></big></big> (version 2.1)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_plotting</strong></big></big> (version 2.2)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdgpor%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_plotting.py">c:\users\dgpor\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_plotting.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_plotting.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_plotting.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;Handy&nbsp;plotting&nbsp;functions&nbsp;"functions_plotting.py"<br>
 &nbsp;<br>
 Contains&nbsp;various&nbsp;plotting&nbsp;shortcuts&nbsp;using&nbsp;matplotlib.pyplot<br>
@@ -25,8 +25,8 @@ Usage:&nbsp;<br>
 All&nbsp;plots&nbsp;generated&nbsp;require&nbsp;plt.show()&nbsp;call,&nbsp;unless&nbsp;using&nbsp;interactive&nbsp;mode<br>
 &nbsp;<br>
 &nbsp;<br>
-Version&nbsp;2.1<br>
-Last&nbsp;updated:&nbsp;10/08/22<br>
+Version&nbsp;2.2<br>
+Last&nbsp;updated:&nbsp;09/07/23<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 06/01/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created&nbsp;from&nbsp;DansGeneralProgs.py&nbsp;V2.3<br>
@@ -42,6 +42,7 @@ Version&nbsp;History:<br>
 15/02/21&nbsp;1.9.1&nbsp;&nbsp;Update&nbsp;to&nbsp;vecplot&nbsp;for&nbsp;plotting&nbsp;on&nbsp;axis<br>
 27/09/21&nbsp;2.0&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;plot3darray,&nbsp;plot_diffractometer_reciprocal_space<br>
 10/08/22&nbsp;2.1&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;plot_lattice_points3D,&nbsp;set_plot_defaults,&nbsp;changed&nbsp;default&nbsp;fig&nbsp;size<br>
+09/07/23&nbsp;2.2&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;asteppke&nbsp;for&nbsp;suggested&nbsp;update&nbsp;to&nbsp;<a href="#Arrow3D">Arrow3D</a>&nbsp;for&nbsp;matplotlib&nbsp;V&gt;3.4<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -229,6 +230,8 @@ Valid&nbsp;kwargs&nbsp;are:<br>
 &nbsp;&nbsp;url:&nbsp;str<br>
 &nbsp;&nbsp;visible:&nbsp;bool<br>
 &nbsp;&nbsp;zorder:&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-do_3d_projection"><strong>do_3d_projection</strong></a>(self, renderer=None)</dt><dd><tt>#&nbsp;Fix&nbsp;for&nbsp;change&nbsp;in&nbsp;matplotlib&nbsp;3.5.0&nbsp;(https://github.com/matplotlib/matplotlib/issues/21688)</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-draw"><strong>draw</strong></a>(self, renderer)</dt><dd><tt>Draw&nbsp;the&nbsp;:class:`Patch`&nbsp;to&nbsp;the&nbsp;given&nbsp;*renderer*.</tt></dd></dl>
 
@@ -1189,7 +1192,7 @@ From:&nbsp;https://xdb.lbl.gov/Section4/Sec_4-2.html<br>
 :param&nbsp;density:&nbsp;float,&nbsp;density&nbsp;in&nbsp;g/cm^3<br>
 :param&nbsp;energy_range:&nbsp;float&nbsp;or&nbsp;array,&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
 :param&nbsp;grazing_angle:&nbsp;float,&nbsp;incidence&nbsp;angle&nbsp;relative&nbsp;to&nbsp;the&nbsp;surface,&nbsp;in&nbsp;degrees<br>
-:return:&nbsp;float&nbsp;or&nbsp;array</tt></dd></dl>
+:return:&nbsp;None</tt></dd></dl>
  <dl><dt><a name="-plot_xray_refractive_index"><strong>plot_xray_refractive_index</strong></a>(chemical_formula, density=8.9, energy_range=None)</dt><dd><tt>Plot&nbsp;the&nbsp;Complex&nbsp;Index&nbsp;of&nbsp;Refraction&nbsp;of&nbsp;a&nbsp;compound<br>
 &nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;=&nbsp;1&nbsp;-&nbsp;(1/2pi)N*r0*lambda^2*(f1+if2)&nbsp;=&nbsp;1&nbsp;-&nbsp;Delta&nbsp;-&nbsp;iBeta<br>
 Equivalent&nbsp;to:&nbsp;https://henke.lbl.gov/optical_constants/getdb2.html<br>
