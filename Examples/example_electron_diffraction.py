@@ -63,6 +63,7 @@ plt.figure()
 plt.pcolormesh(xx, yy, mesh, vmin=0, vmax=.001, shading='auto')
 plt.xlabel('x-axis [mm]')
 plt.ylabel('z-axis [mm]')
+plt.title('LEED Image %.0f eV' % energy_ev)
 plt.axis('image')
 # reflection labels
 for n in range(len(reflist['hkl'])):

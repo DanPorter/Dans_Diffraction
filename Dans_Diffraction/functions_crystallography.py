@@ -2055,8 +2055,9 @@ def wavevector_difference(Q, ki):
     :param ki: [x,y,z] incident wavevector, in A-1
     :return: [nx1] array of difference, in A-1
     """
-    Q = np.reshape(Q, [-1, 3])
-    return np.array([np.dot(q, q) + 2 * np.dot(q, ki) for q in Q])
+    return np.abs(fg.mag(Q + ki) - fg.mag(ki))
+    # Q = np.reshape(Q, [-1, 3])
+    # return np.array([np.dot(q, q) + 2 * np.dot(q, ki) for q in Q])
 
 
 def latparvolume(a, b=None, c=None, alpha=90., beta=90., gamma=90.):
@@ -3210,7 +3211,8 @@ def resolution2energy(res, twotheta=180.):
 def wave2energy(wavelength):
     """
     Converts wavelength in A to energy in keV
-     Energy = wave2energy(wavelength)
+     energy_kev = wave2energy(wavelength_a)
+     Energy [keV] = h*c/L = 12.3984 / lambda [A]
     """
 
     # SI: E = hc/lambda
@@ -3225,7 +3227,8 @@ def wave2energy(wavelength):
 def energy2wave(energy_kev):
     """
     Converts energy in keV to wavelength in A
-     wavelength = energy2wave(energy)
+     wavelength_a = energy2wave(energy_kev)
+     lambda [A] = h*c/E = 12.3984 / E [keV]
     """
 
     # Electron Volts:
@@ -3341,6 +3344,23 @@ def scherrer_fwhm(size, twotheta, wavelength_a=None, energy_kev=None, shape_fact
         wavelength_a = energy2wave(energy_kev)
     costheta = np.cos(np.deg2rad(twotheta / 2.))
     return np.rad2deg(shape_factor * wavelength_a / (size * costheta))
+
+
+def peakwidth_deg(domain_size_a, twotheta, wavelength_a=None, energy_kev=None, instrument_resolution=0):
+    """
+    Return the peak width in degrees for a given two-theta based on the
+    crystallite domain size and instrument resolution.
+      Equivalent to the Scherrer equation with shape factor 1.0
+    :param domain_size_a: crystallite domain size in Anstroms
+    :param twotheta: scattering angle in degrees
+    :param wavelength_a: incident beam wavelength, in Angstroms
+    :param energy_kev: or, incident beam energy, in keV
+    :param instrument_resolution: instrument resolution in inverse Anstroms
+    :return:
+    """
+    peak_width = np.sqrt(dspace2q(domain_size_a)**2 + instrument_resolution**2)
+    q = calqmag(twotheta, energy_kev, wavelength_a)
+    return cal2theta(q + peak_width, energy_kev, wavelength_a) - twotheta
 
 
 def biso2uiso(biso):
@@ -3723,4 +3743,269 @@ def scale_intensity(intensity, wavevector_diff, resolution=0.5):
     :return:
     """
     return intensity * np.exp(-np.log(2) * (wavevector_diff / (0.5 * resolution)) ** 2)
+
+
+def wavevector_resolution(energy_range_ev=200, wavelength_range_a=None, domain_size_a=1000):
+    """
+    Calculate the combined wavevector resolutuion in inverse Angstroms
+    Combines instrument incident beam resolution and the mosaic of the crystal
+    :param energy_range_ev: Incident x-ray beam resolution in eV
+    :param wavelength_range_a: Incident beam resolution in Angstroms
+    :param domain_size_a: crysallite size in Angstroms (provides mosic using Scherrer equation)
+    :return: float, resolutuion in inverse Angstroms
+    """
+    if wavelength_range_a is None:
+        beam_resolution = wavevector(energy_kev=energy_range_ev / 1000)
+    else:
+        beam_resolution = dspace2q(wavelength_range_a)
+    sample_resolution = dspace2q(domain_size_a)
+    return np.sqrt(sample_resolution**2 + beam_resolution**2)
+
+
+def reciprocal_volume(twotheta, twotheta_min=0, energy_kev=None, wavelength_a=1.5):
+    """
+    Calculate the volume of reciprocal space covered between two scattering angles
+    :param twotheta: larger scattering angle (Bragg angle, 2theta)
+    :param twotheta_min: smaller scattering angle
+    :param energy_kev: photon energy, in keV
+    :param wavelength_a: wavelength in Angstroms
+    :return: float, volume, in Angstroms^-3
+    """
+    q1 = calqmag(twotheta_min, energy_kev, wavelength_a)
+    q2 = calqmag(twotheta, energy_kev, wavelength_a)
+    vol1 = 4 * fg.pi * q1 ** 3 / 3
+    vol2 = 4 * fg.pi * q2 ** 3 / 3
+    return vol2 - vol1
+
+
+def detector_angle_size(detector_distance_mm=565, height_mm=67, width_mm=34, pixel_size_um=172):
+    """
+    Return the angular spread of the detector
+      delta_width, gamma_width, pixel_width = detector_angle_size(distance, height, widht, pixel)
+    :param detector_distance_mm: Detector distance from sample in mm
+    :param height_mm: Detector size in the vertical direction, in mm
+    :param width_mm: Detector size in the horizontal direction, in mm
+    :param pixel_size_um: Pixel size in microns
+    :return x_angle: total angular spread in the diffractometer x-axis, in degrees
+    :return z_angle: total angular spread in the diffractometer z-axis, in degrees
+    :return pixel_angle: angular spread per pixel, in degrees
+    """
+    gam_width = 2 * np.rad2deg(np.arctan2(width_mm / 2, detector_distance_mm))
+    del_height = 2 * np.rad2deg(np.arctan2(height_mm / 2, detector_distance_mm))
+    pix_width = 2 * np.rad2deg(np.arctan2(pixel_size_um / 2, 1000 * detector_distance_mm))
+    return gam_width, del_height, pix_width
+
+
+def detector_coverage(wavelength_a=1.5, resolution=0.1, delta=0, gamma=0,
+                      detector_distance_mm=565, height_mm=67, width_mm=34):
+    """
+    Determine volume of reciprocal space covered by the detector based on angular spread
+    :param wavelength_a: Incicent beam wavelength, in Angstroms
+    :param resolution: Incident beam resolution, in inverse-Angstroms
+    :param delta: float or array, detector vertical rotation
+    :param gamma: float or array, detector horizontal rotation
+    :param detector_distance_mm: Detector distance from sample in mm
+    :param height_mm: Detector size in the vertical direction, in mm
+    :param width_mm: Detector size in the horizontal direction, in mm
+    :return: volume in inverse-Angstroms
+    """
+    gam_width = np.rad2deg(np.arctan2(width_mm / 2, detector_distance_mm))
+    del_height = np.rad2deg(np.arctan2(height_mm / 2, detector_distance_mm))
+    gam_wid_a = 2 * dspace2q(scherrer_size(gam_width, gamma, wavelength_a=wavelength_a, shape_factor=1.0))
+    del_wid_a = 2 * dspace2q(scherrer_size(del_height, delta, wavelength_a=wavelength_a, shape_factor=1.0))
+    det_wid = 2 * resolution
+    return gam_wid_a * del_wid_a * det_wid
+
+
+def detector_volume(wavelength_a=1.5, resolution=0.1,
+                    phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0,
+                    detector_distance_mm=565, height_mm=67, width_mm=34, lab=np.eye(3)):
+    """
+    Determine volume of reciprocal space covered by the detector, return list of voxels covered by detector
+      total_volume, hkl = detector_volume(1.5, 0.1, chi=90, eta=30, delta=60)
+    The returned list of coordinates (hkl) is defined in the sample frame, where each coordinate specifies a voxel
+    in reciprocal space with size resolution(inverse-Anstroms) ** 3
+    As such, the total volume of reciprocal space measured is:
+        total_volume = len(hkl) * fc.wavevector(energy_kev=energy_range_ev / 1000.) ** 3
+
+    :param wavelength_a: Incicent beam wavelength, in Angstroms
+    :param resolution: Incident beam resolution, in inverse-Angstroms (determines segmentation of calculation)
+    :param phi: float, phi-axis rotation about sample-z axis
+    :param chi: float, chi-axis rotation about sample-y' axis
+    :param eta: float, eta-axis rotation about sample-z'' axis
+    :param mu: float, mu-axis rotation about sample-x''' axis
+    :param delta: float, detector rotation vertical rotation
+    :param gamma: float, detector rotation horizontal rotation
+    :param detector_distance_mm: Detector distance from sample in mm
+    :param height_mm: Detector size in the vertical direction, in mm
+    :param width_mm: Detector size in the horizontal direction, in mm
+    :param lab: [3x3] Transformation matrix to change the lab coordinate system
+    :return total_volume: float, total volume of reciprocal space in inverse Angstroms
+    :return hkl: [nx3] array of voxels covered by detector, integer coordinates in the sample frame
+    """
+    # Rotate detector
+    D = rotmatrixz(-delta)  # left handed
+    G = rotmatrixx(gamma)
+    Rdet = np.dot(G, D)
+    position_mm = detector_distance_mm * labvector([0, 1., 0], R=Rdet, LAB=lab)
+    normal_dir = labvector([0, -1, 0], R=Rdet, LAB=lab)
+    x_axis = width_mm * fg.norm(np.cross(normal_dir, (0, 0, 1.)))
+    z_axis = height_mm * fg.norm(np.cross(x_axis, normal_dir))
+    corners = np.array([
+        position_mm + x_axis / 2 + z_axis / 2,
+        position_mm + x_axis / 2 - z_axis / 2,
+        position_mm - x_axis / 2 - z_axis / 2,
+        position_mm - x_axis / 2 + z_axis / 2,
+    ])
+
+    # Create a reciprocal lattice with basis size = resolution
+    ub = resolution * np.eye(3)
+    k = wavevector(wavelength=wavelength_a)
+    ki = k * labvector([0, 1, 0], LAB=lab)  # incident beam
+
+    # Determine the lattice position at each of the detector corners to determine a rough lattice
+    gam_width = np.rad2deg(np.arctan2(width_mm / 2, detector_distance_mm))
+    del_height = np.rad2deg(np.arctan2(height_mm / 2, detector_distance_mm))
+    hkl_corners = np.array([
+        diff6circle2hkl(ub, phi, chi, eta, mu, delta=delta + del_height, gamma=gamma + gam_width,
+                        wavelength=wavelength_a, lab=lab),
+        diff6circle2hkl(ub, phi, chi, eta, mu, delta=delta - del_height, gamma=gamma + gam_width,
+                        wavelength=wavelength_a, lab=lab),
+        diff6circle2hkl(ub, phi, chi, eta, mu, delta=delta - del_height, gamma=gamma - gam_width,
+                        wavelength=wavelength_a, lab=lab),
+        diff6circle2hkl(ub, phi, chi, eta, mu, delta=delta + del_height, gamma=gamma - gam_width,
+                        wavelength=wavelength_a, lab=lab),
+    ])
+    h_range = range(int(min(hkl_corners[:, 0])) - 2, int(max(hkl_corners[:, 0])) + 2)
+    k_range = range(int(min(hkl_corners[:, 1])) - 2, int(max(hkl_corners[:, 1])) + 2)
+    l_range = range(int(min(hkl_corners[:, 2])) - 2, int(max(hkl_corners[:, 2])) + 2)
+    HH, KK, LL = np.meshgrid(h_range, k_range, l_range)
+    hkl = np.asarray([HH.ravel(), KK.ravel(), LL.ravel()]).T
+
+    # Rotate lattice
+    R = diffractometer_rotation(phi=phi, chi=chi, eta=eta, mu=mu)
+    q = labvector(resolution * hkl, R=R, LAB=lab)
+
+    # Find lattice points incident on detector
+    kf = q + ki
+    directions = fg.norm(kf)
+    # Check magnitude of kf matches ki
+    scatters = np.flatnonzero(np.abs(fg.mag(kf) - k) < resolution)
+    # check which lattice directions are in the quadrent of detector
+    corner_angle = min(np.dot(fg.norm(corners), fg.norm(position_mm)))
+    vec_angles = np.dot(directions[scatters], fg.norm(position_mm))
+    # Check with lattice point directions intercept the detector plane
+    # Only loop over lattice points with correct magnitude and in the right direction
+    check = vec_angles > corner_angle
+    iuvw = np.nan * np.zeros([len(hkl), 3])
+    for n in scatters[check]:
+        ixyz = fg.plane_intersection((0, 0, 0), directions[n], position_mm, normal_dir)
+        # incident positions on detector
+        iuvw[n] = fg.index_coordinates(np.subtract(ixyz, position_mm), [x_axis, z_axis, normal_dir])
+    iuvw[np.any(abs(iuvw) > 0.5, axis=1)] = [np.nan, np.nan, np.nan]
+
+    # Remove non-incident reflections
+    idx = ~np.isnan(iuvw[:, 0])  # iuvw same size as Q
+    tot_space = np.sum(idx)
+    tot_recspace = tot_space * resolution ** 3  # A-3
+    # print(f"Measured Reciprocal space: {tot_space:.0f} voxels, {tot_recspace: .4g} A-3")
+    return tot_recspace, hkl[idx, :]
+
+
+def detector_volume_scan(wavelength_a=1.5, resolution=0.1,
+                         phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0,
+                         detector_distance_mm=565, height_mm=67, width_mm=34, lab=np.eye(3)):
+    """
+    Return total reciprocal space volume covered by scanning an axis with a detector
+      total, hkl, overlaps = detector_volume_scan(1.5, 0.1, phi=np.arange(-180,180))
+    Rotation axes can be specified as either floats or arrays, where all arrays must have the same length.
+
+    :param wavelength_a: Incicent beam wavelength, in Angstroms
+    :param resolution: Incident beam resolution, in inverse-Angstroms (determines segmentation of calculation)
+    :param phi: float or array, phi-axis about sample-z axis
+    :param chi: float or array, chi-axis about sample-y' axis
+    :param eta: float or array, eta-axis about sample-z'' axis
+    :param mu: float or array, mu-axis about sample-x''' axis
+    :param delta: float or array, detector vertical rotation
+    :param gamma: float or array, detector horizontal rotation
+    :param detector_distance_mm: Detector distance from sample in mm
+    :param height_mm: Detector size in the vertical direction, in mm
+    :param width_mm: Detector size in the horizontal direction, in mm
+    :param lab: [3x3] Transformation matrix to change the lab coordinate system
+    :return total: float, total volume covered, in cubic inverse Angstroms
+    :return hkl: [nx3] array of voxels covered by detector, integer coordinates in the sample frame
+    :return overlaps: [n] array of the number of times each voxel has been repeatedly measured (0 = only measurred once)
+    """
+    # pad the scan axes
+    scan_angles = [phi, chi, eta, mu, delta, gamma]
+    axes = np.zeros([min([np.size(s) for s in scan_angles if np.size(s) > 1]), len(scan_angles)])
+    for n in range(len(scan_angles)):
+        axes[:, n] = scan_angles[n]
+    # loop over the scan
+    hkl_list = np.empty([0, 3], dtype=int)
+    for phi, chi, eta, mu, delta, gamma in axes:
+        vol, hkl = detector_volume(wavelength_a, resolution, phi, chi, eta, mu, delta, gamma,
+                                   detector_distance_mm, height_mm, width_mm, lab)
+        hkl_list = np.vstack([hkl_list, hkl])
+    # Find the overlapping points
+    hkl, counts = np.unique(hkl_list, return_counts=True, axis=0)
+    overlaps = counts - 1
+    total = len(hkl) * resolution ** 3
+    return total, hkl, overlaps
+
+
+def diffractometer_step(wavelength_a=1.5, resolution=0.1,
+                        phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0, lab=np.eye(3)):
+    """
+    Determine the euler angle steps required to scan through reciprocal space at the required resolutuion
+        phi_step, chi_step, eta_step, mu_step = diffractometer_step(1.5, 0.1, chi=90, eta=20, delta=40)
+    The returned step size will provide a rotation that moves the wavevector transfer by approximately the resolutuion.
+    Any steps returning 0 are unsensitive to the rotation in this position
+    :param wavelength_a: Incicent beam wavelength, in Angstroms
+    :param resolution: float, combined resolution required, in inverse Angstroms
+    :param phi: float, phi-axis about sample-z axis
+    :param chi: float, chi-axis about sample-y' axis
+    :param eta: float, eta-axis about sample-z'' axis
+    :param mu: float, mu-axis about sample-x''' axis
+    :param delta: float, detector vertical rotation
+    :param gamma: float, detector horizontal rotation
+    :param lab: [3x3] Transformation matrix to change the lab coordinate system
+    :returns: phi_step, chi_step, eta_step, mu_step
+    """
+    ub = resolution * np.eye(3)
+    # Determine current location of diffractometer in orthogonal basis coordinates
+    hkl = diff6circle2hkl(ub, phi=phi, chi=chi, eta=eta, mu=mu, delta=delta, gamma=gamma,
+                          wavelength=wavelength_a, lab=lab)
+    # Convert hkl back to wavevector units
+    q0 = np.dot(ub, hkl)
+    q = labvector(q0, R=diffractometer_rotation(phi=phi, chi=chi, eta=eta, mu=mu), LAB=lab)
+    # Add the resolution in various directions and determine the max angular difference
+    q2 = q + [
+        [resolution, 0, 0],
+        [0, resolution, 0],
+        [0, 0, resolution],
+        resolution * fg.norm([1, 1, 0]),
+        resolution * fg.norm([1, 0, 1]),
+        resolution * fg.norm([0, 1, 1]),
+        resolution * fg.norm([1, 1, 1]),
+    ]
+    ang = max(np.abs(fg.vectors_angle_degrees(q, q2)))
+
+    # Add this angle in each axis and check how much is moved
+    q_phi = fg.mag(q - labvector(q0, R=diffractometer_rotation(phi=phi + ang, chi=chi, eta=eta, mu=mu), LAB=lab))
+    q_chi = fg.mag(q - labvector(q0, R=diffractometer_rotation(phi=phi, chi=chi + ang, eta=eta, mu=mu), LAB=lab))
+    q_eta = fg.mag(q - labvector(q0, R=diffractometer_rotation(phi=phi, chi=chi, eta=eta + ang, mu=mu), LAB=lab))
+    q_mu = fg.mag(q - labvector(q0, R=diffractometer_rotation(phi=phi, chi=chi, eta=eta, mu=mu + ang), LAB=lab))
+
+    # Scale this movement back to the resolution
+    phi_ang = ang * resolution / q_phi
+    chi_ang = ang * resolution / q_chi
+    eta_ang = ang * resolution / q_eta
+    mu_ang = ang * resolution / q_mu
+    # if the movement is unrealistically large, the axis is unsensitive
+    if phi_ang > 20: phi_ang = 0
+    if chi_ang > 20: chi_ang = 0
+    if eta_ang > 20: eta_ang = 0
+    if mu_ang > 20: mu_ang = 0
+    return phi_ang, chi_ang, eta_ang, mu_ang
 

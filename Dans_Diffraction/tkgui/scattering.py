@@ -468,10 +468,10 @@ class ScatteringGuiOLD:
         elif unit.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
             q = fc.calqmag(tth, energy)
             d = fc.q2dspace(q)
-            self.hkl_result.set(u'I:%10.0f   d:%8.2f \u00c5' % (I, d))
+            self.hkl_result.set(u'I:%10.0f   d:%8.2f \u212B' % (I, d))
         else:
             q = fc.calqmag(tth, energy)
-            self.hkl_result.set(u'I:%8.0f   Q:%8.2f \u00c5\u207B\u00B9' % (I, q))
+            self.hkl_result.set(u'I:%8.0f   Q:%8.2f \u212B\u207B\u00B9' % (I, q))
 
     def fun_hklsym(self):
         """Print symmetric reflections"""
@@ -1104,10 +1104,10 @@ class ScatteringGui:
         elif unit.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
             q = fc.calqmag(tth, energy)
             d = fc.q2dspace(q)
-            self.hkl_result.set(u'I:%10.0f   d:%8.2f \u00c5' % (I, d))
+            self.hkl_result.set(u'I:%10.0f   d:%8.2f \u212B' % (I, d))
         else:
             q = fc.calqmag(tth, energy)
-            self.hkl_result.set(u'I:%8.0f   Q:%8.2f \u00c5\u207B\u00B9' % (I, q))
+            self.hkl_result.set(u'I:%8.0f   Q:%8.2f \u212B\u207B\u00B9' % (I, q))
 
     def fun_hklsym(self):
         """Print symmetric reflections"""

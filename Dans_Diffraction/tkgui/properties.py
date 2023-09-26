@@ -680,7 +680,7 @@ class NeighborsGui:
         s = '%4s [%2s] (%5.2f,%5.2f,%5.2f)'
         return s % (atom.label, atom.type, atom.u, atom.v, atom.w)
 
-    def atom_update(self, event=True):
+    def atom_update(self, event=None):
         idx = self.structure_index.get()
         self.atom_str.set(self.atom_list[idx])
 

@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.1.0
-Last updated: 11/07/23
+Version 3.1.1
+Last updated: 26/09/23
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -70,6 +70,7 @@ Version History:
 25/06/23 3.0.0  Added new GUI elements including new Scattering UI and diffractomter simulator, plus other updates
 11/07/23 3.0.1  Some fixes for plotting and additions to diffractometer orientation. Thanks asteppke!
 20/07/23 3.1.0  Refactored FDMNES wrapper with new methods and new defaults. Thanks YvesJoly!
+26/09/23 3.1.1  Minor changes and improvments. Added hkl1, hkl2 = xtl.scatter.orientation_reflections()
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -136,8 +137,8 @@ from .classes_fdmnes import fdmnes_checker, Fdmnes, FdmnesAnalysis
 from .functions_crystallography import readcif
 
 
-__version__ = '3.1.0'
-__date__ = '20/07/23'
+__version__ = '3.1.1'
+__date__ = '26/09/23'
 
 
 # Build

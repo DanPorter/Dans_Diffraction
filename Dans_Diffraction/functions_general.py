@@ -56,6 +56,15 @@ Cu = 8.048  # Cu-Ka emission energy, keV
 Mo = 17.4808  # Mo-Ka emission energy, keV
 # Mo = 17.4447 # Mo emission energy, keV
 
+# Characters
+AA = u'\u212B'
+Am1 = u'\u212B\u207B\u00B9'
+THETA = u'\u03B8'
+DELTA = u'\u0394'
+SIGMA = u'\u03c3'
+PI = u'\u03c0'
+
+
 '--------------------------Misc General Programs------------------------'
 
 '---------------------------Vector manipulation-------------------------'
@@ -546,14 +555,14 @@ def find_vector(A, V, difference=0.01):
     Return the index(s) of vectors in array A within difference of vector V
     Comparison is based on vector difference A[n,:]-V
 
-    Returns None if no matching vector is present.
+    Returns [] if no matching vector is present.
 
     E.G.
     A = [[1,2,3],
          [4,5,6],
          [7,8,9]]
     find_index(A,[4,5,6])
-     >> 1
+     >> [1]
 
     A = [[0, 2.5, 0],
          [1, 0.1, 0],
@@ -564,14 +573,7 @@ def find_vector(A, V, difference=0.01):
     """
     A = np.asarray(A).reshape((-1, np.shape(A)[-1]))
     V = np.asarray(V).reshape(-1)
-    M = mag(A - V)
-    idx = np.where(M < difference)[0]
-    if len(idx) == 1:
-        return idx[0]
-    elif len(idx) == 0:
-        return None
-    else:
-        return idx
+    return np.flatnonzero(mag(A - V) < difference)
 
 
 def search_dict_lists(d, **kwargs):
@@ -733,6 +735,33 @@ def sphere_array(A, max_angle1=90, max_angle2=90, step1=1, step2=1):
             nd = n * len2 + (m + 1) * len3
             OUT[st:nd, :] = B
     return OUT
+
+
+def rebin_volume(volume, step=(1, 1, 1), average_points=True):
+    """
+    Rebins the array volume along 3 dimensions, taking the average of elements within each step
+    :param volume: Volume object or numpy.array with ndim==3
+    :param step: [i', j', k'] step size along each dimension
+    :param average_points: Bool, if True, averages the points along each step, otherwise just sum
+    :return: volume[i//i',j//j',k//k']
+    """
+
+    i, j, k = volume.shape
+
+    # remove trailing elements
+    vol2 = volume[:i - i % step[0], :j - j % step[1], :k - k % step[2]]
+
+    # sum pixels
+    count = 0.0
+    volsum = np.zeros(np.floor_divide(vol2.shape, step))
+    for n in range(step[0]):
+        for m in range(step[1]):
+            for o in range(step[2]):
+                count += 1.0
+                volsum += vol2[n::step[0],m::step[1],o::step[2]]
+    if average_points:
+        return volsum / count  # Take the average
+    return volsum
 
 
 '---------------------------String manipulation-------------------------'

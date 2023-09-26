@@ -1345,10 +1345,23 @@ def read_spherical(filename):
     """Load contribution from spherical harmonics to resonant reflection, from e.g. out_sph_signal_rxs1.txt"""
     keys = ['D00', 'D_xy', 'D_xz', 'D_yz', 'D_x2y2', 'D_z2']
     data = np.genfromtxt(filename, skip_header=3, names=True)
-    l3 = '_L3' if 'D00_r_L3' in data.dtype.names else ''  # Only load L3 part if "L23" is used
+    # Only load L3 part if "L23" is used
+    if 'D(00)_r_L3' in data.dtype.names or 'D(00)_r_1_L3' in data.dtype.names:
+        l3 = '_l3'
+    else:
+        l3 = ''
 
     def modulus(key):
-        value = data[key + '_r' + l3] + 1j * data[key + '_i' + l3]
+        if key + '_r' + l3 in data.dtype.names:
+            value = data[key + '_r' + l3] + 1j * data[key + '_i' + l3]
+        elif key + '_r_1' + l3 in data.dtype.names:
+            n = 1
+            value = 0j
+            while key + ('_r_%d' % n) + l3 in data.dtype.names:
+                value += data[key + ('_r_%d' % n) + l3] + 1j * data[key + ('_i_%d' % n) + l3]
+                n += 1
+        else:
+            value = 0.0
         return np.real(value * np.conj(value))
     out = {
         key: modulus(key) for key in keys

@@ -185,7 +185,7 @@ class Lattice:
         self.tth = fc.cal2theta(self.qmag, wavelength_a=wavelength_a)
         tth = 1.0 * self.tth
         tth[tth > 175] = 175.  # stop peaks becoming too broad at high angle
-        self.fwhm = fc.scherrer_fwhm(self.domain_size, tth, wavelength_a=wavelength_a)
+        self.fwhm = fc.scherrer_fwhm(self.domain_size, tth, wavelength_a=wavelength_a, shape_factor=1.0)
         self.hkl_str = np.array(fc.hkl2str(self.hkl).split('\n'))
         self.intensity = np.zeros_like(self.qmag)
         self._calculated = np.zeros_like(self.qmag, dtype=bool)
@@ -629,7 +629,7 @@ def tk_beam(parent, xtl, callback):
             res = fc.wavevector(wavelength=fc.neutron_wavelength(val))
         elif old_unit == 'Deg':
             wavelength = get_wavelength()
-            res = fc.calqmag(val, fc.wave2energy(wavelength))
+            res = fc.calqmag(val, wavelength_a=wavelength)
         elif old_unit == u'\u212B':  # Angstroms
             res = fc.dspace2q(val)
         else:  # inverse angstroms
@@ -1751,8 +1751,8 @@ class DiffractometerGui:
         )
         self.det.update_widgets(
             distance=565,
-            width=34,
-            height=84,
+            width=487 * 0.172 * np.cos(np.deg2rad(35)),
+            height=195 * 0.172,
             pixel_size=0.172,
         )
         self.update()

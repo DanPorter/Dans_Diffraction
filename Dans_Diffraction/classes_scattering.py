@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.3.0
-Last updated: 02/07/23
+Version 2.3.1
+Last updated: 26/09/23
 
 Version History:
 10/09/17 0.1    Program created
@@ -33,6 +33,7 @@ Version History:
 14/01/23 2.1.1  Corrected background error in xtl.Scatter.powder
 06/05/23 2.0.0  Merged pull request for non-integer hkl option on SF and electron form factors. Thanks Prestipino!
 02/07/23 2.3.0  Fixed rounding error in Scatter.powder, thanks Sergio I. Rincon!
+26/09/23 2.3.1  Added Scattering.orientation_reflections for automatic orientation help
 
 @author: DGPorter
 """
@@ -47,7 +48,7 @@ from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '2.3.0'
+__version__ = '2.3.1'
 __scattering_types__ = {'xray': ['xray', 'x', 'x-ray', 'thomson', 'charge'],
                         'neutron': ['neutron', 'n', 'nuclear'],
                         'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'],
@@ -411,6 +412,14 @@ class Scattering:
 
         # Break up long lists of HKLs
         nref, natom = len(q), len(r)
+        if nref == 0:
+            if nenergy == 1 and npsi == 1:
+                return np.empty([0], dtype=complex)  # shape(nref)
+            if nenergy == 1:
+                return np.empty([0, nenergy], dtype=complex)  # shape(nref)  # shape(nref, nenergy)
+            if npsi == 1:
+                return np.empty([0, npsi], dtype=complex)  # shape(nref)  # shape(nref, npsi)
+            return np.empty([0, nenergy, npsi], dtype=complex)
         n_arrays = np.ceil(nref * natom / fs.MAX_QR_ARRAY)
         if n_arrays > 1:
             print('Splitting %d reflections (%d atoms) into %1.0f parts' % (nref, natom, n_arrays))
@@ -471,7 +480,7 @@ class Scattering:
         if nenergy == 1:
             return sf[:, 0, :]  # shape(nref, nenergy)
         if npsi == 1:
-            return sf[:, :, 0]  # shape(nref, nspi)
+            return sf[:, :, 0]  # shape(nref, npsi)
         return sf
     new_structure_factor = structure_factor
 
@@ -2095,7 +2104,37 @@ class Scattering:
             ss += '%62s Reflection Total:  %s  %s\n' % (' ', fg.complex2str(all_phase), fg.complex2str(all_sf))
             outstr += '(%2.0f,%2.0f,%2.0f) I = %9.2f    %s\n' % (HKL[n, 0], HKL[n, 1], HKL[n, 2], I[n], ss)
         return outstr
-    
+
+    def orientation_reflections(self, energy_kev=None):
+        """
+        Return 2 reflections to use to orient a crystal
+         1. a strong reflection that is easy to discriminate in 2-theta
+         2. another strong reflection non-parallel and non-normal to (1)
+        :param energy_kev: photon energy in keV
+        :return: hkl_1, hkl_2
+        """
+        # Reflection seletor
+        refs = self.get_hkl(energy_kev=energy_kev, remove_symmetric=True)
+        ref_tth = self.xtl.Cell.tth(refs, energy_kev=energy_kev)
+        ref_multiplicity = self.xtl.Symmetry.reflection_multiplyer(refs)
+        ref_intensity = self.intensity(refs)
+        ref_cluster = np.array([np.sum(1 / (np.abs(th - ref_tth) + 1)) - 1 for th in ref_tth])
+        ref_select = ref_intensity * ref_multiplicity / ref_cluster  # ** 2
+        hkl_1 = refs[np.argmax(ref_select), :]
+
+        next_refs = self.get_hkl(energy_kev=energy_kev, remove_symmetric=False)
+        # tth_1 = self.xtl.Cell.tth(hkl_1, energy_kev=energy_kev)
+        # tth_2 = self.xtl.Cell.tth(refs, energy_kev=energy_kev)
+        q_1 = self.xtl.Cell.calculateQ(hkl_1)
+        q_2 = self.xtl.Cell.calculateQ(next_refs)
+        angles = fg.vectors_angle_degrees(q_1, q_2)
+        ref_select = (angles > 1.) * (angles < 40.)
+        next_refs = next_refs[ref_select]
+        angles = angles[ref_select]
+        next_select = self.intensity(next_refs) / angles
+        hkl_2 = next_refs[np.argmax(next_select)]
+        return hkl_1, hkl_2
+
     def find_close_reflections(self,HKL,energy_kev=None,max_twotheta=2,max_angle=10):
         """
         Find and print list of reflections close to the given one
