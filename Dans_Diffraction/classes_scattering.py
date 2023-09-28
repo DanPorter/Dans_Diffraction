@@ -2105,35 +2105,49 @@ class Scattering:
             outstr += '(%2.0f,%2.0f,%2.0f) I = %9.2f    %s\n' % (HKL[n, 0], HKL[n, 1], HKL[n, 2], I[n], ss)
         return outstr
 
-    def orientation_reflections(self, energy_kev=None):
+    def orientation_reflections(self, energy_kev, hkl_1=None):
         """
         Return 2 reflections to use to orient a crystal
          1. a strong reflection that is easy to discriminate in 2-theta
          2. another strong reflection non-parallel and non-normal to (1)
-        :param energy_kev: photon energy in keV
-        :return: hkl_1, hkl_2
-        """
-        # Reflection seletor
-        refs = self.get_hkl(energy_kev=energy_kev, remove_symmetric=True)
-        ref_tth = self.xtl.Cell.tth(refs, energy_kev=energy_kev)
-        ref_multiplicity = self.xtl.Symmetry.reflection_multiplyer(refs)
-        ref_intensity = self.intensity(refs)
-        ref_cluster = np.array([np.sum(1 / (np.abs(th - ref_tth) + 1)) - 1 for th in ref_tth])
-        ref_select = ref_intensity * ref_multiplicity / ref_cluster  # ** 2
-        hkl_1 = refs[np.argmax(ref_select), :]
 
+        hkl_1, hkl_2, alternatives = xtl.Scatter.orientation_reflections(8)
+
+        :param energy_kev: photon energy in keV
+        :param hkl_1: None or [h,k,l], allows to specify the first reflection
+        :returns hkl_1: [h,k,l] indices of reflection 1
+        :returns hkl_2: [h,k,l] indices of reflection 2
+        :returns hkl_2_alternatives: [[h,k,l],...] list of alternative reflections with same angles
+        """
+        # Reflection 1 seletor
+        if hkl_1 is None:
+            refs = self.get_hkl(energy_kev=energy_kev, remove_symmetric=True)
+            ref_tth = self.xtl.Cell.tth(refs, energy_kev=energy_kev)
+            ref_multiplicity = self.xtl.Symmetry.reflection_multiplyer(refs)
+            ref_intensity = self.intensity(refs)
+            ref_cluster = np.array([np.sum(1 / (np.abs(th - ref_tth) + 1)) - 1 for th in ref_tth])
+            ref_select = ref_intensity * ref_multiplicity / ref_cluster  # ** 2
+            hkl_1 = refs[np.argmax(ref_select), :]
+
+        # Reflection 2 selector
         next_refs = self.get_hkl(energy_kev=energy_kev, remove_symmetric=False)
         # tth_1 = self.xtl.Cell.tth(hkl_1, energy_kev=energy_kev)
         # tth_2 = self.xtl.Cell.tth(refs, energy_kev=energy_kev)
         q_1 = self.xtl.Cell.calculateQ(hkl_1)
         q_2 = self.xtl.Cell.calculateQ(next_refs)
-        angles = fg.vectors_angle_degrees(q_1, q_2)
+        angles = abs(fg.vectors_angle_degrees(q_1, q_2))
         ref_select = (angles > 1.) * (angles < 40.)
+        if sum(ref_select) < 1:
+            ref_select = angles > 1.
         next_refs = next_refs[ref_select]
         angles = angles[ref_select]
+        tth_1 = self.xtl.Cell.tth(hkl_1, energy_kev=energy_kev)
+        tth_2 = self.xtl.Cell.tth(next_refs, energy_kev=energy_kev)
         next_select = self.intensity(next_refs) / angles
-        hkl_2 = next_refs[np.argmax(next_select)]
-        return hkl_1, hkl_2
+        idx = np.argmax(next_select)
+        hkl_2 = next_refs[idx]
+        hkl_2_options = (abs(angles - angles[idx]) < 1.) * (abs(tth_2 - tth_2[idx]) < 1.)
+        return hkl_1, hkl_2, next_refs[hkl_2_options]
 
     def find_close_reflections(self,HKL,energy_kev=None,max_twotheta=2,max_angle=10):
         """
