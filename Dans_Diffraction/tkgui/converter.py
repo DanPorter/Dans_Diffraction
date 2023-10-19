@@ -88,6 +88,7 @@ class UnitConverter:
         self.dom_size_unit = tk.StringVar(self.root, u'\u212B')
         self._dom_size_unit = tk.StringVar(self.root, u'\u212B')
 
+        self.refine_hkl = False  # used in self.update_hkl, altered in self.but_hkl_switch
 
         # --- Mass / Wavelength / Energy ---
         frame = tk.Frame(self.root)
@@ -142,14 +143,18 @@ class UnitConverter:
 
         frame = tk.Frame(self.root)
         frame.pack(side=tk.TOP, fill=tk.X, expand=tk.YES, padx=6, pady=6)
-        var = tk.Label(frame, text='hkl: ', font=TTF, width=4)
+        var = tk.Label(frame, text='hkl: ', font=TTF, width=4, borderwidth=0, relief="ridge")
         var.pack(side=tk.LEFT)
+        var.bind("<Button-1>", self.but_hkl_switch)
+        self.hkl_label = var
         var = tk.Entry(frame, textvariable=self.hkl, font=TF, width=20, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         var.bind('<Return>', self.fun_hkl)
         var.bind('<KP_Enter>', self.fun_hkl)
-        var = tk.Label(frame, text='Lattice: ', font=TTF)
+        var = tk.Label(frame, text='Lattice: ', font=TTF, borderwidth=2, relief="ridge")
         var.pack(side=tk.LEFT, padx=6)
+        var.bind("<Button-1>", self.but_latt_switch)
+        self.lattice_label = var
         var = tk.Entry(frame, textvariable=self.latt, font=TF, width=8, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         var.bind('<Return>', self.fun_setlat)
@@ -311,6 +316,16 @@ class UnitConverter:
         self.xtl.Cell.latt(latt)  # set cubic lattice
         self.fun_hkl()
 
+    def but_hkl_switch(self, event=None):
+        self.lattice_label.config(borderwidth=0)
+        self.hkl_label.config(borderwidth=2)
+        self.refine_hkl = True
+
+    def but_latt_switch(self, event=None):
+        self.lattice_label.config(borderwidth=2)
+        self.hkl_label.config(borderwidth=0)
+        self.refine_hkl = False
+
     def fun_hkl(self, event=None):
         hkl = fg.str2array(self.hkl.get())
         wavelength_a = self.get_wavelength_a()
@@ -328,9 +343,20 @@ class UnitConverter:
         oldqmag = fg.mag(oldq)
         newq = oldq * qmag / oldqmag
         new_hkl = self.xtl.Cell.indexQ(newq)[0]
-        hkl_str = ' '.join([FMT % h for h in new_hkl])
-        self.hkl.set(hkl_str)
-        self.fun_hkl()
+
+        if self.refine_hkl:
+            # Update hkl
+            hkl_str = ' '.join([FMT % h for h in new_hkl])
+            self.hkl.set(hkl_str)
+            self.fun_hkl()
+        else:
+            # update lattice
+            old_lat = self.xtl.Cell.lp()
+            new_lat = [old_lat[n] * old_hkl[n] / new_hkl[n] if abs(old_hkl[n]) > 0 else old_lat[n] for n in range(3)]
+            new_lat.extend(old_lat[3:])
+            self.xtl.Cell.latt(new_lat)
+            self.latt.set('%.3f' % new_lat[0])
+            self.fun_hkl()
 
     def fun_tth(self, event=None):
         wavelength_a = self.get_wavelength_a()

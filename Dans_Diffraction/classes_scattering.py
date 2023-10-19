@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.3.1
-Last updated: 26/09/23
+Version 2.3.2
+Last updated: 19/10/23
 
 Version History:
 10/09/17 0.1    Program created
@@ -34,6 +34,7 @@ Version History:
 06/05/23 2.0.0  Merged pull request for non-integer hkl option on SF and electron form factors. Thanks Prestipino!
 02/07/23 2.3.0  Fixed rounding error in Scatter.powder, thanks Sergio I. Rincon!
 26/09/23 2.3.1  Added Scattering.orientation_reflections for automatic orientation help
+19/20/23 2.3.2  Fixed scatteringbasis so xray_resonant() now works with non-cubic systems
 
 @author: DGPorter
 """
@@ -48,7 +49,7 @@ from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '2.3.1'
+__version__ = '2.3.2'
 __scattering_types__ = {'xray': ['xray', 'x', 'x-ray', 'thomson', 'charge'],
                         'neutron': ['neutron', 'n', 'nuclear'],
                         'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'],
@@ -1291,14 +1292,23 @@ class Scattering:
     def scatteringcomponents(self, mxmymz, hkl, azim_zero=[1,0,0], psi=0):
         """
         Transform magnetic vector into components within the scattering plane
-            ***warning - may not be correct for non-cubic systems***
+        First transforms the moments into a cartesian reference frame.
+           U1 = direction || ki - kf = Q
+           U2 = direction || kf + ki (within scattering plane, pi)
+           U3 = direction perp. to U1, U2 (normal to scattering plane, sigma)
         """
 
         # Define coordinate system I,J,Q (U1,U2,U3)
         U = self.scatteringbasis(hkl, azim_zero, psi)
+
+        # Calculate moment
+        momentmag = fg.mag(mxmymz).reshape([-1, 1])
+        momentxyz = self.xtl.Cell.calculateR(mxmymz)  # moment direction in cartesian reference frame
+        moment = momentmag * fg.norm(momentxyz)  # broadcast n*1 x n*3 = n*3
+        moment[np.isnan(moment)] = 0.
         
         # Determine components of the magnetic vector
-        z1z2z3 = np.dot(mxmymz, U.T) # [mxmymz.I, mxmymz.J, mxmymz.Q]
+        z1z2z3 = np.dot(moment, U.T)  # [mxmymz.I, mxmymz.J, mxmymz.Q]
         return fg.norm(z1z2z3)
 
     def scatteringbasis(self, hkl, azim_zero=[1, 0, 0], psi=0):

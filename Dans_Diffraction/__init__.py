@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.1.1
-Last updated: 26/09/23
+Version 3.1.2
+Last updated: 19/10/23
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -71,6 +71,7 @@ Version History:
 11/07/23 3.0.1  Some fixes for plotting and additions to diffractometer orientation. Thanks asteppke!
 20/07/23 3.1.0  Refactored FDMNES wrapper with new methods and new defaults. Thanks YvesJoly!
 26/09/23 3.1.1  Minor changes and improvments. Added hkl1, hkl2 = xtl.scatter.orientation_reflections()
+19/10/23 3.1.2  xray_resonant() now works with non-cubic systems, fixed scaling issue in diffractometer.py
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -88,6 +89,7 @@ Acknoledgements:
     June 2023   Thanks to Sergio I. Rincon for pointing out the rounding error in Scatter.powder
     July 2023   Thanks to asteppke for suggested update to Arrow3D for matplotlib V>3.4
     July 2023   Thanks to Yves Joly for helpful suggestions on FDMNES wrapper
+    Oct 2023    Thanks to asteppke for pointing out scaling issue in diffractometer gui
 
 -----------------------------------------------------------------------------
    Copyright 2023 Diamond Light Source Ltd.
@@ -137,8 +139,8 @@ from .classes_fdmnes import fdmnes_checker, Fdmnes, FdmnesAnalysis
 from .functions_crystallography import readcif
 
 
-__version__ = '3.1.1'
-__date__ = '26/09/23'
+__version__ = '3.1.2'
+__date__ = '19/10/23'
 
 
 # Build

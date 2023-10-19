@@ -743,7 +743,7 @@ def tk_beam(parent, xtl, callback):
     # TK widgets
     OPT_WIDTH = 14
     frm = tk.LabelFrame(parent, text='Beam', relief=tk.RIDGE)
-    frm.pack(fill=tk.X, padx=2, pady=2)
+    frm.pack(fill=tk.BOTH, expand=tk.YES, padx=2, pady=2)
 
     # Radiation
     ln = tk.Frame(frm)
@@ -878,7 +878,7 @@ def tk_detector(parent, callback):
     frm.pack(fill=tk.X, padx=2, pady=2)
 
     ln = tk.Frame(frm)
-    ln.pack(side=tk.TOP, fill=tk.X)
+    ln.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
     var = tk.Label(ln, text='Distance:', font=SF)
     var.pack(side=tk.LEFT)
     var = tk.Entry(ln, textvariable=det_distance, font=TF, width=8, bg=ety, fg=ety_txt)
@@ -1496,11 +1496,12 @@ class DiffractometerGui:
         grid.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
         grid.columnconfigure((0, 1), weight=1)
         grid.rowconfigure((0, 1), weight=1)
+        border = {}  # {'highlightbackground': "black", 'highlightthickness': 1}
 
         # ***--- TOP ---***
         # --- Reciprocal Space Plot ---
-        top_left = tk.LabelFrame(grid, text='Diffractometer')
-        top_left.grid(row=1, column=1, sticky=tk.N+tk.W)
+        top_left = tk.LabelFrame(grid, text='Diffractometer', **border)
+        top_left.grid(row=0, column=0, sticky='nsew')
         frm = tk.Frame(top_left)
         frm.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
 
@@ -1536,9 +1537,9 @@ class DiffractometerGui:
         # self.toolbar1.pack(fill=tk.X, expand=tk.YES)
 
         # --- Detector Plot ---
-        top_right = tk.LabelFrame(grid, text='Detector')
+        top_right = tk.LabelFrame(grid, text='Detector', **border)
         # sec.pack(side=tk.LEFT, expand=tk.YES, padx=4, pady=4)
-        top_right.grid(row=1, column=2, sticky=tk.N+tk.E)
+        top_right.grid(row=0, column=1, sticky='nsew')
         frm = tk.Frame(top_right)
         frm.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
 
@@ -1569,12 +1570,12 @@ class DiffractometerGui:
 
         # ***--- BOTTOM ---***
         # --- Diffractometer axes ---
-        bottom_left = tk.Frame(grid)
+        bottom_left = tk.Frame(grid, **border)
         # sec.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
-        bottom_left.grid(row=2, column=1, sticky=tk.S+tk.W)
+        bottom_left.grid(row=1, column=0, sticky='nsew')
 
         sec = tk.LabelFrame(bottom_left, text='Angles (Deg)')
-        sec.pack(side=tk.TOP, fill=tk.X, expand=tk.YES, padx=4, pady=4)
+        sec.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES, padx=4, pady=4)
 
         # Default scattering angle
         tth = self.xtl.Cell.tth([0, 0, 2], 8)[0]
@@ -1595,9 +1596,9 @@ class DiffractometerGui:
         }
 
         # --- Beam ---
-        bottom_right = tk.Frame(grid)
+        bottom_right = tk.Frame(grid, **border)
         # sec.pack(side=tk.LEFT, expand=tk.YES, padx=4, pady=4)
-        bottom_right.grid(row=2, column=2, sticky=tk.S+tk.E)
+        bottom_right.grid(row=1, column=1, sticky='nsew')
         self.latt = tk_beam(bottom_right, self.xtl, self.update)
 
         # --- Detector ---
@@ -1610,10 +1611,10 @@ class DiffractometerGui:
         tk_scan(bottom_left, angle_dict, self.latt, self.det)
 
         # Configure expansion of Tk frame
+        self.root.columnconfigure(0, weight=1)
         self.root.columnconfigure(1, weight=1)
-        self.root.columnconfigure(2, weight=1)
-        self.root.rowconfigure(1, weight=3)
-        self.root.rowconfigure(2, weight=1)
+        self.root.rowconfigure(0, weight=1)
+        self.root.rowconfigure(1, weight=1)
 
         self.latt.generate_refs()
         self.det.generate_detector()
