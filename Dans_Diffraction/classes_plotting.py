@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9.5
-Last updated: 15/11/21
+Version 1.9.6
+Last updated: 25/10/23
 
 Version History:
 18/08/17 0.1    Program created
@@ -31,6 +31,7 @@ Version History:
 15/02/21 1.9.3  Added axis_reciprocal_lattice_points/lines/vectors
 11/10/21 1.9.4  Centered crystal in plot_crystal
 15/11/21 1.9.5  Added plot_diffractometer_reciprocal_space
+25/10/23 1.9.6  Corrected Plotting.simulate_powder to display radiation and wavelength
 
 @author: DGPorter
 """
@@ -44,7 +45,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.9.5'
+__version__ = '1.9.6'
 
 
 class Plotting:
@@ -388,8 +389,10 @@ class Plotting:
                      rotation='vertical', ha='center', va='bottom')
         
         # Plot labels
+        wavelength_a = fc.energy2wave(energy_kev)
+        scattering = self.xtl.Scatter._scattering_type
         ylab = u'Intensity [a. u.]'
-        ttl = '%s\nE = %1.3f keV' % (self.xtl.name, energy_kev)
+        ttl = u'%s\n%s \u03BB = %1.3f \u00C5' % (self.xtl.name, scattering.capitalize(), wavelength_a)
         fp.labels(ttl, xlab, ylab)
 
     def axis_reciprocal_lattice_points(self, axes=None, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),

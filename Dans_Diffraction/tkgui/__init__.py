@@ -28,11 +28,12 @@ Version History:
 25/06/23 3.0.0  Added new GUI elements including new Scattering UI, diffractomter simulator, unit converter
 20/07/23 3.1.0  Added new FDMNES GUI elements including in the Menu
 19/10/23 3.1.1  Fixed scaling issue in diffractometer.py. Thanks asteppke!
+25/10/23 3.1.2  Fixed error with powder plot for Neutrons. Thanks Cyril!
 
 @author: DGPorter
 """
 
 from .crystal import CrystalGui
 
-__version__ = '3.1.1'
-__date__ = '19/10/23'
+__version__ = '3.1.2'
+__date__ = '25/10/23'

@@ -1150,14 +1150,12 @@ class ScatteringGui:
     def fun_powder(self):
         """Plot Powder"""
         self.fun_get()
-        energy = self.get_energy()
-        min_q = fc.calqmag(self.twotheta_min.get(), energy)
-        max_q = fc.calqmag(self.twotheta_max.get(), energy)
+        wavelength_a = self.get_wavelength()
+        energy_kev = fc.wave2energy(wavelength_a)
         pow_avg = self.powderaverage.get()
         pow_wid = self.powder_width.get()
-        #if min_q < 0: min_q = 0.0
 
-        self.xtl.Plot.simulate_powder(energy, peak_width=pow_wid, powder_average=pow_avg)
+        self.xtl.Plot.simulate_powder(energy_kev, peak_width=pow_wid, powder_average=pow_avg)
         plt.show()
 
     def fun_hki(self):
