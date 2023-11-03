@@ -2,19 +2,27 @@
 FDMNES tkinter GUI windows
 """
 
-import sys, os
-import matplotlib.pyplot as plt # Plotting
-if sys.version_info[0] < 3:
-    import Tkinter as tk
-    import tkFileDialog as filedialog
-else:
-    import tkinter as tk
-    from tkinter import filedialog
-from ..classes_fdmnes import Fdmnes, FdmnesAnalysis, find_fdmnes
+import os
+import matplotlib.pyplot as plt  # Plotting
+from ..classes_fdmnes import Fdmnes, FdmnesAnalysis, find_fdmnes, fdmnes_checker
+from .basic_widgets import tk, filedialog, messagebox
+from .basic_widgets import StringViewer, text_search
+from .basic_widgets import popup_help, popup_about, topmenu, menu_github, menu_docs
 from .basic_widgets import (TF, BF, SF, LF, HF, TTF, TTFG, TTBG,
                             bkg, ety, btn, opt, btn2,
                             btn_active, opt_active, txtcol,
                             btn_txt, ety_txt, opt_txt)
+
+
+def menu_help():
+    """Display help"""
+    StringViewer(Fdmnes.__doc__, title='Dans_Diffraction diffractometer', width=121)
+
+
+def menu_fdmnes():
+    """Open GitHub page"""
+    import webbrowser
+    webbrowser.open_new_tab("https://fdmnes.neel.cnrs.fr/")
 
 
 class RunFDMNESgui:
@@ -39,11 +47,28 @@ class RunFDMNESgui:
         default_width = 60
         default_height = 30
 
+        # ---Menu---
+        menu = {
+            'File': {
+                'New Window': self.menu_new,
+                'Analyse Output': self.menu_fdmnes_ana,
+                'Exit': self.on_closing,
+            },
+            'Help': {
+                'Help': menu_help,
+                'FDMNES Homepage': menu_fdmnes,
+                'Select FDMNES executable': self.fun_loadfdmnespath,
+                'About': popup_about,
+            }
+        }
+        topmenu(self.root, menu)
+
         frame = tk.Frame(self.root)
         frame.pack(side=tk.LEFT, anchor=tk.N, fill=tk.BOTH, expand=tk.YES)
 
         # Available x-ray edges
         self.xr_edges, self.xr_energies = self.xtl.Properties.xray_edges()
+        absorber = '%s K' % self.xtl.Properties.resonant_element()
         # Polarisations
         poltypes = [u'\u03c3-\u03c3', u'\u03c3-\u03c0', u'\u03c0-\u03c3', u'\u03c0-\u03c0']
 
@@ -54,19 +79,24 @@ class RunFDMNESgui:
         else:
             # Not superstructure
             pass
+        self.fdmnes_path = tk.StringVar(frame, self.fdm.exe_path)
         self.calculation_name = tk.StringVar(frame, self.fdm.output_name)
         self.calculation_path = tk.StringVar(frame, self.fdm.generate_input_path())
         self.calc_comment = tk.StringVar(frame, self.fdm.comment)
         self.calc_range = tk.StringVar(frame, self.fdm.range)
         self.calc_radius = tk.DoubleVar(frame, self.fdm.radius)
-        self.calc_edge = tk.StringVar(frame, self.xr_edges[0])
+        self.calc_edge = tk.StringVar(frame, absorber)
         self.calc_green = tk.BooleanVar(frame, self.fdm.green)
         self.calc_scf = tk.BooleanVar(frame, self.fdm.scf)
         self.calc_quad = tk.BooleanVar(frame, self.fdm.quadrupole)
+        self.calc_mag = tk.BooleanVar(frame, self.fdm.magnetism)
+        self.calc_spo = tk.BooleanVar(frame, self.fdm.spinorbit)
+        self.calc_ss = tk.BooleanVar(frame, True)
+        self.calc_sp = tk.BooleanVar(frame, True)
         self.calc_aziref = tk.StringVar(frame, str(self.fdm.azi_ref).strip('[]'))
         self.calc_reflist = tk.StringVar(frame, str(self.fdm.hkl_reflections))
-        self.calc_addref = tk.StringVar(frame, '1, 0, 0')
-        self.calc_addpol = tk.StringVar(frame,  poltypes[1])
+        # self.calc_addref = tk.StringVar(frame, '1, 0, 0')
+        # self.calc_addpol = tk.StringVar(frame,  poltypes[1])
 
         # ---Line 0---
         line = tk.Frame(frame, bg=TTBG)
@@ -77,8 +107,16 @@ class RunFDMNESgui:
         # ---Line 0---
         line = tk.Frame(frame)
         line.pack(expand=tk.YES, fill=tk.X)
-        var = tk.Label(line, text='FDMNES Path: %s' % self.fdm.exe_path, font=SF)
-        var.pack(side=tk.LEFT, fill=tk.X, expand=tk.YES)
+        var = tk.Label(line, text='FDMNES Path:', font=SF)
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.fdmnes_path, font=HF, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT, expand=tk.YES, fill=tk.X)
+        var = tk.Button(line, text='Select', font=BF, bg=btn, activebackground=btn_active,
+                        command=self.fun_loadfdmnespath)
+        var.pack(side=tk.LEFT, padx=5)
+        var = tk.Button(line, text='Search', font=BF, bg=btn, activebackground=btn_active,
+                        command=self.fun_findfdmnespath)
+        var.pack(side=tk.LEFT, padx=5)
 
         # ---Line 1---
         line = tk.Frame(frame)
@@ -155,6 +193,14 @@ class RunFDMNESgui:
         var = tk.Checkbutton(bline, text='Quadrupole', variable=self.calc_quad, font=SF)
         var.pack(side=tk.LEFT, padx=6)
 
+        # ---Line B5---
+        bline = tk.Frame(box)
+        bline.pack(side=tk.TOP, fill=tk.X, pady=5)
+        var = tk.Checkbutton(bline, text='Magnetic', variable=self.calc_mag, font=SF, command=self.fun_mag)
+        var.pack(side=tk.LEFT, padx=6)
+        var = tk.Checkbutton(bline, text='Spin-Orbit', variable=self.calc_spo, font=SF, command=self.fun_mag)
+        var.pack(side=tk.LEFT, padx=6)
+
         # ---Line B6---
         bline = tk.Frame(box)
         bline.pack(side=tk.TOP, fill=tk.X, pady=5)
@@ -166,30 +212,22 @@ class RunFDMNESgui:
         # ---Line B7---
         bline = tk.Frame(box)
         bline.pack(side=tk.TOP, fill=tk.X, pady=5)
-        var = tk.Label(bline, text='h,k,l:', font=SF)
-        var.pack(side=tk.LEFT)
-        var = tk.Entry(bline, textvariable=self.calc_addref, font=SF, width=6, bg=ety, fg=ety_txt)
-        var.pack(side=tk.LEFT, expand=tk.YES, padx=6)
-        """
-        var = tk.OptionMenu(bline, self.calc_addpol, *poltypes)
-        var.config(font=SF, width=5, bg=opt, activebackground=opt_active)
-        var["menu"].config(bg=opt, bd=0, activebackground=opt_active)
-        var.pack(side=tk.LEFT)
-        """
-        var = tk.Button(bline, text='Add Ref', font=BF, bg=btn, activebackground=btn_active,
-                        command=self.fun_addref)
-        var.pack(side=tk.LEFT)
-
-        # ---Line B8---
-        bline = tk.Frame(box)
-        bline.pack(side=tk.TOP, fill=tk.X, pady=5)
         var = tk.Label(bline, text='Reflections:', font=SF)
         var.pack(side=tk.LEFT)
         var = tk.Label(bline, textvariable=self.calc_reflist, font=SF)
         var.pack(side=tk.LEFT)
-        var = tk.Button(bline, text='Clear', font=BF, bg=btn, activebackground=btn_active,
-                        command=self.fun_clearref)
+        iline = tk.Frame(bline)
+        iline.pack(side=tk.LEFT)
+        var = tk.Checkbutton(iline, text=u'\u03c3-\u03c3', variable=self.calc_ss, font=SF)
+        var.pack(side=tk.TOP, padx=3)
+        var = tk.Checkbutton(iline, text=u'\u03c3-\u03c0', variable=self.calc_sp, font=SF)
+        var.pack(side=tk.TOP, padx=3)
+        var = tk.Button(bline, text='Add Refs', font=BF, bg=btn, activebackground=btn_active, command=self.fun_addref)
         var.pack(side=tk.LEFT)
+
+        # ---Line B8---
+        # bline = tk.Frame(box)
+        # bline.pack(side=tk.TOP, fill=tk.X, pady=5)
 
         # ---Line  B9---
         bline = tk.Frame(box)
@@ -234,6 +272,12 @@ class RunFDMNESgui:
         scanx.config(command=self.text.xview)
         scany.config(command=self.text.yview)
 
+    def menu_new(self):
+        RunFDMNESgui()
+
+    def menu_fdmnes_ana(self):
+        AnaFDMNESgui()
+
     def update(self):
         """Updates the internal fdm object"""
 
@@ -249,6 +293,8 @@ class RunFDMNESgui:
         self.fdm.green = self.calc_green.get()
         self.fdm.scf = self.calc_scf.get()
         self.fdm.quadrupole = self.calc_quad.get()
+        self.fdm.magnetism = self.calc_mag.get()
+        self.fdm.spinorbit = self.calc_spo.get()
         self.fdm.azi_ref = [float(n) for n in self.calc_aziref.get().replace(',', ' ').split()]
 
     def gentxt(self):
@@ -257,29 +303,69 @@ class RunFDMNESgui:
         self.text.delete('1.0', tk.END)
         self.text.insert(tk.END, parstr)
 
-    def write_reflections(self):
-        """ Write reflections string"""
-        self.calc_reflist.set('%s'%self.fdm.hkl_reflections)
+    def fun_loadfdmnespath(self):
+        """Select fdmnes executable"""
+        filename = filedialog.askopenfilename(
+            parent=self.root,
+            title='Select FDMNES Executable',
+            filetypes=[('EXE File', '*.exe'), ('All Files', '*.*')],
+            initialfile='fdmnes_win64.exe',
+        )
+        if filename:
+            self.fdm.setup(exe_path=filename)
+            self.fdmnes_path.set(filename)
+            self.calculation_path.set(self.fdm.generate_input_path())
+
+    def fun_findfdmnespath(self):
+        """Find fdmnes executable"""
+        filename = find_fdmnes()
+        self.fdm.setup(exe_path=filename)
+        self.fdmnes_path.set(filename)
+        self.calculation_path.set(self.fdm.generate_input_path())
 
     def fun_loadpath(self, event=None):
         """Select folder"""
         filepath, filename = os.path.split(self.calculation_path.get())
-        filepath = filedialog.askdirectory(initialdir=filepath)
-        self.fdm.input_name = filename
-        self.fdm.output_path = filepath
-        self.calculation_path.set(self.fdm.generate_input_path())
+        filepath = filedialog.askdirectory(parent=self.root, initialdir=filepath)
+        if filepath:
+            self.fdm.input_name = filename
+            self.fdm.output_path = filepath
+            self.calculation_path.set(self.fdm.generate_input_path())
+
+    def fun_mag(self, event=None):
+        """Toggle magnetic / spin-orbit"""
+        magnetic = self.calc_mag.get()
+        spinorbit = self.calc_spo.get()
+        if spinorbit:
+            self.calc_mag.set(False)
+        if magnetic:
+            self.calc_spo.set(False)
 
     def fun_addref(self, event=None):
         """Add reflection to list"""
-        newhkl = [int(n) for n in self.calc_addref.get().replace(',', ' ').split()]
-        newpol = self.calc_addpol.get()
-        self.fdm.hkl_reflections += [newhkl]
-        self.write_reflections()
+        from ..functions_crystallography import energy2wave
+        from .scattering import ReflectionSelectionBox
 
-    def fun_clearref(self, event=None):
-        """Clear reflection list"""
-        self.fdm.hkl_reflections = []
-        self.write_reflections()
+        edge = self.calc_edge.get()
+        idx = self.xr_edges.index(edge)
+        energy_kev = self.xr_energies[idx]
+        wavelength_a = energy2wave(energy_kev)
+
+        refs = ReflectionSelectionBox(
+            xtl=self.xtl,
+            parent=self.root,
+            title='Select Resonant Reflections',
+            radiation='X-Ray',
+            wavelength_a=wavelength_a,
+        ).show()
+        if len(refs['hkl']) == 0:
+            return
+
+        ss = self.calc_ss.get()
+        sp = self.calc_sp.get()
+
+        self.fdm.hkl_reflections = refs['hkl']
+        self.calc_reflist.set('%d' % len(refs['hkl']))
 
     def fun_update(self, event=None):
         """Update values and generate text"""
@@ -311,6 +397,10 @@ class RunFDMNESgui:
         self.update()
         AnaFDMNESgui(self.fdm.output_path, self.fdm.output_name)
 
+    def on_closing(self):
+        """End mainloop on close window"""
+        self.root.destroy()
+
 
 class AnaFDMNESgui:
     """
@@ -334,6 +424,7 @@ class AnaFDMNESgui:
 
         if output_path is None or not os.path.isfile(os.path.join(output_path, output_name + '.txt')):
             self.fun_loadpath()
+            return
 
         self.fdm = FdmnesAnalysis(output_path, output_name)
 
@@ -467,16 +558,20 @@ class AnaFDMNESgui:
 
     def fun_loadpath(self, event=None):
         """Button Select - Open new folder"""
-        ini_dir = find_fdmnes()
-        title = 'Select FDMNES output file, e.g. name_bav.txt'
-        filetypes = [('FDMNES output file', '.txt'), ('All files', '.*')]
-        filename = filedialog.askopenfilename(initialdir=ini_dir, title=title, filetypes=filetypes)
+        filename = filedialog.askopenfilename(
+            parent=self.root,
+            initialdir=find_fdmnes() if fdmnes_checker() else os.path.expanduser('~'),
+            title='Select FDMNES output file, e.g. name_bav.txt',
+            filetypes=[('FDMNES output file', '.txt'), ('All files', '.*')]
+        )
         if filename:
             filepath, filename = os.path.split(filename)
             filename = filename.replace('_', '.')
             calc_name = filename.split('.')[0]
             self.root.destroy()
             AnaFDMNESgui(filepath, calc_name)
+        else:
+            self.root.destroy()
 
     def fun_xanes(self, event=None):
         """Button XANES"""
@@ -485,8 +580,15 @@ class AnaFDMNESgui:
 
     def fun_dos(self, event=None):
         """Button DOS"""
-        self.fdm.density.plot()
-        plt.show()
+        if self.fdm.density is not None:
+            self.fdm.density.plot()
+            plt.show()
+        else:
+            messagebox.showinfo(
+                parent=self.root,
+                title='FDMNES DOS',
+                message="Density of States file ('%s_sd0.txt') not available." % self.fdm.output_name
+            )
 
     def fun_ref3d(self, event=None):
         """Button Plot all Azim/energy"""
@@ -504,7 +606,11 @@ class AnaFDMNESgui:
             refob.plot()
             plt.show()
         else:
-            print('Spherical tensor file not available')
+            messagebox.showinfo(
+                parent=self.root,
+                title='FDMNES',
+                message="Spherical tensor file not available"
+            )
 
     def fun_refenergy(self, event=None):
         """Button Plot Energy"""
@@ -533,7 +639,8 @@ class AnaFDMNESgui:
     def fun_search_next(self, event=None):
         """Button Next"""
         search_text = self.bavsearch.get()
-        if search_text == '': return
+        text_search(self.text, search_text)  # Add tags
+        if not search_text: return
 
         searchpos = self.text.index(tk.INSERT) + "+1c"
 
@@ -546,7 +653,8 @@ class AnaFDMNESgui:
     def fun_search_prev(self, event=None):
         """Button Prev"""
         search_text = self.bavsearch.get()
-        if search_text == '': return
+        text_search(self.text, search_text)  # Add tags
+        if not search_text: return
 
         searchpos = self.text.index(tk.INSERT) + "-1c"
 

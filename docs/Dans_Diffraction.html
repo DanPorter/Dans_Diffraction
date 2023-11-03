@@ -6,18 +6,18 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>Dans_Diffraction</strong></big></big> (version 2.3.0, 08/05/23)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>Dans_Diffraction</strong></big></big> (version 3.1.0, 20/07/23)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5C__init__.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\__init__.py</a></font></td></tr></table>
     <p><tt>Dans_Diffraction<br>
 Python&nbsp;package&nbsp;for&nbsp;loading&nbsp;crystal&nbsp;structures&nbsp;from&nbsp;cif&nbsp;files&nbsp;and&nbsp;calculating&nbsp;diffraction&nbsp;information.<br>
 &nbsp;<br>
 Installation:<br>
-$&nbsp;pip&nbsp;install&nbsp;Dans-Diffraction<br>
+$&nbsp;python&nbsp;-m&nbsp;pip&nbsp;install&nbsp;Dans-Diffraction<br>
 or<br>
 $&nbsp;git&nbsp;clone&nbsp;https://github.com/DanPorter/Dans_Diffraction.git<br>
 or<br>
-$&nbsp;pip&nbsp;install&nbsp;git+https://github.com/DanPorter/Dans_Diffraction.git<br>
+$&nbsp;python&nbsp;-m&nbsp;pip&nbsp;install&nbsp;git+https://github.com/DanPorter/Dans_Diffraction.git<br>
 &nbsp;<br>
 Requirements:<br>
 Python&nbsp;2.7+/3+&nbsp;with&nbsp;packages:&nbsp;Numpy,&nbsp;Matplotlib,&nbsp;Tkinter<br>
@@ -35,14 +35,14 @@ Usage:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;$&nbsp;ipython&nbsp;-i&nbsp;-m&nbsp;-matplotlib&nbsp;tk&nbsp;Dans_Diffraction<br>
 &nbsp;<br>
 GitHub&nbsp;Repo:&nbsp;https://github.com/DanPorter/Dans_Diffraction<br>
-Citation&nbsp;DOI:&nbsp;https://doi.org/10.5281/zenodo.3859501<br>
+Citation&nbsp;DOI:&nbsp;https://doi.org/10.5281/zenodo.8106031<br>
 &nbsp;<br>
 By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;2.3.0<br>
-Last&nbsp;updated:&nbsp;08/05/23<br>
+Version&nbsp;3.1.0<br>
+Last&nbsp;updated:&nbsp;11/07/23<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 02/03/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
@@ -77,6 +77,26 @@ Version&nbsp;History:<br>
 06/01/23&nbsp;2.2.2&nbsp;&nbsp;Removed&nbsp;redundent&nbsp;references&nbsp;to&nbsp;np.float<br>
 14/01/23&nbsp;2.2.3&nbsp;&nbsp;Corrected&nbsp;background&nbsp;error&nbsp;in&nbsp;xtl.Scatter.powder<br>
 08/05/23&nbsp;2.3.0&nbsp;&nbsp;Merged&nbsp;pull&nbsp;request&nbsp;for&nbsp;non-integer&nbsp;hkl&nbsp;option&nbsp;on&nbsp;SF&nbsp;and&nbsp;electron&nbsp;form&nbsp;factors.&nbsp;Thanks&nbsp;Prestipino!<br>
+25/06/23&nbsp;3.0.0&nbsp;&nbsp;Added&nbsp;new&nbsp;GUI&nbsp;elements&nbsp;including&nbsp;new&nbsp;Scattering&nbsp;UI&nbsp;and&nbsp;diffractomter&nbsp;simulator,&nbsp;plus&nbsp;other&nbsp;updates<br>
+11/07/23&nbsp;3.0.1&nbsp;&nbsp;Some&nbsp;fixes&nbsp;for&nbsp;plotting&nbsp;and&nbsp;additions&nbsp;to&nbsp;diffractometer&nbsp;orientation.&nbsp;Thanks&nbsp;asteppke!<br>
+20/07/23&nbsp;3.1.0&nbsp;&nbsp;Refactored&nbsp;FDMNES&nbsp;wrapper&nbsp;with&nbsp;new&nbsp;methods&nbsp;and&nbsp;new&nbsp;defaults.&nbsp;Thanks&nbsp;YvesJoly!<br>
+&nbsp;<br>
+Acknoledgements:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;2018&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Hepesu&nbsp;for&nbsp;help&nbsp;with&nbsp;Python3&nbsp;support&nbsp;and&nbsp;ideas&nbsp;about&nbsp;breaking&nbsp;up&nbsp;calculations<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Dec&nbsp;2019&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Gareth&nbsp;Nisbet&nbsp;for&nbsp;allowing&nbsp;me&nbsp;to&nbsp;inlude&nbsp;his&nbsp;multiple&nbsp;scattering&nbsp;siumulation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;April&nbsp;2020&nbsp;&nbsp;Thanks&nbsp;to&nbsp;ChunHai&nbsp;Wang&nbsp;for&nbsp;helpful&nbsp;suggestions&nbsp;in&nbsp;readcif!<br>
+&nbsp;&nbsp;&nbsp;&nbsp;May&nbsp;2020&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;AndreEbel&nbsp;for&nbsp;helpful&nbsp;suggestions&nbsp;on&nbsp;citations<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Dec&nbsp;2020&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Chris&nbsp;Drozdowski&nbsp;for&nbsp;suggestions&nbsp;about&nbsp;reflection&nbsp;families<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Jan&nbsp;2021&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;aslarsen&nbsp;for&nbsp;suggestions&nbsp;about&nbsp;outputting&nbsp;the&nbsp;structure&nbsp;factor<br>
+&nbsp;&nbsp;&nbsp;&nbsp;April&nbsp;2021&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Trygve&nbsp;Ræder&nbsp;for&nbsp;suggestions&nbsp;about&nbsp;x-ray&nbsp;scattering&nbsp;factors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Feb&nbsp;2022&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Mirko&nbsp;for&nbsp;pointing&nbsp;out&nbsp;the&nbsp;error&nbsp;in&nbsp;two-theta&nbsp;values&nbsp;in&nbsp;Scatter.powder<br>
+&nbsp;&nbsp;&nbsp;&nbsp;March&nbsp;2022&nbsp;&nbsp;Thanks&nbsp;to&nbsp;yevgenyr&nbsp;for&nbsp;suggesting&nbsp;new&nbsp;peak&nbsp;profiles&nbsp;in&nbsp;Scatter.powder<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Jan&nbsp;2023&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Anuradha&nbsp;Vibhakar&nbsp;for&nbsp;pointing&nbsp;out&nbsp;the&nbsp;error&nbsp;in&nbsp;f0&nbsp;+&nbsp;if'-if''<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Jan&nbsp;2023&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Andreas&nbsp;Rosnes&nbsp;for&nbsp;testing&nbsp;the&nbsp;installation&nbsp;in&nbsp;jupyterlab<br>
+&nbsp;&nbsp;&nbsp;&nbsp;May&nbsp;2023&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Carmelo&nbsp;Prestipino&nbsp;for&nbsp;adding&nbsp;electron&nbsp;scattering&nbsp;factors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;June&nbsp;2023&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Sergio&nbsp;I.&nbsp;Rincon&nbsp;for&nbsp;pointing&nbsp;out&nbsp;the&nbsp;rounding&nbsp;error&nbsp;in&nbsp;Scatter.powder<br>
+&nbsp;&nbsp;&nbsp;&nbsp;July&nbsp;2023&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;asteppke&nbsp;for&nbsp;suggested&nbsp;update&nbsp;to&nbsp;Arrow3D&nbsp;for&nbsp;matplotlib&nbsp;V&gt;3.4<br>
+&nbsp;&nbsp;&nbsp;&nbsp;July&nbsp;2023&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Yves&nbsp;Joly&nbsp;for&nbsp;helpful&nbsp;suggestions&nbsp;on&nbsp;FDMNES&nbsp;wrapper<br>
 &nbsp;<br>
 -----------------------------------------------------------------------------<br>
 &nbsp;&nbsp;&nbsp;Copyright&nbsp;2023&nbsp;Diamond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
@@ -140,7 +160,10 @@ Other&nbsp;files&nbsp;are&nbsp;either&nbsp;covered&nbsp;by&nbsp;their&nbsp;own&n
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-activate_fdmnes"><strong>activate_fdmnes</strong></a>()</dt><dd><tt>To&nbsp;activate&nbsp;FDMNES&nbsp;functionality</tt></dd></dl>
+<td width="100%"><dl><dt><a name="-activate_fdmnes"><strong>activate_fdmnes</strong></a>(initial_dir=None, fdmnes_filename='fdmnes_win64.exe')</dt><dd><tt>Call&nbsp;to&nbsp;activate&nbsp;FDMNES&nbsp;functionality<br>
+:param&nbsp;fdmnes_filename:&nbsp;name&nbsp;of&nbsp;the&nbsp;executable&nbsp;to&nbsp;search&nbsp;for<br>
+:param&nbsp;initial_dir:&nbsp;None&nbsp;or&nbsp;str,&nbsp;if&nbsp;directory,&nbsp;look&nbsp;here&nbsp;for&nbsp;file<br>
+:return:&nbsp;None</tt></dd></dl>
  <dl><dt><a name="-doc_str"><strong>doc_str</strong></a>()</dt></dl>
  <dl><dt><a name="-module_info"><strong>module_info</strong></a>()</dt></dl>
  <dl><dt><a name="-start_gui"><strong>start_gui</strong></a>(xtl=None)</dt><dd><tt>Start&nbsp;GUI&nbsp;window&nbsp;(requires&nbsp;tkinter)</tt></dd></dl>

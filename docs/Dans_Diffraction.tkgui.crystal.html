@@ -88,6 +88,8 @@ Provide&nbsp;options&nbsp;for&nbsp;plotting&nbsp;and&nbsp;viewing&nbsp;Crystal&n
 
 <dl><dt><a name="CrystalGui-fun_atoms"><strong>fun_atoms</strong></a>(self)</dt></dl>
 
+<dl><dt><a name="CrystalGui-fun_diffractometer"><strong>fun_diffractometer</strong></a>(self)</dt></dl>
+
 <dl><dt><a name="CrystalGui-fun_fdmnes"><strong>fun_fdmnes</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="CrystalGui-fun_get"><strong>fun_get</strong></a>(self)</dt></dl>
@@ -110,9 +112,7 @@ Provide&nbsp;options&nbsp;for&nbsp;plotting&nbsp;and&nbsp;viewing&nbsp;Crystal&n
 
 <dl><dt><a name="CrystalGui-fun_properties"><strong>fun_properties</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="CrystalGui-fun_set"><strong>fun_set</strong></a>(self)</dt><dd><tt>###################################################################################<br>
-##############################&nbsp;FUNCTIONS&nbsp;##########################################<br>
-###################################################################################</tt></dd></dl>
+<dl><dt><a name="CrystalGui-fun_set"><strong>fun_set</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="CrystalGui-fun_simulate"><strong>fun_simulate</strong></a>(self)</dt></dl>
 
@@ -126,7 +126,17 @@ Provide&nbsp;options&nbsp;for&nbsp;plotting&nbsp;and&nbsp;viewing&nbsp;Crystal&n
 
 <dl><dt><a name="CrystalGui-fun_writecif"><strong>fun_writecif</strong></a>(self, inifile=None)</dt></dl>
 
+<dl><dt><a name="CrystalGui-menu_analyse_fdmnes"><strong>menu_analyse_fdmnes</strong></a>(self)</dt><dd><tt>Open&nbsp;FDMNS&nbsp;analysis&nbsp;GUI</tt></dd></dl>
+
+<dl><dt><a name="CrystalGui-menu_converter"><strong>menu_converter</strong></a>(self)</dt><dd><tt>Open&nbsp;unit&nbsp;converter</tt></dd></dl>
+
+<dl><dt><a name="CrystalGui-menu_darkmode"><strong>menu_darkmode</strong></a>(self)</dt><dd><tt>Change&nbsp;colour&nbsp;scheme</tt></dd></dl>
+
 <dl><dt><a name="CrystalGui-menu_examples"><strong>menu_examples</strong></a>(self)</dt><dd><tt>List&nbsp;example&nbsp;files,&nbsp;open&nbsp;in&nbsp;system&nbsp;viewer</tt></dd></dl>
+
+<dl><dt><a name="CrystalGui-menu_fdmnes_indata"><strong>menu_fdmnes_indata</strong></a>(self)</dt><dd><tt>Display&nbsp;FDMNES&nbsp;indata&nbsp;file</tt></dd></dl>
+
+<dl><dt><a name="CrystalGui-menu_file_clipboard"><strong>menu_file_clipboard</strong></a>(self)</dt><dd><tt>Add&nbsp;filename&nbsp;to&nbsp;clipboard</tt></dd></dl>
 
 <dl><dt><a name="CrystalGui-menu_info_atoms"><strong>menu_info_atoms</strong></a>(self)</dt><dd><tt>Atoms&nbsp;info</tt></dd></dl>
 
@@ -142,7 +152,19 @@ Provide&nbsp;options&nbsp;for&nbsp;plotting&nbsp;and&nbsp;viewing&nbsp;Crystal&n
 
 <dl><dt><a name="CrystalGui-menu_info_symmetry"><strong>menu_info_symmetry</strong></a>(self)</dt><dd><tt>Symmetry&nbsp;info</tt></dd></dl>
 
+<dl><dt><a name="CrystalGui-menu_info_table"><strong>menu_info_table</strong></a>(self)</dt><dd><tt>Open&nbsp;periodic&nbsp;table</tt></dd></dl>
+
+<dl><dt><a name="CrystalGui-menu_latex"><strong>menu_latex</strong></a>(self)</dt><dd><tt>Display&nbsp;latex&nbsp;commands</tt></dd></dl>
+
 <dl><dt><a name="CrystalGui-menu_new"><strong>menu_new</strong></a>(self)</dt><dd><tt>Create&nbsp;a&nbsp;new&nbsp;instance</tt></dd></dl>
+
+<dl><dt><a name="CrystalGui-menu_ref_list"><strong>menu_ref_list</strong></a>(self)</dt><dd><tt>Reflection&nbsp;list</tt></dd></dl>
+
+<dl><dt><a name="CrystalGui-menu_spacegroups"><strong>menu_spacegroups</strong></a>(self)</dt><dd><tt>Open&nbsp;Spacegroup&nbsp;viewer&nbsp;gui</tt></dd></dl>
+
+<dl><dt><a name="CrystalGui-menu_start_fdmnes"><strong>menu_start_fdmnes</strong></a>(self)</dt><dd><tt>Search&nbsp;for&nbsp;FDMNES,&nbsp;restart&nbsp;GUI</tt></dd></dl>
+
+<dl><dt><a name="CrystalGui-menu_xray_interactions"><strong>menu_xray_interactions</strong></a>(self)</dt><dd><tt>Open&nbsp;x-ray&nbsp;interactions&nbsp;gui</tt></dd></dl>
 
 <dl><dt><a name="CrystalGui-on_closing"><strong>on_closing</strong></a>(self)</dt><dd><tt>End&nbsp;mainloop&nbsp;on&nbsp;close&nbsp;window</tt></dd></dl>
 
@@ -265,10 +287,10 @@ Data descriptors defined here:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>BF</strong> = ['Times', 14]<br>
+<td width="100%"><strong>BF</strong> = ['Palatino', 14]<br>
 <strong>HF</strong> = ['Courier', 12]<br>
-<strong>SF</strong> = ['Times New Roman', 14]<br>
-<strong>TF</strong> = ['Times', 12]<br>
+<strong>SF</strong> = ['Palatino', 14]<br>
+<strong>TF</strong> = ['Palatino', 12]<br>
 <strong>TTF</strong> = ('Helvetica', 10, 'bold italic')<br>
 <strong>bkg</strong> = 'snow'<br>
 <strong>btn</strong> = 'azure'<br>

@@ -2,19 +2,13 @@
 Properties GUI
 """
 
-import sys, os
-
 import matplotlib.pyplot as plt
 import numpy as np
-if sys.version_info[0] < 3:
-    import Tkinter as tk
-else:
-    import tkinter as tk
 
 from .. import functions_general as fg
 from .. import functions_crystallography as fc
 from .. import functions_plotting as fp
-from .basic_widgets import StringViewer, SelectionBox
+from .basic_widgets import tk, StringViewer, SelectionBox, messagebox
 from .basic_widgets import (TF, BF, SF, LF, HF,
                             bkg, ety, btn, opt, btn2,
                             btn_active, opt_active, txtcol,
@@ -171,6 +165,10 @@ class PropertiesGui:
                         activebackground=btn_active)
         var.pack(side=tk.LEFT)
 
+        var = tk.Button(line, text='Bond\nDistances', font=BF, command=self.fun_neighbours, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT)
+
         # ---Line 5---
         line = tk.Frame(frame)
         line.pack(side=tk.TOP, pady=5)
@@ -283,6 +281,9 @@ class PropertiesGui:
         fp.plot_xray_attenuation(elelist)
         plt.show()
 
+    def fun_neighbours(self):
+        NeighborsGui(self.xtl)
+
     def fun_xsf(self):
         """Properties button"""
         elements = self.atoms.get()
@@ -331,7 +332,7 @@ class XrayInteractionsGui:
         # Crystal info
         name = xtl.name
         formula = xtl.Properties.molname()
-        density = xtl.Properties.density()
+        density = round(xtl.Properties.density(), 3)
 
         # Variables
         self.chem_formula = tk.StringVar(frame, formula)
@@ -419,6 +420,8 @@ class XrayInteractionsGui:
 
         var = tk.Label(line, text='Grazing angle:', width=20, font=TF, anchor=tk.E)
         var.pack(side=tk.LEFT)
+        var = tk.Button(line, text='?', font=TF, command=self.button_help_angle, bg=btn, activebackground=btn_active)
+        var.pack(side=tk.LEFT, padx=1)
         var = tk.Entry(line, textvariable=self.grazing_angle, font=TF, width=20, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         var = tk.Label(line, text=' Deg', font=TF)
@@ -430,6 +433,8 @@ class XrayInteractionsGui:
 
         var = tk.Label(line, text='Thickness:', width=20, font=TF, anchor=tk.E)
         var.pack(side=tk.LEFT)
+        var = tk.Button(line, text='?', font=TF, command=self.button_help_thickness, bg=btn, activebackground=btn_active)
+        var.pack(side=tk.LEFT, padx=1)
         var = tk.Entry(line, textvariable=self.slab_thickness, font=TF, width=20, bg=ety, fg=ety_txt)
         var.pack(side=tk.LEFT)
         var = tk.Label(line, text=' μm', font=TF)
@@ -446,6 +451,10 @@ class XrayInteractionsGui:
         var = tk.Button(line, text='Thick Slab\nTransmission', font=BF, command=self.button_transmission, bg=btn,
                         activebackground=btn_active)
         var.pack(side=tk.LEFT)
+
+        var = tk.Button(line, text='Reflectivity', font=BF, command=self.button_reflectivity, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT, fill=tk.Y)
 
         var = tk.Button(line, text='Index of\nRefraction', font=BF, command=self.button_refraction, bg=btn,
                         activebackground=btn_active)
@@ -520,6 +529,21 @@ class XrayInteractionsGui:
         self.scan_step.set(scan_step)
         self.scan_units.set(self.scan_types[scan_type])
 
+    def button_help_angle(self):
+        messagebox.showinfo(
+            parent=self.root,
+            title='X-Ray Interactions',
+            message='Grazing angle: angle from surface to incident beam, in degrees\n' +
+            'Typical values:\n\tTransmission: 90 Deg\n\tReflectivity: 0.2 Deg',
+        )
+
+    def button_help_thickness(self):
+        messagebox.showinfo(
+            parent=self.root,
+            title='X-Ray Interactions',
+            message='Thickness: distance beam travels through material in Transmission, in microns.',
+        )
+
     def button_atten(self):
         formula = self.chem_formula.get()
         density = self.density.get()
@@ -536,10 +560,187 @@ class XrayInteractionsGui:
         fp.plot_xray_transmission(formula, density, energy_range, thickness)
         plt.show()
 
+    def button_reflectivity(self):
+        formula = self.chem_formula.get()
+        density = self.density.get()
+        angle = self.grazing_angle.get()
+        energy_range = self.get_scan()
+        fp.plot_xray_reflectivity(formula, density, energy_range, angle)
+        plt.show()
+
     def button_refraction(self):
         formula = self.chem_formula.get()
         density = self.density.get()
         energy_range = self.get_scan()
         fp.plot_xray_refractive_index(formula, density, energy_range)
         plt.show()
+
+
+class NeighborsGui:
+    """
+    Calculate bond distances
+    """
+
+    def __init__(self, xtl):
+        """Initialise"""
+        self.xtl = xtl
+        # Create Tk inter instance
+        self.root = tk.Tk()
+        self.root.wm_title('Bond Distances')
+        # self.root.minsize(width=640, height=480)
+        self.root.maxsize(width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight())
+        self.root.tk_setPalette(
+            background=bkg,
+            foreground=txtcol,
+            activeBackground=opt_active,
+            activeForeground=txtcol)
+
+        frame = tk.Frame(self.root)
+        frame.pack(side=tk.LEFT, anchor=tk.N)
+
+        # Variables
+        self.atom_list = [self._atom_str(atom) for atom in self.xtl.Structure]
+        self.structure_index = tk.IntVar(frame, 0)
+        self.atom_str = tk.StringVar(frame, self.atom_list[0])
+        self.radius = tk.DoubleVar(frame, 2.5)
+        self.exchange_type = tk.StringVar(frame, 'O')
+        self.bond_angle = tk.DoubleVar(frame, 90)
+        self.search_in_cell = tk.BooleanVar(frame, True)
+        self.group_neighbors = tk.BooleanVar(frame, True)
+
+        # Atom index
+        line = tk.Frame(frame)
+        line.pack(side=tk.TOP, expand=tk.TRUE, fill=tk.X, pady=5)
+        var = tk.Label(line, text='Atom Index:', width=20, font=TF, anchor=tk.E)
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.structure_index, font=TF, width=3, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.atom_update)
+        var.bind('<KP_Enter>', self.atom_update)
+        var = tk.Label(line, textvariable=self.atom_str, font=TF, width=30, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var = tk.Button(line, text='Select', font=TF, command=self.button_select_atom,
+                        bg=btn, activebackground=btn_active)
+        var.pack(side=tk.LEFT, padx=1)
+
+        # Radius
+        line = tk.Frame(frame)
+        line.pack(side=tk.TOP, expand=tk.TRUE, fill=tk.X, pady=5)
+        var = tk.Label(line, text='Radius:', width=20, font=TF, anchor=tk.E)
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.radius, font=TF, width=3, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var = tk.Button(line, text='?', font=TF, command=self.button_radius,
+                        bg=btn, activebackground=btn_active)
+        var.pack(side=tk.LEFT, padx=1)
+
+        # Exchange type
+        line = tk.Frame(frame)
+        line.pack(side=tk.TOP, expand=tk.TRUE, fill=tk.X, pady=5)
+        var = tk.Label(line, text='Exchange type:', width=20, font=TF, anchor=tk.E)
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.exchange_type, font=TF, width=3, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+
+        # bond angle
+        line = tk.Frame(frame)
+        line.pack(side=tk.TOP, expand=tk.TRUE, fill=tk.X, pady=5)
+        var = tk.Label(line, text='Bond Angle:', width=20, font=TF, anchor=tk.E)
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.bond_angle, font=TF, width=3, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var = tk.Label(line, text=' Deg', font=TF)
+        var.pack(side=tk.LEFT)
+
+        # Options
+        line = tk.Frame(frame)
+        line.pack(side=tk.TOP, expand=tk.TRUE, fill=tk.X, pady=5)
+        var = tk.Checkbutton(line, text='Search in cell', variable=self.search_in_cell, font=SF)
+        var.pack(side=tk.LEFT, padx=6)
+        var = tk.Checkbutton(line, text='Group Neighbors', variable=self.group_neighbors, font=SF)
+        var.pack(side=tk.LEFT, padx=6)
+
+        # Buttons
+        line = tk.Frame(frame)
+        line.pack(side=tk.TOP, expand=tk.TRUE, pady=5)
+        var = tk.Button(line, text='All Bond\nDistances', font=BF, command=self.button_allbonds, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT)
+        var = tk.Button(line, text='Atomic\nNeighbours', font=BF, command=self.button_neighbours, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT)
+        var = tk.Button(line, text='Exchange\nPaths', font=BF, command=self.button_exchange, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT)
+        var = tk.Button(line, text='Plot Exchange\nPaths', font=BF, command=self.button_plot_exchange, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT)
+
+    def _atom_str(self, atom):
+        s = '%4s [%2s] (%5.2f,%5.2f,%5.2f)'
+        return s % (atom.label, atom.type, atom.u, atom.v, atom.w)
+
+    def atom_update(self, event=None):
+        idx = self.structure_index.get()
+        self.atom_str.set(self.atom_list[idx])
+
+    def button_select_atom(self):
+        choose = SelectionBox(self.root, self.atom_list, multiselect=False, title='Select atom site').show()
+        if choose:
+            idx = self.atom_list.index(choose[0])
+            self.structure_index.set(idx)
+            self.atom_str.set(choose[0])
+
+    def button_radius(self):
+        messagebox.showinfo(
+            parent=self.root,
+            title='Radius',
+            message='Nearest neighbors: search radius about central atom [2.5A]\n' +
+            'Exchange paths: typical value [7.0A]'
+        )
+
+    def button_allbonds(self):
+        out = ''
+        # get atom sites
+        for atom_str in self.atom_list:
+            idx = self.atom_list.index(atom_str)
+            bond_str = self.xtl.Properties.atomic_neighbours(
+                structure_index=idx,
+                radius=self.radius.get(),
+                return_str=True
+            )
+            out += '%3d %s\n%s\n\n' % (idx, atom_str, bond_str)
+        StringViewer(out, title='%s All Bonds' % self.xtl.name, width=60)
+
+    def button_neighbours(self):
+        out = self.xtl.Properties.atomic_neighbours(
+            structure_index=self.structure_index.get(),
+            radius=self.radius.get(),
+            disp=True,
+            return_str=True
+        )
+        StringViewer(out, title='%s %s' % (self.xtl.name, self.atom_str.get()), width=60)
+
+    def button_exchange(self):
+        exchange_paths, exchange_distances, outstr = self.xtl.Properties.exchange_paths(
+            cen_idx=self.structure_index.get(),
+            nearest_neighbor_distance=self.radius.get(),
+            exchange_type=self.exchange_type.get(),
+            bond_angle=self.bond_angle.get(),
+            search_in_cell=self.search_in_cell.get(),
+            group_neighbors=self.group_neighbors.get(),
+            disp=True,
+            return_str=True
+        )
+        StringViewer(outstr, title='%s %s' % (self.xtl.name, self.atom_str.get()), width=100)
+
+    def button_plot_exchange(self):
+        self.xtl.Plot.plot_exchange_paths(
+            cen_idx=self.structure_index.get(),
+            nearest_neighbor_distance=self.radius.get(),
+            exchange_type=self.exchange_type.get(),
+            bond_angle=self.bond_angle.get(),
+            search_in_cell=self.search_in_cell.get(),
+            group_neighbors=self.group_neighbors.get()
+        )
 

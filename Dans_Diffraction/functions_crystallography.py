@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.8.0
-Last updated: 07/05/23
+Version 3.8.2
+Last updated: 02/07/23
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -41,6 +41,8 @@ Version History:
 12/01/22 3.7.1  Added gen_sym_axial_vector
 23/04/22 3.7.2  Corrected magnitude of Q in magnetic_structure_factors
 07/05/23 3.8.0  Added electron_scattering_factors and electron wavelength formula
+22/05/23 3.8.1  Added wyckoff_label, find_spacegroup
+02/07/23 3.8.2  Added wavelength options to several functions, plut DeBroglie wavelength function
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -56,7 +58,7 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.7.2'
+__version__ = '3.8.2'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -93,13 +95,6 @@ ELEMENT_LIST = [
 ]
 element_regex = re.compile('|'.join(ELEMENT_LIST))
 
-# Symmetry translations (remove these to turn symmetry operations into magnetic one)
-TRANSLATIONS = [
-    '+1/2', '+1/3', '+2/3', '+1/4', '+3/4', '+1/6', '+5/6', '+5/4',
-    '1/2+', '1/3+', '2/3+', '1/4+', '3/4+', '1/6+', '5/6+', '5/4+',
-    '-1/2', '-1/3', '-2/3', '-1/4', '-3/4', '-1/6', '-5/6', '-5/4',
-    '1/2-', '1/3-', '2/3-', '1/4-', '3/4-', '1/6-', '5/6-', '5/4-',
-]
 
 # Required CIF keys, must be available and not '?'
 CIF_REQUIRES = [
@@ -1092,7 +1087,7 @@ def xray_scattering_factor_resonant(element, Qmag, energy_kev):
 
     Qff = np.zeros([len(Qmag), len(coef), len(energy_kev)], dtype=complex)
     # Broadcast dispersion corrections
-    Qff[:, :, :] = f1.T + 1j * f2.T
+    Qff[:, :, :] = f1.T - 1j * f2.T  # change from + to - on 2/July/2023
 
     # Loop over elements
     for n in range(len(coef)):
@@ -1421,13 +1416,15 @@ def spacegroup_subgroups(sg_number):
     return [all_sg[num] for num in subgroups]
 
 
-def spacegroup_subgroups_list(sg_number):
+def spacegroup_subgroups_list(sg_number=None, sg_dict=None):
     """
     Return str of maximal subgroups for spacegroup
     :param sg_number: space group number (1-230)
+    :param sg_dict: alternate input, spacegroup dict from spacegroup function
     :return: str
     """
-    sg_dict = spacegroup(sg_number)
+    if sg_number is not None:
+        sg_dict = spacegroup(sg_number)
     sub_num = sg_dict["subgroup number"]
     sub_name = sg_dict["subgroup name"]
     sub_index = sg_dict["subgroup index"]
@@ -1439,10 +1436,11 @@ def spacegroup_subgroups_list(sg_number):
     return out
 
 
-def spacegroups_magnetic(sg_number=None):
+def spacegroups_magnetic(sg_number=None, sg_dict=None):
     """
     Returns dict of magnetic space groups for required space group
     :param sg_number: space group number (1-230) or None to return all magnetic spacegroups
+    :param sg_dict: alternate input, spacegroup dict from spacegroup function
     :return: dict
     """
 
@@ -1450,10 +1448,10 @@ def spacegroups_magnetic(sg_number=None):
     with open(msg_file, 'r') as fp:
         msg_dict = json.load(fp)
 
-    if sg_number is None:
+    if sg_number is None and sg_dict is None:
         return msg_dict
-
-    sg_dict = spacegroup(sg_number)
+    if sg_number is not None:
+        sg_dict = spacegroup(sg_number)
     msg_numbers = sg_dict['magnetic space groups']
     return [msg_dict[num] for num in msg_numbers]
 
@@ -1489,13 +1487,15 @@ def spacegroup_magnetic(msg_number):
         return [msg_dict[num] for num in msg_number]
 
 
-def spacegroup_magnetic_list(sg_number):
+def spacegroup_magnetic_list(sg_number=None, sg_dict=None):
     """
     Return str list of magnetic space groups
     :param sg_number: space group number (1-230)
+    :param sg_dict: alternate input, spacegroup dict from spacegroup function
     :return: str
     """
-    mag_spacegroups = spacegroups_magnetic(sg_number)
+    mag_spacegroups = spacegroups_magnetic(sg_number, sg_dict)
+
     out = ''
     fmt = 'Parent: %3s Magnetic: %-10s  %-10s  Setting: %3s %30s  Operators: %s\n'
     for sg in mag_spacegroups:
@@ -1508,6 +1508,64 @@ def spacegroup_magnetic_list(sg_number):
         ops = sg['positions magnetic']
         out += fmt % (parent, number, name, setting, typename, ops)
     return out
+
+
+def find_spacegroup(sg_symbol):
+    """
+    Find a spacegroup based on the identifying symbol
+    :param sg_symbol: str, e.g. 'Fd-3m'
+    :return: spacegroup dict or None if not found
+    """
+    sg_symbol = sg_symbol.replace(' ', '').replace('\"', '')
+    sg_dict = spacegroups()
+    sg_keys = list(sg_dict.keys())
+    sg_names = [sg_dict[sg]['space group name'] for sg in sg_dict]
+    if sg_symbol in sg_names:
+        key = sg_keys[sg_names.index(sg_symbol)]
+        return sg_dict[key]
+    sg_dict = spacegroups_magnetic()
+    sg_keys = list(sg_dict.keys())
+    sg_names = [sg_dict[sg]['space group name'] for sg in sg_dict]
+    if sg_symbol in sg_names:
+        key = sg_keys[sg_names.index(sg_symbol)]
+        return sg_dict[key]
+    return None
+
+
+def wyckoff_labels(spacegroup_dict, UVW):
+    """
+    Return Wyckoff site labels for given positions
+    :param spacegroup_dict: spacegroup dict from tables, if magnetic spacegroup given, uses the parent spacegroup
+    :param UVW: n*3 array([u,v,w]) atomic positions in fractional coordinates
+    :return: list[n] of Wyckoff site letters
+    """
+
+    if 'parent number' in spacegroup_dict:
+        # magnetic spacegroup - doesn't contain wyckoff letters
+        spacegroup_dict = spacegroup(spacegroup_dict['parent number'])
+
+    general_positions = spacegroup_dict['general positions']
+    wyckoff_positions = spacegroup_dict['positions coordinates'][::-1]
+    wyckoff_letters = spacegroup_dict['positions wyckoff letter'][::-1]
+    multiplicity = spacegroup_dict['positions multiplicity'][::-1]
+    symmetry = spacegroup_dict['positions symmetry'][::-1]
+
+    sites = ['%s%s (%s)' % (m, l, s) for l, m, s in zip(wyckoff_letters, multiplicity, symmetry)]
+
+    UVW = np.asarray(UVW, dtype=float).reshape((-1, 3))
+    uvw_letters = [wyckoff_letters[-1] for n in range(len(UVW))]
+    for n in range(len(UVW)):
+        u, v, w = UVW[n]
+        # For each position, generate all general positions
+        sym_uvw = fitincell(gen_sym_pos(general_positions, u, v, w))
+        for wyckoff_ops, letter in zip(wyckoff_positions, sites):
+            # looping from smallest to most general, check if first Wyckoff position is in general positions
+            trial_uvw = fitincell(gen_sym_pos(wyckoff_ops[:1], u, v, w))[0]
+            diff = fg.mag(sym_uvw - trial_uvw)
+            if diff.min() < 0.01:
+                uvw_letters[n] = letter
+                break
+    return uvw_letters
 
 
 '--------------Element Properties & Charge----------------------'
@@ -1850,21 +1908,37 @@ def xray_refractive_index(elements, energy_kev, atom_per_volume):
 def xray_reflectivity(elements, energy_kev, atom_per_volume, grazing_angle):
     """
     Calculate the specular reflectivity of a material
-      NOT CURRENTLY WORKING
+    From: https://xdb.lbl.gov/Section4/Sec_4-2.html
     :param elements: str or list of str, if list - absorption will be summed over elements
     :param energy_kev: float array
     :param atom_per_volume: float atoms per A^3
     :param grazing_angle: incidence angle relative to the surface, in degrees
     :return: float or array
     """
-    #wavelength = energy2wave(energy_kev) * 1e-10
+    wavelength = energy2wave(energy_kev)
     refindex = xray_refractive_index(elements, energy_kev, atom_per_volume)
-    #pilambda = 2 * fg.pi / wavelength
-    costh = np.cos(np.deg2rad(grazing_angle))
-    ki = costh
-    kt = np.sqrt(refindex*np.conj(refindex) - costh**2)
+    pilambda = 2 * fg.pi / wavelength
+    angle_rad = np.deg2rad(grazing_angle)
+    ki = pilambda * np.sin(angle_rad)
+    kt = pilambda * np.sqrt(refindex**2 - np.cos(angle_rad)**2)
     r = (ki - kt)/(ki + kt)
-    return np.real(r * np.conj(r))
+    return np.real(np.multiply(r, np.conj(r)))
+
+
+def xray_harmonic_rejection(elements, energy_kev, atom_per_volume, grazing_angle, harmonic=2):
+    """
+    Calculate the specular reflectivity of a material
+    From: https://xdb.lbl.gov/Section4/Sec_4-2.html
+    :param elements: str or list of str, if list - absorption will be summed over elements
+    :param energy_kev: float array
+    :param atom_per_volume: float atoms per A^3
+    :param grazing_angle: incidence angle relative to the surface, in degrees
+    :param harmonic: int harmonic multiple
+    :return: float or array
+    """
+    primary_r = xray_reflectivity(elements, energy_kev, atom_per_volume, grazing_angle)
+    harmonic_r = xray_reflectivity(elements, np.multiply(energy_kev, harmonic), atom_per_volume, grazing_angle)
+    return np.divide(harmonic_r, primary_r)
 
 
 def molecular_attenuation_length(chemical_formula, energy_kev, density, grazing_angle=90):
@@ -1902,6 +1976,22 @@ def molecular_refractive_index(chemical_formula, energy_kev, density):
     delta = 1 - np.real(n)
     beta = -np.imag(n)
     return n, delta, beta
+
+
+def molecular_reflectivity(chemical_formula, energy_kev, density, grazing_angle):
+    """
+    Calculate the specular reflectivity of a material
+    From: https://xdb.lbl.gov/Section4/Sec_4-2.html
+    :param chemical_formula: str molecular formula
+    :param energy_kev: float or array, x-ray energy in keV
+    :param density: float, density in g/cm^3
+    :param grazing_angle: float, incidence angle relative to the surface, in degrees
+    :return: float or array
+    """
+    elements = split_compound(chemical_formula)
+    weight = molecular_weight(chemical_formula)
+    atom_per_volume = 1e-24 * density * fg.Na / weight  # atoms per A^3
+    return xray_reflectivity(elements, energy_kev, atom_per_volume, grazing_angle)
 
 
 def filter_transmission(chemical_formula, energy_kev, density, thickness_um=100):
@@ -1951,6 +2041,23 @@ def indx(Q, UV):
     """
     HKL = np.dot(Q, np.linalg.inv(UV))
     return HKL
+
+
+def wavevector_difference(Q, ki):
+    """
+    Returns the difference between reciprocal lattice coordinates and incident wavevector, in A-1
+    When the difference is zero, the condition for diffraction is met.
+      Laue condition: Q = ha* + kb* + lc* == kf - ki
+      Elastic scattering:            |kf| = |ki|
+      Therefore:          |Q + ki| - |ki| = 0
+      Expanding & simplifing: Q.Q + 2Q.ki = 0
+    :param Q: [[nx3]] array of reciprocal lattice coordinates, in A-1
+    :param ki: [x,y,z] incident wavevector, in A-1
+    :return: [nx1] array of difference, in A-1
+    """
+    return np.abs(fg.mag(Q + ki) - fg.mag(ki))
+    # Q = np.reshape(Q, [-1, 3])
+    # return np.array([np.dot(q, q) + 2 * np.dot(q, ki) for q in Q])
 
 
 def latparvolume(a, b=None, c=None, alpha=90., beta=90., gamma=90.):
@@ -2066,19 +2173,29 @@ def ubmatrix(uv, u):
 
 def rotmatrixz(phi):
     """
-    Generate diffractometer rotation matrix phi (eta, delta) about z-axis
+    Generate diffractometer rotation matrix about z-axis (right handed)
+    Equivalent to YAW in the Tait-Bryan convention
+    Equivalent to -phi, -eta, -delta in You et al. diffractometer convention (left handed)
+        r = rotmatrix_z(phi)
+        vec' = np.dot(r, vec)
+    vec must be 1D or column vector (3*n)
     :param phi: float angle in degrees
     :return: [3*3] array
     """
     phi = np.deg2rad(phi)
     c = np.cos(phi)
     s = np.sin(phi)
-    return np.array([[c, s, 0], [-s, c, 0], [0, 0, 1]])
+    return np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])  # wiki - right handed
 
 
 def rotmatrixy(chi):
     """
-    Generate diffractometer rotation matrix chi about y-axis
+    Generate diffractometer rotation matrix chi about y-axis (right handed)
+    Equivalent to PITCH in the Tait–Bryan convention
+    Equivalent to -chi in You et al. diffractometer convention (left handed)
+        r = rotmatrix_y(chi)
+        vec' = np.dot(r, vec)
+    vec must be 1D or column vector (3*n)
     :param chi: float angle in degrees
     :return: [3*3] array
     """
@@ -2090,7 +2207,12 @@ def rotmatrixy(chi):
 
 def rotmatrixx(mu):
     """
-    Generate diffractometer rotation matrix mu (gamma) about x-axis
+    Generate diffractometer rotation matrix mu about x-axis (right handed)
+    Equivalent to ROLL in the Tait–Bryan convention
+    Equivalent to mu in You et al. diffractometer convention (right handed)
+        r = rotmatrix_x(mu)
+        vec' = np.dot(r, vec)
+    vec must be 1D or column vector (3*n)
     :param mu: float angle in degrees
     :return: [3*3] array
     """
@@ -2105,15 +2227,23 @@ def diffractometer_rotation(phi=0, chi=0, eta=0, mu=0):
     Generate the 6-axis diffracometer rotation matrix
       R = M * E * X * P
     Also called Z in H. You, J. Appl. Cryst 32 (1999), 614-623
-    :param phi: float angle in degrees
-    :param chi: float angle in degrees
-    :param eta: float angle in degrees
-    :param mu: float angle in degrees
+    The diffractometer coordinate system has the convention (all angles zero):
+        x-axis points vertically, perpendicular to beam (mu is about x)
+        y-axis points along the direction of the beam
+        z-axis points along the phi axis, perpendicular to x and y
+    The vertical scattering plane is in the y-x axis
+    The horizontal scattering plane is in the y-z axis
+       vec' = np.dot(diffractometer_rotation(phi, chi, eta, mu), vec)
+       vec must be 1D or column vector (3*n)
+    :param phi: float angle in degrees, left handed roation about z'''
+    :param chi: float angle in degrees, right handed rotation about y''
+    :param eta: float angle in degrees, left handed rotation about z'
+    :param mu: float angle in degrees, right handed rotation about x
     :return:  [3*3] array
     """
-    P = rotmatrixz(phi)
+    P = rotmatrixz(-phi)  # left handed
     X = rotmatrixy(chi)
-    E = rotmatrixz(eta)
+    E = rotmatrixz(-eta)  # left handed
     M = rotmatrixx(mu)
     return np.dot(M, np.dot(E, np.dot(X, P)))
 
@@ -2362,7 +2492,8 @@ def gen_sym_pos(sym_ops, x, y, z):
         sym = sym.replace('/', './')
         sym = sym.strip('\"\'')
         sym = sym.replace('mx', 'x').replace('my', 'y').replace('mz', 'z')
-        out = eval(sym)
+        sym = sym.replace('2x', '2*x')  # 2x appears in some hexagonal spacegroups
+        out = eval(sym, {'x': x, 'y': y, 'z': z})
         uvw[n] = np.array(out[0:3]) + 0.0  # add zero to remove -0.0 values
     return uvw
 
@@ -2603,7 +2734,8 @@ def sym_op_recogniser(sym_ops):
         msum = np.sum(m[:3, :3])
         asum = np.sum(np.abs(m[:3, :3]))
         if DEBUG:
-            print(f"{op:20s}: ns={ns}, parity={parity}, translation={translation}, sum={msum}, abssum={asum}")
+            s = "{20s}: ns={}, parity={}, translation={}, sum={}, abssum={}"
+            print(s.format(os, ns, parity, translation, msum, asum))
         if ns == 0:  # translation
             if translation < 0.01:
                 out += ['1']
@@ -2923,17 +3055,18 @@ def hkl2Qmag(hkl, UVstar):
     return fg.mag(Q)
 
 
-def hkl2twotheta(hkl, UVstar, energy_kev=17.794):
+def hkl2twotheta(hkl, UVstar, energy_kev=17.794, wavelength_a=None):
     """
     Calcualte d-spacing from hkl reflection
     :param hkl: [nx3] array of reflections
     :param UV: [3x3] array of unit cell vectors
     :param energy_kev: float energy in keV
+    :param wavelength_a: float wavelength in Angstroms
     :return: [nx1] array of d-spacing in A
     """
     q = np.dot(hkl, UVstar)
     q_mag = fg.mag(q)
-    return cal2theta(q_mag, energy_kev)
+    return cal2theta(q_mag, energy_kev, wavelength_a)
 
 
 def hkl2dspace(hkl, UVstar):
@@ -2973,39 +3106,46 @@ def lattice_hkl2twotheta(hkl, energy_kev=17.794, lattice_parameters=(), *args, *
     return hkl2twotheta(hkl, uvs, energy_kev)
 
 
-def calqmag(twotheta, energy_kev=17.794):
+def calqmag(twotheta, energy_kev=17.794, wavelength_a=None):
     """
     Calculate |Q| at a particular 2-theta (deg) for energy in keV
      magQ = calqmag(twotheta, energy_kev=17.794)
     """
-
-    energy = energy_kev * 1000.0  # energy in eV
+    if wavelength_a is None:
+        wavelength_a = energy2wave(energy_kev)  # wavelength form photon energy
+    # energy = energy_kev * 1000.0  # energy in eV
     theta = twotheta * np.pi / 360  # theta in radians
     # Calculate |Q|
-    magq = np.sin(theta) * energy * fg.e * 4 * np.pi / (fg.h * fg.c * 1e10)
+    # magq = 4pi sin(theta) / lambda
+    # magq = np.sin(theta) * energy * fg.e * 4 * np.pi / (fg.h * fg.c * 1e10)
+    magq = np.sin(theta) * 4 * np.pi / wavelength_a
     return magq
 
 
-def cal2theta(qmag, energy_kev=17.794):
+def cal2theta(qmag, energy_kev=17.794, wavelength_a=None):
     """
     Calculate theta at particular energy in keV from |Q|
      twotheta = cal2theta(Qmag,energy_kev=17.794)
     """
-
-    energy = energy_kev * 1000.0  # energy in eV
+    if wavelength_a is None:
+        wavelength_a = energy2wave(energy_kev)  # wavelength form photon energy
+    # energy = energy_kev * 1000.0  # energy in eV
     # Calculate 2theta angles for x-rays
-    twotheta = 2 * np.arcsin(qmag * 1e10 * fg.h * fg.c / (energy * fg.e * 4 * np.pi))
+    # lambda = 2d sin(theta) = 4pi sin(theta) / qmag
+    # theta = arcsin(qmag * lambda / 4pi)
+    # twotheta = 2 * np.arcsin(qmag * 1e10 * fg.h * fg.c / (energy * fg.e * 4 * np.pi))
+    twotheta = 2 * np.arcsin(qmag * wavelength_a / (4 * np.pi))
     # return x2T in degrees
     twotheta = twotheta * 180 / np.pi
     return twotheta
 
 
-def caldspace(twotheta, energy_kev=17.794):
+def caldspace(twotheta, energy_kev=17.794, wavelength_a=None):
     """
     Calculate d-spacing from two-theta
      dspace = caldspace(tth, energy_kev)
     """
-    qmag = calqmag(twotheta, energy_kev)
+    qmag = calqmag(twotheta, energy_kev, wavelength_a)
     dspace = q2dspace(qmag)
     return dspace
 
@@ -3071,7 +3211,8 @@ def resolution2energy(res, twotheta=180.):
 def wave2energy(wavelength):
     """
     Converts wavelength in A to energy in keV
-     Energy = wave2energy(wavelength)
+     energy_kev = wave2energy(wavelength_a)
+     Energy [keV] = h*c/L = 12.3984 / lambda [A]
     """
 
     # SI: E = hc/lambda
@@ -3086,7 +3227,8 @@ def wave2energy(wavelength):
 def energy2wave(energy_kev):
     """
     Converts energy in keV to wavelength in A
-     wavelength = energy2wave(energy)
+     wavelength_a = energy2wave(energy_kev)
+     lambda [A] = h*c/E = 12.3984 / E [keV]
     """
 
     # Electron Volts:
@@ -3105,7 +3247,27 @@ def wavevector(energy_kev=None, wavelength=None):
     return 2 * np.pi / wavelength
 
 
-def electron_wavelenth(energy_ev):
+def neutron_wavelength(energy_mev):
+    """
+    Calcualte the neutron wavelength in Angstroms using DeBroglie's formula
+      lambda [A] ~ sqrt( 81.82 / E [meV] )
+    :param energy_mev: neutron energy in meV
+    :return: wavelength in Anstroms
+    """
+    return fg.h / np.sqrt(2 * fg.mn * energy_mev * fg.e / 1000) / fg.A
+
+
+def neutron_energy(wavelength_a):
+    """
+    Calcualte the neutron energy in milli-electronvolts using DeBroglie's formula
+      E [meV] ~ 81.82 / lambda^2 [A]
+    :param wavelength_a: neutron wavelength in Angstroms
+    :return: energy in meV
+    """
+    return fg.h**2 / (2 * fg.mn * (wavelength_a*fg.A)**2 * fg.e / 1000)
+
+
+def electron_wavelength(energy_ev):
     """
     Calcualte the electron wavelength in Angstroms using DeBroglie's formula
       lambda [nm] ~ sqrt( 1.5 / E [eV] )
@@ -3113,6 +3275,92 @@ def electron_wavelenth(energy_ev):
     :return: wavelength in Anstroms
     """
     return fg.h / np.sqrt(2 * fg.me * energy_ev * fg.e) / fg.A
+
+
+def electron_energy(wavelength_a):
+    """
+    Calcualte the electron energy in electronvolts using DeBroglie's formula
+      E [eV] ~ 1.5 / lambda^2 [nm]
+    :param wavelength_a: electron wavelength in Angstroms
+    :return: energy in eV
+    """
+    return fg.h**2 / (2 * fg.me * (wavelength_a * fg.A)**2 * fg.e)
+
+
+def debroglie_wavelength(energy_kev, mass_kg):
+    """
+    Calcualte the wavelength in Angstroms using DeBroglie's formula
+      lambda [A] = h  / sqrt( 2 * mass [kg] * E [keV] * 1e3 * e )
+    :param energy_kev: energy in keV
+    :param mass_kg: mass in kg
+    :return: wavelength in Anstroms
+    """
+    return fg.h / (np.sqrt(2 * mass_kg * energy_kev * 1000 * fg.e) * fg.A)
+
+
+def debroglie_energy(wavelength_a, mass_kg):
+    """
+    Calcualte the energy in electronvolts using DeBroglie's formula
+      E [keV] = h^2 / (2 * e * mass [kg] * A^2 * lambda^2 [A] * 1e3)
+    :param wavelength_a: wavelength in Angstroms
+    :param mass_kg: mass in kg
+    :return: energy in keV
+    """
+    return fg.h ** 2 / (2 * mass_kg * (wavelength_a * fg.A) ** 2 * fg.e * 1e3)
+
+
+def scherrer_size(fwhm, twotheta, wavelength_a=None, energy_kev=None, shape_factor=0.9):
+    """
+    Use the Scherrer equation to calculate the size of a crystallite from a peak width
+      L = K * lambda / fwhm * cos(theta)
+    See: https://en.wikipedia.org/wiki/Scherrer_equation
+    :param fwhm: full-width-half-maximum of a peak, in degrees
+    :param twotheta: 2*Bragg angle, in degrees
+    :param wavelength_a: incident beam wavelength, in Angstroms
+    :param energy_kev: or, incident beam energy, in keV
+    :param shape_factor: dimensionless shape factor, dependent on shape of crystallite
+    :return: float, crystallite domain size in Angstroms
+    """
+    if wavelength_a is None:
+        wavelength_a = energy2wave(energy_kev)
+    delta_theta = np.deg2rad(fwhm)
+    costheta = np.cos(np.deg2rad(twotheta / 2.))
+    return shape_factor * wavelength_a / (delta_theta * costheta)
+
+
+def scherrer_fwhm(size, twotheta, wavelength_a=None, energy_kev=None, shape_factor=0.9):
+    """
+    Use the Scherrer equation to calculate the size of a crystallite from a peak width
+      L = K * lambda / fwhm * cos(theta)
+    See: https://en.wikipedia.org/wiki/Scherrer_equation
+    :param size: crystallite domain size in Angstroms
+    :param twotheta: 2*Bragg angle, in degrees
+    :param wavelength_a: incident beam wavelength, in Angstroms
+    :param energy_kev: or, incident beam energy, in keV
+    :param shape_factor: dimensionless shape factor, dependent on shape of crystallite
+    :return: float, peak full-width-at-half-max in degrees
+    """
+    if wavelength_a is None:
+        wavelength_a = energy2wave(energy_kev)
+    costheta = np.cos(np.deg2rad(twotheta / 2.))
+    return np.rad2deg(shape_factor * wavelength_a / (size * costheta))
+
+
+def peakwidth_deg(domain_size_a, twotheta, wavelength_a=None, energy_kev=None, instrument_resolution=0):
+    """
+    Return the peak width in degrees for a given two-theta based on the
+    crystallite domain size and instrument resolution.
+      Equivalent to the Scherrer equation with shape factor 1.0
+    :param domain_size_a: crystallite domain size in Anstroms
+    :param twotheta: scattering angle in degrees
+    :param wavelength_a: incident beam wavelength, in Angstroms
+    :param energy_kev: or, incident beam energy, in keV
+    :param instrument_resolution: instrument resolution in inverse Anstroms
+    :return:
+    """
+    peak_width = np.sqrt(dspace2q(domain_size_a)**2 + instrument_resolution**2)
+    q = calqmag(twotheta, energy_kev, wavelength_a)
+    return cal2theta(q + peak_width, energy_kev, wavelength_a) - twotheta
 
 
 def biso2uiso(biso):
@@ -3370,3 +3618,394 @@ def cif2table(cif):
     out += '    \\label{tab:}\n'
     out += '\\end{table}\n'
     return out
+
+
+def detector_rotate(detector_position_mm=(0, 1000., 0), delta=0., gamma=0., labmatrix=np.eye(3)):
+    """
+    Return a position array for a vector rotated by delta and gamma, like a detector along [0,1,0]
+    :param detector_position_mm: detector position from sample in mm
+    :param delta: vertical rotation about z-axis in Deg
+    :param gamma: horizontal rotation about x-axis in Deg
+    :param labmatrix: [3*3] orientation matrix to convert to alternative basis
+    :return: array
+    """
+    det_position = np.array(detector_position_mm)
+    D = rotmatrixz(-delta)  # left handed
+    G = rotmatrixx(gamma)
+    R = np.dot(G, D)
+    return labvector(det_position, R=R, LAB=labmatrix)
+
+
+def reflections_on_detector(qxqyqz, energy_kev, det_distance=1., det_normal=(0, -1., 0),
+                            delta=0., gamma=0., det_width=1., det_height=1., labmatrix=np.eye(3)):
+    """
+    Return relative position of reflection on detector
+    :param qxqyqz: [nx3] array of reflection coordinates in Q-space [qx, qy, qz]
+    :param energy_kev: float, Incident beam energy in keV
+    :param det_distance: float, Detector distance in meters
+    :param det_normal: (dx,dy,dz) direction of detector normal
+    :param delta: float, angle in degrees in vertical direction (about diff-z)
+    :param gamma: float angle in degrees in horizontal direction (about diff-x)
+    :param det_width: float, detector width along x-axis in meters
+    :param det_height: float, detector height along z-axis in meters
+    :param labmatrix: [3x3] orientation array to convert to difference basis
+    :return uvw: [nx3] array of positions relative to the centre of the detector, or NaN if not incident
+    :return wavevector_difference: [n] array of wavevector difference in A-1
+    """
+
+    # Lattice
+    q = np.reshape(qxqyqz, [-1, 3])
+    k = wavevector(energy_kev)
+    ki = k * labvector([0, 1, 0], LAB=labmatrix)
+    kf = q + ki
+    kf_directions = fg.norm(kf)
+    wv_difference = wavevector_difference(q, ki)  # difference in A-1
+
+    # Detector basis
+    det_position = det_distance * np.array([0, 1., 0])
+    det_normal = fg.norm(det_normal)
+    det_x_axis = det_width * fg.norm(np.cross(det_normal, (0, 0, 1.)))
+    det_z_axis = det_height * fg.norm(np.cross(det_x_axis, det_normal))
+
+    # Detector rotation
+    D = rotmatrixz(-delta)  # left handed
+    G = rotmatrixx(gamma)
+    R = np.dot(G, D)
+    det_position = labvector(det_position, R=R, LAB=labmatrix)
+    det_normal = labvector(det_normal, R=R, LAB=labmatrix)
+    det_x_axis = labvector(det_x_axis, R=R, LAB=labmatrix)
+    det_z_axis = labvector(det_z_axis, R=R, LAB=labmatrix)
+
+    # Detector corners
+    det_corners = np.array([
+        det_position + det_x_axis / 2 + det_z_axis / 2,
+        det_position + det_x_axis / 2 - det_z_axis / 2,
+        det_position - det_x_axis / 2 - det_z_axis / 2,
+        det_position - det_x_axis / 2 + det_z_axis / 2,
+    ])
+
+    # Reflection direction near detector
+    corner_angle = max(abs(fg.vectors_angle_degrees(det_position, det_corners)))
+    ref_angles = abs(fg.vectors_angle_degrees(det_position, kf_directions))
+    check = ref_angles < corner_angle
+
+    # Reflection direction incident on detector
+    incident_xyz = np.nan * np.zeros([len(kf_directions), 3])
+    for n in np.flatnonzero(check):
+        incident_xyz[n] = fg.plane_intersection((0, 0, 0), kf_directions[n], det_position, det_normal)
+
+    # Relative position on detector
+    incident_uvw = fg.index_coordinates(incident_xyz - det_position, [det_x_axis, det_z_axis, det_normal])
+    incident_uvw[np.any(abs(incident_uvw) > 0.5, axis=1)] = [np.nan, np.nan, np.nan]
+    return incident_uvw, wv_difference
+
+
+def peaks_on_plane(peak_x, peak_y, peak_height, peak_width, max_x, max_y, pixels_width=1001, background=0):
+    """
+    Creates a rectangular grid and adds Gaussian peaks with height "intensity"
+    :param peak_x: [nx1] array of x coordinates
+    :param peak_y: [nx1] array of y coordinates
+    :param peak_height: [nx1] array of peak heights
+    :param peak_width: [nx1] or float, gaussian width
+    :param max_x: grid will be created from -max_x : +max_x horizontally
+    :param max_y: grid will be created from -max_y : +max_y vertically
+    :param pixels_width: grid will contain pixels horizontally and the number vertically will be scaled
+    :param background: if >0, add a normaly distributed background with average level = background
+    :return: x, y, plane
+    """
+    # create plotting mesh
+    pixels_height = int(pixels_width * max_y / max_x)
+    mesh = np.zeros([pixels_height, pixels_width])
+    mesh_x = np.linspace(-max_x, max_x, pixels_width)
+    mesh_y = np.linspace(-max_y, max_y, pixels_height)
+    xx, yy = np.meshgrid(mesh_x, mesh_y)
+    # cast float peak_width to array
+    peak_width = np.asarray(peak_width) * np.ones_like(peak_height)
+
+    for n in range(len(peak_height)):
+        # Add each reflection as a gaussian
+        mesh += peak_height[n] * np.exp(-np.log(2) * (((xx - peak_x[n]) ** 2 + (yy - peak_y[n]) ** 2) / (peak_width[n] / 2) ** 2))
+
+    # Add background (if not None or 0)
+    if background:
+        bkg = np.random.normal(background, np.sqrt(background), mesh.shape)
+        mesh = mesh + bkg
+
+    return xx, yy, mesh
+
+
+def scale_intensity(intensity, wavevector_diff, resolution=0.5):
+    """
+    Scale intensity depending on wavevector difference and resolution
+    :param intensity: intensity value
+    :param wavevector_diff: distance from centre in inverse angstroms
+    :param resolution: resolution in inverse angstroms
+    :return:
+    """
+    return intensity * np.exp(-np.log(2) * (wavevector_diff / (0.5 * resolution)) ** 2)
+
+
+def wavevector_resolution(energy_range_ev=200, wavelength_range_a=None, domain_size_a=1000):
+    """
+    Calculate the combined wavevector resolutuion in inverse Angstroms
+    Combines instrument incident beam resolution and the mosaic of the crystal
+    :param energy_range_ev: Incident x-ray beam resolution in eV
+    :param wavelength_range_a: Incident beam resolution in Angstroms
+    :param domain_size_a: crysallite size in Angstroms (provides mosic using Scherrer equation)
+    :return: float, resolutuion in inverse Angstroms
+    """
+    if wavelength_range_a is None:
+        beam_resolution = wavevector(energy_kev=energy_range_ev / 1000)
+    else:
+        beam_resolution = dspace2q(wavelength_range_a)
+    sample_resolution = dspace2q(domain_size_a)
+    return np.sqrt(sample_resolution**2 + beam_resolution**2)
+
+
+def reciprocal_volume(twotheta, twotheta_min=0, energy_kev=None, wavelength_a=1.5):
+    """
+    Calculate the volume of reciprocal space covered between two scattering angles
+    :param twotheta: larger scattering angle (Bragg angle, 2theta)
+    :param twotheta_min: smaller scattering angle
+    :param energy_kev: photon energy, in keV
+    :param wavelength_a: wavelength in Angstroms
+    :return: float, volume, in Angstroms^-3
+    """
+    q1 = calqmag(twotheta_min, energy_kev, wavelength_a)
+    q2 = calqmag(twotheta, energy_kev, wavelength_a)
+    vol1 = 4 * fg.pi * q1 ** 3 / 3
+    vol2 = 4 * fg.pi * q2 ** 3 / 3
+    return vol2 - vol1
+
+
+def detector_angle_size(detector_distance_mm=565, height_mm=67, width_mm=34, pixel_size_um=172):
+    """
+    Return the angular spread of the detector
+      delta_width, gamma_width, pixel_width = detector_angle_size(distance, height, widht, pixel)
+    :param detector_distance_mm: Detector distance from sample in mm
+    :param height_mm: Detector size in the vertical direction, in mm
+    :param width_mm: Detector size in the horizontal direction, in mm
+    :param pixel_size_um: Pixel size in microns
+    :return x_angle: total angular spread in the diffractometer x-axis, in degrees
+    :return z_angle: total angular spread in the diffractometer z-axis, in degrees
+    :return pixel_angle: angular spread per pixel, in degrees
+    """
+    gam_width = 2 * np.rad2deg(np.arctan2(width_mm / 2, detector_distance_mm))
+    del_height = 2 * np.rad2deg(np.arctan2(height_mm / 2, detector_distance_mm))
+    pix_width = 2 * np.rad2deg(np.arctan2(pixel_size_um / 2, 1000 * detector_distance_mm))
+    return gam_width, del_height, pix_width
+
+
+def detector_coverage(wavelength_a=1.5, resolution=0.1, delta=0, gamma=0,
+                      detector_distance_mm=565, height_mm=67, width_mm=34):
+    """
+    Determine volume of reciprocal space covered by the detector based on angular spread
+    :param wavelength_a: Incicent beam wavelength, in Angstroms
+    :param resolution: Incident beam resolution, in inverse-Angstroms
+    :param delta: float or array, detector vertical rotation
+    :param gamma: float or array, detector horizontal rotation
+    :param detector_distance_mm: Detector distance from sample in mm
+    :param height_mm: Detector size in the vertical direction, in mm
+    :param width_mm: Detector size in the horizontal direction, in mm
+    :return: volume in inverse-Angstroms
+    """
+    gam_width = np.rad2deg(np.arctan2(width_mm / 2, detector_distance_mm))
+    del_height = np.rad2deg(np.arctan2(height_mm / 2, detector_distance_mm))
+    gam_wid_a = 2 * dspace2q(scherrer_size(gam_width, gamma, wavelength_a=wavelength_a, shape_factor=1.0))
+    del_wid_a = 2 * dspace2q(scherrer_size(del_height, delta, wavelength_a=wavelength_a, shape_factor=1.0))
+    det_wid = 2 * resolution
+    return gam_wid_a * del_wid_a * det_wid
+
+
+def detector_volume(wavelength_a=1.5, resolution=0.1,
+                    phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0,
+                    detector_distance_mm=565, height_mm=67, width_mm=34, lab=np.eye(3)):
+    """
+    Determine volume of reciprocal space covered by the detector, return list of voxels covered by detector
+      total_volume, hkl = detector_volume(1.5, 0.1, chi=90, eta=30, delta=60)
+    The returned list of coordinates (hkl) is defined in the sample frame, where each coordinate specifies a voxel
+    in reciprocal space with size resolution(inverse-Anstroms) ** 3
+    As such, the total volume of reciprocal space measured is:
+        total_volume = len(hkl) * fc.wavevector(energy_kev=energy_range_ev / 1000.) ** 3
+
+    :param wavelength_a: Incicent beam wavelength, in Angstroms
+    :param resolution: Incident beam resolution, in inverse-Angstroms (determines segmentation of calculation)
+    :param phi: float, phi-axis rotation about sample-z axis
+    :param chi: float, chi-axis rotation about sample-y' axis
+    :param eta: float, eta-axis rotation about sample-z'' axis
+    :param mu: float, mu-axis rotation about sample-x''' axis
+    :param delta: float, detector rotation vertical rotation
+    :param gamma: float, detector rotation horizontal rotation
+    :param detector_distance_mm: Detector distance from sample in mm
+    :param height_mm: Detector size in the vertical direction, in mm
+    :param width_mm: Detector size in the horizontal direction, in mm
+    :param lab: [3x3] Transformation matrix to change the lab coordinate system
+    :return total_volume: float, total volume of reciprocal space in inverse Angstroms
+    :return hkl: [nx3] array of voxels covered by detector, integer coordinates in the sample frame
+    """
+    # Rotate detector
+    D = rotmatrixz(-delta)  # left handed
+    G = rotmatrixx(gamma)
+    Rdet = np.dot(G, D)
+    position_mm = detector_distance_mm * labvector([0, 1., 0], R=Rdet, LAB=lab)
+    normal_dir = labvector([0, -1, 0], R=Rdet, LAB=lab)
+    x_axis = width_mm * fg.norm(np.cross(normal_dir, (0, 0, 1.)))
+    z_axis = height_mm * fg.norm(np.cross(x_axis, normal_dir))
+    corners = np.array([
+        position_mm + x_axis / 2 + z_axis / 2,
+        position_mm + x_axis / 2 - z_axis / 2,
+        position_mm - x_axis / 2 - z_axis / 2,
+        position_mm - x_axis / 2 + z_axis / 2,
+    ])
+
+    # Create a reciprocal lattice with basis size = resolution
+    ub = resolution * np.eye(3)
+    k = wavevector(wavelength=wavelength_a)
+    ki = k * labvector([0, 1, 0], LAB=lab)  # incident beam
+
+    # Determine the lattice position at each of the detector corners to determine a rough lattice
+    gam_width = np.rad2deg(np.arctan2(width_mm / 2, detector_distance_mm))
+    del_height = np.rad2deg(np.arctan2(height_mm / 2, detector_distance_mm))
+    hkl_corners = np.array([
+        diff6circle2hkl(ub, phi, chi, eta, mu, delta=delta + del_height, gamma=gamma + gam_width,
+                        wavelength=wavelength_a, lab=lab),
+        diff6circle2hkl(ub, phi, chi, eta, mu, delta=delta - del_height, gamma=gamma + gam_width,
+                        wavelength=wavelength_a, lab=lab),
+        diff6circle2hkl(ub, phi, chi, eta, mu, delta=delta - del_height, gamma=gamma - gam_width,
+                        wavelength=wavelength_a, lab=lab),
+        diff6circle2hkl(ub, phi, chi, eta, mu, delta=delta + del_height, gamma=gamma - gam_width,
+                        wavelength=wavelength_a, lab=lab),
+    ])
+    h_range = range(int(min(hkl_corners[:, 0])) - 2, int(max(hkl_corners[:, 0])) + 2)
+    k_range = range(int(min(hkl_corners[:, 1])) - 2, int(max(hkl_corners[:, 1])) + 2)
+    l_range = range(int(min(hkl_corners[:, 2])) - 2, int(max(hkl_corners[:, 2])) + 2)
+    HH, KK, LL = np.meshgrid(h_range, k_range, l_range)
+    hkl = np.asarray([HH.ravel(), KK.ravel(), LL.ravel()]).T
+
+    # Rotate lattice
+    R = diffractometer_rotation(phi=phi, chi=chi, eta=eta, mu=mu)
+    q = labvector(resolution * hkl, R=R, LAB=lab)
+
+    # Find lattice points incident on detector
+    kf = q + ki
+    directions = fg.norm(kf)
+    # Check magnitude of kf matches ki
+    scatters = np.flatnonzero(np.abs(fg.mag(kf) - k) < resolution)
+    # check which lattice directions are in the quadrent of detector
+    corner_angle = min(np.dot(fg.norm(corners), fg.norm(position_mm)))
+    vec_angles = np.dot(directions[scatters], fg.norm(position_mm))
+    # Check with lattice point directions intercept the detector plane
+    # Only loop over lattice points with correct magnitude and in the right direction
+    check = vec_angles > corner_angle
+    iuvw = np.nan * np.zeros([len(hkl), 3])
+    for n in scatters[check]:
+        ixyz = fg.plane_intersection((0, 0, 0), directions[n], position_mm, normal_dir)
+        # incident positions on detector
+        iuvw[n] = fg.index_coordinates(np.subtract(ixyz, position_mm), [x_axis, z_axis, normal_dir])
+    iuvw[np.any(abs(iuvw) > 0.5, axis=1)] = [np.nan, np.nan, np.nan]
+
+    # Remove non-incident reflections
+    idx = ~np.isnan(iuvw[:, 0])  # iuvw same size as Q
+    tot_space = np.sum(idx)
+    tot_recspace = tot_space * resolution ** 3  # A-3
+    # print(f"Measured Reciprocal space: {tot_space:.0f} voxels, {tot_recspace: .4g} A-3")
+    return tot_recspace, hkl[idx, :]
+
+
+def detector_volume_scan(wavelength_a=1.5, resolution=0.1,
+                         phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0,
+                         detector_distance_mm=565, height_mm=67, width_mm=34, lab=np.eye(3)):
+    """
+    Return total reciprocal space volume covered by scanning an axis with a detector
+      total, hkl, overlaps = detector_volume_scan(1.5, 0.1, phi=np.arange(-180,180))
+    Rotation axes can be specified as either floats or arrays, where all arrays must have the same length.
+
+    :param wavelength_a: Incicent beam wavelength, in Angstroms
+    :param resolution: Incident beam resolution, in inverse-Angstroms (determines segmentation of calculation)
+    :param phi: float or array, phi-axis about sample-z axis
+    :param chi: float or array, chi-axis about sample-y' axis
+    :param eta: float or array, eta-axis about sample-z'' axis
+    :param mu: float or array, mu-axis about sample-x''' axis
+    :param delta: float or array, detector vertical rotation
+    :param gamma: float or array, detector horizontal rotation
+    :param detector_distance_mm: Detector distance from sample in mm
+    :param height_mm: Detector size in the vertical direction, in mm
+    :param width_mm: Detector size in the horizontal direction, in mm
+    :param lab: [3x3] Transformation matrix to change the lab coordinate system
+    :return total: float, total volume covered, in cubic inverse Angstroms
+    :return hkl: [nx3] array of voxels covered by detector, integer coordinates in the sample frame
+    :return overlaps: [n] array of the number of times each voxel has been repeatedly measured (0 = only measurred once)
+    """
+    # pad the scan axes
+    scan_angles = [phi, chi, eta, mu, delta, gamma]
+    axes = np.zeros([min([np.size(s) for s in scan_angles if np.size(s) > 1]), len(scan_angles)])
+    for n in range(len(scan_angles)):
+        axes[:, n] = scan_angles[n]
+    # loop over the scan
+    hkl_list = np.empty([0, 3], dtype=int)
+    for phi, chi, eta, mu, delta, gamma in axes:
+        vol, hkl = detector_volume(wavelength_a, resolution, phi, chi, eta, mu, delta, gamma,
+                                   detector_distance_mm, height_mm, width_mm, lab)
+        hkl_list = np.vstack([hkl_list, hkl])
+    # Find the overlapping points
+    hkl, counts = np.unique(hkl_list, return_counts=True, axis=0)
+    overlaps = counts - 1
+    total = len(hkl) * resolution ** 3
+    return total, hkl, overlaps
+
+
+def diffractometer_step(wavelength_a=1.5, resolution=0.1,
+                        phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0, lab=np.eye(3)):
+    """
+    Determine the euler angle steps required to scan through reciprocal space at the required resolutuion
+        phi_step, chi_step, eta_step, mu_step = diffractometer_step(1.5, 0.1, chi=90, eta=20, delta=40)
+    The returned step size will provide a rotation that moves the wavevector transfer by approximately the resolutuion.
+    Any steps returning 0 are unsensitive to the rotation in this position
+    :param wavelength_a: Incicent beam wavelength, in Angstroms
+    :param resolution: float, combined resolution required, in inverse Angstroms
+    :param phi: float, phi-axis about sample-z axis
+    :param chi: float, chi-axis about sample-y' axis
+    :param eta: float, eta-axis about sample-z'' axis
+    :param mu: float, mu-axis about sample-x''' axis
+    :param delta: float, detector vertical rotation
+    :param gamma: float, detector horizontal rotation
+    :param lab: [3x3] Transformation matrix to change the lab coordinate system
+    :returns: phi_step, chi_step, eta_step, mu_step
+    """
+    ub = resolution * np.eye(3)
+    # Determine current location of diffractometer in orthogonal basis coordinates
+    hkl = diff6circle2hkl(ub, phi=phi, chi=chi, eta=eta, mu=mu, delta=delta, gamma=gamma,
+                          wavelength=wavelength_a, lab=lab)
+    # Convert hkl back to wavevector units
+    q0 = np.dot(ub, hkl)
+    q = labvector(q0, R=diffractometer_rotation(phi=phi, chi=chi, eta=eta, mu=mu), LAB=lab)
+    # Add the resolution in various directions and determine the max angular difference
+    q2 = q + [
+        [resolution, 0, 0],
+        [0, resolution, 0],
+        [0, 0, resolution],
+        resolution * fg.norm([1, 1, 0]),
+        resolution * fg.norm([1, 0, 1]),
+        resolution * fg.norm([0, 1, 1]),
+        resolution * fg.norm([1, 1, 1]),
+    ]
+    ang = max(np.abs(fg.vectors_angle_degrees(q, q2)))
+
+    # Add this angle in each axis and check how much is moved
+    q_phi = fg.mag(q - labvector(q0, R=diffractometer_rotation(phi=phi + ang, chi=chi, eta=eta, mu=mu), LAB=lab))
+    q_chi = fg.mag(q - labvector(q0, R=diffractometer_rotation(phi=phi, chi=chi + ang, eta=eta, mu=mu), LAB=lab))
+    q_eta = fg.mag(q - labvector(q0, R=diffractometer_rotation(phi=phi, chi=chi, eta=eta + ang, mu=mu), LAB=lab))
+    q_mu = fg.mag(q - labvector(q0, R=diffractometer_rotation(phi=phi, chi=chi, eta=eta, mu=mu + ang), LAB=lab))
+
+    # Scale this movement back to the resolution
+    phi_ang = ang * resolution / q_phi
+    chi_ang = ang * resolution / q_chi
+    eta_ang = ang * resolution / q_eta
+    mu_ang = ang * resolution / q_mu
+    # if the movement is unrealistically large, the axis is unsensitive
+    if phi_ang > 20: phi_ang = 0
+    if chi_ang > 20: chi_ang = 0
+    if eta_ang > 20: eta_ang = 0
+    if mu_ang > 20: mu_ang = 0
+    return phi_ang, chi_ang, eta_ang, mu_ang
+

@@ -119,16 +119,16 @@ class Orbital:
     _state = ['s', 'p', 'd', 'f']
     _state_max = [2, 6, 10, 14]
 
-    def __init__(self, standard=None, n=1, l=0, fill=0):
-        if standard is not None:
-            self.standard = standard
-            self.n = int(standard[0])
-            self.l_name = standard[1].lower()
-            self.l = self._state.index(standard[1].lower())
-            if len(standard) == 2:
+    def __init__(self, orbital_string=None, n=1, l=0, fill=0):
+        if orbital_string is not None:
+            self.standard = orbital_string
+            self.n = int(orbital_string[0])
+            self.l_name = orbital_string[1].lower()
+            self.l = self._state.index(orbital_string[1].lower())
+            if len(orbital_string) == 2:
                 self.fill = 0.
             else:
-                self.fill = float(standard[2:])
+                self.fill = float(orbital_string[2:])
             self.max_fill = self._state_max[self.l]
             self.max_l = self._level_max[self.n - 1]
         else:
@@ -144,7 +144,10 @@ class Orbital:
         return self.generate_string_standard()
 
     def __repr__(self):
-        return 'Orbital: %s' % self.generate_string_standard()
+        return 'Orbital(%s)' % self.generate_string_standard()
+
+    def __str__(self):
+        return self.generate_string_standard()
 
     def __eq__(self, other):
         if isinstance(other, Orbital):
@@ -155,8 +158,12 @@ class Orbital:
     def generate_string_standard(self):
         return '%d%s%1.3g' % (self.n, self.l_name, self.fill)
 
-    def generate_string_fdmnes(self):
-        return '%d %d %4.2f' % (self.n, self.l, self.fill)
+    def generate_string_fdmnes(self, spin=False):
+        if spin:
+            # split occupancy accross up and down states
+            return '%d %d %4.2f %4.2f' % (self.n, self.l, self.fill/2, self.fill/2)
+        else:
+            return '%d %d %4.2f' % (self.n, self.l, self.fill)
 
     def generate_string_latex(self):
         return '%d%s$^{%1.3g}$' % (self.n, self.l_name, self.fill)
@@ -228,7 +235,14 @@ class Atom:
         self.assign_charge(charge)
 
     def __repr__(self):
+        elestr = fc.element_charge_string(self.element_symbol, occupancy=self.occupancy, charge=self.charge)
+        return "Atom(%s)" % elestr
+
+    def __str__(self):
         return 'Atom: %s\n' % self.generate_string_standard()
+
+    def __getitem__(self, item):
+        return self.orbitals.__getitem__(item)
 
     def valence_orbitals(self):
         valence = []
@@ -381,14 +395,16 @@ class Atom:
         orbstr = ' '.join([orb.generate_string_standard() for orb in self.orbitals])
         return '%3d %10s  %s' % (self.z, elestr, orbstr)
 
-    def generate_string_fdmnes(self):
+    def generate_string_fdmnes(self, spin=False):
         elestr = fc.element_charge_string(self.element_symbol, occupancy=self.occupancy, charge=self.charge)
         empty_orbital = self.orbitals[-1].next_orbital()
         valence = self.valence_orbitals()
         orbitals = valence + [empty_orbital]
-        fdm = '  '.join([orb.generate_string_fdmnes() for orb in orbitals])
+        # keep atom neutral by adding charge electrons to outer shell
+        unused = orbitals[-1].add_electron(self.charge)
+        fdm = '  '.join([orb.generate_string_fdmnes(spin) for orb in orbitals])
         std = ' '.join([orb.generate_string_standard() for orb in orbitals])
-        return '%d  %s ! %s %s' % (len(orbitals), fdm, elestr, std)
+        return '%3d %d  %s ! %s %s' % (self.z, len(orbitals), fdm, elestr, std)
 
     def generate_string_latex(self):
         orbstr = ' '.join([orb.generate_string_latex() for orb in self.orbitals])
@@ -399,7 +415,7 @@ class Atom:
 class Compound:
     """
     Compound - collection of atoms
-    LiCoO2 = Compound('Li0.7CoO2')
+    LiCoO2 = Compound([Atom, Atom, Atom])
     print(LiCoO2)
     >> Li0.7CoO2:
     >>   3 Li0.7+  1s2 2s0.3
@@ -409,12 +425,18 @@ class Compound:
     """
 
     def __init__(self, atom_list):
-        self.atom_list = atom_list
+        self.atom_list = atom_list  # list of Atom objects
         self.balance_charge()
         self.compound_string = self.generate_charge_name()
 
     def __repr__(self):
+        return 'Compound(%s)' % self.compound_string
+
+    def __str__(self):
         return 'Compound: %s:\n%s' % (self.compound_string, self.generate_string_standard())
+
+    def __getitem__(self, item):
+        return self.atom_list.__getitem__(item)
 
     def charge_list(self):
         return [at.occupancy*at.check_charge() for at in self.atom_list]
@@ -456,12 +478,28 @@ class Compound:
         return ' '.join(cnames)
 
     def generate_string_standard(self):
+        """Generate string showing atomic orbitals"""
         return '\n'.join([at.generate_string_standard() for at in self.atom_list])
 
-    def generate_string_fdmnes(self):
-        return '\n'.join([at.generate_string_fdmnes() for at in self.atom_list])
+    def generate_string_fdmnes(self, spin=False):
+        """Generate string showing atomic orbittals in FDMNES format"""
+        return '\n'.join([at.generate_string_fdmnes(spin) for at in self.atom_list])
+
+    def generate_string_fdmnes_absorber(self, absorber, spin=False):
+        """
+        Generate string showing atomic orbittals in FDMNES format
+        :param absorber: str element symbol of principal absorber
+        :param spin: Bool, if True element populations will be split by spin up/down
+        :return: str, element list
+        """
+        ele_list = [at.element_symbol for at in self.atom_list if at.element_symbol == absorber]
+        ele_list += [at.element_symbol for at in self.atom_list if at.element_symbol != absorber]
+        out = [at.generate_string_fdmnes(spin) for at in self.atom_list if at.element_symbol == absorber]
+        out += ['%3d 0 ! %s' % (at.z, at.element_symbol) for at in self.atom_list if at.element_symbol != absorber]
+        return '\n'.join(out), ele_list
 
     def generate_string_latex(self):
+        """Generate string showing atomic orbittals in Latex format"""
         return '\n'.join([at.generate_string_latex() for at in self.atom_list])
 
 

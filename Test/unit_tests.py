@@ -16,7 +16,7 @@ TEST_FDMNES = False
 
 # Write output to file
 ranon = datetime.datetime.now()
-out_name = ranon.strftime('result_%Y_%m_%d_V2.3.txt')
+out_name = ranon.strftime('result_%Y_%m_%d_V3.1.txt')  # CHANGE VERSION ON EACH RUN!!!
 outfile = open(os.path.join('unit_test_results', out_name), 'wt')
 original_stdout = sys.stdout
 sys.stdout = outfile

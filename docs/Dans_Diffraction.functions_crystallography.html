@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_crystallography</strong></big></big> (version 3.7.2)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_crystallography</strong></big></big> (version 3.8.2)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_crystallography.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_crystallography.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;functions_crystallography.py<br>
@@ -20,8 +20,8 @@ Usage:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;OR<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;from&nbsp;Dans_Diffraction&nbsp;import&nbsp;functions_crystallography&nbsp;as&nbsp;fc<br>
 &nbsp;<br>
-Version&nbsp;3.8.0<br>
-Last&nbsp;updated:&nbsp;07/05/23<br>
+Version&nbsp;3.8.2<br>
+Last&nbsp;updated:&nbsp;02/07/23<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 09/07/15&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
@@ -50,6 +50,8 @@ Version&nbsp;History:<br>
 12/01/22&nbsp;3.7.1&nbsp;&nbsp;Added&nbsp;gen_sym_axial_vector<br>
 23/04/22&nbsp;3.7.2&nbsp;&nbsp;Corrected&nbsp;magnitude&nbsp;of&nbsp;Q&nbsp;in&nbsp;magnetic_structure_factors<br>
 07/05/23&nbsp;3.8.0&nbsp;&nbsp;Added&nbsp;electron_scattering_factors&nbsp;and&nbsp;electron&nbsp;wavelength&nbsp;formula<br>
+22/05/23&nbsp;3.8.1&nbsp;&nbsp;Added&nbsp;wyckoff_label,&nbsp;find_spacegroup<br>
+02/07/23&nbsp;3.8.2&nbsp;&nbsp;Added&nbsp;wavelength&nbsp;options&nbsp;to&nbsp;several&nbsp;functions,&nbsp;plut&nbsp;DeBroglie&nbsp;wavelength&nbsp;function<br>
 &nbsp;<br>
 Acknoledgements:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;April&nbsp;2020&nbsp;&nbsp;Thanks&nbsp;to&nbsp;ChunHai&nbsp;Wang&nbsp;for&nbsp;helpful&nbsp;suggestions&nbsp;in&nbsp;readcif!<br>
@@ -165,17 +167,17 @@ unspecified&nbsp;elements<br>
  <dl><dt><a name="-biso2uiso"><strong>biso2uiso</strong></a>(biso)</dt><dd><tt>Convert&nbsp;B&nbsp;isotropic&nbsp;thermal&nbsp;parameters&nbsp;to&nbsp;U&nbsp;isotropic&nbsp;thermal&nbsp;parameters<br>
 :param&nbsp;biso:&nbsp;Biso&nbsp;value&nbsp;or&nbsp;array<br>
 :return:&nbsp;Uiso&nbsp;value&nbsp;or&nbsp;array</tt></dd></dl>
- <dl><dt><a name="-cal2theta"><strong>cal2theta</strong></a>(qmag, energy_kev=17.794)</dt><dd><tt>Calculate&nbsp;theta&nbsp;at&nbsp;particular&nbsp;energy&nbsp;in&nbsp;keV&nbsp;from&nbsp;|Q|<br>
+ <dl><dt><a name="-cal2theta"><strong>cal2theta</strong></a>(qmag, energy_kev=17.794, wavelength_a=None)</dt><dd><tt>Calculate&nbsp;theta&nbsp;at&nbsp;particular&nbsp;energy&nbsp;in&nbsp;keV&nbsp;from&nbsp;|Q|<br>
 &nbsp;twotheta&nbsp;=&nbsp;<a href="#-cal2theta">cal2theta</a>(Qmag,energy_kev=17.794)</tt></dd></dl>
  <dl><dt><a name="-calc_vol"><strong>calc_vol</strong></a>(UV)</dt><dd><tt>Calculate&nbsp;volume&nbsp;in&nbsp;Angstrom^3&nbsp;from&nbsp;unit&nbsp;vectors</tt></dd></dl>
- <dl><dt><a name="-caldspace"><strong>caldspace</strong></a>(twotheta, energy_kev=17.794)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;two-theta<br>
+ <dl><dt><a name="-caldspace"><strong>caldspace</strong></a>(twotheta, energy_kev=17.794, wavelength_a=None)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;two-theta<br>
 &nbsp;dspace&nbsp;=&nbsp;<a href="#-caldspace">caldspace</a>(tth,&nbsp;energy_kev)</tt></dd></dl>
  <dl><dt><a name="-callattice"><strong>callattice</strong></a>(twotheta, energy_kev=17.794, hkl=(1, 0, 0))</dt><dd><tt>Calculate&nbsp;cubic&nbsp;lattice&nbsp;parameter,&nbsp;a&nbsp;from&nbsp;reflection&nbsp;two-theta<br>
 :param&nbsp;twotheta:&nbsp;Bragg&nbsp;angle,&nbsp;deg<br>
 :param&nbsp;energy_kev:&nbsp;energy&nbsp;in&nbsp;keV<br>
 :param&nbsp;hkl:&nbsp;reflection&nbsp;(cubic&nbsp;only<br>
 :return:&nbsp;float,&nbsp;lattice&nbsp;contant</tt></dd></dl>
- <dl><dt><a name="-calqmag"><strong>calqmag</strong></a>(twotheta, energy_kev=17.794)</dt><dd><tt>Calculate&nbsp;|Q|&nbsp;at&nbsp;a&nbsp;particular&nbsp;2-theta&nbsp;(deg)&nbsp;for&nbsp;energy&nbsp;in&nbsp;keV<br>
+ <dl><dt><a name="-calqmag"><strong>calqmag</strong></a>(twotheta, energy_kev=17.794, wavelength_a=None)</dt><dd><tt>Calculate&nbsp;|Q|&nbsp;at&nbsp;a&nbsp;particular&nbsp;2-theta&nbsp;(deg)&nbsp;for&nbsp;energy&nbsp;in&nbsp;keV<br>
 &nbsp;magQ&nbsp;=&nbsp;<a href="#-calqmag">calqmag</a>(twotheta,&nbsp;energy_kev=17.794)</tt></dd></dl>
  <dl><dt><a name="-cif2dict"><strong>cif2dict</strong></a>(cifvals)</dt><dd><tt>From&nbsp;a&nbsp;dict&nbsp;of&nbsp;key:value&nbsp;pairs&nbsp;generated&nbsp;from&nbsp;a&nbsp;*.cif&nbsp;file&nbsp;(using&nbsp;readcif),<br>
 read&nbsp;standard&nbsp;crystallographic&nbsp;infromation&nbsp;into&nbsp;a&nbsp;crystal&nbsp;dictionary,&nbsp;with&nbsp;keys:<br>
@@ -232,6 +234,16 @@ E.G.:<br>
 :param&nbsp;qz:&nbsp;[n,m]&nbsp;array&nbsp;or&nbsp;float&nbsp;of&nbsp;Q&nbsp;coordinates&nbsp;in&nbsp;z<br>
 :param&nbsp;cut:&nbsp;[n,m]&nbsp;array&nbsp;of&nbsp;intensities<br>
 :return:&nbsp;qm[o],&nbsp;pow[o]</tt></dd></dl>
+ <dl><dt><a name="-debroglie_energy"><strong>debroglie_energy</strong></a>(wavelength_a, mass_kg)</dt><dd><tt>Calcualte&nbsp;the&nbsp;energy&nbsp;in&nbsp;electronvolts&nbsp;using&nbsp;DeBroglie's&nbsp;formula<br>
+&nbsp;&nbsp;E&nbsp;[keV]&nbsp;=&nbsp;h^2&nbsp;/&nbsp;(2&nbsp;*&nbsp;e&nbsp;*&nbsp;mass&nbsp;[kg]&nbsp;*&nbsp;A^2&nbsp;*&nbsp;lambda^2&nbsp;[A]&nbsp;*&nbsp;1e3)<br>
+:param&nbsp;wavelength_a:&nbsp;wavelength&nbsp;in&nbsp;Angstroms<br>
+:param&nbsp;mass_kg:&nbsp;mass&nbsp;in&nbsp;kg<br>
+:return:&nbsp;energy&nbsp;in&nbsp;keV</tt></dd></dl>
+ <dl><dt><a name="-debroglie_wavelength"><strong>debroglie_wavelength</strong></a>(energy_kev, mass_kg)</dt><dd><tt>Calcualte&nbsp;the&nbsp;wavelength&nbsp;in&nbsp;Angstroms&nbsp;using&nbsp;DeBroglie's&nbsp;formula<br>
+&nbsp;&nbsp;lambda&nbsp;[A]&nbsp;=&nbsp;h&nbsp;&nbsp;/&nbsp;sqrt(&nbsp;2&nbsp;*&nbsp;mass&nbsp;[kg]&nbsp;*&nbsp;E&nbsp;[keV]&nbsp;*&nbsp;1e3&nbsp;*&nbsp;e&nbsp;)<br>
+:param&nbsp;energy_kev:&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;mass_kg:&nbsp;mass&nbsp;in&nbsp;kg<br>
+:return:&nbsp;wavelength&nbsp;in&nbsp;Anstroms</tt></dd></dl>
  <dl><dt><a name="-debyewaller"><strong>debyewaller</strong></a>(uiso, Qmag=0)</dt><dd><tt>Calculate&nbsp;the&nbsp;debye&nbsp;waller&nbsp;factor&nbsp;for&nbsp;a&nbsp;particular&nbsp;Q<br>
 &nbsp;T&nbsp;=&nbsp;<a href="#-debyewaller">debyewaller</a>(uiso,Qmag=[0])<br>
 &nbsp;<br>
@@ -240,6 +252,14 @@ E.G.:<br>
  <dl><dt><a name="-default_atom_charge"><strong>default_atom_charge</strong></a>(element)</dt><dd><tt>Returns&nbsp;the&nbsp;default&nbsp;charge&nbsp;value&nbsp;for&nbsp;the&nbsp;element<br>
 :param&nbsp;element:&nbsp;str:&nbsp;'Fe'<br>
 :return:&nbsp;int&nbsp;or&nbsp;nan</tt></dd></dl>
+ <dl><dt><a name="-detector_rotate"><strong>detector_rotate</strong></a>(detector_position_mm=(0, 1000.0, 0), delta=0.0, gamma=0.0, labmatrix=array([[1., 0., 0.],
+       [0., 1., 0.],
+       [0., 0., 1.]]))</dt><dd><tt>Return&nbsp;a&nbsp;position&nbsp;array&nbsp;for&nbsp;a&nbsp;vector&nbsp;rotated&nbsp;by&nbsp;delta&nbsp;and&nbsp;gamma,&nbsp;like&nbsp;a&nbsp;detector&nbsp;along&nbsp;[0,1,0]<br>
+:param&nbsp;detector_position_mm:&nbsp;detector&nbsp;position&nbsp;from&nbsp;sample&nbsp;in&nbsp;mm<br>
+:param&nbsp;delta:&nbsp;vertical&nbsp;rotation&nbsp;about&nbsp;z-axis&nbsp;in&nbsp;Deg<br>
+:param&nbsp;gamma:&nbsp;horizontal&nbsp;rotation&nbsp;about&nbsp;x-axis&nbsp;in&nbsp;Deg<br>
+:param&nbsp;labmatrix:&nbsp;[3*3]&nbsp;orientation&nbsp;matrix&nbsp;to&nbsp;convert&nbsp;to&nbsp;alternative&nbsp;basis<br>
+:return:&nbsp;array</tt></dd></dl>
  <dl><dt><a name="-diff2lab"><strong>diff2lab</strong></a>(vec, lab=None)</dt><dd><tt>Convert&nbsp;between&nbsp;diffractometer&nbsp;frame&nbsp;and&nbsp;lab&nbsp;frame<br>
 Lab&nbsp;frame&nbsp;according&nbsp;to&nbsp;Diamond&nbsp;I16&nbsp;beamline<br>
 Diffractometer&nbsp;frame&nbsp;according&nbsp;to&nbsp;Fig.&nbsp;1,&nbsp;H.&nbsp;You,&nbsp;J.&nbsp;Appl.&nbsp;Cryst&nbsp;32&nbsp;(1999),&nbsp;614-623<br>
@@ -290,13 +310,25 @@ Diffractometer&nbsp;frame&nbsp;according&nbsp;to&nbsp;Fig.&nbsp;1,&nbsp;H.&nbsp;
  <dl><dt><a name="-diffractometer_rotation"><strong>diffractometer_rotation</strong></a>(phi=0, chi=0, eta=0, mu=0)</dt><dd><tt>Generate&nbsp;the&nbsp;6-axis&nbsp;diffracometer&nbsp;rotation&nbsp;matrix<br>
 &nbsp;&nbsp;R&nbsp;=&nbsp;M&nbsp;*&nbsp;E&nbsp;*&nbsp;X&nbsp;*&nbsp;P<br>
 Also&nbsp;called&nbsp;Z&nbsp;in&nbsp;H.&nbsp;You,&nbsp;J.&nbsp;Appl.&nbsp;Cryst&nbsp;32&nbsp;(1999),&nbsp;614-623<br>
-:param&nbsp;phi:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees<br>
-:param&nbsp;chi:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees<br>
-:param&nbsp;eta:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees<br>
-:param&nbsp;mu:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees<br>
+The&nbsp;diffractometer&nbsp;coordinate&nbsp;system&nbsp;has&nbsp;the&nbsp;convention&nbsp;(all&nbsp;angles&nbsp;zero):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x-axis&nbsp;points&nbsp;vertically,&nbsp;perpendicular&nbsp;to&nbsp;beam&nbsp;(mu&nbsp;is&nbsp;about&nbsp;x)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y-axis&nbsp;points&nbsp;along&nbsp;the&nbsp;direction&nbsp;of&nbsp;the&nbsp;beam<br>
+&nbsp;&nbsp;&nbsp;&nbsp;z-axis&nbsp;points&nbsp;along&nbsp;the&nbsp;phi&nbsp;axis,&nbsp;perpendicular&nbsp;to&nbsp;x&nbsp;and&nbsp;y<br>
+The&nbsp;vertical&nbsp;scattering&nbsp;plane&nbsp;is&nbsp;in&nbsp;the&nbsp;y-x&nbsp;axis<br>
+The&nbsp;horizontal&nbsp;scattering&nbsp;plane&nbsp;is&nbsp;in&nbsp;the&nbsp;y-z&nbsp;axis<br>
+&nbsp;&nbsp;&nbsp;vec'&nbsp;=&nbsp;np.dot(<a href="#-diffractometer_rotation">diffractometer_rotation</a>(phi,&nbsp;chi,&nbsp;eta,&nbsp;mu),&nbsp;vec)<br>
+&nbsp;&nbsp;&nbsp;vec&nbsp;must&nbsp;be&nbsp;1D&nbsp;or&nbsp;column&nbsp;vector&nbsp;(3*n)<br>
+:param&nbsp;phi:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees,&nbsp;left&nbsp;handed&nbsp;roation&nbsp;about&nbsp;z'''<br>
+:param&nbsp;chi:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees,&nbsp;right&nbsp;handed&nbsp;rotation&nbsp;about&nbsp;y''<br>
+:param&nbsp;eta:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees,&nbsp;left&nbsp;handed&nbsp;rotation&nbsp;about&nbsp;z'<br>
+:param&nbsp;mu:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees,&nbsp;right&nbsp;handed&nbsp;rotation&nbsp;about&nbsp;x<br>
 :return:&nbsp;&nbsp;[3*3]&nbsp;array</tt></dd></dl>
  <dl><dt><a name="-dspace2q"><strong>dspace2q</strong></a>(dspace)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;|Q|<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qmag&nbsp;=&nbsp;<a href="#-q2dspace">q2dspace</a>(dspace)</tt></dd></dl>
+ <dl><dt><a name="-electron_energy"><strong>electron_energy</strong></a>(wavelength_a)</dt><dd><tt>Calcualte&nbsp;the&nbsp;electron&nbsp;energy&nbsp;in&nbsp;electronvolts&nbsp;using&nbsp;DeBroglie's&nbsp;formula<br>
+&nbsp;&nbsp;E&nbsp;[eV]&nbsp;~&nbsp;1.5&nbsp;/&nbsp;lambda^2&nbsp;[nm]<br>
+:param&nbsp;wavelength_a:&nbsp;electron&nbsp;wavelength&nbsp;in&nbsp;Angstroms<br>
+:return:&nbsp;energy&nbsp;in&nbsp;eV</tt></dd></dl>
  <dl><dt><a name="-electron_scattering_factor"><strong>electron_scattering_factor</strong></a>(element, Qmag=0)</dt><dd><tt>Read&nbsp;X-ray&nbsp;scattering&nbsp;factor&nbsp;table,&nbsp;calculate&nbsp;f(|Q|)<br>
 Uses&nbsp;the&nbsp;coefficients&nbsp;for&nbsp;analytical&nbsp;approximation&nbsp;to&nbsp;the&nbsp;scattering&nbsp;factors&nbsp;<br>
 &nbsp;&nbsp;Peng,&nbsp;L.&nbsp;M.;&nbsp;Acta&nbsp;Crystallogr&nbsp;A&nbsp;&nbsp;1996,&nbsp;52&nbsp;(2),&nbsp;257–276.&nbsp;<br>
@@ -305,7 +337,7 @@ Qff&nbsp;=&nbsp;<a href="#-xray_scattering_factor">xray_scattering_factor</a>(el
 :param&nbsp;element:&nbsp;[n*str]&nbsp;list&nbsp;or&nbsp;array&nbsp;of&nbsp;elements<br>
 :param&nbsp;Qmag:&nbsp;[m]&nbsp;array&nbsp;of&nbsp;wavevector&nbsp;distance,&nbsp;in&nbsp;A^-1<br>
 :return:&nbsp;[m*n]&nbsp;array&nbsp;of&nbsp;scattering&nbsp;factors</tt></dd></dl>
- <dl><dt><a name="-electron_wavelenth"><strong>electron_wavelenth</strong></a>(energy_ev)</dt><dd><tt>Calcualte&nbsp;the&nbsp;electron&nbsp;wavelength&nbsp;in&nbsp;Angstroms&nbsp;using&nbsp;DeBroglie's&nbsp;formula<br>
+ <dl><dt><a name="-electron_wavelength"><strong>electron_wavelength</strong></a>(energy_ev)</dt><dd><tt>Calcualte&nbsp;the&nbsp;electron&nbsp;wavelength&nbsp;in&nbsp;Angstroms&nbsp;using&nbsp;DeBroglie's&nbsp;formula<br>
 &nbsp;&nbsp;lambda&nbsp;[nm]&nbsp;~&nbsp;sqrt(&nbsp;1.5&nbsp;/&nbsp;E&nbsp;[eV]&nbsp;)<br>
 :param&nbsp;energy_ev:&nbsp;electron&nbsp;energy&nbsp;in&nbsp;eV<br>
 :return:&nbsp;wavelength&nbsp;in&nbsp;Anstroms</tt></dd></dl>
@@ -342,6 +374,9 @@ Based&nbsp;on&nbsp;formulas&nbsp;from:&nbsp;Henke,&nbsp;Gullikson,&nbsp;and&nbsp
 :param&nbsp;density:&nbsp;float&nbsp;density&nbsp;in&nbsp;g/cm^3<br>
 :param&nbsp;thickness_um:&nbsp;slab&nbsp;thickness&nbsp;in&nbsp;microns<br>
 :return:&nbsp;float&nbsp;or&nbsp;array</tt></dd></dl>
+ <dl><dt><a name="-find_spacegroup"><strong>find_spacegroup</strong></a>(sg_symbol)</dt><dd><tt>Find&nbsp;a&nbsp;spacegroup&nbsp;based&nbsp;on&nbsp;the&nbsp;identifying&nbsp;symbol<br>
+:param&nbsp;sg_symbol:&nbsp;str,&nbsp;e.g.&nbsp;'Fd-3m'<br>
+:return:&nbsp;spacegroup&nbsp;dict&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found</tt></dd></dl>
  <dl><dt><a name="-fitincell"><strong>fitincell</strong></a>(uvw)</dt><dd><tt>Set&nbsp;all&nbsp;fractional&nbsp;coodinates&nbsp;between&nbsp;0&nbsp;and&nbsp;1<br>
 Usage:<br>
 &nbsp;&nbsp;uvw&nbsp;=&nbsp;<a href="#-fitincell">fitincell</a>(uvw)<br>
@@ -470,10 +505,11 @@ E.G.<br>
  <dl><dt><a name="-hkl2str"><strong>hkl2str</strong></a>(hkl)</dt><dd><tt>Convert&nbsp;hkl&nbsp;to&nbsp;string&nbsp;(h,k,l)<br>
 :param&nbsp;hkl:<br>
 :return:&nbsp;str&nbsp;'(h,k,l)'</tt></dd></dl>
- <dl><dt><a name="-hkl2twotheta"><strong>hkl2twotheta</strong></a>(hkl, UVstar, energy_kev=17.794)</dt><dd><tt>Calcualte&nbsp;d-spacing&nbsp;from&nbsp;hkl&nbsp;reflection<br>
+ <dl><dt><a name="-hkl2twotheta"><strong>hkl2twotheta</strong></a>(hkl, UVstar, energy_kev=17.794, wavelength_a=None)</dt><dd><tt>Calcualte&nbsp;d-spacing&nbsp;from&nbsp;hkl&nbsp;reflection<br>
 :param&nbsp;hkl:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;reflections<br>
 :param&nbsp;UV:&nbsp;[3x3]&nbsp;array&nbsp;of&nbsp;unit&nbsp;cell&nbsp;vectors<br>
 :param&nbsp;energy_kev:&nbsp;float&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;wavelength_a:&nbsp;float&nbsp;wavelength&nbsp;in&nbsp;Angstroms<br>
 :return:&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;d-spacing&nbsp;in&nbsp;A</tt></dd></dl>
  <dl><dt><a name="-indx"><strong>indx</strong></a>(Q, UV)</dt><dd><tt>Index&nbsp;Q(x,y,z)&nbsp;on&nbsp;on&nbsp;lattice&nbsp;[h,k,l]&nbsp;with&nbsp;unit&nbsp;vectors&nbsp;UV<br>
 Usage:<br>
@@ -608,6 +644,13 @@ Based&nbsp;on&nbsp;formulas&nbsp;from:&nbsp;Henke,&nbsp;Gullikson,&nbsp;and&nbsp
 :param&nbsp;density:&nbsp;float&nbsp;density&nbsp;in&nbsp;g/cm^3<br>
 :param&nbsp;grazing_angle:&nbsp;incidence&nbsp;angle&nbsp;relative&nbsp;to&nbsp;the&nbsp;surface,&nbsp;in&nbsp;degrees<br>
 :return:&nbsp;float&nbsp;or&nbsp;array,&nbsp;in&nbsp;microns</tt></dd></dl>
+ <dl><dt><a name="-molecular_reflectivity"><strong>molecular_reflectivity</strong></a>(chemical_formula, energy_kev, density, grazing_angle)</dt><dd><tt>Calculate&nbsp;the&nbsp;specular&nbsp;reflectivity&nbsp;of&nbsp;a&nbsp;material<br>
+From:&nbsp;https://xdb.lbl.gov/Section4/Sec_4-2.html<br>
+:param&nbsp;chemical_formula:&nbsp;str&nbsp;molecular&nbsp;formula<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;or&nbsp;array,&nbsp;x-ray&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;density:&nbsp;float,&nbsp;density&nbsp;in&nbsp;g/cm^3<br>
+:param&nbsp;grazing_angle:&nbsp;float,&nbsp;incidence&nbsp;angle&nbsp;relative&nbsp;to&nbsp;the&nbsp;surface,&nbsp;in&nbsp;degrees<br>
+:return:&nbsp;float&nbsp;or&nbsp;array</tt></dd></dl>
  <dl><dt><a name="-molecular_refractive_index"><strong>molecular_refractive_index</strong></a>(chemical_formula, energy_kev, density)</dt><dd><tt>Calculate&nbsp;Complex&nbsp;Index&nbsp;of&nbsp;Refraction<br>
 &nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;=&nbsp;1&nbsp;-&nbsp;(1/2pi)N*r0*lambda^2*(f1+if2)&nbsp;=&nbsp;1&nbsp;-&nbsp;Delta&nbsp;-&nbsp;iBeta<br>
 Equivalent&nbsp;to:&nbsp;https://henke.lbl.gov/optical_constants/getdb2.html<br>
@@ -619,12 +662,20 @@ Based&nbsp;on&nbsp;formulas&nbsp;from:&nbsp;Henke,&nbsp;Gullikson,&nbsp;and&nbsp
  <dl><dt><a name="-molecular_weight"><strong>molecular_weight</strong></a>(compound_name)</dt><dd><tt>Calculate&nbsp;the&nbsp;molecular&nbsp;weight&nbsp;of&nbsp;given&nbsp;compound<br>
 :param&nbsp;compound_name:&nbsp;str&nbsp;elements<br>
 :return:&nbsp;float&nbsp;weight&nbsp;in&nbsp;g</tt></dd></dl>
+ <dl><dt><a name="-neutron_energy"><strong>neutron_energy</strong></a>(wavelength_a)</dt><dd><tt>Calcualte&nbsp;the&nbsp;neutron&nbsp;energy&nbsp;in&nbsp;milli-electronvolts&nbsp;using&nbsp;DeBroglie's&nbsp;formula<br>
+&nbsp;&nbsp;E&nbsp;[meV]&nbsp;~&nbsp;81.82&nbsp;/&nbsp;lambda^2&nbsp;[A]<br>
+:param&nbsp;wavelength_a:&nbsp;neutron&nbsp;wavelength&nbsp;in&nbsp;Angstroms<br>
+:return:&nbsp;energy&nbsp;in&nbsp;meV</tt></dd></dl>
  <dl><dt><a name="-neutron_scattering_length"><strong>neutron_scattering_length</strong></a>(element)</dt><dd><tt>Return&nbsp;neutron&nbsp;scattering&nbsp;length,&nbsp;b,&nbsp;in&nbsp;fm<br>
 Uses&nbsp;bound&nbsp;coherent&nbsp;scattering&nbsp;length&nbsp;from&nbsp;NIST<br>
 https://www.ncnr.nist.gov/resources/n-lengths/<br>
 &nbsp;b&nbsp;=&nbsp;<a href="#-neutron_scattering_length">neutron_scattering_length</a>('Co')<br>
 :param&nbsp;element:&nbsp;[n*str]&nbsp;list&nbsp;or&nbsp;array&nbsp;of&nbsp;elements<br>
 :return:&nbsp;[n]&nbsp;array&nbsp;of&nbsp;scattering&nbsp;lengths</tt></dd></dl>
+ <dl><dt><a name="-neutron_wavelength"><strong>neutron_wavelength</strong></a>(energy_mev)</dt><dd><tt>Calcualte&nbsp;the&nbsp;neutron&nbsp;wavelength&nbsp;in&nbsp;Angstroms&nbsp;using&nbsp;DeBroglie's&nbsp;formula<br>
+&nbsp;&nbsp;lambda&nbsp;[A]&nbsp;~&nbsp;sqrt(&nbsp;81.82&nbsp;/&nbsp;E&nbsp;[meV]&nbsp;)<br>
+:param&nbsp;energy_mev:&nbsp;neutron&nbsp;energy&nbsp;in&nbsp;meV<br>
+:return:&nbsp;wavelength&nbsp;in&nbsp;Anstroms</tt></dd></dl>
  <dl><dt><a name="-orbital_configuration"><strong>orbital_configuration</strong></a>(element, charge=None)</dt><dd><tt>Returns&nbsp;the&nbsp;orbital&nbsp;configuration&nbsp;of&nbsp;an&nbsp;element&nbsp;as&nbsp;a&nbsp;list&nbsp;of&nbsp;strings<br>
 :param&nbsp;element:&nbsp;str,&nbsp;element&nbsp;name,&nbsp;e.g.&nbsp;'Fe'&nbsp;or&nbsp;'Fe3+'&nbsp;or&nbsp;'0.8Fe2+'<br>
 :param&nbsp;charge:&nbsp;int,&nbsp;element&nbsp;charge&nbsp;(overwrites&nbsp;charge&nbsp;given&nbsp;in&nbsp;element)<br>
@@ -640,6 +691,16 @@ E.G.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&nbsp;x&nbsp;=&nbsp;array([0,1,0])<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&nbsp;y&nbsp;=&nbsp;array([0,0,1])<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&nbsp;z&nbsp;=&nbsp;array([1,0,0])</tt></dd></dl>
+ <dl><dt><a name="-peaks_on_plane"><strong>peaks_on_plane</strong></a>(peak_x, peak_y, peak_height, peak_width, max_x, max_y, pixels_width=1001, background=0)</dt><dd><tt>Creates&nbsp;a&nbsp;rectangular&nbsp;grid&nbsp;and&nbsp;adds&nbsp;Gaussian&nbsp;peaks&nbsp;with&nbsp;height&nbsp;"intensity"<br>
+:param&nbsp;peak_x:&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;x&nbsp;coordinates<br>
+:param&nbsp;peak_y:&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;y&nbsp;coordinates<br>
+:param&nbsp;peak_height:&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;peak&nbsp;heights<br>
+:param&nbsp;peak_width:&nbsp;[nx1]&nbsp;or&nbsp;float,&nbsp;gaussian&nbsp;width<br>
+:param&nbsp;max_x:&nbsp;grid&nbsp;will&nbsp;be&nbsp;created&nbsp;from&nbsp;-max_x&nbsp;:&nbsp;+max_x&nbsp;horizontally<br>
+:param&nbsp;max_y:&nbsp;grid&nbsp;will&nbsp;be&nbsp;created&nbsp;from&nbsp;-max_y&nbsp;:&nbsp;+max_y&nbsp;vertically<br>
+:param&nbsp;pixels_width:&nbsp;grid&nbsp;will&nbsp;contain&nbsp;pixels&nbsp;horizontally&nbsp;and&nbsp;the&nbsp;number&nbsp;vertically&nbsp;will&nbsp;be&nbsp;scaled<br>
+:param&nbsp;background:&nbsp;if&nbsp;&gt;0,&nbsp;add&nbsp;a&nbsp;normaly&nbsp;distributed&nbsp;background&nbsp;with&nbsp;average&nbsp;level&nbsp;=&nbsp;background<br>
+:return:&nbsp;x,&nbsp;y,&nbsp;plane</tt></dd></dl>
  <dl><dt><a name="-photoabsorption_crosssection"><strong>photoabsorption_crosssection</strong></a>(elements, energy_kev)</dt><dd><tt>Calculate&nbsp;the&nbsp;photoabsorption&nbsp;cross&nbsp;section&nbsp;from&nbsp;the&nbsp;atomic&nbsp;scattering&nbsp;factors<br>
 &nbsp;&nbsp;&nbsp;&nbsp;u&nbsp;=&nbsp;2*r0*lambda*f2<br>
 See:&nbsp;https://henke.lbl.gov/optical_constants/intro.html<br>
@@ -698,19 +759,71 @@ Some&nbsp;useful&nbsp;standard&nbsp;CIF&nbsp;keywords:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_x<br>
 &nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_y<br>
 &nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_z</tt></dd></dl>
+ <dl><dt><a name="-reflections_on_detector"><strong>reflections_on_detector</strong></a>(qxqyqz, energy_kev, det_distance=1.0, det_normal=(0, -1.0, 0), delta=0.0, gamma=0.0, det_width=1.0, det_height=1.0, labmatrix=array([[1., 0., 0.],
+       [0., 1., 0.],
+       [0., 0., 1.]]))</dt><dd><tt>Return&nbsp;relative&nbsp;position&nbsp;of&nbsp;reflection&nbsp;on&nbsp;detector<br>
+:param&nbsp;qxqyqz:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;reflection&nbsp;coordinates&nbsp;in&nbsp;Q-space&nbsp;[qx,&nbsp;qy,&nbsp;qz]<br>
+:param&nbsp;energy_kev:&nbsp;float,&nbsp;Incident&nbsp;beam&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;det_distance:&nbsp;float,&nbsp;Detector&nbsp;distance&nbsp;in&nbsp;meters<br>
+:param&nbsp;det_normal:&nbsp;(dx,dy,dz)&nbsp;direction&nbsp;of&nbsp;detector&nbsp;normal<br>
+:param&nbsp;delta:&nbsp;float,&nbsp;angle&nbsp;in&nbsp;degrees&nbsp;in&nbsp;vertical&nbsp;direction&nbsp;(about&nbsp;diff-z)<br>
+:param&nbsp;gamma:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees&nbsp;in&nbsp;horizontal&nbsp;direction&nbsp;(about&nbsp;diff-x)<br>
+:param&nbsp;det_width:&nbsp;float,&nbsp;detector&nbsp;width&nbsp;along&nbsp;x-axis&nbsp;in&nbsp;meters<br>
+:param&nbsp;det_height:&nbsp;float,&nbsp;detector&nbsp;height&nbsp;along&nbsp;z-axis&nbsp;in&nbsp;meters<br>
+:param&nbsp;labmatrix:&nbsp;[3x3]&nbsp;orientation&nbsp;array&nbsp;to&nbsp;convert&nbsp;to&nbsp;difference&nbsp;basis<br>
+:return&nbsp;uvw:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;positions&nbsp;relative&nbsp;to&nbsp;the&nbsp;centre&nbsp;of&nbsp;the&nbsp;detector,&nbsp;or&nbsp;NaN&nbsp;if&nbsp;not&nbsp;incident<br>
+:return&nbsp;wavevector_difference:&nbsp;[n]&nbsp;array&nbsp;of&nbsp;wavevector&nbsp;difference&nbsp;in&nbsp;A-1</tt></dd></dl>
  <dl><dt><a name="-resolution2energy"><strong>resolution2energy</strong></a>(res, twotheta=180.0)</dt><dd><tt>Calcualte&nbsp;the&nbsp;energy&nbsp;required&nbsp;to&nbsp;achieve&nbsp;a&nbsp;specific&nbsp;resolution&nbsp;at&nbsp;a&nbsp;given&nbsp;two-theta<br>
 :param&nbsp;res:&nbsp;measurement&nbsp;resolution&nbsp;in&nbsp;A&nbsp;(==d-spacing)<br>
 :param&nbsp;twotheta:&nbsp;Bragg&nbsp;angle&nbsp;in&nbsp;Degrees<br>
 :return:&nbsp;float</tt></dd></dl>
- <dl><dt><a name="-rotmatrixx"><strong>rotmatrixx</strong></a>(mu)</dt><dd><tt>Generate&nbsp;diffractometer&nbsp;rotation&nbsp;matrix&nbsp;mu&nbsp;(gamma)&nbsp;about&nbsp;x-axis<br>
+ <dl><dt><a name="-rotmatrixx"><strong>rotmatrixx</strong></a>(mu)</dt><dd><tt>Generate&nbsp;diffractometer&nbsp;rotation&nbsp;matrix&nbsp;mu&nbsp;about&nbsp;x-axis&nbsp;(right&nbsp;handed)<br>
+Equivalent&nbsp;to&nbsp;ROLL&nbsp;in&nbsp;the&nbsp;Tait–Bryan&nbsp;convention<br>
+Equivalent&nbsp;to&nbsp;mu&nbsp;in&nbsp;You&nbsp;et&nbsp;al.&nbsp;diffractometer&nbsp;convention&nbsp;(right&nbsp;handed)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;r&nbsp;=&nbsp;rotmatrix_x(mu)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vec'&nbsp;=&nbsp;np.dot(r,&nbsp;vec)<br>
+vec&nbsp;must&nbsp;be&nbsp;1D&nbsp;or&nbsp;column&nbsp;vector&nbsp;(3*n)<br>
 :param&nbsp;mu:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees<br>
 :return:&nbsp;[3*3]&nbsp;array</tt></dd></dl>
- <dl><dt><a name="-rotmatrixy"><strong>rotmatrixy</strong></a>(chi)</dt><dd><tt>Generate&nbsp;diffractometer&nbsp;rotation&nbsp;matrix&nbsp;chi&nbsp;about&nbsp;y-axis<br>
+ <dl><dt><a name="-rotmatrixy"><strong>rotmatrixy</strong></a>(chi)</dt><dd><tt>Generate&nbsp;diffractometer&nbsp;rotation&nbsp;matrix&nbsp;chi&nbsp;about&nbsp;y-axis&nbsp;(right&nbsp;handed)<br>
+Equivalent&nbsp;to&nbsp;PITCH&nbsp;in&nbsp;the&nbsp;Tait–Bryan&nbsp;convention<br>
+Equivalent&nbsp;to&nbsp;-chi&nbsp;in&nbsp;You&nbsp;et&nbsp;al.&nbsp;diffractometer&nbsp;convention&nbsp;(left&nbsp;handed)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;r&nbsp;=&nbsp;rotmatrix_y(chi)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vec'&nbsp;=&nbsp;np.dot(r,&nbsp;vec)<br>
+vec&nbsp;must&nbsp;be&nbsp;1D&nbsp;or&nbsp;column&nbsp;vector&nbsp;(3*n)<br>
 :param&nbsp;chi:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees<br>
 :return:&nbsp;[3*3]&nbsp;array</tt></dd></dl>
- <dl><dt><a name="-rotmatrixz"><strong>rotmatrixz</strong></a>(phi)</dt><dd><tt>Generate&nbsp;diffractometer&nbsp;rotation&nbsp;matrix&nbsp;phi&nbsp;(eta,&nbsp;delta)&nbsp;about&nbsp;z-axis<br>
+ <dl><dt><a name="-rotmatrixz"><strong>rotmatrixz</strong></a>(phi)</dt><dd><tt>Generate&nbsp;diffractometer&nbsp;rotation&nbsp;matrix&nbsp;about&nbsp;z-axis&nbsp;(right&nbsp;handed)<br>
+Equivalent&nbsp;to&nbsp;YAW&nbsp;in&nbsp;the&nbsp;Tait-Bryan&nbsp;convention<br>
+Equivalent&nbsp;to&nbsp;-phi,&nbsp;-eta,&nbsp;-delta&nbsp;in&nbsp;You&nbsp;et&nbsp;al.&nbsp;diffractometer&nbsp;convention&nbsp;(left&nbsp;handed)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;r&nbsp;=&nbsp;rotmatrix_z(phi)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vec'&nbsp;=&nbsp;np.dot(r,&nbsp;vec)<br>
+vec&nbsp;must&nbsp;be&nbsp;1D&nbsp;or&nbsp;column&nbsp;vector&nbsp;(3*n)<br>
 :param&nbsp;phi:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees<br>
 :return:&nbsp;[3*3]&nbsp;array</tt></dd></dl>
+ <dl><dt><a name="-scale_intensity"><strong>scale_intensity</strong></a>(intensity, wavevector_diff, resolution=0.5)</dt><dd><tt>Scale&nbsp;intensity&nbsp;depending&nbsp;on&nbsp;wavevector&nbsp;difference&nbsp;and&nbsp;resolution<br>
+:param&nbsp;intensity:&nbsp;intensity&nbsp;value<br>
+:param&nbsp;wavevector_diff:&nbsp;distance&nbsp;from&nbsp;centre&nbsp;in&nbsp;inverse&nbsp;angstroms<br>
+:param&nbsp;resolution:&nbsp;resolution&nbsp;in&nbsp;inverse&nbsp;angstroms<br>
+:return:</tt></dd></dl>
+ <dl><dt><a name="-scherrer_fwhm"><strong>scherrer_fwhm</strong></a>(size, twotheta, wavelength_a=None, energy_kev=None, shape_factor=0.9)</dt><dd><tt>Use&nbsp;the&nbsp;Scherrer&nbsp;equation&nbsp;to&nbsp;calculate&nbsp;the&nbsp;size&nbsp;of&nbsp;a&nbsp;crystallite&nbsp;from&nbsp;a&nbsp;peak&nbsp;width<br>
+&nbsp;&nbsp;L&nbsp;=&nbsp;K&nbsp;*&nbsp;lambda&nbsp;/&nbsp;fwhm&nbsp;*&nbsp;cos(theta)<br>
+See:&nbsp;https://en.wikipedia.org/wiki/Scherrer_equation<br>
+:param&nbsp;size:&nbsp;crystallite&nbsp;domain&nbsp;size&nbsp;in&nbsp;Angstroms<br>
+:param&nbsp;twotheta:&nbsp;2*Bragg&nbsp;angle,&nbsp;in&nbsp;degrees<br>
+:param&nbsp;wavelength_a:&nbsp;incident&nbsp;beam&nbsp;wavelength,&nbsp;in&nbsp;Angstroms<br>
+:param&nbsp;energy_kev:&nbsp;or,&nbsp;incident&nbsp;beam&nbsp;energy,&nbsp;in&nbsp;keV<br>
+:param&nbsp;shape_factor:&nbsp;dimensionless&nbsp;shape&nbsp;factor,&nbsp;dependent&nbsp;on&nbsp;shape&nbsp;of&nbsp;crystallite<br>
+:return:&nbsp;float,&nbsp;peak&nbsp;full-width-at-half-max&nbsp;in&nbsp;degrees</tt></dd></dl>
+ <dl><dt><a name="-scherrer_size"><strong>scherrer_size</strong></a>(fwhm, twotheta, wavelength_a=None, energy_kev=None, shape_factor=0.9)</dt><dd><tt>Use&nbsp;the&nbsp;Scherrer&nbsp;equation&nbsp;to&nbsp;calculate&nbsp;the&nbsp;size&nbsp;of&nbsp;a&nbsp;crystallite&nbsp;from&nbsp;a&nbsp;peak&nbsp;width<br>
+&nbsp;&nbsp;L&nbsp;=&nbsp;K&nbsp;*&nbsp;lambda&nbsp;/&nbsp;fwhm&nbsp;*&nbsp;cos(theta)<br>
+See:&nbsp;https://en.wikipedia.org/wiki/Scherrer_equation<br>
+:param&nbsp;fwhm:&nbsp;full-width-half-maximum&nbsp;of&nbsp;a&nbsp;peak,&nbsp;in&nbsp;degrees<br>
+:param&nbsp;twotheta:&nbsp;2*Bragg&nbsp;angle,&nbsp;in&nbsp;degrees<br>
+:param&nbsp;wavelength_a:&nbsp;incident&nbsp;beam&nbsp;wavelength,&nbsp;in&nbsp;Angstroms<br>
+:param&nbsp;energy_kev:&nbsp;or,&nbsp;incident&nbsp;beam&nbsp;energy,&nbsp;in&nbsp;keV<br>
+:param&nbsp;shape_factor:&nbsp;dimensionless&nbsp;shape&nbsp;factor,&nbsp;dependent&nbsp;on&nbsp;shape&nbsp;of&nbsp;crystallite<br>
+:return:&nbsp;float,&nbsp;crystallite&nbsp;domain&nbsp;size&nbsp;in&nbsp;Angstroms</tt></dd></dl>
  <dl><dt><a name="-spacegroup"><strong>spacegroup</strong></a>(sg_number)</dt><dd><tt>Return&nbsp;a&nbsp;dict&nbsp;of&nbsp;information&nbsp;for&nbsp;a&nbsp;space&nbsp;group<br>
 :param&nbsp;sg_number:&nbsp;int&nbsp;space&nbsp;group&nbsp;number,&nbsp;as&nbsp;in&nbsp;the&nbsp;international&nbsp;tables&nbsp;of&nbsp;Crystallography<br>
 :return:&nbsp;dict</tt></dd></dl>
@@ -731,14 +844,16 @@ Some&nbsp;useful&nbsp;standard&nbsp;CIF&nbsp;keywords:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'operators&nbsp;general':&nbsp;xyz_op,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'operators&nbsp;magnetic':&nbsp;mxmymz_op,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'operators&nbsp;time':&nbsp;time,</tt></dd></dl>
- <dl><dt><a name="-spacegroup_magnetic_list"><strong>spacegroup_magnetic_list</strong></a>(sg_number)</dt><dd><tt>Return&nbsp;str&nbsp;list&nbsp;of&nbsp;magnetic&nbsp;space&nbsp;groups<br>
+ <dl><dt><a name="-spacegroup_magnetic_list"><strong>spacegroup_magnetic_list</strong></a>(sg_number=None, sg_dict=None)</dt><dd><tt>Return&nbsp;str&nbsp;list&nbsp;of&nbsp;magnetic&nbsp;space&nbsp;groups<br>
 :param&nbsp;sg_number:&nbsp;space&nbsp;group&nbsp;number&nbsp;(1-230)<br>
+:param&nbsp;sg_dict:&nbsp;alternate&nbsp;input,&nbsp;spacegroup&nbsp;dict&nbsp;from&nbsp;spacegroup&nbsp;function<br>
 :return:&nbsp;str</tt></dd></dl>
  <dl><dt><a name="-spacegroup_subgroups"><strong>spacegroup_subgroups</strong></a>(sg_number)</dt><dd><tt>Return&nbsp;dict&nbsp;of&nbsp;maximal&nbsp;subgroups&nbsp;for&nbsp;spacegroup<br>
 :param&nbsp;sg_number:&nbsp;space&nbsp;group&nbsp;number&nbsp;(1-230)<br>
 :return:&nbsp;dict</tt></dd></dl>
- <dl><dt><a name="-spacegroup_subgroups_list"><strong>spacegroup_subgroups_list</strong></a>(sg_number)</dt><dd><tt>Return&nbsp;str&nbsp;of&nbsp;maximal&nbsp;subgroups&nbsp;for&nbsp;spacegroup<br>
+ <dl><dt><a name="-spacegroup_subgroups_list"><strong>spacegroup_subgroups_list</strong></a>(sg_number=None, sg_dict=None)</dt><dd><tt>Return&nbsp;str&nbsp;of&nbsp;maximal&nbsp;subgroups&nbsp;for&nbsp;spacegroup<br>
 :param&nbsp;sg_number:&nbsp;space&nbsp;group&nbsp;number&nbsp;(1-230)<br>
+:param&nbsp;sg_dict:&nbsp;alternate&nbsp;input,&nbsp;spacegroup&nbsp;dict&nbsp;from&nbsp;spacegroup&nbsp;function<br>
 :return:&nbsp;str</tt></dd></dl>
  <dl><dt><a name="-spacegroups"><strong>spacegroups</strong></a>()</dt><dd><tt>Return&nbsp;a&nbsp;dict&nbsp;of&nbsp;all&nbsp;space&nbsp;groups<br>
 Loaded&nbsp;from&nbsp;json&nbsp;file&nbsp;created&nbsp;from&nbsp;the&nbsp;Bilbao&nbsp;crystallographic&nbsp;server:&nbsp;https://www.cryst.ehu.es/<br>
@@ -760,8 +875,9 @@ Loaded&nbsp;from&nbsp;json&nbsp;file&nbsp;created&nbsp;from&nbsp;the&nbsp;Bilbao
 &nbsp;&nbsp;&nbsp;&nbsp;'subgroup&nbsp;name',<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'subgroup&nbsp;index',<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'subgroup&nbsp;type'</tt></dd></dl>
- <dl><dt><a name="-spacegroups_magnetic"><strong>spacegroups_magnetic</strong></a>(sg_number=None)</dt><dd><tt>Returns&nbsp;dict&nbsp;of&nbsp;magnetic&nbsp;space&nbsp;groups&nbsp;for&nbsp;required&nbsp;space&nbsp;group<br>
+ <dl><dt><a name="-spacegroups_magnetic"><strong>spacegroups_magnetic</strong></a>(sg_number=None, sg_dict=None)</dt><dd><tt>Returns&nbsp;dict&nbsp;of&nbsp;magnetic&nbsp;space&nbsp;groups&nbsp;for&nbsp;required&nbsp;space&nbsp;group<br>
 :param&nbsp;sg_number:&nbsp;space&nbsp;group&nbsp;number&nbsp;(1-230)&nbsp;or&nbsp;None&nbsp;to&nbsp;return&nbsp;all&nbsp;magnetic&nbsp;spacegroups<br>
+:param&nbsp;sg_dict:&nbsp;alternate&nbsp;input,&nbsp;spacegroup&nbsp;dict&nbsp;from&nbsp;spacegroup&nbsp;function<br>
 :return:&nbsp;dict</tt></dd></dl>
  <dl><dt><a name="-split_compound"><strong>split_compound</strong></a>(compound_name)</dt><dd><tt>Convert&nbsp;a&nbsp;molecular&nbsp;or&nbsp;compound&nbsp;name&nbsp;into&nbsp;a&nbsp;list&nbsp;of&nbsp;elements&nbsp;and&nbsp;numbers.<br>
 Assumes&nbsp;all&nbsp;element&nbsp;multiplications&nbsp;are&nbsp;to&nbsp;the&nbsp;LEFT&nbsp;of&nbsp;the&nbsp;element&nbsp;name.<br>
@@ -830,6 +946,15 @@ Diffractometer&nbsp;frame&nbsp;according&nbsp;to&nbsp;Fig.&nbsp;1,&nbsp;H.&nbsp;
  <dl><dt><a name="-wave2energy"><strong>wave2energy</strong></a>(wavelength)</dt><dd><tt>Converts&nbsp;wavelength&nbsp;in&nbsp;A&nbsp;to&nbsp;energy&nbsp;in&nbsp;keV<br>
 &nbsp;Energy&nbsp;=&nbsp;<a href="#-wave2energy">wave2energy</a>(wavelength)</tt></dd></dl>
  <dl><dt><a name="-wavevector"><strong>wavevector</strong></a>(energy_kev=None, wavelength=None)</dt><dd><tt>Return&nbsp;wavevector&nbsp;=&nbsp;2pi/lambda</tt></dd></dl>
+ <dl><dt><a name="-wavevector_difference"><strong>wavevector_difference</strong></a>(Q, ki)</dt><dd><tt>Returns&nbsp;the&nbsp;difference&nbsp;between&nbsp;reciprocal&nbsp;lattice&nbsp;coordinates&nbsp;and&nbsp;incident&nbsp;wavevector,&nbsp;in&nbsp;A-1<br>
+When&nbsp;the&nbsp;difference&nbsp;is&nbsp;zero,&nbsp;the&nbsp;condition&nbsp;for&nbsp;diffraction&nbsp;is&nbsp;met.<br>
+&nbsp;&nbsp;Laue&nbsp;condition:&nbsp;Q&nbsp;=&nbsp;ha*&nbsp;+&nbsp;kb*&nbsp;+&nbsp;lc*&nbsp;==&nbsp;kf&nbsp;-&nbsp;ki<br>
+&nbsp;&nbsp;Elastic&nbsp;scattering:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|kf|&nbsp;=&nbsp;|ki|<br>
+&nbsp;&nbsp;Therefore:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|Q&nbsp;+&nbsp;ki|&nbsp;-&nbsp;|ki|&nbsp;=&nbsp;0<br>
+&nbsp;&nbsp;Expanding&nbsp;&amp;&nbsp;simplifing:&nbsp;Q.Q&nbsp;+&nbsp;2Q.ki&nbsp;=&nbsp;0<br>
+:param&nbsp;Q:&nbsp;[[nx3]]&nbsp;array&nbsp;of&nbsp;reciprocal&nbsp;lattice&nbsp;coordinates,&nbsp;in&nbsp;A-1<br>
+:param&nbsp;ki:&nbsp;[x,y,z]&nbsp;incident&nbsp;wavevector,&nbsp;in&nbsp;A-1<br>
+:return:&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;difference,&nbsp;in&nbsp;A-1</tt></dd></dl>
  <dl><dt><a name="-write_cif"><strong>write_cif</strong></a>(cifvals, filename=None, comments=None)</dt><dd><tt>Write&nbsp;.cif&nbsp;file&nbsp;with&nbsp;values&nbsp;from&nbsp;a&nbsp;cif&nbsp;dict,<br>
 Only&nbsp;basic&nbsp;items&nbsp;are&nbsp;saved,&nbsp;rather&nbsp;than&nbsp;returning&nbsp;the&nbsp;orginal&nbsp;file<br>
 :param&nbsp;cifvals:&nbsp;dict&nbsp;from&nbsp;readcif<br>
@@ -842,6 +967,10 @@ Only&nbsp;basic&nbsp;items&nbsp;are&nbsp;saved,&nbsp;rather&nbsp;than&nbsp;retur
 :param&nbsp;filename:&nbsp;filename&nbsp;to&nbsp;write&nbsp;(use&nbsp;None&nbsp;to&nbsp;return&nbsp;string)<br>
 :param&nbsp;comments:&nbsp;str&nbsp;comments&nbsp;to&nbsp;write&nbsp;to&nbsp;the&nbsp;file&nbsp;top&nbsp;matter<br>
 :return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-wyckoff_labels"><strong>wyckoff_labels</strong></a>(spacegroup_dict, UVW)</dt><dd><tt>Return&nbsp;Wyckoff&nbsp;site&nbsp;labels&nbsp;for&nbsp;given&nbsp;positions<br>
+:param&nbsp;spacegroup_dict:&nbsp;spacegroup&nbsp;dict&nbsp;from&nbsp;tables,&nbsp;if&nbsp;magnetic&nbsp;spacegroup&nbsp;given,&nbsp;uses&nbsp;the&nbsp;parent&nbsp;spacegroup<br>
+:param&nbsp;UVW:&nbsp;n*3&nbsp;array([u,v,w])&nbsp;atomic&nbsp;positions&nbsp;in&nbsp;fractional&nbsp;coordinates<br>
+:return:&nbsp;list[n]&nbsp;of&nbsp;Wyckoff&nbsp;site&nbsp;letters</tt></dd></dl>
  <dl><dt><a name="-xray_attenuation_length"><strong>xray_attenuation_length</strong></a>(elements, energy_kev, atom_per_volume, grazing_angle=90)</dt><dd><tt>Calcualte&nbsp;the&nbsp;attenuation&nbsp;length&nbsp;in&nbsp;microns<br>
 The&nbsp;depth&nbsp;into&nbsp;the&nbsp;material&nbsp;measured&nbsp;along&nbsp;the&nbsp;surface&nbsp;normal&nbsp;where&nbsp;the&nbsp;intensity&nbsp;of<br>
 x-rays&nbsp;falls&nbsp;to&nbsp;1/e&nbsp;of&nbsp;its&nbsp;value&nbsp;at&nbsp;the&nbsp;surface.<br>
@@ -856,8 +985,16 @@ From:&nbsp;<a href="http://henke.lbl.gov/optical_constants/asf.html">http://henk
 :param&nbsp;elements:&nbsp;list&nbsp;of&nbsp;str,&nbsp;name&nbsp;of&nbsp;element<br>
 :param&nbsp;energy_kev:&nbsp;float&nbsp;or&nbsp;list&nbsp;energy&nbsp;in&nbsp;keV&nbsp;(None&nbsp;to&nbsp;return&nbsp;original,&nbsp;uninterpolated&nbsp;list)<br>
 :return:&nbsp;f',&nbsp;f"&nbsp;with&nbsp;shape&nbsp;(len(energy),&nbsp;len(elements))</tt></dd></dl>
+ <dl><dt><a name="-xray_harmonic_rejection"><strong>xray_harmonic_rejection</strong></a>(elements, energy_kev, atom_per_volume, grazing_angle, harmonic=2)</dt><dd><tt>Calculate&nbsp;the&nbsp;specular&nbsp;reflectivity&nbsp;of&nbsp;a&nbsp;material<br>
+From:&nbsp;https://xdb.lbl.gov/Section4/Sec_4-2.html<br>
+:param&nbsp;elements:&nbsp;str&nbsp;or&nbsp;list&nbsp;of&nbsp;str,&nbsp;if&nbsp;list&nbsp;-&nbsp;absorption&nbsp;will&nbsp;be&nbsp;summed&nbsp;over&nbsp;elements<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;array<br>
+:param&nbsp;atom_per_volume:&nbsp;float&nbsp;atoms&nbsp;per&nbsp;A^3<br>
+:param&nbsp;grazing_angle:&nbsp;incidence&nbsp;angle&nbsp;relative&nbsp;to&nbsp;the&nbsp;surface,&nbsp;in&nbsp;degrees<br>
+:param&nbsp;harmonic:&nbsp;int&nbsp;harmonic&nbsp;multiple<br>
+:return:&nbsp;float&nbsp;or&nbsp;array</tt></dd></dl>
  <dl><dt><a name="-xray_reflectivity"><strong>xray_reflectivity</strong></a>(elements, energy_kev, atom_per_volume, grazing_angle)</dt><dd><tt>Calculate&nbsp;the&nbsp;specular&nbsp;reflectivity&nbsp;of&nbsp;a&nbsp;material<br>
-&nbsp;&nbsp;NOT&nbsp;CURRENTLY&nbsp;WORKING<br>
+From:&nbsp;https://xdb.lbl.gov/Section4/Sec_4-2.html<br>
 :param&nbsp;elements:&nbsp;str&nbsp;or&nbsp;list&nbsp;of&nbsp;str,&nbsp;if&nbsp;list&nbsp;-&nbsp;absorption&nbsp;will&nbsp;be&nbsp;summed&nbsp;over&nbsp;elements<br>
 :param&nbsp;energy_kev:&nbsp;float&nbsp;array<br>
 :param&nbsp;atom_per_volume:&nbsp;float&nbsp;atoms&nbsp;per&nbsp;A^3<br>
@@ -912,7 +1049,6 @@ See:<br>
 <strong>CIF_REQUIRES</strong> = ['_cell_length_a', '_cell_length_b', '_cell_length_c', '_cell_angle_alpha', '_cell_angle_beta', '_cell_angle_gamma', '_atom_site_label', '_atom_site_fract_x', '_atom_site_fract_y', '_atom_site_fract_z']<br>
 <strong>ELEMENT_LIST</strong> = ['Zr', 'Mo', 'Es', 'Eu', 'Fe', 'Fl', 'Fm', 'Fr', 'Ga', 'Gd', 'Ge', 'He', 'Hf', 'Hg', 'Ho', 'Hs', 'In', 'Ir', 'Kr', 'La', ...]<br>
 <strong>PENGFILE</strong> = r'C:\Users\grp66007\OneDrive - Diamond Light Sourc...s\Dans_Diffraction\Dans_Diffraction\data\peng.dat'<br>
-<strong>TRANSLATIONS</strong> = ['+1/2', '+1/3', '+2/3', '+1/4', '+3/4', '+1/6', '+5/6', '+5/4', '1/2+', '1/3+', '2/3+', '1/4+', '3/4+', '1/6+', '5/6+', '5/4+', '-1/2', '-1/3', '-2/3', '-1/4', ...]<br>
 <strong>datadir</strong> = r'C:\Users\grp66007\OneDrive - Diamond Light Sourc...onProjects\Dans_Diffraction\Dans_Diffraction\data'<br>
 <strong>element_regex</strong> = re.compile('Zr|Mo|Es|Eu|Fe|Fl|Fm|Fr|Ga|Gd|Ge|He|...n|Co|Cr|Cs|Cu|Mn|Md|Mt|Rb|Rf|Rh|Rn|Ru|Sb|Sc|Se|S)</td></tr></table>
 </body></html>

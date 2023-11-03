@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_scattering</strong></big></big> (version 2.2.0)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_scattering</strong></big></big> (version 2.3.0)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_scattering.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\classes_scattering.py</a></font></td></tr></table>
     <p><tt><a href="#Scattering">Scattering</a>&nbsp;Class&nbsp;"classes_scattering.py"<br>
@@ -16,8 +16,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;2.2.0<br>
-Last&nbsp;updated:&nbsp;06/05/23<br>
+Version&nbsp;2.3.0<br>
+Last&nbsp;updated:&nbsp;02/07/23<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 10/09/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -41,6 +41,7 @@ Version&nbsp;History:<br>
 14/03/22&nbsp;2.1.0&nbsp;&nbsp;&nbsp;powder()&nbsp;updated&nbsp;for&nbsp;new&nbsp;inputs&nbsp;and&nbsp;outputs&nbsp;for&nbsp;pVoight&nbsp;and&nbsp;custom&nbsp;peak&nbsp;shapes.&nbsp;Thanks&nbsp;yevgenyr!<br>
 14/01/23&nbsp;2.1.1&nbsp;&nbsp;Corrected&nbsp;background&nbsp;error&nbsp;in&nbsp;xtl.Scatter.powder<br>
 06/05/23&nbsp;2.0.0&nbsp;&nbsp;Merged&nbsp;pull&nbsp;request&nbsp;for&nbsp;non-integer&nbsp;hkl&nbsp;option&nbsp;on&nbsp;SF&nbsp;and&nbsp;electron&nbsp;form&nbsp;factors.&nbsp;Thanks&nbsp;Prestipino!<br>
+02/07/23&nbsp;2.3.0&nbsp;&nbsp;Fixed&nbsp;rounding&nbsp;error&nbsp;in&nbsp;Scatter.powder,&nbsp;thanks&nbsp;Sergio&nbsp;I.&nbsp;Rincon!<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -163,6 +164,36 @@ Useage:<br>
 <dl><dt><a name="Scattering-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
 
 <dl><dt><a name="Scattering-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>Return&nbsp;str(self).</tt></dd></dl>
+
+<dl><dt><a name="Scattering-detector_image"><strong>detector_image</strong></a>(self, detector_distance_mm=100.0, delta=0, gamma=0, height_mm=100.0, width_mm=100.0, pixel_size_mm=0.1, energy_range_ev=1000.0, peak_width_deg=0.5, wavelength_a=None, background=0, min_intensity=0.01)</dt><dd><tt>Calcualte&nbsp;detector&nbsp;image<br>
+&nbsp;&nbsp;Creates&nbsp;a&nbsp;detector&nbsp;rotated&nbsp;about&nbsp;the&nbsp;sample&nbsp;and&nbsp;generates&nbsp;incident&nbsp;reflections&nbsp;on&nbsp;the&nbsp;detector.<br>
+&nbsp;&nbsp;<a href="#Reflections">Reflections</a>&nbsp;incident&nbsp;on&nbsp;the&nbsp;detector&nbsp;are&nbsp;scaled&nbsp;by&nbsp;the&nbsp;distance&nbsp;of&nbsp;the&nbsp;scattered&nbsp;wavevector&nbsp;from&nbsp;the&nbsp;Ewald<br>
+&nbsp;&nbsp;sphere&nbsp;and&nbsp;also&nbsp;scaled&nbsp;by&nbsp;all&nbsp;reflections&nbsp;incident&nbsp;on&nbsp;the&nbsp;Ewald&nbsp;sphere.<br>
+Example<br>
+&nbsp;&nbsp;tth&nbsp;=&nbsp;xtl.Cell.tth([0,&nbsp;0,&nbsp;2],&nbsp;wavelength_a=1)[0]<br>
+&nbsp;&nbsp;xtl.Cell.orientation.rotate_6circle(mu=tth/2)&nbsp;&nbsp;#&nbsp;Orient&nbsp;crystal&nbsp;to&nbsp;scattering&nbsp;position<br>
+&nbsp;&nbsp;xx,&nbsp;yy,&nbsp;mesh,&nbsp;reflist&nbsp;=&nbsp;xtl.Scatter.<a href="#Scattering-detector_image">detector_image</a>(detector_distance_mm=100,&nbsp;gamma=tth,&nbsp;wavelength_a=1)<br>
+&nbsp;&nbsp;#&nbsp;Plot&nbsp;detector&nbsp;image<br>
+&nbsp;&nbsp;plt.figure()<br>
+&nbsp;&nbsp;plt.pcolormesh(xx,&nbsp;yy,&nbsp;mesh,&nbsp;vmin=0,&nbsp;vmax=1,&nbsp;shading='auto')<br>
+&nbsp;&nbsp;#&nbsp;reflection&nbsp;labels<br>
+&nbsp;&nbsp;for&nbsp;n&nbsp;in&nbsp;range(len(reflist['hkl'])):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plt.text(reflist['detx'][n],&nbsp;reflist['dety'][n],&nbsp;reflist['hkl_str'][n],&nbsp;c='w')<br>
+:param&nbsp;detector_distance_mm:&nbsp;float,&nbsp;Detector&nbsp;distance&nbsp;in&nbsp;mm&nbsp;(along&nbsp;(0,1,0))<br>
+:param&nbsp;delta:&nbsp;flaot,&nbsp;angle&nbsp;to&nbsp;rotate&nbsp;detector&nbsp;about&nbsp;(0,0,1)&nbsp;in&nbsp;Deg<br>
+:param&nbsp;gamma:&nbsp;float,&nbsp;angle&nbsp;to&nbsp;rotate&nbsp;detector&nbsp;about&nbsp;(1,0,0)&nbsp;in&nbsp;Deg<br>
+:param&nbsp;height_mm:&nbsp;float,&nbsp;detector&nbsp;size&nbsp;vertically&nbsp;(along&nbsp;(0,0,1))<br>
+:param&nbsp;width_mm:&nbsp;float,&nbsp;detector&nbsp;size&nbsp;horizontally&nbsp;(along&nbsp;(1,0,0))<br>
+:param&nbsp;pixel_size_mm:&nbsp;float,&nbsp;size&nbsp;of&nbsp;pixels,&nbsp;determines&nbsp;grid&nbsp;size<br>
+:param&nbsp;energy_range_ev:&nbsp;float,&nbsp;determines&nbsp;width&nbsp;of&nbsp;energies&nbsp;in&nbsp;incident&nbsp;intensity&nbsp;in&nbsp;eV<br>
+:param&nbsp;peak_width_deg:&nbsp;float,&nbsp;determines&nbsp;peak&nbsp;width&nbsp;on&nbsp;detector<br>
+:param&nbsp;wavelength_a:&nbsp;float,&nbsp;wavelength&nbsp;in&nbsp;A<br>
+:param&nbsp;background:&nbsp;float,&nbsp;detector&nbsp;background<br>
+:param&nbsp;min_intensity:&nbsp;float,&nbsp;min&nbsp;intenisty&nbsp;to&nbsp;include<br>
+:return&nbsp;xx:&nbsp;[height//pixelsize&nbsp;x&nbsp;width//pixelsize]&nbsp;array&nbsp;of&nbsp;x-coordinates<br>
+:return&nbsp;yy:&nbsp;[height//pixelsize&nbsp;x&nbsp;width//pixelsize]&nbsp;array&nbsp;of&nbsp;y-coordinates<br>
+:return&nbsp;mesh:&nbsp;[height//pixelsize&nbsp;x&nbsp;width//pixelsize]&nbsp;array&nbsp;of&nbsp;intensities<br>
+:return&nbsp;reflist:&nbsp;dict&nbsp;with&nbsp;info&nbsp;about&nbsp;each&nbsp;reflection&nbsp;on&nbsp;detector</tt></dd></dl>
 
 <dl><dt><a name="Scattering-diff6circle_intensity"><strong>diff6circle_intensity</strong></a>(self, phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0, energy_kev=None, wavelength=1.0, fwhm=0.5)</dt><dd><tt>Return&nbsp;the&nbsp;closest&nbsp;hkl&nbsp;and&nbsp;intensity&nbsp;factor<br>
 :param&nbsp;phi:&nbsp;float&nbsp;sample&nbsp;angle&nbsp;in&nbsp;degrees<br>
@@ -383,6 +414,21 @@ the&nbsp;crystal&nbsp;<a href="builtins.html#object">object</a>:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_theta_offset</strong>&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;sample&nbsp;offset&nbsp;angle<br>
 &nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_scattering_parallel_direction</strong>&nbsp;:&nbsp;[h,k,l]&nbsp;:&nbsp;reflections&nbsp;normal&nbsp;to&nbsp;sample&nbsp;surface,&nbsp;parallel&nbsp;to&nbsp;beam&nbsp;at&nbsp;theta&nbsp;=&nbsp;0</tt></dd></dl>
 
+<dl><dt><a name="Scattering-print_xray_nonresonant"><strong>print_xray_nonresonant</strong></a>(self, HKL, energy_kev=None, azim_zero=(1, 0, 0), psi=0)</dt><dd><tt>Return&nbsp;string&nbsp;with&nbsp;non-resonant&nbsp;magnetic&nbsp;contriubtions&nbsp;to&nbsp;the&nbsp;x-ray&nbsp;scattering<br>
+:param&nbsp;HKL:&nbsp;array(nx3)&nbsp;of&nbsp;(h,k,l)&nbsp;reflections<br>
+:param&nbsp;energy_kev:&nbsp;incident&nbsp;photon&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;azim_zero:&nbsp;(h,k,l)&nbsp;reference&nbsp;vector&nbsp;defining&nbsp;azimuthal&nbsp;zero&nbsp;angle<br>
+:param&nbsp;psi:&nbsp;float,&nbsp;azimuthal&nbsp;angle<br>
+:return:&nbsp;str</tt></dd></dl>
+
+<dl><dt><a name="Scattering-print_xray_resonant"><strong>print_xray_resonant</strong></a>(self, HKL, energy_kev=None, azim_zero=(1, 0, 0), psi=0, F0=0, F1=1, F2=0)</dt><dd><tt>Return&nbsp;string&nbsp;with&nbsp;resonant&nbsp;magnetic&nbsp;contriubtions&nbsp;to&nbsp;the&nbsp;x-ray&nbsp;scattering<br>
+:param&nbsp;HKL:&nbsp;array(nx3)&nbsp;of&nbsp;(h,k,l)&nbsp;reflections<br>
+:param&nbsp;energy_kev:&nbsp;incident&nbsp;photon&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;azim_zero:&nbsp;(h,k,l)&nbsp;reference&nbsp;vector&nbsp;defining&nbsp;azimuthal&nbsp;zero&nbsp;angle<br>
+:param&nbsp;psi:&nbsp;float,&nbsp;azimuthal&nbsp;angle<br>
+:param&nbsp;F0,&nbsp;F1,&nbsp;F2:&nbsp;Resonance&nbsp;factor&nbsp;Flm<br>
+:return:&nbsp;str</tt></dd></dl>
+
 <dl><dt><a name="Scattering-scatteringbasis"><strong>scatteringbasis</strong></a>(self, hkl, azim_zero=[1, 0, 0], psi=0)</dt><dd><tt>Determine&nbsp;the&nbsp;scattering&nbsp;and&nbsp;polarisation&nbsp;vectors&nbsp;of&nbsp;a&nbsp;reflection&nbsp;based&nbsp;on&nbsp;energy,&nbsp;azimuth&nbsp;and&nbsp;polarisation.<br>
 :param&nbsp;hkl:&nbsp;[n,3]&nbsp;array&nbsp;of&nbsp;reflections<br>
 :param&nbsp;azim_zero:&nbsp;[1,3]&nbsp;direction&nbsp;along&nbsp;which&nbsp;the&nbsp;azimuthal&nbsp;zero&nbsp;angle&nbsp;is&nbsp;determind<br>
@@ -520,7 +566,7 @@ parallel&nbsp;to&nbsp;it.<br>
 &nbsp;<br>
 From&nbsp;Hill+McMorrow&nbsp;Acta&nbsp;Cryst.&nbsp;1996&nbsp;A52,&nbsp;236-244&nbsp;Equ.&nbsp;(15)</tt></dd></dl>
 
-<dl><dt><a name="Scattering-xray_resonant_magnetic"><strong>xray_resonant_magnetic</strong></a>(self, HKL, energy_kev=None, azim_zero=[1, 0, 0], psi=0, polarisation='s-p', F0=0, F1=1, F2=0, disp=True)</dt><dd><tt>Calculate&nbsp;the&nbsp;non-resonant&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor<br>
+<dl><dt><a name="Scattering-xray_resonant_magnetic"><strong>xray_resonant_magnetic</strong></a>(self, HKL, energy_kev=None, azim_zero=[1, 0, 0], psi=0, polarisation='s-p', F0=0, F1=1, F2=0, disp=True)</dt><dd><tt>Calculate&nbsp;the&nbsp;resonant&nbsp;magnetic&nbsp;component&nbsp;of&nbsp;the&nbsp;structure&nbsp;factor<br>
 for&nbsp;the&nbsp;given&nbsp;HKL,&nbsp;using&nbsp;x-ray&nbsp;rules&nbsp;and&nbsp;form&nbsp;factor<br>
 &nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-xray_magnetic">xray_magnetic</a>([1,0,0])<br>
 &nbsp;&nbsp;<a href="#Scattering">Scattering</a>.<a href="#Scattering-xray_magnetic">xray_magnetic</a>([[1,0,0],[2,0,0],[3,0,0])<br>

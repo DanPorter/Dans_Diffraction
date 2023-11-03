@@ -10,8 +10,8 @@ By Dan Porter, PhD
 Diamond
 2019
 
-Version 2.3.0
-Last updated: 26/01/21
+Version 3.1.1
+Last updated: 19/10/23
 
 Version History:
 10/11/17 0.1    Program created
@@ -24,11 +24,16 @@ Version History:
 15/10/20 2.2.1  Slight correction to SymmetryGui - no longer adds 'm' to labels
 21/01/21 2.2.2  Added 'xray dispersion' scattering option
 26/01/21 2.3.0  Refactored properites into new file, added x-ray interactions GUI
+16/05/23 2.4.0  Added periodic_table.py and added menu items to CrystalGUI. Changed default fonts and colours
+25/06/23 3.0.0  Added new GUI elements including new Scattering UI, diffractomter simulator, unit converter
+20/07/23 3.1.0  Added new FDMNES GUI elements including in the Menu
+19/10/23 3.1.1  Fixed scaling issue in diffractometer.py. Thanks asteppke!
+25/10/23 3.1.2  Fixed error with powder plot for Neutrons. Thanks Cyril!
 
 @author: DGPorter
 """
 
 from .crystal import CrystalGui
 
-__version__ = '2.3.0'
-__date__ = '26/01/20'
+__version__ = '3.1.2'
+__date__ = '25/10/23'

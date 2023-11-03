@@ -3,11 +3,11 @@ Dans_Diffraction
 Python package for loading crystal structures from cif files and calculating diffraction information.
 
 Installation:
-$ pip install Dans-Diffraction
+$ python -m pip install Dans-Diffraction
 or
 $ git clone https://github.com/DanPorter/Dans_Diffraction.git
 or
-$ pip install git+https://github.com/DanPorter/Dans_Diffraction.git
+$ python -m pip install git+https://github.com/DanPorter/Dans_Diffraction.git
 
 Requirements:
 Python 2.7+/3+ with packages: Numpy, Matplotlib, Tkinter
@@ -25,14 +25,14 @@ Usage:
     $ ipython -i -m -matplotlib tk Dans_Diffraction
 
 GitHub Repo: https://github.com/DanPorter/Dans_Diffraction
-Citation DOI: https://doi.org/10.5281/zenodo.3859501
+Citation DOI: https://doi.org/10.5281/zenodo.8106031
 
 By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.3.0
-Last updated: 08/05/23
+Version 3.1.3
+Last updated: 25/10/23
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -67,6 +67,31 @@ Version History:
 06/01/23 2.2.2  Removed redundent references to np.float
 14/01/23 2.2.3  Corrected background error in xtl.Scatter.powder
 08/05/23 2.3.0  Merged pull request for non-integer hkl option on SF and electron form factors. Thanks Prestipino!
+25/06/23 3.0.0  Added new GUI elements including new Scattering UI and diffractomter simulator, plus other updates
+11/07/23 3.0.1  Some fixes for plotting and additions to diffractometer orientation. Thanks asteppke!
+20/07/23 3.1.0  Refactored FDMNES wrapper with new methods and new defaults. Thanks YvesJoly!
+26/09/23 3.1.1  Minor changes and improvments. Added hkl1, hkl2 = xtl.scatter.orientation_reflections()
+19/10/23 3.1.2  xray_resonant() now works with non-cubic systems, fixed scaling issue in diffractometer.py
+25/10/23 3.1.3  Fixed error with powder plot for Neutrons. Thanks Cyril!
+
+Acknoledgements:
+    2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
+    Dec 2019    Thanks to Gareth Nisbet for allowing me to inlude his multiple scattering siumulation
+    April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
+    May 2020    Thanks to AndreEbel for helpful suggestions on citations
+    Dec 2020    Thanks to Chris Drozdowski for suggestions about reflection families
+    Jan 2021    Thanks to aslarsen for suggestions about outputting the structure factor
+    April 2021  Thanks to Trygve Ræder for suggestions about x-ray scattering factors
+    Feb 2022    Thanks to Mirko for pointing out the error in two-theta values in Scatter.powder
+    March 2022  Thanks to yevgenyr for suggesting new peak profiles in Scatter.powder
+    Jan 2023    Thanks to Anuradha Vibhakar for pointing out the error in f0 + if'-if''
+    Jan 2023    Thanks to Andreas Rosnes for testing the installation in jupyterlab
+    May 2023    Thanks to Carmelo Prestipino for adding electron scattering factors
+    June 2023   Thanks to Sergio I. Rincon for pointing out the rounding error in Scatter.powder
+    July 2023   Thanks to asteppke for suggested update to Arrow3D for matplotlib V>3.4
+    July 2023   Thanks to Yves Joly for helpful suggestions on FDMNES wrapper
+    Oct 2023    Thanks to asteppke for pointing out scaling issue in diffractometer gui
+    Oct 2023    Thanks to Cyril Cayron for pointing out the error with plotting neutron power spectra
 
 -----------------------------------------------------------------------------
    Copyright 2023 Diamond Light Source Ltd.
@@ -112,16 +137,12 @@ from . import functions_crystallography as fc
 from .classes_crystal import Crystal
 from .classes_multicrystal import MultiCrystal
 from .classes_structures import Structures
+from .classes_fdmnes import fdmnes_checker, Fdmnes, FdmnesAnalysis
 from .functions_crystallography import readcif
 
-# FDMNES
-from .classes_fdmnes import fdmnes_checker
-if fdmnes_checker():
-    from .classes_fdmnes import Fdmnes, FdmnesAnalysis
 
-
-__version__ = '2.3.0'
-__date__ = '08/05/23'
+__version__ = '3.1.3'
+__date__ = '25/10/23'
 
 
 # Build
@@ -171,8 +192,11 @@ def start_gui(xtl=None):
 
 
 # FDMNES Activation
-def activate_fdmnes():
-    """To activate FDMNES functionality"""
-    fdmnes_checker(activate=True)
-    if fdmnes_checker():
-        from .classes_fdmnes import Fdmnes, FdmnesAnalysis
+def activate_fdmnes(initial_dir=None, fdmnes_filename='fdmnes_win64.exe'):
+    """
+    Call to activate FDMNES functionality
+    :param fdmnes_filename: name of the executable to search for
+    :param initial_dir: None or str, if directory, look here for file
+    :return: None
+    """
+    fdmnes_checker(activate=True, fdmnes_filename=fdmnes_filename, initial_dir=initial_dir)

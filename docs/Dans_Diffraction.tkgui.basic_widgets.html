@@ -17,11 +17,12 @@
 <font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="tkinter.messagebox.html">tkinter.messagebox</a><br>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="tkinter.filedialog.html">tkinter.filedialog</a><br>
+<a href="tkinter.messagebox.html">tkinter.messagebox</a><br>
 </td><td width="25%" valign=top><a href="re.html">re</a><br>
-</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+<a href="sys.html">sys</a><br>
 </td><td width="25%" valign=top><a href="tkinter.html">tkinter</a><br>
-</td></tr></table></td></tr></table><p>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -91,6 +92,10 @@ Simple&nbsp;GUI&nbsp;that&nbsp;displays&nbsp;strings<br>
 
 <dl><dt><a name="StringViewer-fun_close"><strong>fun_close</strong></a>(self)</dt><dd><tt>close&nbsp;window</tt></dd></dl>
 
+<dl><dt><a name="StringViewer-fun_saveas"><strong>fun_saveas</strong></a>(self)</dt><dd><tt>Save&nbsp;as&nbsp;text&nbsp;file</tt></dd></dl>
+
+<dl><dt><a name="StringViewer-fun_search"><strong>fun_search</strong></a>(self, event=None)</dt><dd><tt>Search</tt></dd></dl>
+
 <hr>
 Data descriptors defined here:<br>
 <dl><dt><strong>__dict__</strong></dt>
@@ -106,11 +111,19 @@ Data descriptors defined here:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-menu_docs"><strong>menu_docs</strong></a>()</dt><dd><tt>Open&nbsp;local&nbsp;docs</tt></dd></dl>
+<td width="100%"><dl><dt><a name="-dark_mode"><strong>dark_mode</strong></a>()</dt><dd><tt>Change&nbsp;the&nbsp;colour&nbsp;scheme</tt></dd></dl>
+ <dl><dt><a name="-light_mode"><strong>light_mode</strong></a>()</dt><dd><tt>Change&nbsp;the&nbsp;colour&nbsp;scheme</tt></dd></dl>
+ <dl><dt><a name="-menu_docs"><strong>menu_docs</strong></a>()</dt><dd><tt>Open&nbsp;local&nbsp;docs</tt></dd></dl>
  <dl><dt><a name="-menu_github"><strong>menu_github</strong></a>()</dt><dd><tt>Open&nbsp;GitHub&nbsp;page</tt></dd></dl>
  <dl><dt><a name="-popup_about"><strong>popup_about</strong></a>()</dt><dd><tt>Create&nbsp;about&nbsp;message</tt></dd></dl>
  <dl><dt><a name="-popup_help"><strong>popup_help</strong></a>()</dt><dd><tt>Create&nbsp;help&nbsp;message</tt></dd></dl>
  <dl><dt><a name="-popup_message"><strong>popup_message</strong></a>(parent, title, message)</dt><dd><tt>Create&nbsp;a&nbsp;message&nbsp;box</tt></dd></dl>
+ <dl><dt><a name="-search_re"><strong>search_re</strong></a>(pattern, text)</dt></dl>
+ <dl><dt><a name="-text_search"><strong>text_search</strong></a>(text: tkinter.Text, search_pattern: str, highlight_colour='yellow')</dt><dd><tt>Find&nbsp;string&nbsp;patterns&nbsp;in&nbsp;tk&nbsp;Text&nbsp;<a href="builtins.html#object">object</a>&nbsp;and&nbsp;highlight&nbsp;them<br>
+:param&nbsp;text:&nbsp;tk.Text&nbsp;<a href="builtins.html#object">object</a><br>
+:param&nbsp;search_pattern:&nbsp;str&nbsp;text&nbsp;to&nbsp;search&nbsp;for&nbsp;or&nbsp;Regular&nbsp;expression<br>
+:param&nbsp;highlight_colour:&nbsp;str&nbsp;color&nbsp;spec<br>
+:return:&nbsp;None</tt></dd></dl>
  <dl><dt><a name="-topmenu"><strong>topmenu</strong></a>(root, menu_dict)</dt><dd><tt>Add&nbsp;a&nbsp;menubar&nbsp;to&nbsp;tkinter&nbsp;frame<br>
 :param&nbsp;root:&nbsp;tkinter&nbsp;root<br>
 :param&nbsp;menu_dict:&nbsp;{Menu&nbsp;name:&nbsp;{Item&nbsp;name:&nbsp;function}}<br>
@@ -122,12 +135,12 @@ Data descriptors defined here:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>BF</strong> = ['Times', 14]<br>
+<td width="100%"><strong>BF</strong> = ['Palatino', 14]<br>
 <strong>HF</strong> = ['Courier', 12]<br>
-<strong>LF</strong> = ['Times', 14]<br>
+<strong>LF</strong> = ['Palatino', 14]<br>
 <strong>MF</strong> = ['Courier', 8]<br>
-<strong>SF</strong> = ['Times New Roman', 14]<br>
-<strong>TF</strong> = ['Times', 12]<br>
+<strong>SF</strong> = ['Palatino', 14]<br>
+<strong>TF</strong> = ['Palatino', 12]<br>
 <strong>TTBG</strong> = 'light grey'<br>
 <strong>TTF</strong> = ('Helvetica', 10, 'bold italic')<br>
 <strong>TTFG</strong> = 'red'<br>

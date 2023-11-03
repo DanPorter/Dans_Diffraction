@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_general</strong></big></big> (version 2.2.0, 11/March/2022)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_general</strong></big></big> (version 2.2.1, 01/June/2023)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_general.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_general.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;Generally&nbsp;useful&nbsp;functions&nbsp;"functions_general.py"<br>
@@ -362,6 +362,7 @@ Notes:<br>
 &nbsp;-&nbsp;Errors&nbsp;less&nbsp;than&nbsp;0.01%&nbsp;of&nbsp;values&nbsp;will&nbsp;be&nbsp;given&nbsp;as&nbsp;0<br>
 &nbsp;-&nbsp;The&nbsp;maximum&nbsp;length&nbsp;of&nbsp;string&nbsp;is&nbsp;13&nbsp;characters<br>
 &nbsp;-&nbsp;Errors&nbsp;greater&nbsp;then&nbsp;10x&nbsp;the&nbsp;value&nbsp;will&nbsp;cause&nbsp;the&nbsp;value&nbsp;to&nbsp;be&nbsp;rounded&nbsp;to&nbsp;zero</tt></dd></dl>
+ <dl><dt><a name="-str2array"><strong>str2array</strong></a>(string)</dt><dd><tt>Convert&nbsp;string&nbsp;to&nbsp;array</tt></dd></dl>
  <dl><dt><a name="-unique_vector"><strong>unique_vector</strong></a>(vecarray, tol=0.05)</dt><dd><tt>Find&nbsp;unique&nbsp;vectors&nbsp;in&nbsp;an&nbsp;array&nbsp;within&nbsp;a&nbsp;certain&nbsp;tolerance<br>
 &nbsp;<br>
 newarray,uniqueidx,matchidx&nbsp;=&nbsp;<a href="#-unique_vector">unique_vector</a>(vecarray,tol=0.05)<br>
@@ -403,6 +404,19 @@ For&nbsp;derivation,&nbsp;see:&nbsp;https://math.stackexchange.com/questions/270
 :param&nbsp;point2:&nbsp;[x,y,z]&nbsp;some&nbsp;coordinate&nbsp;on&nbsp;line&nbsp;2<br>
 :param&nbsp;direction2:&nbsp;[dx,&nbsp;dy,&nbsp;dz]&nbsp;the&nbsp;direction&nbsp;of&nbsp;line&nbsp;2<br>
 :return:&nbsp;[x,&nbsp;y,&nbsp;z]</tt></dd></dl>
+ <dl><dt><a name="-vectorinvector"><strong>vectorinvector</strong></a>(vecarray1, vecarray2, tol=0.05)</dt><dd><tt>Return&nbsp;True&nbsp;if&nbsp;vecarray1&nbsp;is&nbsp;replicated&nbsp;in&nbsp;vecarray2<br>
+:param&nbsp;vecarray1:&nbsp;[1xn]&nbsp;list&nbsp;or&nbsp;array<br>
+:param&nbsp;vecarray2:&nbsp;[mxn]&nbsp;list&nbsp;or&nbsp;array<br>
+:param&nbsp;tol:&nbsp;float<br>
+:return:&nbsp;Bool</tt></dd></dl>
+ <dl><dt><a name="-vectors_angle_degrees"><strong>vectors_angle_degrees</strong></a>(a, b)</dt><dd><tt>Returns&nbsp;the&nbsp;angle,&nbsp;in&nbsp;degrees&nbsp;between&nbsp;vectors&nbsp;a&nbsp;and&nbsp;b.<br>
+Gives&nbsp;the&nbsp;absolute&nbsp;angle,&nbsp;negatives&nbsp;are&nbsp;not&nbsp;given&nbsp;for&nbsp;sectors.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;angle&nbsp;=&nbsp;acos(a.b&nbsp;/&nbsp;|a|.|b|)<br>
+:param&nbsp;a:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;vectors&nbsp;[x,y,z]<br>
+:param&nbsp;b:&nbsp;[mx3]&nbsp;array&nbsp;of&nbsp;vectors&nbsp;[x,y,z]<br>
+:return:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees&nbsp;is&nbsp;n==m==1<br>
+:return:&nbsp;[max(n,&nbsp;m)]&nbsp;array&nbsp;of&nbsp;angles&nbsp;in&nbsp;degrees&nbsp;if&nbsp;n&nbsp;or&nbsp;m&nbsp;==&nbsp;1<br>
+:return:&nbsp;[n,&nbsp;m]&nbsp;array&nbsp;of&nbsp;angles&nbsp;in&nbsp;degrees&nbsp;if&nbsp;n&nbsp;and&nbsp;m&nbsp;&gt;&nbsp;1</tt></dd></dl>
  <dl><dt><a name="-whererun"><strong>whererun</strong></a>()</dt><dd><tt>Returns&nbsp;the&nbsp;location&nbsp;where&nbsp;python&nbsp;was&nbsp;run</tt></dd></dl>
  <dl><dt><a name="-you_normal_vector"><strong>you_normal_vector</strong></a>(eta=0, chi=90, mu=0)</dt><dd><tt>Determine&nbsp;the&nbsp;normal&nbsp;vector&nbsp;using&nbsp;the&nbsp;You&nbsp;diffractometer&nbsp;angles<br>
 &nbsp;&nbsp;<a href="#-you_normal_vector">you_normal_vector</a>(0,&nbsp;0,&nbsp;0)&nbsp;=&nbsp;[1,&nbsp;0,&nbsp;0]<br>
@@ -429,6 +443,7 @@ For&nbsp;derivation,&nbsp;see:&nbsp;https://math.stackexchange.com/questions/270
 <strong>e</strong> = 1.6021733e-19<br>
 <strong>h</strong> = 6.62606868e-34<br>
 <strong>me</strong> = 9.109e-31<br>
+<strong>mn</strong> = 1.6749e-27<br>
 <strong>pi</strong> = 3.141592653589793<br>
 <strong>r0</strong> = 2.8179403227e-15<br>
 <strong>u0</strong> = 1.2566370614359173e-06</td></tr></table>

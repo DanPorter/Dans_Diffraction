@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.2.0
-Last updated: 06/05/23
+Version 2.3.2
+Last updated: 19/10/23
 
 Version History:
 10/09/17 0.1    Program created
@@ -32,6 +32,9 @@ Version History:
 14/03/22 2.1.0   powder() updated for new inputs and outputs for pVoight and custom peak shapes. Thanks yevgenyr!
 14/01/23 2.1.1  Corrected background error in xtl.Scatter.powder
 06/05/23 2.0.0  Merged pull request for non-integer hkl option on SF and electron form factors. Thanks Prestipino!
+02/07/23 2.3.0  Fixed rounding error in Scatter.powder, thanks Sergio I. Rincon!
+26/09/23 2.3.1  Added Scattering.orientation_reflections for automatic orientation help
+19/20/23 2.3.2  Fixed scatteringbasis so xray_resonant() now works with non-cubic systems
 
 @author: DGPorter
 """
@@ -46,7 +49,7 @@ from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '2.2.0'
+__version__ = '2.3.2'
 __scattering_types__ = {'xray': ['xray', 'x', 'x-ray', 'thomson', 'charge'],
                         'neutron': ['neutron', 'n', 'nuclear'],
                         'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'],
@@ -410,6 +413,14 @@ class Scattering:
 
         # Break up long lists of HKLs
         nref, natom = len(q), len(r)
+        if nref == 0:
+            if nenergy == 1 and npsi == 1:
+                return np.empty([0], dtype=complex)  # shape(nref)
+            if nenergy == 1:
+                return np.empty([0, nenergy], dtype=complex)  # shape(nref)  # shape(nref, nenergy)
+            if npsi == 1:
+                return np.empty([0, npsi], dtype=complex)  # shape(nref)  # shape(nref, npsi)
+            return np.empty([0, nenergy, npsi], dtype=complex)
         n_arrays = np.ceil(nref * natom / fs.MAX_QR_ARRAY)
         if n_arrays > 1:
             print('Splitting %d reflections (%d atoms) into %1.0f parts' % (nref, natom, n_arrays))
@@ -470,7 +481,7 @@ class Scattering:
         if nenergy == 1:
             return sf[:, 0, :]  # shape(nref, nenergy)
         if npsi == 1:
-            return sf[:, :, 0]  # shape(nref, nspi)
+            return sf[:, :, 0]  # shape(nref, npsi)
         return sf
     new_structure_factor = structure_factor
 
@@ -536,20 +547,9 @@ class Scattering:
         q_range = q_max - q_min
 
         # Get reflections
-        hmax, kmax, lmax = fc.maxHKL(q_max, self.xtl.Cell.UVstar())
-        HKL = fc.genHKL([hmax, -hmax], [kmax, -kmax], [lmax, -lmax])
+        HKL = self.xtl.Cell.all_hkl(maxq=q_max)
         HKL = self.xtl.Cell.sort_hkl(HKL)  # required for labels
         Qmag = self.xtl.Cell.Qmag(HKL)
-        select = (Qmag < q_max) * (Qmag > q_min)
-        HKL = HKL[select, :]
-        Qmag = Qmag[select]
-
-        # Calculate intensities
-        I = self.intensity(HKL, scattering_type, **options)
-
-        if powder_average:
-            # Apply powder averging correction, I0/|Q|**2
-            I = I/(Qmag+0.001)**2
 
         # create plotting mesh
         tot_pixels = int(pixels * q_range)  # reduce this to make convolution faster
@@ -557,10 +557,19 @@ class Scattering:
         peak_width_pixels = peak_width / pixel_size
         mesh = np.zeros([tot_pixels])
         mesh_q = np.linspace(q_min, q_max, tot_pixels)
+        pixel_coord = np.round(tot_pixels * (Qmag - q_min) / q_range).astype(int)
 
-        # add reflections to background
-        pixel_coord = (Qmag - q_min) / q_range
-        pixel_coord = (pixel_coord * tot_pixels).round().astype(int)
+        select = (pixel_coord < tot_pixels) * (pixel_coord > 0)
+        HKL = HKL[select, :]
+        Qmag = Qmag[select]
+        pixel_coord = pixel_coord[select]
+
+        # Calculate intensities
+        I = self.intensity(HKL, scattering_type, **options)
+
+        if powder_average:
+            # Apply powder averging correction, I0/|Q|**2
+            I = I/(Qmag+0.001)**2
 
         for n in range(len(I)):
             mesh[pixel_coord[n]] = mesh[pixel_coord[n]] + I[n]
@@ -1126,7 +1135,7 @@ class Scattering:
 
     def xray_resonant_magnetic(self, HKL, energy_kev=None, azim_zero=[1, 0, 0], psi=0, polarisation='s-p', F0=0, F1=1, F2=0, disp=True):
         """
-        Calculate the non-resonant magnetic component of the structure factor
+        Calculate the resonant magnetic component of the structure factor
         for the given HKL, using x-ray rules and form factor
           Scattering.xray_magnetic([1,0,0])
           Scattering.xray_magnetic([[1,0,0],[2,0,0],[3,0,0])
@@ -1283,14 +1292,23 @@ class Scattering:
     def scatteringcomponents(self, mxmymz, hkl, azim_zero=[1,0,0], psi=0):
         """
         Transform magnetic vector into components within the scattering plane
-            ***warning - may not be correct for non-cubic systems***
+        First transforms the moments into a cartesian reference frame.
+           U1 = direction || ki - kf = Q
+           U2 = direction || kf + ki (within scattering plane, pi)
+           U3 = direction perp. to U1, U2 (normal to scattering plane, sigma)
         """
 
         # Define coordinate system I,J,Q (U1,U2,U3)
         U = self.scatteringbasis(hkl, azim_zero, psi)
+
+        # Calculate moment
+        momentmag = fg.mag(mxmymz).reshape([-1, 1])
+        momentxyz = self.xtl.Cell.calculateR(mxmymz)  # moment direction in cartesian reference frame
+        moment = momentmag * fg.norm(momentxyz)  # broadcast n*1 x n*3 = n*3
+        moment[np.isnan(moment)] = 0.
         
         # Determine components of the magnetic vector
-        z1z2z3 = np.dot(mxmymz, U.T) # [mxmymz.I, mxmymz.J, mxmymz.Q]
+        z1z2z3 = np.dot(moment, U.T)  # [mxmymz.I, mxmymz.J, mxmymz.Q]
         return fg.norm(z1z2z3)
 
     def scatteringbasis(self, hkl, azim_zero=[1, 0, 0], psi=0):
@@ -1367,11 +1385,12 @@ class Scattering:
         IXRps=self.xray_resonant(HKL, None, 'ps')
         IXRpp=self.xray_resonant(HKL, None, 'pp')
         
-        fmt = '(%2.0f,%2.0f,%2.0f)  %8.1f  %8.1f  %8.2f  %8.2f  ss=%8.2f  sp=%8.2f  ps=%8.2f  pp=%8.2f'
-        print('( h, k, l)   Neutron      xray   Magn. N  Magn. XR   sig-sig    sig-pi    pi-sig     pi-pi')
+        fmt = '(%2.0f,%2.0f,%2.0f)  %8.1f  %8.1f  %8.2f  %8.2f  ss=%8.2f  sp=%8.2f  ps=%8.2f  pp=%8.2f\n'
+        outstr = '( h, k, l)   Neutron      xray   Magn. N  Magn. XR   sig-sig    sig-pi    pi-sig     pi-pi\n'
         for n in range(len(HKL)):
             vals=(HKL[n][0],HKL[n][1],HKL[n][2],IN[n],IX[n],INM[n],IXM[n],IXRss[n],IXRsp[n],IXRps[n],IXRpp[n])
-            print(fmt%vals)
+            outstr += fmt % vals
+        return outstr
     
     def old_intensity(self, HKL, scattering_type=None):
         """
@@ -1601,6 +1620,134 @@ class Scattering:
 
         return rhkl, rinten
 
+    def detector_image(self, detector_distance_mm=100., delta=0, gamma=0, height_mm=100., width_mm=100.,
+                       pixel_size_mm=0.1, energy_range_ev=1000., peak_width_deg=0.5, wavelength_a=None,
+                       background=0, min_intensity=0.01):
+        """
+        Calcualte detector image
+          Creates a detector rotated about the sample and generates incident reflections on the detector.
+          Reflections incident on the detector are scaled by the distance of the scattered wavevector from the Ewald
+          sphere and also scaled by all reflections incident on the Ewald sphere.
+        Example
+          tth = xtl.Cell.tth([0, 0, 2], wavelength_a=1)[0]
+          xtl.Cell.orientation.rotate_6circle(mu=tth/2)  # Orient crystal to scattering position
+          xx, yy, mesh, reflist = xtl.Scatter.detector_image(detector_distance_mm=100, gamma=tth, wavelength_a=1)
+          # Plot detector image
+          plt.figure()
+          plt.pcolormesh(xx, yy, mesh, vmin=0, vmax=1, shading='auto')
+          # reflection labels
+          for n in range(len(reflist['hkl'])):
+              plt.text(reflist['detx'][n], reflist['dety'][n], reflist['hkl_str'][n], c='w')
+        :param detector_distance_mm: float, Detector distance in mm (along (0,1,0))
+        :param delta: flaot, angle to rotate detector about (0,0,1) in Deg
+        :param gamma: float, angle to rotate detector about (1,0,0) in Deg
+        :param height_mm: float, detector size vertically (along (0,0,1))
+        :param width_mm: float, detector size horizontally (along (1,0,0))
+        :param pixel_size_mm: float, size of pixels, determines grid size
+        :param energy_range_ev: float, determines width of energies in incident intensity in eV
+        :param peak_width_deg: float, determines peak width on detector
+        :param wavelength_a: float, wavelength in A
+        :param background: float, detector background
+        :param min_intensity: float, min intenisty to include
+        :return xx: [height//pixelsize x width//pixelsize] array of x-coordinates
+        :return yy: [height//pixelsize x width//pixelsize] array of y-coordinates
+        :return mesh: [height//pixelsize x width//pixelsize] array of intensities
+        :return reflist: dict with info about each reflection on detector
+        """
+        domain_size = fc.scherrer_size(peak_width_deg, 45, wavelength_a=wavelength_a)  # A
+        peak_width = fc.dspace2q(domain_size)  # inverse Angstrom
+        resolution = fc.wavevector(energy_kev=energy_range_ev / 1000.)  # inverse Angstrom
+
+        # Define Detector
+        D = fc.rotmatrixz(-delta)  # left handed
+        G = fc.rotmatrixx(gamma)
+        R = np.dot(G, D)
+        lab = self.xtl.Cell.orientation.labframe
+        initial_position = detector_distance_mm * np.array([0, 1., 0])
+        position_mm = fc.labvector(initial_position, R=R, LAB=lab)
+        normal_dir = fc.labvector([0, -1, 0], R=R, LAB=lab)
+        x_axis = width_mm * fg.norm(np.cross(normal_dir, (0, 0, 1.)))
+        z_axis = height_mm * fg.norm(np.cross(x_axis, normal_dir))
+        pixels_width = int(width_mm / pixel_size_mm) + 1  # n pixels
+        distance_mm = fg.mag(position_mm)
+        fwhm_mm = distance_mm * np.tan(np.deg2rad(peak_width_deg))
+        corners = np.array([
+            position_mm + x_axis / 2 + z_axis / 2,
+            position_mm + x_axis / 2 - z_axis / 2,
+            position_mm - x_axis / 2 - z_axis / 2,
+            position_mm - x_axis / 2 + z_axis / 2,
+        ])
+
+        # Define lattice
+        if wavelength_a is None:
+            wavelength_a = fc.energy2wave(self.get_energy())
+        hkl = self.xtl.Cell.all_hkl(max_angle=180, wavelength_a=wavelength_a)
+        qxqyqz = self.xtl.Cell.calculateQ(hkl)
+
+        # Find lattice points incident on detector
+        lab = self.xtl.Cell.orientation.labframe
+        ki = fc.wavevector(wavelength=wavelength_a) * fc.labvector([0, 1, 0], LAB=lab)
+        kf = qxqyqz + ki
+        directions = fg.norm(kf)
+        diff = fc.wavevector_difference(qxqyqz, ki)  # difference in A-1
+
+        corner_angle = max(abs(fg.vectors_angle_degrees(position_mm, corners)))
+        vec_angles = abs(fg.vectors_angle_degrees(position_mm, directions))
+        check = vec_angles < corner_angle  # reflections in the right quadrant
+        ixyz = np.nan * np.zeros([len(directions), 3])
+        for n in np.flatnonzero(check):
+            ixyz[n] = fg.plane_intersection((0, 0, 0), directions[n], position_mm, normal_dir)
+        # incident positions on detector
+        iuvw = fg.index_coordinates(np.subtract(ixyz, position_mm), [x_axis, z_axis, normal_dir])
+        iuvw[np.any(abs(iuvw) > 0.5, axis=1)] = [np.nan, np.nan, np.nan]
+
+        # Remove non-incident reflections
+        idx = ~np.isnan(iuvw[:, 0])
+        hkl = hkl[idx, :]
+        qxqyqz = qxqyqz[idx, :]
+        iuvw = iuvw[idx, :]
+
+        # Calculate intensities
+        intensity = self.xtl.Scatter.intensity(hkl)
+        res = np.sqrt(resolution ** 2 + peak_width ** 2)  # combine resolutions in A-1
+        scaled_inten = fc.scale_intensity(intensity, diff[idx], res)
+        scale = sum(fc.scale_intensity(1, diff, res))
+        scaled_inten = scaled_inten / scale  # reduce intensity by total reflected intensity
+        good = scaled_inten > min_intensity  # minimise the number of gaussians to generate
+
+        # Calculate peak widths etc.
+        qmag = fg.mag(qxqyqz[good])
+        tth = fc.cal2theta(qmag, wavelength_a=wavelength_a)
+        tth = 1.0 * tth
+        tth[tth > 175] = 175.  # stop peaks becoming too broad at high angle
+        fwhm = fc.scherrer_fwhm(domain_size, tth, wavelength_a=wavelength_a)
+        hkl_str = np.array(fc.hkl2str(hkl[good]).split('\n'))
+        peak_x = width_mm * iuvw[good, 0]
+        peak_z = height_mm * iuvw[good, 1]
+
+        # Generate the detector plane using gaussians on a plane
+        xx, yy, mesh = fc.peaks_on_plane(
+            peak_x=peak_x,
+            peak_y=peak_z,
+            peak_height=scaled_inten[good],
+            peak_width=fwhm_mm,
+            max_x=width_mm / 2,
+            max_y=height_mm / 2,
+            pixels_width=pixels_width,
+            background=background
+        )
+        reflist = {
+            'hkl': hkl[good, :],
+            'hkl_str': hkl_str,
+            'qxqyqz': qxqyqz[good, :],
+            'fwhm': fwhm,
+            'intensity': intensity[good],
+            'scaled': scaled_inten[good],
+            'detx': peak_x,
+            'dety': peak_z,
+        }
+        return xx, yy, mesh, reflist
+
     def print_all_reflections(self, energy_kev=None, print_symmetric=False,
                               min_intensity=0.01, max_intensity=None, units=None):
         """
@@ -1784,11 +1931,83 @@ class Scattering:
             outstr += fmt % (HKL[n, 0], HKL[n, 1], HKL[n, 2], tth[n], theta[n], inten[n])
         outstr += ('Reflections: %1.0f\n' % count)
         return outstr
-    
-    def print_symmetric_reflections(self,HKL):
-        "Prints equivalent reflections"
+
+    def print_xray_resonant(self, HKL, energy_kev=None, azim_zero=(1, 0, 0), psi=0, F0=0, F1=1, F2=0):
+        """
+        Return string with resonant magnetic contriubtions to the x-ray scattering
+        :param HKL: array(nx3) of (h,k,l) reflections
+        :param energy_kev: incident photon energy in keV
+        :param azim_zero: (h,k,l) reference vector defining azimuthal zero angle
+        :param psi: float, azimuthal angle
+        :param F0, F1, F2: Resonance factor Flm
+        :return: str
+        """
+        HKL = np.asarray(HKL, dtype=float).reshape([-1, 3])
+        inp = {
+            'HKL': HKL,
+            'energy_kev': energy_kev,
+            'azim_zero': azim_zero,
+            'psi': psi,
+            'F0': F0, 'F1': F1, 'F2': F2,
+            'disp': False
+        }
+        xr = self.x_ray(HKL)
+        ss = self.xray_resonant_magnetic(polarisation='ss', **inp)
+        sp = self.xray_resonant_magnetic(polarisation='sp', **inp)
+        ps = self.xray_resonant_magnetic(polarisation='ps', **inp)
+        pp = self.xray_resonant_magnetic(polarisation='pp', **inp)
+
+        tth = self.xtl.Cell.tth(HKL, energy_kev)
+        hkl_str = ['({:3.0f},{:3.0f},{:3.0f})'.format(*h) for h in HKL]
+
+        outstr = 'Resonant Magnetic X-Ray scattering: %s\n' % self.xtl.name
+        outstr += u'Energy = %6.3f keV (%.3f \u212B)\n' % (energy_kev, fc.energy2wave(energy_kev))
+        outstr += u'azimuth = %.2f Deg, azim_zero = %s || incident beam\n' % (psi, fc.hkl2str(azim_zero))
+        outstr += '(  h,  k,  l)  Two-Theta      Charge      '\
+                  '\u03c3-\u03c3       \u03c3-\u03c0       \u03c0-\u03c3       \u03c0-\u03c0\n'
+        fmt = '%s %10.2f  %9.2f  %8.4f  %8.4f  %8.4f  %8.4f'
+        outstr += '\n'.join([fmt % (hkl_str[n], tth[n], xr[n], ss[n], sp[n], ps[n], pp[n]) for n in range(len(HKL))])
+        return outstr
+
+    def print_xray_nonresonant(self, HKL, energy_kev=None, azim_zero=(1, 0, 0), psi=0):
+        """
+        Return string with non-resonant magnetic contriubtions to the x-ray scattering
+        :param HKL: array(nx3) of (h,k,l) reflections
+        :param energy_kev: incident photon energy in keV
+        :param azim_zero: (h,k,l) reference vector defining azimuthal zero angle
+        :param psi: float, azimuthal angle
+        :return: str
+        """
+        HKL = np.asarray(HKL, dtype=float).reshape([-1, 3])
+        inp = {
+            'HKL': HKL,
+            'energy_kev': energy_kev,
+            'azim_zero': azim_zero,
+            'psi': psi,
+            'disp': False
+        }
+        xr = self.x_ray(HKL)
+        ss = self.xray_nonresonant_magnetic(polarisation='ss', **inp)
+        sp = self.xray_nonresonant_magnetic(polarisation='sp', **inp)
+        ps = self.xray_nonresonant_magnetic(polarisation='ps', **inp)
+        pp = self.xray_nonresonant_magnetic(polarisation='pp', **inp)
+
+        tth = self.xtl.Cell.tth(HKL, energy_kev)
+        hkl_str = ['({:3.0f},{:3.0f},{:3.0f})'.format(*h) for h in HKL]
+
+        outstr = 'NonResonant Magnetic X-Ray scattering: %s\n' % self.xtl.name
+        outstr += u'Energy = %6.3f keV (%.3f \u212B)\n' % (energy_kev, fc.energy2wave(energy_kev))
+        outstr += u'azimuth = %.2f Deg, azim_zero = %s || incident beam\n' % (psi, fc.hkl2str(azim_zero))
+        outstr += '(  h,  k,  l)  Two-Theta      Charge      '\
+                  '\u03c3-\u03c3       \u03c3-\u03c0       \u03c0-\u03c3       \u03c0-\u03c0\n'
+        fmt = '%s %10.2f  %9.2f  %8.4f  %8.4f  %8.4f  %8.4f'
+        outstr += '\n'.join([fmt % (hkl_str[n], tth[n], xr[n], ss[n], sp[n], ps[n], pp[n]) for n in range(len(HKL))])
+        return outstr
+
+    def print_symmetric_reflections(self, HKL):
+        """Prints equivalent reflections"""
         
-        symHKL = self.xtl.Symmetry.symmetric_reflections(HKL)
+        symHKL = self.xtl.Symmetry.symmetric_reflections_unique(HKL)
         Nsyms = len(symHKL)
         outstr = ''
         outstr+= 'Equivalent reflections: %d\n' % Nsyms
@@ -1895,7 +2114,51 @@ class Scattering:
             ss += '%62s Reflection Total:  %s  %s\n' % (' ', fg.complex2str(all_phase), fg.complex2str(all_sf))
             outstr += '(%2.0f,%2.0f,%2.0f) I = %9.2f    %s\n' % (HKL[n, 0], HKL[n, 1], HKL[n, 2], I[n], ss)
         return outstr
-    
+
+    def orientation_reflections(self, energy_kev, hkl_1=None):
+        """
+        Return 2 reflections to use to orient a crystal
+         1. a strong reflection that is easy to discriminate in 2-theta
+         2. another strong reflection non-parallel and non-normal to (1)
+
+        hkl_1, hkl_2, alternatives = xtl.Scatter.orientation_reflections(8)
+
+        :param energy_kev: photon energy in keV
+        :param hkl_1: None or [h,k,l], allows to specify the first reflection
+        :returns hkl_1: [h,k,l] indices of reflection 1
+        :returns hkl_2: [h,k,l] indices of reflection 2
+        :returns hkl_2_alternatives: [[h,k,l],...] list of alternative reflections with same angles
+        """
+        # Reflection 1 seletor
+        if hkl_1 is None:
+            refs = self.get_hkl(energy_kev=energy_kev, remove_symmetric=True)
+            ref_tth = self.xtl.Cell.tth(refs, energy_kev=energy_kev)
+            ref_multiplicity = self.xtl.Symmetry.reflection_multiplyer(refs)
+            ref_intensity = self.intensity(refs)
+            ref_cluster = np.array([np.sum(1 / (np.abs(th - ref_tth) + 1)) - 1 for th in ref_tth])
+            ref_select = ref_intensity * ref_multiplicity / ref_cluster  # ** 2
+            hkl_1 = refs[np.argmax(ref_select), :]
+
+        # Reflection 2 selector
+        next_refs = self.get_hkl(energy_kev=energy_kev, remove_symmetric=False)
+        # tth_1 = self.xtl.Cell.tth(hkl_1, energy_kev=energy_kev)
+        # tth_2 = self.xtl.Cell.tth(refs, energy_kev=energy_kev)
+        q_1 = self.xtl.Cell.calculateQ(hkl_1)
+        q_2 = self.xtl.Cell.calculateQ(next_refs)
+        angles = abs(fg.vectors_angle_degrees(q_1, q_2))
+        ref_select = (angles > 1.) * (angles < 40.)
+        if sum(ref_select) < 1:
+            ref_select = angles > 1.
+        next_refs = next_refs[ref_select]
+        angles = angles[ref_select]
+        tth_1 = self.xtl.Cell.tth(hkl_1, energy_kev=energy_kev)
+        tth_2 = self.xtl.Cell.tth(next_refs, energy_kev=energy_kev)
+        next_select = self.intensity(next_refs) / angles
+        idx = np.argmax(next_select)
+        hkl_2 = next_refs[idx]
+        hkl_2_options = (abs(angles - angles[idx]) < 1.) * (abs(tth_2 - tth_2[idx]) < 1.)
+        return hkl_1, hkl_2, next_refs[hkl_2_options]
+
     def find_close_reflections(self,HKL,energy_kev=None,max_twotheta=2,max_angle=10):
         """
         Find and print list of reflections close to the given one

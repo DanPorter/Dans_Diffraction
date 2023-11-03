@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9.5
-Last updated: 15/11/21
+Version 1.9.6
+Last updated: 25/10/23
 
 Version History:
 18/08/17 0.1    Program created
@@ -31,6 +31,7 @@ Version History:
 15/02/21 1.9.3  Added axis_reciprocal_lattice_points/lines/vectors
 11/10/21 1.9.4  Centered crystal in plot_crystal
 15/11/21 1.9.5  Added plot_diffractometer_reciprocal_space
+25/10/23 1.9.6  Corrected Plotting.simulate_powder to display radiation and wavelength
 
 @author: DGPorter
 """
@@ -44,7 +45,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.9.5'
+__version__ = '1.9.6'
 
 
 class Plotting:
@@ -388,8 +389,10 @@ class Plotting:
                      rotation='vertical', ha='center', va='bottom')
         
         # Plot labels
+        wavelength_a = fc.energy2wave(energy_kev)
+        scattering = self.xtl.Scatter._scattering_type
         ylab = u'Intensity [a. u.]'
-        ttl = '%s\nE = %1.3f keV' % (self.xtl.name, energy_kev)
+        ttl = u'%s\n%s \u03BB = %1.3f \u00C5' % (self.xtl.name, scattering.capitalize(), wavelength_a)
         fp.labels(ttl, xlab, ylab)
 
     def axis_reciprocal_lattice_points(self, axes=None, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
@@ -671,7 +674,7 @@ class Plotting:
         """
         # Add background (if not None or 0)
         if background:
-            bkg = np.random.normal(background,np.sqrt(background), [pixels, pixels])
+            bkg = np.random.normal(background, np.sqrt(background), [pixels, pixels])
             mesh = mesh+bkg
         
         return xx, yy, mesh
@@ -716,7 +719,7 @@ class Plotting:
         # create figure
         plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
         cmap = plt.get_cmap('hot_r')
-        plt.pcolormesh(X, Y, mesh, cmap=cmap)
+        plt.pcolormesh(X, Y, mesh, cmap=cmap, shading='auto')
         plt.axis('image')
         plt.colorbar()
         plt.clim([background-(np.max(mesh)/200),background+(np.max(mesh)/50)])
@@ -743,10 +746,11 @@ class Plotting:
         plt.text(0 - (0.2*q_max), 0 - (0.1*q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18)
         
         # Plot labels
-        xlab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0],x_axis[1],x_axis[2])
-        ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0],y_axis[1],y_axis[2])
-        ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name,centre[0],centre[1],centre[2])
-        fp.labels(ttl,xlab,ylab)
+        scatter_type = self.xtl.Scatter._scattering_type.capitalize()
+        xlab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0], x_axis[1], x_axis[2])
+        ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0], y_axis[1], y_axis[2])
+        ttl = '%s %s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name, scatter_type, centre[0], centre[1], centre[2])
+        fp.labels(ttl, xlab, ylab)
     
     def simulate_hk0(self, L=0, **kwargs):
         """
@@ -875,6 +879,10 @@ class Plotting:
         fp.newplot3(Q[:,0],Q[:,1],Q[:,2],'bo')
         fp.plot_cell(c_cart,CELL)
         plt.plot(Q[inplot,0],Q[inplot,1],Q[inplot,2],'ro')
+        ax = plt.gca()
+        ax.set_xlim3d(-q_max, q_max)
+        ax.set_ylim3d(-q_max, q_max)
+        ax.set_zlim3d(-q_max, q_max)
         
         fp.labels(self.xtl.name,'Qx','Qy','Qz')
     
@@ -1595,64 +1603,41 @@ class MultiPlotting:
         colours = iter(['b','g','r','c','m','y','k'])
         
         for xtl in self.crystal_list:
-            # Get reflections
-            angle_max = xtl.Scatter._scattering_max_twotheta
-            q_max = fc.calqmag(angle_max, energy_kev)
-            HKL = xtl.Cell.all_hkl(energy_kev, angle_max)
-            HKL = xtl.Cell.sort_hkl(HKL) # required for labels
+            # Units
+            units = xtl.Scatter._powder_units
+            min_overlap = xtl.Scatter._powder_min_overlap
+            min_twotheta = xtl.Scatter._scattering_min_twotheta
+            if min_twotheta <= 0: min_twotheta = 1.0
+            max_twotheta = xtl.Scatter._scattering_max_twotheta
+            q_min = fc.calqmag(min_twotheta, energy_kev)
+            q_max = fc.calqmag(max_twotheta, energy_kev)
+            q_range = q_max - q_min
+
+            HKL = xtl.Cell.all_hkl(maxq=q_max)
+            HKL = xtl.Cell.sort_hkl(HKL)  # required for labels
             Qmag = xtl.Cell.Qmag(HKL)
-            I = xtl.Scatter.intensity(HKL)
             col = next(colours)
 
+            pixels = 2000
+            tot_pixels = int(pixels * q_range)  # reduce this to make convolution faster
+            pixel_size = q_range / float(tot_pixels)
+            peak_width_pixels = peak_width / pixel_size
+            mesh = np.zeros([tot_pixels])
+            mesh_q = np.linspace(q_min, q_max, tot_pixels)
+            pixel_coord = np.round(tot_pixels * (Qmag - q_min) / q_range).astype(int)
+
+            select = (pixel_coord < tot_pixels) * (pixel_coord > 0)
+            HKL = HKL[select, :]
+            Qmag = Qmag[select]
+            pixel_coord = pixel_coord[select]
+
+            I = xtl.Scatter.intensity(HKL)
             if powder_average:
                 # Apply powder averging correction, I0/|Q|**2
-                I = I / Qmag ** 2
-            
-            # create plotting mesh
-            pixels = int(2000*q_max)  # reduce this to make convolution faster
-            pixel_size = q_max/pixels
-            peak_width_pixels = peak_width/(1.0*pixel_size)
-            mesh = np.zeros([int(pixels)])
+                I = I / (Qmag+0.001) ** 2
 
-            if xtl.Scatter._powder_units.lower() in ['tth', 'angle', 'two-theta', 'twotheta', 'theta']:
-                xx = xtl.Cell.tth(HKL, energy_kev)
-                max_x = angle_max
-                xlab = u'Two-Theta [Deg]'
-            elif xtl.Scatter._powder_units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
-                xx = xtl.Cell.dspace(HKL)
-                max_x = 10.0
-                xlab = u'd-spacing [$\AA$]'
-            else:
-                xx = Qmag
-                max_x = q_max
-                xlab = u'Q [$\AA^{-1}]$'
-
-            # add reflections to background
-            # scipy.interpolate.griddata?
-            mesh_x = np.linspace(0, max_x, pixels)
-            pixel_coord = xx / max_x
-            pixel_coord = (pixel_coord * (pixels - 1)).astype(int)
-
-            ref_n = [0]
-            ref_txt = ['']
-            ext_n = []
-            ext_txt = []
-            for n in range(1, len(I) - 1):
-                if xx[n] > max_x:
-                    continue
+            for n in range(len(I)):
                 mesh[pixel_coord[n]] = mesh[pixel_coord[n]] + I[n]
-
-                close_ref = np.abs(pixel_coord[n] - pixel_coord) < peak_width_pixels / 2
-                close_lab = np.all(np.abs(pixel_coord[n] - np.array(ref_n + ext_n)) > peak_width_pixels / 2)
-
-                if np.all(I[n] >= I[close_ref]) and close_lab:
-                    # generate label if not too close to another reflection
-                    if I[n] > 0.1:
-                        ref_n += [pixel_coord[n]]
-                        ref_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n, 0], HKL[n, 1], HKL[n, 2])]
-                    else:
-                        ext_n += [pixel_coord[n]]
-                        ext_txt += ['(%1.0f,%1.0f,%1.0f)' % (HKL[n, 0], HKL[n, 1], HKL[n, 2])]
             
             # Convolve with a gaussian
             if peak_width:
@@ -1664,21 +1649,38 @@ class MultiPlotting:
             if background:
                 bkg = np.random.normal(background, np.sqrt(background), [int(pixels)])
                 mesh = mesh+bkg
-            
+
+            # Change output units
+            xval = fc.q2units(mesh_q, units, energy_kev)
+
+            # Determine non-overlapping hkl coordinates
+            xvalues = fc.q2units(Qmag, units, energy_kev)
+            ref_n = fc.group_intensities(xvalues, I, min_overlap)
+
+            grp_hkl = HKL[ref_n, :]
+            grp_xval = xvalues[ref_n]
+            grp_inten = mesh[pixel_coord[ref_n]]
+
             # create figure
-            plt.plot(mesh_x, mesh, '-', lw=2, label=xtl.name, c=col)
+            plt.plot(xval, mesh, '-', lw=2, label=xtl.name, c=col)
 
             # Reflection labels
-            for n in range(len(ref_n)):
-                plt.text(mesh_x[ref_n[n]], 1.01 * mesh[ref_n[n]], ref_txt[n],
-                         fontname=fp.DEFAULT_FONT, fontsize=12, color=col, fontweight='bold',
-                         rotation='vertical', ha='center', va='bottom')
-            # Extinction labels
-            ext_y = background + 0.01 * plt.ylim()[1]
-            for n in range(len(ext_n)):
-                plt.text(mesh_x[ext_n[n]], ext_y, ext_txt[n],
-                         fontname=fp.DEFAULT_FONT, fontsize=12, color=col,
-                         rotation='vertical', ha='center', va='bottom')
+            for n in range(len(grp_hkl)):
+                if grp_inten[n] > 1.01 * background:
+                    plt.text(grp_xval[n], 1.01 * grp_inten[n], fc.hkl2str(grp_hkl[n]),
+                             fontname=fp.DEFAULT_FONT, fontsize=12, color=col, fontweight='bold',
+                             rotation='vertical', ha='center', va='bottom')
+                else:  # Extinction labels
+                    plt.text(grp_xval[n], (1.01 * background) + 1, fc.hkl2str(grp_hkl[n]),
+                             fontname=fp.DEFAULT_FONT, fontsize=12, color=col, fontweight='bold',
+                             rotation='vertical', ha='center', va='bottom')
+
+        if xtl.Scatter._powder_units.lower() in ['tth', 'angle', 'two-theta', 'twotheta', 'theta']:
+            xlab = u'Two-Theta [Deg]'
+        elif xtl.Scatter._powder_units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
+            xlab = u'd-spacing [$\AA$]'
+        else:
+            xlab = u'Q [$\AA^{-1}]$'
 
         ylab = u'Intensity [a. u.]'
         ttl = 'E = %1.3f keV' % energy_kev

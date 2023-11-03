@@ -16,8 +16,8 @@ Usage:
 All plots generated require plt.show() call, unless using interactive mode
 
 
-Version 2.1
-Last updated: 10/08/22
+Version 2.2
+Last updated: 09/07/23
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -33,6 +33,7 @@ Version History:
 15/02/21 1.9.1  Update to vecplot for plotting on axis
 27/09/21 2.0    Added plot3darray, plot_diffractometer_reciprocal_space
 10/08/22 2.1    Added plot_lattice_points3D, set_plot_defaults, changed default fig size
+09/07/23 2.2    Thanks to asteppke for suggested update to Arrow3D for matplotlib V>3.4
 
 @author: DGPorter
 """
@@ -47,7 +48,7 @@ from mpl_toolkits.mplot3d import proj3d
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '2.1'
+__version__ = '2.2'
 
 DEFAULT_FONT = 'Times New Roman'
 DEFAULT_FONTSIZE = 14
@@ -510,14 +511,22 @@ class Arrow3D(FancyArrowPatch):
             kwargs['arrowstyle'] = "-|>"
         if 'mutation_scale' not in kwargs.keys():
             kwargs['mutation_scale'] = 20
-        FancyArrowPatch.__init__(self, (0, 0), (0, 0), *args, **kwargs)
+        super().__init__((0,0), (0,0), *args, **kwargs)
         self._verts3d = xs, ys, zs
 
+    # Fix for change in matplotlib 3.5.0 (https://github.com/matplotlib/matplotlib/issues/21688)
+    def do_3d_projection(self, renderer=None):
+        xs3d, ys3d, zs3d = self._verts3d
+        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, self.axes.M)
+        self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
+        return np.min(zs)
+
+    # keep this part for older versions of matplotlib
     def draw(self, renderer):
         xs3d, ys3d, zs3d = self._verts3d
-        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
+        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, self.axes.M)
         self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
-        FancyArrowPatch.draw(self, renderer)
+        super().draw(renderer)
 
 
 '----------------------- Crystal Plotting Programs----------------------'
@@ -912,6 +921,26 @@ def plot_xray_attenuation_length(chemical_formula, density=8.9, energy_range=Non
 
     newplot(energy_range, transmission)
     labels(ttl, 'Energy [keV]', 'Atten Length [μm]')
+
+
+def plot_xray_reflectivity(chemical_formula, density=8.9, energy_range=None, grazing_angle=2):
+    """
+    Plot the specular reflectivity of a material
+    From: https://xdb.lbl.gov/Section4/Sec_4-2.html
+    :param chemical_formula: str molecular formula
+    :param density: float, density in g/cm^3
+    :param energy_range: float or array, x-ray energy in keV
+    :param grazing_angle: float, incidence angle relative to the surface, in degrees
+    :return: None
+    """
+    if energy_range is None:
+        energy_range = np.arange(0.03, 20, 0.01)
+
+    reflectivity = fc.molecular_reflectivity(chemical_formula, energy_range, density, grazing_angle)
+    ttl = '%s Density=%5.3f, Angle=%3.3g deg' % (chemical_formula, density, grazing_angle)
+
+    newplot(energy_range, reflectivity)
+    labels(ttl, 'Energy [keV]', 'Reflectivity')
 
 
 def plot_xray_refractive_index(chemical_formula, density=8.9, energy_range=None):

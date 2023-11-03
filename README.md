@@ -1,9 +1,9 @@
 # Dans_Diffaction
 Reads crystallographic cif files, calculates crystal properties and simulates diffraction.
 
-**Version 2.3**
+**Version 3.1**
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7725644.svg)](https://doi.org/10.5281/zenodo.7725644)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8106031.svg)](https://doi.org/10.5281/zenodo.8106031)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/DanPorter/Dans_Diffraction/6be78ef800167276d61d3e73da3b74a8367dbbe7?urlpath=lab%2Ftree%2FDans_Diffraction.ipynb) 
 [![](https://img.shields.io/github/forks/DanPorter/Dans_Diffraction?label=GitHub%20Repo&style=social)](https://github.com/DanPorter/Dans_Diffraction)
 
@@ -14,12 +14,15 @@ By Dan Porter, Diamond Light Source
 #### TL;DR:
 ```text
 $ ipython -i -m Dans_Diffraction
+OR
+$ ipython -m Dans_Diffraction gui
 ```
 
 ```python
+"""Python Sctipt"""
 import Dans_Diffraction as dif
 xtl = dif.Crystal('some_file.cif')
-xtl.info() # print Crystal structure parameters
+print(xtl) # print Crystal structure parameters
 
 # Print reflection list:
 print(xtl.Scatter.print_all_reflections(energy_kev=5)) 
@@ -38,26 +41,28 @@ Try it out on [mybinder!](https://mybinder.org/v2/gh/DanPorter/Dans_Diffraction/
 
 For comments, queries or bugs - email [dan.porter@diamond.ac.uk](mailto:dan.porter@diamond.ac.uk)
 
-**Citation:** If you use this code (great!), please cite the published DOI: [10.5281/zenodo.3859501](https://doi.org/10.5281/zenodo.3859501)
+**Citation:** If you use this code (great!), please cite the published DOI: [10.5281/zenodo.8106031](https://doi.org/10.5281/zenodo.8106031)
 
 # Installation
 **Requirements:** 
 Python 3+ with packages: *Numpy*, *Matplotlib*, *Tkinter*.
 BuiltIn packages used: *sys*, *os*, *re*, *glob*, *warnings*, *json*, *itertools*
 
-Stable version from PyPI:
+Install stable version from PyPI:
 ```text
-$ pip install Dans-Diffraction
+$ python -m pip install Dans-Diffraction
 ```
 
-Download latest version from GitHub:
+Or, install the latest version direct from GitHub:
+```text
+$ python -m pip install git+https://github.com/DanPorter/Dans_Diffraction.git
+```
+
+Or, Download the latest version from GitHub (with examples!):
 ```text
 $ git clone https://github.com/DanPorter/Dans_Diffraction.git
 ```
-Or install latest version direct from GitHub:
-```text
-$ pip install git+https://github.com/DanPorter/Dans_Diffraction.git
-```
+
 
 
 # Operation
@@ -224,8 +229,15 @@ Using an already generated crystal:
 xtl.start_gui()
 ```
 
+### Diffractometer Simulator
+![Diffractometer](https://github.com/DanPorter/Dans_Diffraction/blob/master/Screenshots/diffractometer.png?raw=true)
+
+New in version 3.0.0. Simulate a generic detector situated around the crystal sample, with the ability to 
+control detector location shape and size and lattice orientation.
+
+
 ### FDMNES functionality
-FDMNES is a powerful tool for simulating resonant x-ray diffraction, created by [Y. Joly and O. Bunau.](http://neel.cnrs.fr/spip.php?rubrique1007&lang=en)
+FDMNES is a powerful tool for simulating resonant x-ray diffraction, created by [Y. Joly and O. Bunau.](https://fdmnes.neel.cnrs.fr/)
 
 The Dans_Diffraction FDMNES class allows for the automatic creation of input files and simple analysis of results.
 The following command should be used to activate these features (only needs to be issued once). 
@@ -246,8 +258,28 @@ Once activated, FDMNES GUI elements become available from the main window, emula
 ![FDMNES Analyse](https://github.com/DanPorter/Dans_Diffraction/blob/master/Screenshots/GUI_09.png?raw=true)
 
 
+# Acknoledgements
+| Date       | Thanks to...                                                                            |
+|------------|-----------------------------------------------------------------------------------------|
+| 2018       | Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations |
+| Dec 2019   | Thanks to Gareth Nisbet for allowing me to inlude his multiple scattering siumulation   |
+| April 2020 | Thanks to ChunHai Wang for helpful suggestions in readcif!                              |
+| May 2020   | Thanks to AndreEbel for helpful suggestions on citations                                |
+| Dec 2020   | Thanks to Chris Drozdowski for suggestions about reflection families                    |
+| Jan 2021   | Thanks to aslarsen for suggestions about outputting the structure factor                |
+| April 2021 | Thanks to Trygve Ræder for suggestions about x-ray scattering factors                   |
+| Feb 2022   | Thanks to Mirko for pointing out the error in two-theta values in Scatter.powder        |
+| March 2022 | Thanks to yevgenyr for suggesting new peak profiles in Scatter.powder                   |
+| Jan 2023   | Thanks to Anuradha Vibhakar for pointing out the error in f0 + if'-if'' |
+| Jan 2023   | Thanks to Andreas Rosnes for testing the installation in jupyterlab                     |
+| May 2023   | Thanks to Carmelo Prestipino for adding electron scattering factors                     |
+| June 2023  | Thanks to Sergio I. Rincon for pointing out the rounding error in Scatter.powder        |
+| July 2023  | Thanks to asteppke for suggested update to Arrow3D for matplotlib V>3.4|
+| July 2023  | Thanks to Yves Joly for helpful suggestions on FDMNES wrapper |
+
+Copyright
 -----------------------------------------------------------------------------
-   Copyright 2022 Diamond Light Source Ltd.
+   Copyright 2023 Diamond Light Source Ltd.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -277,8 +309,6 @@ Files in this package covered by this licence:
 
 Other files are either covered by their own licence or not licenced for other use.
 
- Dr Daniel G Porter, [dan.porter@diamond.ac.uk](mailto:dan.porter@diamond.ac.uk)
- 
- [www.diamond.ac.uk](www.diamond.ac.uk)
- 
- Diamond Light Source, Chilton, Didcot, Oxon, OX11 0DE, U.K.
+| Dr Daniel G Porter | [dan.porter@diamond.ac.uk](mailto:dan.porter@diamond.ac.uk) |
+| ---- | ---- |
+| [www.diamond.ac.uk](www.diamond.ac.uk) | Diamond Light Source, Chilton, Didcot, Oxon, OX11 0DE, U.K. |

@@ -24,8 +24,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.2.3
-Last updated: 12/01/21
+Version 3.2.4
+Last updated: 22/05/23
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -48,6 +48,7 @@ Version History:
 22/10/20 3.2.1  Added Cell.moment, updated Cell.latt()
 15/11/21 3.2.2  Added Cell.orientation, updated Cell.UV()
 12/01/21 3.2.3  Added Symmetry.axial_vector
+22/05/23 3.2.4  Added Symmetry.wyckoff_label(), Symmetry.spacegroup_dict
 
 @author: DGPorter
 """
@@ -65,7 +66,7 @@ from .classes_scattering import Scattering
 from .classes_multicrystal import MultiCrystal
 from .classes_plotting import Plotting, PlottingSuperstructure
 
-__version__ = '3.2.3'
+__version__ = '3.2.4'
 
 
 class Crystal:
@@ -614,15 +615,16 @@ class Cell:
         Q = self.calculateQ(HKL)
         return fg.mag(Q)
 
-    def tth(self, HKL, energy_kev=8.048):
+    def tth(self, HKL, energy_kev=8.048, wavelength_a=None):
         """
         Returns the two-theta angle, in deg, of [h,k,l] at specified energy in keV
         :param HKL: list of hkl reflections
-        :param energy_kev: energy in keV
+        :param energy_kev: photon energy in keV
+        :param wavelength_a: wavelength in Angstroms
         :return: two-theta angles
         """
         Qmag = self.Qmag(HKL)
-        return fc.cal2theta(Qmag, energy_kev)
+        return fc.cal2theta(Qmag, energy_kev, wavelength_a)
 
     def angle(self, hkl1, hkl2):
         """
@@ -669,43 +671,46 @@ class Cell:
         Qmag = self.Qmag(hkl)
         return fc.q2dspace(Qmag)
 
-    def max_hkl(self, energy_kev=8.048, max_angle=180.0):
+    def max_hkl(self, energy_kev=8.048, max_angle=180.0, wavelength_a=None, maxq=None):
         """
         Returns the maximum index of h, k and l for a given energy
         :param energy_kev: energy in keV
         :param max_angle: maximum two-theta at this energy
+        :param wavelength_a: wavelength in A
+        :param maxq: maximum wavevetor transfere in A-1 (suplants all above)
         :return: maxh, maxk, maxl
         """
-
-        Qmax = fc.calqmag(max_angle, energy_kev)
-        Qpos = [[Qmax, Qmax, Qmax],
-                [-Qmax, Qmax, Qmax],
-                [Qmax, -Qmax, Qmax],
-                [-Qmax, -Qmax, Qmax],
-                [Qmax, Qmax, -Qmax],
-                [-Qmax, Qmax, -Qmax],
-                [Qmax, -Qmax, -Qmax],
-                [-Qmax, -Qmax, -Qmax]]
+        if maxq is None:
+            maxq = fc.calqmag(max_angle, energy_kev, wavelength_a)
+        Qpos = [[maxq, maxq, maxq],
+                [-maxq, maxq, maxq],
+                [maxq, -maxq, maxq],
+                [-maxq, -maxq, maxq],
+                [maxq, maxq, -maxq],
+                [-maxq, maxq, -maxq],
+                [maxq, -maxq, -maxq],
+                [-maxq, -maxq, -maxq]]
         hkl = self.indexQ(Qpos)
         return np.ceil(np.abs(hkl).max(axis=0)).astype(int)
 
-    def all_hkl(self, energy_kev=8.048, max_angle=180.0):
+    def all_hkl(self, energy_kev=8.048, max_angle=180.0, wavelength_a=None, maxq=None):
         """
         Returns an array of all (h,k,l) reflections at this energy
         :param energy_kev: energy in keV
         :param max_angle: max two-theta angle
+        :param wavelength_a: wavelength in A
+        :param maxq: maximum wavevetor transfere in A-1 (suplants all above)
         :return: array hkl[:,3]
         """
-
-        Qmax = fc.calqmag(max_angle, energy_kev)
-
         # Find the largest indices
-        hmax, kmax, lmax = self.max_hkl(energy_kev, max_angle)
+        hmax, kmax, lmax = self.max_hkl(energy_kev, max_angle, wavelength_a, maxq)
         # Generate the grid
         HKL = fc.genHKL([hmax, -hmax], [kmax, -kmax], [lmax, -lmax])
         # Some will be above the threshold
         Qm = self.Qmag(HKL)
-        return HKL[Qm <= Qmax, :]
+        if maxq is None:
+            maxq = fc.calqmag(max_angle, energy_kev, wavelength_a)
+        return HKL[Qm <= maxq, :]
 
     def reflection_hkl(self, energy_kev=8.048, max_angle=180.0,
                        specular=(0, 0, 1), theta_offset=0, min_theta=0, max_theta=180.):
@@ -944,6 +949,17 @@ class Atom:
         for key in prop_names:
             out += '%20s : %s\n' % (key, self.properties[key][0])
         return out
+
+    def uvw(self):
+        """
+        Returns a [1x3] array of current positions
+        :return: np.array([1x3])
+        """
+        return np.asarray([self.u, self.v, self.w], dtype=float)
+
+    def total_moment(self):
+        """Return the total moment along a, b, c directions"""
+        return np.sum(self.mxmymz)
 
 
 class Atoms:
@@ -1513,14 +1529,15 @@ class Symmetry:
     symmetry_operations_magnetic = ['x,y,z']
     symmetry_operations_time = [1]
     symmetry_matrices = np.eye(4)
+    spacegroup_dict = fc.spacegroup(1)
 
     def __init__(self, symmetry_operations=None, symmetry_operations_magnetic=None):
         """Initialises the symmetry group"""
 
         if symmetry_operations is not None:
             self.addsym(symmetry_operations, symmetry_operations_magnetic)
-
-        self.generate_matrices()
+        else:
+            self.generate_matrices()
 
     def fromcif(self, cifvals):
         """
@@ -1578,6 +1595,19 @@ class Symmetry:
             self.spacegroup_number = float(sgn)
         except ValueError:
             self.spacegroup_number = 0
+        try:
+            if '.' in sgn:
+                self.spacegroup_dict = fc.spacegroup_magnetic(sgn)
+            else:
+                self.spacegroup_dict = fc.spacegroup(sgn)
+        except KeyError:
+            # Find from spacegroup
+            check = fc.find_spacegroup(spacegroup)
+            if check:
+                self.spacegroup_dict = check
+                self.spacegroup_number = check['space group number']
+            else:
+                self.spacegroup_dict = fc.spacegroup(1)
 
         self.generate_matrices()
 
@@ -1587,7 +1617,6 @@ class Symmetry:
         :param cifvals: cif dict from functions_crystallography.readcif
         :return: cifvals
         """
-        keys = cifvals.keys()
 
         cifvals['_symmetry_equiv_pos_as_xyz'] = self.symmetry_operations
         cifvals['_space_group_symop_operation_xyz'] = self.symmetry_operations
@@ -1617,34 +1646,44 @@ class Symmetry:
         cifvals['_space_group_magn.number_BNS'] = self.spacegroup_number
         return cifvals
 
-    def load_spacegroup(self, sg_number):
+    def load_spacegroup(self, sg_number=None, sg_dict=None):
         """
         Load symmetry operations from a spacegroup from the International Tables of Crystallogrphy
         See functions_crystallography.spacegroup for more details
         :param sg_number: space group number (1-230)
+        :param sg_dict: alternative input: spacegroup dict from fc.spacegroup
         :return: None
         """
-        spacegroup = fc.spacegroup(sg_number)
-        self.spacegroup_number = int(spacegroup['space group number'])
-        self.spacegroup = spacegroup['space group name']
+        if sg_dict is None:
+            sg_dict = fc.spacegroup(sg_number)
+        if 'positions magnetic' in sg_dict:
+            self.load_magnetic_spacegroup(sg_dict=sg_dict)
+            return
+        self.spacegroup_number = int(sg_dict['space group number'])
+        self.spacegroup = sg_dict['space group name']
+        self.spacegroup_dict = sg_dict
 
-        symops = spacegroup['general positions']
+        symops = sg_dict['general positions']
         self.symmetry_operations = symops
         self.symmetry_operations_magnetic = fc.symmetry_ops2magnetic(symops)
         self.symmetry_operations_time = [1] * len(symops)
 
-    def load_magnetic_spacegroup(self, msg_number):
+    def load_magnetic_spacegroup(self, msg_number=None, sg_dict=None):
         """
         Load symmetry operations from a magnetic spacegroup from Bilbao crystallographic server
         Replaces the current symmetry operators and the magnetic symmetry operators.
         See functions_crystallography.spacegroup_magnetic for more details
         :param msg_number: magnetic space group number e.g. 61.433
-        :return:
+        :param sg_dict: alternative inuput: spacegroup dict from fc.spacegroup_magnetic
+        :return: None
         """
-
-        maggroup = fc.spacegroup_magnetic(msg_number)
+        if sg_dict is None:
+            maggroup = fc.spacegroup_magnetic(msg_number)
+        else:
+            maggroup = sg_dict
         self.spacegroup_number = maggroup['space group number']
         self.spacegroup = maggroup['space group name']
+        self.spacegroup_dict = maggroup
         symops = maggroup['positions general']
         symmag = maggroup['positions magnetic']
         self.symmetry_operations = symops
@@ -1719,25 +1758,19 @@ class Symmetry:
 
         self.symmetry_matrices = fc.gen_sym_mat(self.symmetry_operations)
 
-    def print_subgroups(self, sg_number=None):
+    def print_subgroups(self):
         """
         Return str of subgroups of this spacegroup
-        :param sg_number: spacegroup number, None to use current one
         :return: str
         """
-        if sg_number is None:
-            sg_number = self.spacegroup_number
-        return fc.spacegroup_subgroups_list(sg_number)
+        return fc.spacegroup_subgroups_list(sg_dict=self.spacegroup_dict)
 
-    def print_magnetic_spacegroups(self, sg_number=None):
+    def print_magnetic_spacegroups(self):
         """
         Return str of available magnetic spacegroups for this spacegroup
-        :param sg_number: spacegroup number, None to use current one
         :return: str
         """
-        if sg_number is None:
-            sg_number = self.spacegroup_number
-        return fc.spacegroup_magnetic_list(sg_number)
+        return fc.spacegroup_magnetic_list(sg_dict=self.spacegroup_dict)
 
     def symmetric_coordinates(self, UVW, MXMYMZ=None, remove_identical=True):
         """
@@ -2128,6 +2161,37 @@ class Symmetry:
             # Generate string
             mag_str = fc.sym_mat2str(t * p * m)
             out += "%3d, %19s, %6s, %9s, %8s, %19s\n" % (n, operations[n], t, p, mag_str, magnetic_ops[n])
+        return out
+
+    def wyckoff_labels(self, UVW):
+        """
+        Return Wyckoff site for position
+        :param UVW: (u,v,w) or None to use xtl.Atoms.uvw()
+        :return: list of Wyckoff site letters
+        """
+        return fc.wyckoff_labels(self.spacegroup_dict, UVW)
+
+    def print_wyckoff_sites(self):
+        """Return info str about Wycoff positions for this spacegroup"""
+
+        spg = self.spacegroup_dict
+        out = 'Spacegoup: %s (%s)\n' % (spg['space group name'], spg['space group number'])
+        if 'parent number' in spg:
+            spg = fc.spacegroup(self.spacegroup_dict['parent number'])
+            out += ' Parent: %s (%s)\n' % (spg['space group name'], spg['space group number'])
+        centring = spg['positions centring']
+        out += '\nCentring operations: %2d : \n     ' % len(centring)
+        out += '\n     '.join(centring)
+        out += '\n\n'
+        out += 'Wyckoff Sites\n'
+        coordinates = spg['positions coordinates']
+        multiplicity = spg['positions multiplicity']
+        symmetry = spg['positions symmetry']
+        wyckoff_letter = spg['positions wyckoff letter']
+        for n in range(len(coordinates)):
+            out += '%3s : %10s : %2s\n     ' % (wyckoff_letter[n], symmetry[n], multiplicity[n])
+            out += '\n     '.join(coordinates[n])
+            out += '\n\n'
         return out
 
     def info(self):

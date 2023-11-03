@@ -6,14 +6,10 @@ import sys, os
 
 import matplotlib.pyplot as plt
 import numpy as np
-if sys.version_info[0] < 3:
-    import Tkinter as tk
-else:
-    import tkinter as tk
 
 from .. import functions_general as fg
 from .. import functions_crystallography as fc
-from .basic_widgets import StringViewer
+from .basic_widgets import tk
 from .basic_widgets import (TF, BF, SF, LF, HF, TTF, TTFG, TTBG,
                             bkg, ety, btn, opt, btn2,
                             btn_active, opt_active, txtcol,
