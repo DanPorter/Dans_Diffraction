@@ -542,10 +542,10 @@ class Plotting:
         Q_vec_a_lab =  '(%1.3g,%1.3g,%1.3g)' % (x_axis[0], x_axis[1], x_axis[2])
         Q_vec_b_lab =  '(%1.3g,%1.3g,%1.3g)' % (y_axis[0], y_axis[1], y_axis[2])
 
-        HKL = np.asarray(HKL, dtype=np.float).reshape([-1, 3])
+        HKL = np.asarray(HKL, dtype=float).reshape([-1, 3])
         inten = np.asarray(inten)
 
-        HKL = np.asarray(HKL, dtype=np.float).reshape([-1, 3])
+        HKL = np.asarray(HKL, dtype=float).reshape([-1, 3])
         inten = np.asarray(inten)
         # Determine the directions in cartesian space
         x_cart = fg.norm(self.xtl.Cell.calculateQ(x_axis))
