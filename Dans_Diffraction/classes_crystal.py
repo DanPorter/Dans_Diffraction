@@ -365,6 +365,85 @@ class Crystal:
         except ImportError:
             print('Sorry, you need to install tkinter!')
 
+    def search_distances(self, min_d=0.65, max_d=3.20,
+                         c_ele=None, elems=None, simple=True):
+        """
+        Calculated atoms interatomic distances form each label.
+        :param c_ele (list,string): only sites with noted elements
+                                    if None all site
+        :param elems (list,string): only distances with noted elements
+                                    if None all site
+        :param min_d: minimum distance 
+        :param max_d: maximum distance
+        :return dictionary: 
+
+        """
+        xyz = self.Cell.calculateR(self.Atoms.uvw())
+        UVstar = self.Cell.UVstar()
+        UV = self.Cell.UV()
+        Lpar = self.Cell.lp()[:3]
+
+        Lran = np.array([0, 0, 0, 0, 0, 0])
+
+        for i in range(3):
+            Lran[i] = min(fg.distance2plane([0, 0, 0], UVstar[i], xyz))
+        for i in range(3):
+            Lran[3 + i] = min(fg.distance2plane(UV[i], UVstar[i] + UV[i], xyz))
+        for i, L in enumerate(Lran):
+            Lran[i] = np.ceil(max_d / Lpar[i % 3]) if L < max_d else 0
+
+        IntRes = self.Structure.generate_lattice(U=Lran[0] + Lran[3],
+                                                 V=Lran[1] + Lran[4],
+                                                 W=Lran[2] + Lran[5],
+                                                 centred=False)[:3]
+        B_uvw, B_Ele, B_label = IntRes
+        B_label, B_Ele = np.asarray(B_label), np.asarray(B_Ele)
+
+        B_uvw -= np.array(Lran[:3])
+        B_xyz = self.Cell.calculateR(B_uvw)
+
+        if c_ele is None:
+            c_ele = set(self.Atoms.type)
+        elif isinstance(c_ele, str):
+            c_ele = [c_ele]
+
+        if elems is None:
+            elems = set(self.Atoms.type)
+        elif isinstance(elems, str):
+            elems = [elems]
+
+        distances = {}
+        for i, atom in enumerate(xyz):
+            if not self.Atoms.type[i] in c_ele:
+                continue
+            s_dist = {}
+            vdist = (B_xyz - atom) ** 2
+            vdist = np.sqrt(np.sum(vdist, axis=1))
+            cond1 = (vdist > min_d) * (vdist < max_d)
+            vlabel = B_label[cond1]
+            vele = B_Ele[cond1]
+            vdist = vdist[cond1]
+
+            Ord = np.argsort(vdist)
+            cond2 = [ele in elems for ele in vele[Ord]]
+            s_dist = {'dist': vdist[Ord][cond2],
+                      'label': list(vlabel[Ord][cond2]),
+                      'type': list(vele[Ord][cond2])}
+
+            distances[self.Atoms.label[i]] = s_dist
+
+        if simple:
+            lab = [i for i in self.Atoms.label]
+            for i, site_i in enumerate(lab):
+                for site_j in lab[i + 1:]:
+                    uvw_i = self.Atoms[site_i].uvw()
+                    uvw_j = self.Atoms[site_j].uvw()
+                    if all(uvw_i == uvw_j):
+                        lab.remove(site_j)
+                        del distances[site_j]
+
+        return distances
+
     def __add__(self, other):
         return MultiCrystal([self, other])
 
@@ -564,7 +643,7 @@ class Cell:
         Convert coordinates [x,y,z], in an orthogonal basis, to
         coordinates [h,k,l], in the basis of the reciprocal lattice
                     H(h,k,l) = Q(x,y,z) / [A*,B*,C*]
-        
+
         E.G.
             HKL = indexQ([2.2046264, 1.2728417, 0.0000000]) # for a hexagonal system, a = 2.85
             > HKL = [1,0,0]
@@ -577,7 +656,6 @@ class Cell:
         Convert coordinates [u,v,w], in the basis of the unit cell, to
         coordinates [x,y,z], in an orthogonal basis, in units of A
                     R(x,y,z) = uA + vB + wC
-        
         E.G.
             R = Cell.calculateR([0.1,0,0]) # for a hexagonal system, a = 2.85
             > R = array([[0.285, 0, 0]])
@@ -1030,6 +1108,8 @@ class Atoms:
         self.__init__(u, v, w, type, label, occupancy, uiso, mxmymz=None)
 
     def __getitem__(self, idx):
+        if isinstance(idx, str):
+            idx = self.findatom(label=idx)
         return self.atom(idx)
 
     def fromcif(self, cifvals):

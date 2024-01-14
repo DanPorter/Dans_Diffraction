@@ -441,6 +441,25 @@ def distance2line(line_start, line_end, point):
     return np.sqrt(np.sum(vec_arb ** 2))
 
 
+def distance2plane(line_start, line_end, point):
+    """
+    Calculate distance from a plane (defined by a perpendicular vector) to an arbitary point in space
+    :param vector_start: array, position lying on plane and vector start
+    :param line_end:  array, position of the end of the vector
+    :param point: array, arbitary position in space
+    :return: float
+    """
+    line_start = np.asarray(line_start)
+    line_end = np.asarray(line_end)
+    point = np.asarray(point)
+
+    line_diff = line_end - line_start
+    unit_line = line_diff / np.sqrt(np.sum(line_diff ** 2))
+
+    vec_arb = np.dot((point - line_start), unit_line)
+    return abs(vec_arb)
+
+
 def vector_intersection(point1, direction1, point2, direction2):
     """
     Calculate the point in 2D where two lines cross.
