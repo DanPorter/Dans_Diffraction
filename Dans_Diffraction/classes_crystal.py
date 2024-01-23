@@ -433,14 +433,17 @@ class Crystal:
             distances[self.Atoms.label[i]] = s_dist
 
         if simple:
-            lab = [i for i in self.Atoms.label]
+            lab = [i for i,j in zip(self.Atoms.label, self.Atoms.type) if j in c_ele]
             for i, site_i in enumerate(lab):
                 for site_j in lab[i + 1:]:
                     uvw_i = self.Atoms[site_i].uvw()
                     uvw_j = self.Atoms[site_j].uvw()
                     if all(uvw_i == uvw_j):
                         lab.remove(site_j)
-                        del distances[site_j]
+                        try:
+                            del distances[site_j]
+                        except KeyError:
+                            pass
 
         return distances
 
