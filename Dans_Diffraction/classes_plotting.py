@@ -143,7 +143,7 @@ class Plotting:
         
         plt.title(self.xtl.name, fontsize=28, fontweight='bold')
 
-    def plot_distance(self, min_d=0.65, max_d=3.20,
+    def plot_distance(self, min_d=0.65, max_d=3.20, labels=None,
                       c_ele=None, elems=None, ranges=None, step=0.04):
         """
         Plot atoms interatomic distances form each label.
@@ -151,19 +151,20 @@ class Plotting:
                                     if None all site
         :param elems (list,string): only distances with noted elements
                                     if None all site
-        :param min_d: minimum distance 
+        :param min_d: minimum distance
         :param max_d: maximum distance
         :return:
         """
         dist = self.xtl.search_distances(c_ele=c_ele, elems=elems,
-                                         min_d=min_d, max_d=max_d)
+                                         labels=labels, min_d=min_d,
+                                         max_d=max_d)
 
         if ranges is None:
             all_d = np.hstack([i['dist'] for i in dist.values()])
             ranges = (np.floor(min(all_d)), np.ceil(max(all_d)))
         # Create plot
         if len(dist) == 0:
-            print('no distance present')      
+            print('no distance present')
             return
         fig, axs = plt.subplots(len(dist), constrained_layout=True)
         if len(dist) == 1:
@@ -171,10 +172,10 @@ class Plotting:
         for i, site in enumerate(dist):
             axs[i].set_title(site)
             axs[i].hist(dist[site]['dist'], range=ranges,
-                        bins=int((ranges[1]-ranges[0]) / step))
+                        bins=int((ranges[1] - ranges[0]) / step))
             axs[i].set(ylabel='n. Atoms')
         axs[-1].set(xlabel='$\AA$')
-        if len(dist) > 1:        
+        if len(dist) > 1:
             for ax in axs.flat:
                 ax.label_outer()
 

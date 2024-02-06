@@ -365,8 +365,8 @@ class Crystal:
         except ImportError:
             print('Sorry, you need to install tkinter!')
 
-    def search_distances(self, min_d=0.65, max_d=3.20,
-                         c_ele=None, elems=None, simple=True):
+    def search_distances(self, min_d=0.65, max_d=3.20, c_ele=None, elems=None,
+                         labels=None, simple=True):
         """
         Calculated atoms interatomic distances form each label.
         :param c_ele (list,string): only sites with noted elements
@@ -412,9 +412,16 @@ class Crystal:
         elif isinstance(elems, str):
             elems = [elems]
 
+        if labels is None:
+            labels = self.Atoms.label
+        elif isinstance(labels, str):
+            labels = [labels]
+
         distances = {}
         for i, atom in enumerate(xyz):
             if not self.Atoms.type[i] in c_ele:
+                continue
+            if not self.Atoms.label[i] in labels:
                 continue
             s_dist = {}
             vdist = (B_xyz - atom) ** 2
