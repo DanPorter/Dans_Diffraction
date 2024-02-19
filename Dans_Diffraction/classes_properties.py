@@ -374,6 +374,59 @@ class Properties:
             X += -(N / D) * C * (Zeff * r * r)
         return X
 
+    def relative_positions(self, position, min_distance=0., max_distance=3.2, elements=None):
+        """
+        Returns atomic positions relative to given position
+            rel_pos, atom_type, label, occ, uiso, mxmymz = Properties.relative_positions([0, 0, 0])
+            rel_distance = np.sqrt(np.sum(np.square(rel_pos), axis=1))
+
+        Note: all output positions are sorted in increasing order of distance from position.
+
+        :param position: [x,y,z] position vector in Angstroms
+        :param min_distance: min distance to find atoms, in Angstroms
+        :param max_distance: max distance to find atoms, in Angstroms
+        :param elements: str or list of str, atom types to return
+        :return relative_position: [[dx,dy,dz], ...] relative positions in Angstroms
+        :return atom_type: ['El', ..] elements
+        :return label: ['El1', ..] site labels
+        :return occ: [occ, ..] occupancy
+        :return uiso: [uiso, ..] Uiso parameters
+        :return mxmymz: [[mx,my,mz], ..] magnetic moments
+        """
+
+        position = np.reshape(position, 3)
+
+        uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
+
+        if elements is not None:
+            elements = np.reshape(elements, -1)  # convert to str array
+            ele_idx = np.zeros(len(atom_type), dtype=bool)
+            for element in elements:
+                ele_idx += atom_type == element
+            uvw = uvw[ele_idx, :]
+            atom_type = atom_type[ele_idx]
+            label = label[ele_idx]
+            occ = occ[ele_idx]
+            uiso = uiso[ele_idx]
+            mxmymz = mxmymz[ele_idx, :]
+
+        R = self.xtl.Cell.calculateR(uvw)
+
+        diff = R - position
+
+        mag = fg.mag(diff)
+        jj = np.argsort(mag)
+        diff = diff[jj, :]
+        label = label[jj]
+        mag = mag[jj]
+        atom_type = atom_type[jj]
+        occ = occ[jj]
+        uiso = uiso[jj]
+        mxmymz = mxmymz[jj, :]
+        ii = np.flatnonzero((mag > min_distance) * (mag < max_distance))
+
+        return diff[ii, :], atom_type[ii], label[ii], occ[ii], uiso[ii], mxmymz[ii, :]
+
     def atomic_neighbours(self, structure_index=0, radius=2.5, disp=False, return_str=False):
         """
         Returns the relative positions of atoms within a radius of the selected atom
