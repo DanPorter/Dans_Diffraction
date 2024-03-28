@@ -10,8 +10,8 @@ By Dan Porter, PhD
 Diamond
 2019
 
-Version 3.1.1
-Last updated: 19/10/23
+Version 3.1.3
+Last updated: 28/03/24
 
 Version History:
 10/11/17 0.1    Program created
@@ -29,11 +29,12 @@ Version History:
 20/07/23 3.1.0  Added new FDMNES GUI elements including in the Menu
 19/10/23 3.1.1  Fixed scaling issue in diffractometer.py. Thanks asteppke!
 25/10/23 3.1.2  Fixed error with powder plot for Neutrons. Thanks Cyril!
+28/03/24 3.1.3  Fixed error with site symmetries having spaces in AtomsGui, use RegEx instead
 
 @author: DGPorter
 """
 
 from .crystal import CrystalGui
 
-__version__ = '3.1.2'
-__date__ = '25/10/23'
+__version__ = '3.1.3'
+__date__ = '28/03/24'

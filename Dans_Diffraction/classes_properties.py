@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9
-Last updated: 20/07/23
+Version 2.0
+Last updated: 19/02/24
 
 Version History:
 10/11/17 0.1    Program created
@@ -22,6 +22,7 @@ Version History:
 26/01/21 1.7    Added calculation of xray attenuation, transmission and refractive index
 16/05/23 1.8    Fixed reflectivity calculation
 20/07/23 1.9    Added FDMNES indata writer
+19/02/24 2.0    Added relative_positions function
 
 @author: DGPorter
 """
@@ -32,7 +33,7 @@ from . import functions_general as fg
 from . import functions_crystallography as fc
 from .classes_orbitals import CrystalOrbitals
 
-__version__ = '1.9'
+__version__ = '2.0'
 
 
 class Properties:

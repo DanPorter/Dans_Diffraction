@@ -3,6 +3,7 @@ Main crystal gui windows
 """
 
 import sys, os
+import re
 import matplotlib.pyplot as plt  # Plotting
 import numpy as np
 
@@ -714,9 +715,15 @@ class AtomsGui:
         AtomsGui(self.xtl, self.symmetric_only, not self.magnetic_moments)
 
     def fun_update(self):
-        "Update atomic properties, close window"
+        """Update atomic properties, close window"""
         # Get string from text box
         s = self.text.get('1.0', tk.END)
+
+        # regular expression matching text string
+        rex = r'\s*?(\d+)\s+(\w+?)\s+(\w+?)\s+\w+?\s\(.+?\)' + r'\s+(\d+?.\d+)'*5
+        if self.magnetic_moments:
+            rex += r'\s+(\d+?.\d+)'*3
+        reg_match = re.compile(rex)
 
         # Analyse string
         """
@@ -743,20 +750,22 @@ class AtomsGui:
         my = []
         mz = []
         for ln in lines:
-            items = ln.split()
+            m = reg_match.match(ln)
+            if m is None: continue
+            items = m.groups()
             if len(items) < 8: continue
             n += [int(items[0])]
             scattering_type += [items[1]]
             label += [items[2]]
-            u += [float(items[5])]
-            v += [float(items[6])]
-            w += [float(items[7])]
-            occ += [float(items[8])]
-            uiso += [float(items[9])]
+            u += [float(items[3])]
+            v += [float(items[4])]
+            w += [float(items[5])]
+            occ += [float(items[6])]
+            uiso += [float(items[7])]
             if self.magnetic_moments:
-                mx += [float(items[10])]
-                my += [float(items[11])]
-                mz += [float(items[12])]
+                mx += [float(items[8])]
+                my += [float(items[9])]
+                mz += [float(items[10])]
 
         self.Atoms.type = scattering_type
         self.Atoms.label = label
