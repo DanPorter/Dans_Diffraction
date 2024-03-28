@@ -49,8 +49,8 @@ class MultiCrystalGui:
         self.energy_kev = tk.DoubleVar(frame, 8.0)
         self.edge = tk.StringVar(frame, 'Edge')
         self.type = tk.StringVar(frame, 'X-Ray')
-        self.twotheta_min = tk.DoubleVar(frame, -180.0)
-        self.twotheta_max = tk.DoubleVar(frame, 180.0)
+        self.twotheta_min = tk.DoubleVar(frame, 5.0)
+        self.twotheta_max = tk.DoubleVar(frame, 60.0)
         self.powder_units = tk.StringVar(frame, 'Two-Theta')
 
         # X-ray edges:

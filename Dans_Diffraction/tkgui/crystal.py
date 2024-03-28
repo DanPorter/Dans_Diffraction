@@ -41,6 +41,9 @@ class CrystalGui:
 
         # Create Tk inter instance
         self.root = tk.Tk()
+        #icon = tk.PhotoImage(file=os.path.dirname(__file__) + '/../../DD_icon.png')
+        #self.root.iconphoto(True, icon)
+        # self.root.iconbitmap(default=os.path.dirname(__file__) + '/../../DD_icon.ico')  # test this on linux first!
         self.root.wm_title('Crystal  by D G Porter [dan.porter@diamond.ac.uk]')
         # self.root.minsize(width=640, height=480)
         self.root.maxsize(width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight())
@@ -80,6 +83,7 @@ class CrystalGui:
             'Help': {
                 'Help': popup_help,
                 # 'Dark mode': self.menu_darkmode,
+                'Set scale': self.menu_scale,
                 'Examples': self.menu_examples,
                 'Activate FDMNES option': self.menu_start_fdmnes,
                 'Analyse FDMNES data': self.menu_analyse_fdmnes,
@@ -275,6 +279,11 @@ class CrystalGui:
         """Open Spacegroup viewer gui"""
         from .spacegroups import SpaceGroupGui
         SpaceGroupGui(self.xtl.Symmetry)
+
+    def menu_scale(self):
+        """Change the scale of the tkinter instance"""
+        print('pixels in 1 inch: %s' % self.root.winfo_fpixels('1i'))
+        self.root.tk.call('tk', 'scaling', self.root.winfo_fpixels('1i')/72)
 
     def menu_examples(self):
         """List example files, open in system viewer"""

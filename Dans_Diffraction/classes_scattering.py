@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.3.2
-Last updated: 19/10/23
+Version 2.3.3
+Last updated: 28/03/24
 
 Version History:
 10/09/17 0.1    Program created
@@ -35,6 +35,7 @@ Version History:
 02/07/23 2.3.0  Fixed rounding error in Scatter.powder, thanks Sergio I. Rincon!
 26/09/23 2.3.1  Added Scattering.orientation_reflections for automatic orientation help
 19/20/23 2.3.2  Fixed scatteringbasis so xray_resonant() now works with non-cubic systems
+28/03/24 2.3.3  Fixed scattering type comparison to compare .lower() scattering types
 
 @author: DGPorter
 """
@@ -49,7 +50,7 @@ from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '2.3.2'
+__version__ = '2.3.3'
 __scattering_types__ = {'xray': ['xray', 'x', 'x-ray', 'thomson', 'charge'],
                         'neutron': ['neutron', 'n', 'nuclear'],
                         'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'],
@@ -369,6 +370,7 @@ class Scattering:
             hkl = self.get_hkl()
         if scattering_type is None:
             scattering_type = self._scattering_type
+        # scattering_type = scattering_type.lower()
         if int_hkl:
             hkl = np.asarray(np.rint(hkl), dtype=float).reshape([-1, 3])
         else:

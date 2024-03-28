@@ -9,7 +9,7 @@ Reads crystallographic cif files, calculates crystal properties and simulates di
 
 
 By Dan Porter, Diamond Light Source
-2023
+2024
 
 #### TL;DR:
 ```text
