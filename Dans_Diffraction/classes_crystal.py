@@ -1478,6 +1478,11 @@ class Atoms:
         if good:
             print("Atoms look good.")
 
+    def fitincell(self):
+        """Adjust all atom positions to fit within unit cell"""
+        uvw = fc.fitincell(self.uvw())
+
+
     def uvw(self):
         """
         Returns a [nx3] array of current positions

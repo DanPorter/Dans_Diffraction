@@ -3,6 +3,7 @@ Main crystal gui windows
 """
 
 import sys, os
+import re
 import matplotlib.pyplot as plt  # Plotting
 import numpy as np
 
@@ -40,6 +41,9 @@ class CrystalGui:
 
         # Create Tk inter instance
         self.root = tk.Tk()
+        #icon = tk.PhotoImage(file=os.path.dirname(__file__) + '/../../DD_icon.png')
+        #self.root.iconphoto(True, icon)
+        # self.root.iconbitmap(default=os.path.dirname(__file__) + '/../../DD_icon.ico')  # test this on linux first!
         self.root.wm_title('Crystal  by D G Porter [dan.porter@diamond.ac.uk]')
         # self.root.minsize(width=640, height=480)
         self.root.maxsize(width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight())
@@ -79,6 +83,7 @@ class CrystalGui:
             'Help': {
                 'Help': popup_help,
                 # 'Dark mode': self.menu_darkmode,
+                'Set scale': self.menu_scale,
                 'Examples': self.menu_examples,
                 'Activate FDMNES option': self.menu_start_fdmnes,
                 'Analyse FDMNES data': self.menu_analyse_fdmnes,
@@ -274,6 +279,11 @@ class CrystalGui:
         """Open Spacegroup viewer gui"""
         from .spacegroups import SpaceGroupGui
         SpaceGroupGui(self.xtl.Symmetry)
+
+    def menu_scale(self):
+        """Change the scale of the tkinter instance"""
+        print('pixels in 1 inch: %s' % self.root.winfo_fpixels('1i'))
+        self.root.tk.call('tk', 'scaling', self.root.winfo_fpixels('1i')/72)
 
     def menu_examples(self):
         """List example files, open in system viewer"""
@@ -714,9 +724,15 @@ class AtomsGui:
         AtomsGui(self.xtl, self.symmetric_only, not self.magnetic_moments)
 
     def fun_update(self):
-        "Update atomic properties, close window"
+        """Update atomic properties, close window"""
         # Get string from text box
         s = self.text.get('1.0', tk.END)
+
+        # regular expression matching text string
+        rex = r'\s*?(\d+)\s+(\w+?)\s+(\w+?)\s+\w+?\s\(.+?\)' + r'\s+(\d+?.\d+)'*5
+        if self.magnetic_moments:
+            rex += r'\s+(\d+?.\d+)'*3
+        reg_match = re.compile(rex)
 
         # Analyse string
         """
@@ -743,20 +759,22 @@ class AtomsGui:
         my = []
         mz = []
         for ln in lines:
-            items = ln.split()
+            m = reg_match.match(ln)
+            if m is None: continue
+            items = m.groups()
             if len(items) < 8: continue
             n += [int(items[0])]
             scattering_type += [items[1]]
             label += [items[2]]
-            u += [float(items[5])]
-            v += [float(items[6])]
-            w += [float(items[7])]
-            occ += [float(items[8])]
-            uiso += [float(items[9])]
+            u += [float(items[3])]
+            v += [float(items[4])]
+            w += [float(items[5])]
+            occ += [float(items[6])]
+            uiso += [float(items[7])]
             if self.magnetic_moments:
-                mx += [float(items[10])]
-                my += [float(items[11])]
-                mz += [float(items[12])]
+                mx += [float(items[8])]
+                my += [float(items[9])]
+                mz += [float(items[10])]
 
         self.Atoms.type = scattering_type
         self.Atoms.label = label

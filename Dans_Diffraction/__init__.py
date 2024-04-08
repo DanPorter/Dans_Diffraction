@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.1.3
-Last updated: 25/10/23
+Version 3.1.4
+Last updated: 28/03/24
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -73,6 +73,7 @@ Version History:
 26/09/23 3.1.1  Minor changes and improvments. Added hkl1, hkl2 = xtl.scatter.orientation_reflections()
 19/10/23 3.1.2  xray_resonant() now works with non-cubic systems, fixed scaling issue in diffractometer.py
 25/10/23 3.1.3  Fixed error with powder plot for Neutrons. Thanks Cyril!
+28/03/24 3.1.4  Fixed error with site symmetries having spaces in AtomsGui, added Properties.relative_positions()
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -94,7 +95,7 @@ Acknoledgements:
     Oct 2023    Thanks to Cyril Cayron for pointing out the error with plotting neutron power spectra
 
 -----------------------------------------------------------------------------
-   Copyright 2023 Diamond Light Source Ltd.
+   Copyright 2024 Diamond Light Source Ltd.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -141,8 +142,8 @@ from .classes_fdmnes import fdmnes_checker, Fdmnes, FdmnesAnalysis
 from .functions_crystallography import readcif
 
 
-__version__ = '3.1.3'
-__date__ = '25/10/23'
+__version__ = '3.1.4'
+__date__ = '28/03/24'
 
 
 # Build

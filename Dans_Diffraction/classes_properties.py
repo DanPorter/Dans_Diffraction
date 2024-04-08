@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9
-Last updated: 20/07/23
+Version 2.0
+Last updated: 19/02/24
 
 Version History:
 10/11/17 0.1    Program created
@@ -22,6 +22,7 @@ Version History:
 26/01/21 1.7    Added calculation of xray attenuation, transmission and refractive index
 16/05/23 1.8    Fixed reflectivity calculation
 20/07/23 1.9    Added FDMNES indata writer
+19/02/24 2.0    Added relative_positions function
 
 @author: DGPorter
 """
@@ -32,7 +33,7 @@ from . import functions_general as fg
 from . import functions_crystallography as fc
 from .classes_orbitals import CrystalOrbitals
 
-__version__ = '1.9'
+__version__ = '2.0'
 
 
 class Properties:
@@ -373,6 +374,59 @@ class Properties:
             r = fc.atom_properties(str(at), 'Radii')[0] * 1e-12
             X += -(N / D) * C * (Zeff * r * r)
         return X
+
+    def relative_positions(self, position, min_distance=0., max_distance=3.2, elements=None):
+        """
+        Returns atomic positions relative to given position
+            rel_pos, atom_type, label, occ, uiso, mxmymz = Properties.relative_positions([0, 0, 0])
+            rel_distance = np.sqrt(np.sum(np.square(rel_pos), axis=1))
+
+        Note: all output positions are sorted in increasing order of distance from position.
+
+        :param position: [x,y,z] position vector in Angstroms
+        :param min_distance: min distance to find atoms, in Angstroms
+        :param max_distance: max distance to find atoms, in Angstroms
+        :param elements: str or list of str, atom types to return
+        :return relative_position: [[dx,dy,dz], ...] relative positions in Angstroms
+        :return atom_type: ['El', ..] elements
+        :return label: ['El1', ..] site labels
+        :return occ: [occ, ..] occupancy
+        :return uiso: [uiso, ..] Uiso parameters
+        :return mxmymz: [[mx,my,mz], ..] magnetic moments
+        """
+
+        position = np.reshape(position, 3)
+
+        uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
+
+        if elements is not None:
+            elements = np.reshape(elements, -1)  # convert to str array
+            ele_idx = np.zeros(len(atom_type), dtype=bool)
+            for element in elements:
+                ele_idx += atom_type == element
+            uvw = uvw[ele_idx, :]
+            atom_type = atom_type[ele_idx]
+            label = label[ele_idx]
+            occ = occ[ele_idx]
+            uiso = uiso[ele_idx]
+            mxmymz = mxmymz[ele_idx, :]
+
+        R = self.xtl.Cell.calculateR(uvw)
+
+        diff = R - position
+
+        mag = fg.mag(diff)
+        jj = np.argsort(mag)
+        diff = diff[jj, :]
+        label = label[jj]
+        mag = mag[jj]
+        atom_type = atom_type[jj]
+        occ = occ[jj]
+        uiso = uiso[jj]
+        mxmymz = mxmymz[jj, :]
+        ii = np.flatnonzero((mag > min_distance) * (mag < max_distance))
+
+        return diff[ii, :], atom_type[ii], label[ii], occ[ii], uiso[ii], mxmymz[ii, :]
 
     def atomic_neighbours(self, structure_index=0, radius=2.5, disp=False, return_str=False):
         """

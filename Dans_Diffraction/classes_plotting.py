@@ -1526,7 +1526,7 @@ class MultiPlotting:
     def __init__(self, crystal_list):
         self.crystal_list = crystal_list
 
-    def simulate_powder(self, energy_kev=8.0, peak_width=0.05, background=0, powder_average=True):
+    def simulate_powder(self, energy_kev=8.0, peak_width=0.01, background=0, powder_average=True):
         """
         Generates a powder pattern for multiple phases
             see classes_scattering.generate_powder
@@ -1595,7 +1595,8 @@ class MultiPlotting:
             grp_inten = mesh[pixel_coord[ref_n]]
 
             # create figure
-            plt.plot(xval, mesh, '-', lw=2, label=xtl.name, c=col)
+            lab = '%s: %s' % (xtl.Scatter._scattering_type.capitalize(), xtl.name)
+            plt.plot(xval, mesh, '-', lw=2, label=lab, c=col)
 
             # Reflection labels
             for n in range(len(grp_hkl)):
