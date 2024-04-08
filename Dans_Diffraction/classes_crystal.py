@@ -440,6 +440,7 @@ class Crystal:
             distances[self.Atoms.label[i]] = s_dist
 
         if simple:
+            # reduce the output for mixed site occupation
             lab = [i for i,j in zip(self.Atoms.label, self.Atoms.type) if j in c_ele]
             for i, site_i in enumerate(lab):
                 for site_j in lab[i + 1:]:
@@ -1119,7 +1120,7 @@ class Atoms:
 
     def __getitem__(self, idx):
         if isinstance(idx, str):
-            idx = self.findatom(label=idx)
+            idx = self.label.index(idx)
         return self.atom(idx)
 
     def fromcif(self, cifvals):
