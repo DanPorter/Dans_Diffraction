@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.1.4
-Last updated: 28/03/24
+Version 3.1.5
+Last updated: 02/05/24
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -74,6 +74,7 @@ Version History:
 19/10/23 3.1.2  xray_resonant() now works with non-cubic systems, fixed scaling issue in diffractometer.py
 25/10/23 3.1.3  Fixed error with powder plot for Neutrons. Thanks Cyril!
 28/03/24 3.1.4  Fixed error with site symmetries having spaces in AtomsGui, added Properties.relative_positions()
+02/05/24 3.1.5  Fixed SyntaxWarnings from Unrecognized escape sequences in Python 3.12
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations

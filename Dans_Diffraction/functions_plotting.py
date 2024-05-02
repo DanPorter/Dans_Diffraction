@@ -146,7 +146,7 @@ def labels(ttl=None, xvar=None, yvar=None, zvar=None, legend=False, size='Normal
 
 
 def saveplot(name, dpi=None, figure=None):
-    """
+    r"""
     Saves current figure as a png in the home directory
     :param name: filename, including or expluding directory and or extension
     :param dpi: image resolution, higher means larger image size, default=matplotlib default
@@ -827,7 +827,7 @@ def plot_xray_scattering_factor(elements, maxq=10):
 
     newplot(q, xrf)
     plt.legend(np.asarray(elements).reshape(-1), loc=0, frameon=False, fontsize=18)
-    labels('X-Ray Scattering Factor', 'Q [$\AA^{-1}$]')
+    labels('X-Ray Scattering Factor', r'Q [$\AA^{-1}$]')
 
 
 def plot_magnetic_form_factor(elements, maxq=10):
@@ -842,7 +842,7 @@ def plot_magnetic_form_factor(elements, maxq=10):
 
     newplot(q, mff)
     plt.legend(np.asarray(elements).reshape(-1), loc=0, frameon=False, fontsize=18)
-    labels('Magnetic Form Factor', 'Q [$\AA^{-1}$]')
+    labels('Magnetic Form Factor', r'Q [$\AA^{-1}$]')
 
 
 def plot_xray_attenuation(elements, min_energy=0, max_energy=20):

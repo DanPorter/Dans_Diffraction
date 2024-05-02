@@ -644,8 +644,8 @@ class Plotting:
         
         # Plot labels
         scatter_type = self.xtl.Scatter._scattering_type.capitalize()
-        xlab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0], x_axis[1], x_axis[2])
-        ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0], y_axis[1], y_axis[2])
+        xlab = r'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0], x_axis[1], x_axis[2])
+        ylab = r'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0], y_axis[1], y_axis[2])
         ttl = '%s %s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name, scatter_type, centre[0], centre[1], centre[2])
         fp.labels(ttl, xlab, ylab)
     
@@ -869,8 +869,8 @@ class Plotting:
         
         
         # Plot labels
-        xlab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0],x_axis[1],x_axis[2])
-        ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0],y_axis[1],y_axis[2])
+        xlab = r'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0],x_axis[1],x_axis[2])
+        ylab = r'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0],y_axis[1],y_axis[2])
         ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name,centre[0],centre[1],centre[2])
         fp.labels(ttl,xlab,ylab)
 
@@ -911,13 +911,13 @@ class Plotting:
         IXR=self.xtl.Scatter.xray_resonant(hkl, energy_kev, polarisation,F0=F0,F1=F1,F2=F2,azim_zero=azim_zero,PSI=psi)
         
         if polarisation == 'ss':
-            pol = '$\sigma$-$\sigma$'
+            pol = r'$\sigma$-$\sigma$'
         elif polarisation == 'sp':
-            pol = '$\sigma$-$\pi$'
+            pol = r'$\sigma$-$\pi$'
         elif polarisation == 'ps':
-            pol = '$\pi$-$\sigma$'
+            pol = r'$\pi$-$\sigma$'
         elif polarisation == 'pp':
-            pol = '$\pi$-$\pi$'
+            pol = r'$\pi$-$\pi$'
         
         ttl = '%s %5.3f keV %s\n(%1.0f,%1.0f,%1.0f) aziref=(%1.0f,%1.0f,%1.0f)'
         ttl = ttl % (self.xtl.name,energy_kev,pol,hkl[0],hkl[1],hkl[2],azim_zero[0],azim_zero[1],azim_zero[2])
@@ -958,7 +958,7 @@ class Plotting:
         plt.plot(azi, I, '-', lw=2)
         plt.xlim([-180, 180])
         plt.ylim([0, 1.1 * np.max(I)])
-        fp.labels(ttl, '$\Psi$ [Deg]', 'Resonant Magnetic Intensity')
+        fp.labels(ttl, r'$\Psi$ [Deg]', 'Resonant Magnetic Intensity')
 
     def simulate_azimuth_nonresonant(self, hkl, energy_kev=None, polarisation='sp', azim_zero=[1, 0, 0]):
         """
@@ -990,7 +990,7 @@ class Plotting:
         plt.plot(azi, I, '-', lw=2)
         plt.xlim([-180, 180])
         plt.ylim([0, 1.1 * np.max(I)])
-        fp.labels(ttl, '$\Psi$ [Deg]', 'Non-Resonant Magnetic Intensity')
+        fp.labels(ttl, r'$\Psi$ [Deg]', 'Non-Resonant Magnetic Intensity')
 
     def simulate_polarisation_resonant(self, hkl, energy_kev=None, F0=1, F1=1, F2=1, azim_zero=[1, 0, 0], psi=0):
         """
@@ -1203,7 +1203,7 @@ class Plotting:
         fp.labels(ttl, r'$\psi$ (deg)', 'Intensity')
         #plt.subplots_adjust(bottom=0.2)
 
-    ''' Remove tensor_scattering 26/05/20
+    r''' Remove tensor_scattering 26/05/20
     def tensor_scattering_azimuth(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], process='E1E1',
                                   rank=2, time=+1, parity=+1, mk=None, lk=None, sk=None):
         """
@@ -1472,8 +1472,8 @@ class PlottingSuperstructure(Plotting):
         plt.text(0 - (0.2 * q_max), 0 - (0.1 * q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18)
 
         # Plot labels
-        xlab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0], x_axis[1], x_axis[2])
-        ylab = u'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0], y_axis[1], y_axis[2])
+        xlab = r'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0], x_axis[1], x_axis[2])
+        ylab = r'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0], y_axis[1], y_axis[2])
         supercentre = self.xtl.parenthkl2super(centre)[0]
         ttl = '%s\n(%1.3g,%1.3g,%1.3g)$_{p}$ = (%1.3g,%1.3g,%1.3g)$_{s}$' \
               % (self.xtl.name, centre[0], centre[1], centre[2], supercentre[0], supercentre[1], supercentre[2])
@@ -1576,9 +1576,9 @@ class MultiPlotting:
         if xtl.Scatter._powder_units.lower() in ['tth', 'angle', 'two-theta', 'twotheta', 'theta']:
             xlab = u'Two-Theta [Deg]'
         elif xtl.Scatter._powder_units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
-            xlab = u'd-spacing [$\AA$]'
+            xlab = r'd-spacing [$\AA$]'
         else:
-            xlab = u'Q [$\AA^{-1}]$'
+            xlab = r'Q [$\AA^{-1}]$'
 
         ylab = u'Intensity [a. u.]'
         ttl = 'E = %1.3f keV' % energy_kev
@@ -1708,8 +1708,8 @@ class MultiPlotting:
         pp.set_array(mesh.ravel())
 
         # Plot labels
-        xlab = u'Qx [$\AA^{-1}$]'
-        ylab = u'Qy [$\AA^{-1}$]'
+        xlab = r'Qx [$\AA^{-1}$]'
+        ylab = r'Qy [$\AA^{-1}$]'
         # ttl = '%s\n(%1.3g,%1.3g,%1.3g)' % (self.name,centre[0],centre[1],centre[2])
         fp.labels(None, xlab, ylab)
     
@@ -1803,8 +1803,8 @@ class MultiPlotting:
                 plt.scatter(mesh_Q[n,0],mesh_Q[n,1],s=50*np.log10(I[n]+1),c=col)
         
         # Plot labels
-        xlab = u'Qx [$\AA^{-1}$]'
-        ylab = u'Qy [$\AA^{-1}$]'
+        xlab = r'Qx [$\AA^{-1}$]'
+        ylab = r'Qy [$\AA^{-1}$]'
         fp.labels(None,xlab,ylab)
         names = [xtl.name for xtl in self.crystal_list]
         plt.legend(legend_entries,names,frameon=True,fontsize=16)

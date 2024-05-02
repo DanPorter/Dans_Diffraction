@@ -2079,7 +2079,7 @@ class Symmetry:
         NOT COMPLETE
         """
 
-        """
+        r"""
         for n, (mx, my, mz) in enumerate(MXMYMZ):
             # Apply symmetry constraints
             if len(contraints) > 0:

@@ -109,7 +109,7 @@ class Fdmnes:
     def setup(self, exe_path=None, output_path=None, output_name=None, folder_name=None, input_name=None,
               comment=None, energy_range=None, radius=None, edge=None, absorber=None, green=None, scf=None,
               quadrupole=None, azi_ref=None, correct_azi=None, hkl_reflections=None):
-        """
+        r"""
         Set FDMNES Parameters
         :param exe_path: Location of FDMNES executable, e.g. 'c:\FDMNES\fdmnes_win64.exe'
         :param output_path: Specify the output path
@@ -250,7 +250,7 @@ class Fdmnes:
         return outstr
 
     def generate_output_path(self, folder_name=None, overwrite=False):
-        """
+        r"""
         Creates an automatic output path in the FDMNES/Sim directory
          If overwrite is False and the directory already exists, a number will be appended to the name
         :param folder_name: str or None, if None xtl.name will be used
@@ -273,7 +273,7 @@ class Fdmnes:
         return newpath
 
     def generate_input_path(self):
-        """
+        r"""
         Returns the input file pathname
          E.G. 'c:\FDMNES\Sim\Fe2O3\FDMNES_Fe2O3.txt'
         :return: filepath
@@ -405,7 +405,7 @@ class FdmnesAnalysis:
     sphkeys = []
 
     def __init__(self, output_path, output_name='out', calc_name=None):
-        """
+        r"""
         Loads data from an FDMNES calculation, allowing plotting and data cuts
          E.G.
          fdm = FdmnesAnalysis('c:\FDMNES\Fe2O3','out')
@@ -619,7 +619,7 @@ class FdmnesCompare:
             if normalise:
                 inten = inten/inten.max()
             plt.plot(en, inten, '-', lw=3, label=fdm.calc_name)
-        plt.title('%s $\Psi$ = %s Deg' % (refkey, psi), fontsize=32, fontname='Times New Roman')
+        plt.title(r'%s $\Psi$ = %s Deg' % (refkey, psi), fontsize=32, fontname='Times New Roman')
         plt.legend(loc=0, frameon=False, fontsize=20)
         plt.xlabel('Energy [eV]', fontsize=28, fontname='Times New Roman')
         plt.ylabel('Intensity [arb. units]', fontsize=28, fontname='Times New Roman')
@@ -653,7 +653,7 @@ class FdmnesCompare:
             plt.plot(psi, inten, '-', lw=3, label=fdm.calc_name)
         plt.title('%s E = %s eV' % (refkey, energy), fontsize=32, fontname='Times New Roman')
         plt.legend(loc=0, frameon=False, fontsize=20)
-        plt.xlabel('$\Psi$ [Deg]', fontsize=28, fontname='Times New Roman')
+        plt.xlabel(r'$\Psi$ [Deg]', fontsize=28, fontname='Times New Roman')
         plt.ylabel('Intensity [arb. units]', fontsize=28, fontname='Times New Roman')
         plt.xticks(fontsize=25, fontname='Times New Roman')
         plt.yticks(fontsize=25, fontname='Times New Roman')
@@ -1090,7 +1090,7 @@ def find_fdmnes(fdmnes_filename='fdmnes_win64.exe', reset=False, initial_dir=Non
 
 
 def sim_folder(folder_name='', new_folder=False):
-    """
+    r"""
     Generates a calculation path directory in the FDMNES/Sim directory
       If new_folder is True and the directory already exists, a number will be appended to the name
     :param folder_name: str folder name

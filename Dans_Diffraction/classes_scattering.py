@@ -1874,7 +1874,7 @@ class Scattering:
         return outstr
     
     def print_tran_reflections(self, energy_kev=None, min_intensity=0.01, max_intensity=None):
-        """
+        r"""
         Prints a list of all allowed reflections at this energy in the transmission geometry
             energy = energy in keV
             min_intensity = None/ 0.01 : omits reflections less than this (remove extinctions)

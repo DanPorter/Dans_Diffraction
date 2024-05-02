@@ -463,7 +463,7 @@ def cif2dict(cifvals):
             C = C.replace('m', '')
             # print('Constraint: {:3s} {:s}'.format(label[n],C))
             # convert '2x' to 'x'
-            old = re.findall('\d[xyz]', C)
+            old = re.findall(r'\d[xyz]', C)
             new = [s.replace('x', '*x').replace('y', '*y').replace('z', '*z') for s in old]
             for s in range(len(old)):
                 C = C.replace(old[s], new[s])
@@ -1035,7 +1035,7 @@ def xray_scattering_factor_WaasKirf(element, Qmag=0):
     data = np.loadtxt(filename)
     # get names
     with open(filename) as f:
-        lines = re.findall('#S\s+\d+\s+[A-Z].*?\n', f.read())
+        lines = re.findall(r'#S\s+\d+\s+[A-Z].*?\n', f.read())
         table_names = [line[7:].strip() for line in lines]
 
     # Qmag should be a 1D array
@@ -1625,7 +1625,7 @@ def split_element_symbol(element):
     # Find element
     symbol = element_regex.findall(element)[0]
     # Find charge
-    find_charge = re.findall('[\d\.]+[\+-]', element)
+    find_charge = re.findall(r'[\d\.]+[\+-]', element)
     if len(find_charge) > 0:
         chargestr = find_charge[0]
         element = element.replace(chargestr, '')
@@ -1636,7 +1636,7 @@ def split_element_symbol(element):
     else:
         charge = 0.
     # Find occupancy
-    find_occ = re.findall('[\d\.]+', element)
+    find_occ = re.findall(r'[\d\.]+', element)
     if len(find_occ) > 0:
         occupancy = float(find_occ[0])
     else:
@@ -1685,7 +1685,7 @@ def split_compound(compound_name):
     :param compound_name: str
     :return: list of str
     """
-    regex_element_num = re.compile('|'.join(['%s[\d\.]*' % el for el in ELEMENT_LIST]))
+    regex_element_num = re.compile('|'.join([r'%s[\d\.]*' % el for el in ELEMENT_LIST]))
     # Multiply out brackets
     compound_name = fg.replace_bracket_multiple(compound_name)
     return regex_element_num.findall(compound_name)
@@ -3609,7 +3609,7 @@ def cif2table(cif):
     out += '\\begin{table}[htp]\n'
     out += '    \\centering\n'
     out += '       \\begin{tabular}{c|c|ccccc}\n'
-    out += '             & Site & x & y & z & Occ. & %s \\\\ \hline\n' % u_or_b
+    out += r'             & Site & x & y & z & Occ. & %s \\\\ \hline\n' % u_or_b
     fmt = '        %4s & %5s & %s & %s & %s & %s & %s \\\\\n'
     for n in range(len(label)):
         out += fmt % (label[n], mult[n], u[n], v[n], w[n], occ[n], uiso[n])

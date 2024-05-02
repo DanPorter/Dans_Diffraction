@@ -210,13 +210,13 @@ def cart2sph(xyz, deg=False):
 
 
 def rot3D(A, alpha=0., beta=0., gamma=0.):
-    """Rotate 3D vector A by euler angles
+    r"""Rotate 3D vector A by euler angles
         A = rot3D(A,alpha=0.,beta=0.,gamma=0.)
        where alpha = angle from X axis to Y axis (Yaw)
              beta  = angle from Z axis to X axis (Pitch)
              gamma = angle from Y axis to Z axis (Roll)
        angles in degrees
-       In a right handed coordinate system.
+       In a right-handed coordinate system.
            Z
           /|\
            |
@@ -846,7 +846,7 @@ def readstfm(string):
     readstfm('1.23(3)E4') = (12300.0, 300.0)
     """
 
-    values = re.findall('[-0-9.]+|\([-0-9.]+\)', string)
+    values = re.findall(r'[-0-9.]+|\([-0-9.]+\)', string)
     if len(values) > 0 and '(' not in values[0] and values[0] != '.':
         value = values[0]
     else:
@@ -860,14 +860,14 @@ def readstfm(string):
         pp = 0
     value = float(value)
 
-    error = re.findall('\([-0-9.]+\)', string)
+    error = re.findall(r'\([-0-9.]+\)', string)
     if len(error) > 0:
         error = abs(float(error[0].strip('()')))
         error = error * 10 ** pp
     else:
         error = 0.
 
-    power = re.findall('(?:[eE]|x10\^|\*10\^|\*10\*\*)([+-]?\d*\.?\d+)', string)
+    power = re.findall(r'(?:[eE]|x10\^|\*10\^|\*10\*\*)([+-]?\d*\.?\d+)', string)
     if len(power) > 0:
         power = float(power[0])
         value = value * 10 ** power
@@ -885,7 +885,7 @@ def saveable(string):
     # Special - replace # with S for scans
     string = string.replace('#', 'S')
     # Replace some characters with underscores
-    for char in '#%{}\/<>@|':
+    for char in r'#%{}\/<>@|':
         string = string.replace(char, '_')
         # Replace other characters with nothing
     for char in '*$&^?!':
@@ -1019,8 +1019,8 @@ def replace_bracket_multiple(name):
      - Multiple on right hand side
     """
     # Regex:
-    regex_num = re.compile('[\d\.]+')
-    regex_bracket_n = re.compile('\)[\d\.]+')
+    regex_num = re.compile(r'[\d\.]+')
+    regex_bracket_n = re.compile(r'\)[\d\.]+')
 
     # Find outside brackets
     bracket = []
