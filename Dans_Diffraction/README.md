@@ -1,7 +1,7 @@
-# Dans_Diffaction
+# Dans_Diffraction
 Reads crystallographic cif files and simulates diffraction
 
-By Dan Porter, Diamond Light Source Ltd. 2020
+By Dan Porter, Diamond Light Source Ltd. 2024
 
 ## Crystal Structure
 The program creates a "Crystal" object with certain properties, attributes and functions useful for diffraction studies.
@@ -150,7 +150,6 @@ xtl.Plot.simulate_powder() # Generates a powder pattern, plots in a new figure w
 
 # Single crystal diffraction
 xtl.Plot.simulate_intensity_cut() # Plot a cut through reciprocal space, visualising the intensity
-xtl.Plot.generate_intensity_cut() # Generate a cut through reciprocal space, returns an array with centred reflections
 xtl.Plot.quick_intensity_cut() # Plot a cut through reciprocal space, visualising the intensity as different sized markers
 xtl.Plot.simulate_hk0(l) # Plots the hk(L) layer of reciprocal space
 xtl.Plot.simulate_h0l(k) # Plots the h(K)l layer of reciprocal space
@@ -216,6 +215,7 @@ xtl.Scatter.hkl_reflection(hkl) # Calculate the theta, two-theta and intensity o
 xtl.Scatter.hkl_transmission(hkl) # Calculate the theta, two-theta and intensity of the given HKL in transmission geometry, display the result
 
 # Diffracted intensities
+xtl.Scatter.structure_factor(hkl)  # Calculate the complex structure factor for the given HKL
 xtl.Scatter.intensity(hkl) # Calculate the squared structure factor for the given HKL
 xtl.Scatter.x_ray(hkl) # Calculate the squared structure factor for the given HKL, using x-ray scattering factors
 xtl.Scatter.x_ray_fast(hkl) # Calculate the squared structure factor for the given HKL, using atomic number as scattering length
@@ -226,9 +226,10 @@ xtl.Scatter.xray_resonant_magnetic(hkl) # Calculate the non-resonant magnetic co
 xtl.Scatter.xray_resonant_scattering_factor(hkl) # Calcualte fxres, the resonant x-ray scattering factor
 xtl.Scatter.neutron(hkl) # Calculate the squared structure factor for the given HKL, using neutron scattering length
 xtl.Scatter.magnetic_neutron(hkl) # Calculate the magnetic component of the structure factor for the given HKL, using neutron rules and form factor
+xtl.Scatter.generate_intensity_cut() # Generate a cut through reciprocal space, returns an array with centred reflections
 
 # Powder Scattering
-xtl.Scatter.generate_powder() # Generates array of intensities along a spaced grid, equivalent to a powder pattern.
+xtl.Scatter.powder() # Generates array of intensities along a spaced grid, equivalent to a powder pattern.
 xtl.Scatter.powder_correction(hkl) # Calculate the squared structure factor for the given HKL, using neutron scattering length
 
 # Multiple Scattering

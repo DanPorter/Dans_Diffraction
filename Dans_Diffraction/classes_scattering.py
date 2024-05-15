@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.3.3
-Last updated: 28/03/24
+Version 2.3.4
+Last updated: 10/05/24
 
 Version History:
 10/09/17 0.1    Program created
@@ -36,11 +36,12 @@ Version History:
 26/09/23 2.3.1  Added Scattering.orientation_reflections for automatic orientation help
 19/20/23 2.3.2  Fixed scatteringbasis so xray_resonant() now works with non-cubic systems
 28/03/24 2.3.3  Fixed scattering type comparison to compare .lower() scattering types
+02/05/24 2.3.4  added min_twotheta to get_hkl, added generate_envelope_cut, fixed low tth error in powder()
+15/05/24 2.3.4  Added "save" and "load" methods to structure factor calculation, improved powder for large calculations
 
 @author: DGPorter
 """
 
-import sys,os
 import numpy as np
 import datetime
 
@@ -50,7 +51,7 @@ from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '2.3.3'
+__version__ = '2.3.4'
 __scattering_types__ = {'xray': ['xray', 'x', 'x-ray', 'thomson', 'charge'],
                         'neutron': ['neutron', 'n', 'nuclear'],
                         'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'],
@@ -87,7 +88,7 @@ class Scattering:
     _debug_mode = False
 
     # powder options
-    _powder_units = 'tth' # tth (two theta), Q, d
+    _powder_units = 'tth'  # tth (two theta), Q, d
     _powder_background = 0.0
     _powder_peak_width = 0.01  # in Deg
     _powder_lorentz_fraction = 0.5
@@ -315,19 +316,23 @@ class Scattering:
             hkl = self.xtl.Symmetry.remove_symmetric_reflections(hkl)
         hkl = self.xtl.Cell.sort_hkl(hkl)[1:]  # remove (0, 0, 0)
 
+        tth = self.xtl.Cell.tth(hkl, en)
+        hkl = hkl[tth > self._scattering_min_twotheta, :]
+        tth = tth[tth > self._scattering_min_twotheta]
+
         if reflection:
-            tth = self.xtl.Cell.tth(hkl, en)
-            hkl = hkl[tth > self._scattering_min_twotheta, :]
-            tth = tth[tth > self._scattering_min_twotheta]
+            # tth = self.xtl.Cell.tth(hkl, en)
+            # hkl = hkl[tth > self._scattering_min_twotheta, :]
+            # tth = tth[tth > self._scattering_min_twotheta]
             theta = self.xtl.Cell.theta_reflection(hkl, en, self._scattering_specular_direction,
                                                    self._scattering_theta_offset)
             p1 = (theta > self._scattering_min_theta) * (theta < self._scattering_max_theta)
             p2 = (tth > (theta + self._scattering_min_theta)) * (tth < (theta + self._scattering_max_theta))
             hkl = hkl[p1 * p2]
         elif transmission:
-            tth = self.xtl.Cell.tth(hkl, en)
-            hkl = hkl[tth > self._scattering_min_twotheta, :]
-            tth = tth[tth > self._scattering_min_twotheta]
+            # tth = self.xtl.Cell.tth(hkl, en)
+            # hkl = hkl[tth > self._scattering_min_twotheta, :]
+            # tth = tth[tth > self._scattering_min_twotheta]
             theta = self.xtl.Cell.theta_transmission(hkl, en, self._scattering_parallel_direction)
 
             p1 = (theta > self._scattering_min_theta) * (theta < self._scattering_max_theta)
@@ -413,6 +418,16 @@ class Scattering:
         scattering_fun = fs.get_scattering_function(scattering_type)
         # print('Scattering function: %s' % scattering_fun.__name__)
 
+        if 'load' in kwargs:
+            # Load SF from file
+            sf = np.load(kwargs['load'])
+            if sf.shape[0] != len(hkl):
+                raise Exception(
+                    "File '%s' with %d structure factors doesn't match %d reflections" % (
+                        kwargs['load'], sf.shape[0], len(hkl))
+                )
+            return sf
+
         # Break up long lists of HKLs
         nref, natom = len(q), len(r)
         if nref == 0:
@@ -429,10 +444,10 @@ class Scattering:
         q_array = np.array_split(q, n_arrays)
         sf = np.zeros([nref, nenergy, npsi], dtype=complex)
         start_time = datetime.datetime.now()
-        for e, enval in enumerate(energy_kev): # for all the energy values
+        for e, enval in enumerate(energy_kev):  # for all the energy values
             for p, psival in enumerate(psi):   # for all azimutal angle
                 ls = 0
-                for n, _q in enumerate(q_array): # for all the reflections parts
+                for n, _q in enumerate(q_array):  # for all the reflections parts
                     if n_arrays > 1:
                         print(' Starting %2.0f/%2.0f: %d:%d' % (n + 1, n_arrays, ls, ls + len(_q)))
                     qmag = fg.mag(_q)      # q magnitude
@@ -479,11 +494,14 @@ class Scattering:
             print('Calculated %d structure factors in %s' % (nref, time_difference))
         sf = sf / self.xtl.scale
         if nenergy == 1 and npsi == 1:
-            return sf[:, 0, 0]  # shape(nref)
-        if nenergy == 1:
-            return sf[:, 0, :]  # shape(nref, nenergy)
-        if npsi == 1:
-            return sf[:, :, 0]  # shape(nref, npsi)
+            sf = sf[:, 0, 0]  # shape(nref)
+        elif nenergy == 1:
+            sf = sf[:, 0, :]  # shape(nref, nenergy)
+        elif npsi == 1:
+            sf = sf[:, :, 0]  # shape(nref, npsi)
+        if 'save' in kwargs:
+            np.save(kwargs['save'], sf, allow_pickle=True)
+            print("Saved %d structure factors to '%s'" % (sf.size, kwargs['save']))
         return sf
     new_structure_factor = structure_factor
 
@@ -540,28 +558,32 @@ class Scattering:
             min_overlap = self._powder_min_overlap
         energy_kev = self.get_energy(**options)
 
+        # Extend range to account for peak widths beyond range
+        ext = 3  # int, multiples of the peak_width used
+
         # Units
         min_twotheta = self._scattering_min_twotheta
         if min_twotheta <= 0: min_twotheta = 1.0
         max_twotheta = self._scattering_max_twotheta
-        q_min = fc.calqmag(min_twotheta, energy_kev)
-        q_max = fc.calqmag(max_twotheta, energy_kev)
+        q_min = fc.calqmag(min_twotheta, energy_kev) - ext * peak_width
+        q_max = fc.calqmag(max_twotheta, energy_kev) + ext * peak_width
         q_range = q_max - q_min
-
-        # Get reflections
-        HKL = self.xtl.Cell.all_hkl(maxq=q_max)
-        HKL = self.xtl.Cell.sort_hkl(HKL)  # required for labels
-        Qmag = self.xtl.Cell.Qmag(HKL)
 
         # create plotting mesh
         tot_pixels = int(pixels * q_range)  # reduce this to make convolution faster
-        pixel_size = q_range / float(tot_pixels)
-        peak_width_pixels = peak_width / pixel_size
+        pixel_size = q_range / float(tot_pixels)  # units of A-1
+        peak_width_pixels = int(np.round(peak_width / pixel_size))  # peak_width is in A-1
         mesh = np.zeros([tot_pixels])
         mesh_q = np.linspace(q_min, q_max, tot_pixels)
-        pixel_coord = np.round(tot_pixels * (Qmag - q_min) / q_range).astype(int)
 
-        select = (pixel_coord < tot_pixels) * (pixel_coord > 0)
+        # Get reflections
+        HKL = self.xtl.Cell.all_hkl(maxq=q_max + pixel_size)
+        HKL = self.xtl.Cell.sort_hkl(HKL)  # required for labels
+        Qmag = self.xtl.Cell.Qmag(HKL)
+
+        # remove reflections not within the calculation
+        pixel_coord = np.round(tot_pixels * (Qmag - q_min) / q_range).astype(int)
+        select = (pixel_coord < tot_pixels) * (pixel_coord >= 0)
         HKL = HKL[select, :]
         Qmag = Qmag[select]
         pixel_coord = pixel_coord[select]
@@ -601,7 +623,103 @@ class Scattering:
         grp_xval = xvalues[ref_n]
         grp_inten = mesh[pixel_coord[ref_n]]
         reflections = np.transpose([grp_hkl[:, 0], grp_hkl[:, 1], grp_hkl[:, 2], grp_xval, grp_inten])
+
+        # Remove extended part
+        mesh = mesh[ext * peak_width_pixels:-ext * peak_width_pixels]
+        xval = xval[ext * peak_width_pixels:-ext * peak_width_pixels]
+        print(f'Mesh: {len(mesh)}, tot_pixels: {tot_pixels}')
         return xval, mesh, reflections
+
+    def generate_intensity_cut(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
+                               q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05, pixels=1001):
+        """
+        Generate a cut through reciprocal space, returns an array with centred reflections
+        Inputs:
+          x_axis = direction along x, in units of the reciprocal lattice (hkl)
+          y_axis = direction along y, in units of the reciprocal lattice (hkl)
+          centre = centre of the plot, in units of the reciprocal lattice (hkl)
+          q_max = maximum distance to plot to - in A-1
+          cut_width = width in height that will be included, in A-1
+          background = average background value
+          peak_width = reflection width in A-1
+        Returns:
+          Qx/Qy = [1000x1000] array of coordinates
+          plane = [1000x1000] array of plane in reciprocal space
+
+        E.G. hk plane at L=3 for hexagonal system:
+            Qx,Qy,plane = xtl.generate_intensity_cut([1,0,0],[0,1,0],[0,0,3])
+            plt.figure()
+            plt.pcolormesh(Qx,Qy,plane)
+            plt.axis('image')
+        """
+
+        qx, qy, hkl = self.xtl.Cell.reciprocal_space_plane(x_axis, y_axis, centre, q_max, cut_width)
+
+        # Calculate intensities
+        inten = self.xtl.Scatter.intensity(hkl)
+
+        # create plotting mesh
+        pixel_size = (2.0 * q_max) / pixels
+        mesh = np.zeros([pixels, pixels])
+        mesh_x = np.linspace(-q_max, q_max, pixels)
+        xx, yy = np.meshgrid(mesh_x, mesh_x)
+
+        if peak_width is None or peak_width < pixel_size:
+            peak_width = pixel_size / 2
+
+        for n in range(len(inten)):
+            # Add each reflection as a gaussian
+            mesh += inten[n] * np.exp(-np.log(2) * (((xx - qx[n]) ** 2 + (yy - qy[n]) ** 2) / (peak_width / 2) ** 2))
+
+        # Add background (if not None or 0)
+        if background:
+            bkg = np.random.normal(background, np.sqrt(background), [pixels, pixels])
+            mesh = mesh + bkg
+        return xx, yy, mesh
+
+    def generate_envelope_cut(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
+                              q_max=4.0, background=0.0, pixels=301):
+        """
+        *In Development*
+        Generate the envelope function, calculating the structure factor at discrete points
+        Inputs:
+          x_axis = direction along x, in units of the reciprocal lattice (hkl)
+          y_axis = direction along y, in units of the reciprocal lattice (hkl)
+          centre = centre of the plot, in units of the reciprocal lattice (hkl)
+          q_max = maximum distance to plot to - in A-1
+          background = average background value
+          pixels = size of mesh, calculates structure factor at each pixel
+        Returns:
+          Qx/Qy = [pixels x pixels] array of coordinates
+          plane = [pixels x pixels] array of plane in reciprocal space
+
+        E.G. hk plane at L=3 for hexagonal system:
+            Qx, Qy, plane = xtl.generate_envelope_cut([1,0,0],[0,1,0],[0,0,3])
+            plt.figure()
+            plt.pcolormesh(Qx, Qy, plane)
+            plt.axis('image')
+        """
+        x_cart = self.xtl.Cell.calculateQ(x_axis)
+        y_cart = self.xtl.Cell.calculateQ(y_axis)
+        x_cart, y_cart, z_cart = fc.orthogonal_axes(x_cart, y_cart)
+        c_cart = self.xtl.Cell.calculateQ(centre)
+
+        xx, yy = np.meshgrid(range(pixels), range(pixels))
+        q_range = np.linspace(-q_max, q_max, pixels)
+        qx, qy = q_range[xx], q_range[yy]  # [pixels, pixels]
+        qxqy = np.transpose([qx.reshape(-1), qy.reshape(-1)])  # returns [qx, qy]
+        qxqyz = np.dot(qxqy, [x_cart, y_cart])  # returns [qx,qy,qz]
+        hkl = self.xtl.Cell.indexQ(qxqyz + c_cart)
+
+        # Calculate intensities
+        inten = self.intensity(hkl, int_hkl=False)
+        mesh = inten.reshape([pixels, pixels])
+
+        # Add background (if not None or 0)
+        if background:
+            bkg = np.random.normal(background, np.sqrt(background), [pixels, pixels])
+            mesh = mesh + bkg
+        return qx, qy, mesh
 
     def x_ray(self, HKL):
         """

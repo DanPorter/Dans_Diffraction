@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9.6
-Last updated: 25/10/23
+Version 1.9.7
+Last updated: 03/05/24
 
 Version History:
 18/08/17 0.1    Program created
@@ -32,6 +32,7 @@ Version History:
 11/10/21 1.9.4  Centered crystal in plot_crystal
 15/11/21 1.9.5  Added plot_diffractometer_reciprocal_space
 25/10/23 1.9.6  Corrected Plotting.simulate_powder to display radiation and wavelength
+03/05/24 1.9.7  Switched to using Scatter.generate_intensity_cut()
 
 @author: DGPorter
 """
@@ -45,7 +46,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.9.6'
+__version__ = '1.9.7'
 
 
 class Plotting:
@@ -575,9 +576,9 @@ class Plotting:
             mesh = mesh+bkg
         
         return xx, yy, mesh
-    
-    def simulate_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],
-                                    q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
+
+    def simulate_intensity_cut(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
+                               q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05):
         """
         Plot a cut through reciprocal space, visualising the intensity
           x_axis = direction along x, in units of the reciprocal lattice (hkl)
@@ -611,7 +612,9 @@ class Plotting:
         vec_b = fg.norm(np.cross(vec_c, vec_a))
         
         # Generate intensity cut
-        X, Y, mesh = self.generate_intensity_cut(x_axis, y_axis, centre, q_max, cut_width, background, peak_width)
+        X, Y, mesh = self.xtl.Scatter.generate_intensity_cut(
+            x_axis, y_axis, centre, q_max, cut_width, background, peak_width
+        )
         
         # create figure
         plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
@@ -676,7 +679,76 @@ class Plotting:
          for inputs, see help(xtl.simulate_intensity_cut)
         """
         self.simulate_intensity_cut([1,1,0], [0,0,1], [HmH,-HmH,0],**kwargs)
-    
+
+    def simulate_envelope_cut(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
+                              q_max=4.0, background=0.0, pixels=301):
+        """
+        Simulate enveloping function by calculating the structure factor on a discrete set of points on a grid
+
+        :param x_axis: direction along x, in units of the reciprocal lattice (hkl)
+        :param y_axis: direction along y, in units of the reciprocal lattice (hkl)
+        :param centre: centre of the plot, in units of the reciprocal lattice (hkl)
+        :param q_max: maximum distance to plot to - in A-1
+        :param background: width in height that will be included, in A-1
+        :param pixels: size of mesh, calculates structure factor at each pixel
+        :return:
+        """
+        # Determine the directions in cartesian space
+        x_cart = fg.norm(self.xtl.Cell.calculateQ(x_axis))
+        y_cart = fg.norm(self.xtl.Cell.calculateQ(y_axis))
+        z_cart = fg.norm(np.cross(x_cart, y_cart))  # z is perp. to x+y
+        y_cart = np.cross(x_cart, z_cart)  # make sure y is perp. to x
+        c_cart = self.xtl.Cell.calculateQ(centre)
+
+        # Correct y-axis for label - original may not have been perp. to x_axis (e.g. hexagonal)
+        y_axis = fg.norm(self.xtl.Cell.indexQ(y_cart))
+        y_axis = -y_axis / np.min(np.abs(y_axis[np.abs(y_axis) > 0])) + 0.0  # +0.0 to remove -0
+
+        # Determine orthogonal lattice vectors for plotting lines and labels
+        vec_a = x_axis
+        vec_c = np.cross(x_axis, y_axis)
+        vec_b = fg.norm(np.cross(vec_c, vec_a))
+
+        # Generate intensity cut
+        X, Y, mesh = self.xtl.Scatter.generate_envelope_cut(x_axis, y_axis, centre, q_max, background, pixels)
+
+        # create figure
+        plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
+        cmap = plt.get_cmap('hot_r')
+        plt.pcolormesh(X, Y, mesh, cmap=cmap, shading='auto')
+        plt.axis('image')
+        plt.colorbar()
+        print(np.max(mesh), np.min(mesh))
+        plt.clim([background - (np.max(mesh) / 200), background + (np.max(mesh) / 5)])
+
+        # Lattice points and vectors within the plot
+        Q_vec_a = self.xtl.Cell.calculateQ(vec_a)
+        Q_vec_b = self.xtl.Cell.calculateQ(vec_b)
+
+        CELL = np.array([2 * q_max * x_cart, -2 * q_max * y_cart, z_cart])  # Plot/mesh unit cell
+
+        mesh_vec_a = fg.index_coordinates(Q_vec_a, CELL) * 2 * q_max  # coordinates wrt plot axes
+        mesh_vec_b = fg.index_coordinates(Q_vec_b, CELL) * 2 * q_max
+
+        # Vector arrows and lattice point labels
+        cen_lab = '(%1.3g,%1.3g,%1.3g)' % (centre[0], centre[1], centre[2])
+        vec_a_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_a[0] + centre[0], vec_a[1] + centre[1], vec_a[2] + centre[2])
+        vec_b_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_b[0] + centre[0], vec_b[1] + centre[1], vec_b[2] + centre[2])
+
+        lattQ = fp.axis_lattice_points(mesh_vec_a, mesh_vec_b, plt.axis())
+        fp.plot_lattice_lines(lattQ, mesh_vec_a, mesh_vec_b)
+        fp.plot_vector_arrows(mesh_vec_a, mesh_vec_b, vec_a_lab, vec_b_lab)
+        # fp.plot_vector_lines(Q_vec_a, Q_vec_b)
+        # fp.plot_vector_arrows(Q_vec_a, Q_vec_b, vec_a_lab, vec_b_lab)
+        plt.text(0 - (0.2 * q_max), 0 - (0.1 * q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18)
+
+        # Plot labels
+        scatter_type = self.xtl.Scatter._scattering_type.capitalize()
+        xlab = r'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0], x_axis[1], x_axis[2])
+        ylab = r'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0], y_axis[1], y_axis[2])
+        ttl = '%s %s\n(%1.3g,%1.3g,%1.3g)' % (self.xtl.name, scatter_type, centre[0], centre[1], centre[2])
+        fp.labels(ttl, xlab, ylab)
+
     def simulate_ewald_coverage(self,energy_kev=8.0,sample_normal=[0,0,1],sample_para=[1,0,0],phi=0,chi=0,**kwargs):
         """
         NOT FINISHED

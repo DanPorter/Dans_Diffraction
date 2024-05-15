@@ -10,7 +10,7 @@ or
 $ python -m pip install git+https://github.com/DanPorter/Dans_Diffraction.git
 
 Requirements:
-Python 2.7+/3+ with packages: Numpy, Matplotlib, Tkinter
+Python 3.5+ with packages: Numpy, Matplotlib, Tkinter
 BuiltIn packages used: sys, os, re, glob, warnings, json, itertools
 
 Usage:
@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.1.5
-Last updated: 02/05/24
+Version 3.2.0
+Last updated: 15/05/24
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -74,7 +74,8 @@ Version History:
 19/10/23 3.1.2  xray_resonant() now works with non-cubic systems, fixed scaling issue in diffractometer.py
 25/10/23 3.1.3  Fixed error with powder plot for Neutrons. Thanks Cyril!
 28/03/24 3.1.4  Fixed error with site symmetries having spaces in AtomsGui, added Properties.relative_positions()
-02/05/24 3.1.5  Fixed SyntaxWarnings from Unrecognized escape sequences in Python 3.12
+10/05/24 3.1.5  Fixed SyntaxWarnings from Unrecognized escape sequences in Python 3.12, various fixes to scattering
+15/05/24 3.2.0  Added "save" and "load" methods to structure factor calculation, improved powder for large calculations
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -94,6 +95,8 @@ Acknoledgements:
     July 2023   Thanks to Yves Joly for helpful suggestions on FDMNES wrapper
     Oct 2023    Thanks to asteppke for pointing out scaling issue in diffractometer gui
     Oct 2023    Thanks to Cyril Cayron for pointing out the error with plotting neutron power spectra
+    May 2024    Thanks to Innbig for spotting some errors in large liquid crystal powder patterns
+    May 2024    Thanks to paul-cares pointing out a silly spelling error in the title!
 
 -----------------------------------------------------------------------------
    Copyright 2024 Diamond Light Source Ltd.
@@ -143,8 +146,8 @@ from .classes_fdmnes import fdmnes_checker, Fdmnes, FdmnesAnalysis
 from .functions_crystallography import readcif
 
 
-__version__ = '3.1.4'
-__date__ = '28/03/24'
+__version__ = '3.2.0'
+__date__ = '15/05/24'
 
 
 # Build

@@ -27,6 +27,7 @@ Version History:
 02/02/21 2.0.0  Merged changes in other versions, added vector_intersection and you_normal_vector
 15/11/21 2.1.0  Added normal_basis
 11/03/22 2.2.0  Added Lorentzian, pVoight, peak_function functions
+15/05/24 2.2.2  Added sph2cart, meshgrid_sphere
 
 @author: DGPorter
 """
@@ -35,8 +36,8 @@ import sys, os, re
 import numpy as np
 import inspect
 
-__version__ = '2.2.1'
-__date__ = '01/June/2023'
+__version__ = '2.2.2'
+__date__ = '15/May/2024'
 
 # File directory
 directory = os.path.abspath(os.path.dirname(__file__))
@@ -207,6 +208,48 @@ def cart2sph(xyz, deg=False):
         theta = np.rad2deg(theta)
         phi = np.rad2deg(phi)
     return np.vstack((r, theta, phi)).T
+
+
+def sph2cart(r_th_ph, deg=False):
+    """
+    Convert coordinates in spherical to coordinates in cartesian
+    https://en.wikipedia.org/wiki/Spherical_coordinate_system
+        radius = sphere radius
+        theta = angle from Z-axis to X-axis
+          phi = angle from X-axis to component in XY plane
+    :param r_th_ph: [[radius, theta, phi], ]
+    :param deg: if True, converts theta, phi from degrees
+    :return: [x,y,z]
+    """
+    r, theta, phi = np.transpose(r_th_ph)
+    if deg:
+        theta = np.deg2rad(theta)
+        phi = np.deg2rad(phi)
+    x = r * np.sin(theta) * np.cos(phi)
+    y = r * np.sin(theta) * np.sin(phi)
+    z = r * np.cos(theta)
+    return np.vstack((x, y, z)).T
+
+
+def meshgrid_sphere(sep, r_max, r_min=0):
+    """
+    Return a cartesian grid of points within a spherical shell
+    :param sep: average separation between lattice points
+    :param r_max: outer shell radiuc
+    :param r_min: inner shell radius
+    :return: array([u, v, w]) of lattice points
+    """
+    r_range = np.arange(r_min, r_max, sep)
+    # use cosine rule to determine average angular separation between points
+    angle_sep = np.arccos(1 - (sep ** 2 / (0.5 * (r_max - r_min) ** 2)))
+    th_range = np.arange(-np.pi, np.pi, angle_sep)
+    ph_range = np.arange(0, np.pi/2, angle_sep)
+    rr, tt, pp = np.meshgrid(r_range, th_range, ph_range)
+    # convert to Cartesian coodinates
+    xx = rr * np.sin(tt) * np.cos(pp)
+    yy = rr * np.sin(tt) * np.sin(pp)
+    zz = rr * np.cos(tt)
+    return np.transpose([xx.reshape(-1), yy.reshape(-1), zz.reshape(-1)])
 
 
 def rot3D(A, alpha=0., beta=0., gamma=0.):
@@ -405,6 +448,19 @@ def unique_vector(vecarray, tol=0.05):
     uniqueidx = [matchidx.index(n) for n in range(np.max(matchidx) + 1)]
     newarray = vecarray[uniqueidx, :]
     return newarray, uniqueidx, matchidx
+
+
+def unique_vectors_fast(vecarray, tol):
+    """
+
+    :param vecarray:
+    :param tol:
+    :return:
+    """
+    vecarray = np.asarray(vecarray).reshape([len(vecarray), -1])
+    vecarray_int = ((1/tol) * vecarray).astype(int)  # convert to int
+    _, uniqueidx, matchidx = np.unique(vecarray_int, return_index=True, return_inverse=True, axis=0)
+    return vecarray[uniqueidx], uniqueidx, matchidx
 
 
 def vectorinvector(vecarray1, vecarray2, tol=0.05):

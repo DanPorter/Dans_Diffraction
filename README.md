@@ -1,4 +1,4 @@
-# Dans_Diffaction
+# Dans_Diffraction
 Reads crystallographic cif files, calculates crystal properties and simulates diffraction.
 
 **Version 3.1**
@@ -270,16 +270,18 @@ Once activated, FDMNES GUI elements become available from the main window, emula
 | April 2021 | Thanks to Trygve Ræder for suggestions about x-ray scattering factors                   |
 | Feb 2022   | Thanks to Mirko for pointing out the error in two-theta values in Scatter.powder        |
 | March 2022 | Thanks to yevgenyr for suggesting new peak profiles in Scatter.powder                   |
-| Jan 2023   | Thanks to Anuradha Vibhakar for pointing out the error in f0 + if'-if'' |
+| Jan 2023   | Thanks to Anuradha Vibhakar for pointing out the error in f0 + if'-if''                 |
 | Jan 2023   | Thanks to Andreas Rosnes for testing the installation in jupyterlab                     |
 | May 2023   | Thanks to Carmelo Prestipino for adding electron scattering factors                     |
 | June 2023  | Thanks to Sergio I. Rincon for pointing out the rounding error in Scatter.powder        |
-| July 2023  | Thanks to asteppke for suggested update to Arrow3D for matplotlib V>3.4|
-| July 2023  | Thanks to Yves Joly for helpful suggestions on FDMNES wrapper |
+| July 2023  | Thanks to asteppke for suggested update to Arrow3D for matplotlib V>3.4                 |
+| July 2023  | Thanks to Yves Joly for helpful suggestions on FDMNES wrapper                           |
+| April 2024 | Thanks to Innbig for pointing out an issue with liquid crystal simulations              |
+| May 2024   | Thanks to paul-cares pointing out a silly spelling error in the title!                  |
 
 Copyright
 -----------------------------------------------------------------------------
-   Copyright 2023 Diamond Light Source Ltd.
+   Copyright 2024 Diamond Light Source Ltd.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
