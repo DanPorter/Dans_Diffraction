@@ -683,6 +683,7 @@ class Plotting:
     def simulate_envelope_cut(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
                               q_max=4.0, background=0.0, pixels=301):
         """
+        *In Development*
         Simulate enveloping function by calculating the structure factor on a discrete set of points on a grid
 
         :param x_axis: direction along x, in units of the reciprocal lattice (hkl)
@@ -718,7 +719,6 @@ class Plotting:
         plt.pcolormesh(X, Y, mesh, cmap=cmap, shading='auto')
         plt.axis('image')
         plt.colorbar()
-        print(np.max(mesh), np.min(mesh))
         plt.clim([background - (np.max(mesh) / 200), background + (np.max(mesh) / 5)])
 
         # Lattice points and vectors within the plot

@@ -8,7 +8,7 @@ Diamond
 2017
 
 Version 2.3.4
-Last updated: 10/05/24
+Last updated: 17/05/24
 
 Version History:
 10/09/17 0.1    Program created
@@ -38,6 +38,8 @@ Version History:
 28/03/24 2.3.3  Fixed scattering type comparison to compare .lower() scattering types
 02/05/24 2.3.4  added min_twotheta to get_hkl, added generate_envelope_cut, fixed low tth error in powder()
 15/05/24 2.3.4  Added "save" and "load" methods to structure factor calculation, improved powder for large calculations
+16/05/24 2.3.4  Added printed progress bar to generate_intensity_cut during convolusion
+17/05/24 2.3.4  Changed generate_intensity_cut to make it much faster
 
 @author: DGPorter
 """
@@ -77,8 +79,8 @@ class Scattering:
     # Standard Options
     _hkl = None  # added so recalculation not required
     _scattering_type = 'xray'  # 'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
-    _scattering_specular_direction = [0,0,1]  # reflection
-    _scattering_parallel_direction = [0,0,1]  # transmission
+    _scattering_specular_direction = [0, 0, 1]  # reflection
+    _scattering_parallel_direction = [0, 0, 1]  # transmission
     _scattering_theta_offset = 0.0
     _scattering_min_theta = -180.0
     _scattering_max_theta = 180.0
@@ -364,6 +366,11 @@ class Scattering:
          reduced by (Crystal.scale)^2
         - Testing against structure factors calculated by Vesta.exe is exactly the same when using Waasmaier structure factors.
 
+        Save/Load behaviour
+            structure_factor(..., save='sf.npy')  # saves structure factors after calculation in compressed file
+            structure_factor(..., load='sf.npy')  # loads structure factors if sf.npy, rather than calculating
+              - if the number of values in load doesn't match the number of hkl indices, an Exception is raised
+
         :param hkl: array[n,3] : reflection indexes (h, k, l)
         :param scattering_type: str : one of ['xray','neutron','xray magnetic','neutron magnetic','xray resonant']
         :param int_hkl: Bool : when True, hkl values are converted to integer.
@@ -625,9 +632,8 @@ class Scattering:
         reflections = np.transpose([grp_hkl[:, 0], grp_hkl[:, 1], grp_hkl[:, 2], grp_xval, grp_inten])
 
         # Remove extended part
-        mesh = mesh[ext * peak_width_pixels:-ext * peak_width_pixels]
-        xval = xval[ext * peak_width_pixels:-ext * peak_width_pixels]
-        print(f'Mesh: {len(mesh)}, tot_pixels: {tot_pixels}')
+        mesh = mesh[ext * peak_width_pixels:-ext * peak_width_pixels - 1]
+        xval = xval[ext * peak_width_pixels:-ext * peak_width_pixels - 1]
         return xval, mesh, reflections
 
     def generate_intensity_cut(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
@@ -652,7 +658,6 @@ class Scattering:
             plt.pcolormesh(Qx,Qy,plane)
             plt.axis('image')
         """
-
         qx, qy, hkl = self.xtl.Cell.reciprocal_space_plane(x_axis, y_axis, centre, q_max, cut_width)
 
         # Calculate intensities
@@ -667,9 +672,81 @@ class Scattering:
         if peak_width is None or peak_width < pixel_size:
             peak_width = pixel_size / 2
 
+        KS = 3  # kernel size in units of peak width
+        kernel_size = int(2 * KS * peak_width * pixels / (2 * q_max))
+        kernel_size = kernel_size + 1 if kernel_size % 2 == 1 else kernel_size  # kernel_size must be even
+        hks = kernel_size // 2
+        kernel_x = np.linspace(-KS * peak_width, KS * peak_width, kernel_size)
+        kxx, kyy = np.meshgrid(kernel_x, kernel_x)
+        kernel = np.exp(-np.log(2) * ((kxx ** 2 + kyy ** 2) / (peak_width / 2) ** 2))
         for n in range(len(inten)):
-            # Add each reflection as a gaussian
+            ix = np.nanargmin(np.abs(mesh_x - qy[n]))  # I need to switch qx,qy here for some reason
+            iy = np.nanargmin(np.abs(mesh_x - qx[n]))  # must be a flip somewhere
+            ix_min = 0 if ix < hks else ix - hks
+            ix_max = pixels if ix > (pixels - hks) else ix + hks
+            iy_min = 0 if iy < hks else iy - hks
+            iy_max = pixels if iy > (pixels - hks) else iy + hks
+            ikx_min = -(ix - hks) if ix < hks else 0
+            ikx_max = hks + pixels - ix if ix > (pixels - hks) else kernel_size
+            iky_min = -(iy - hks) if iy < hks else 0
+            iky_max = hks + pixels - iy if iy > (pixels - hks) else kernel_size
+            mesh[ix_min:ix_max, iy_min:iy_max] += inten[n] * kernel[ikx_min:ikx_max, iky_min:iky_max]
+
+        # Add background (if not None or 0)
+        if background:
+            bkg = np.random.normal(background, np.sqrt(background), [pixels, pixels])
+            mesh = mesh + bkg
+        return xx, yy, mesh
+
+    def generate_intensity_cut_old(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
+                                   q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05, pixels=1001):
+        """
+        Generate a cut through reciprocal space, returns an array with centred reflections
+          **Old version - creates full Gaussian for each peak, very slow**
+        Inputs:
+          x_axis = direction along x, in units of the reciprocal lattice (hkl)
+          y_axis = direction along y, in units of the reciprocal lattice (hkl)
+          centre = centre of the plot, in units of the reciprocal lattice (hkl)
+          q_max = maximum distance to plot to - in A-1
+          cut_width = width in height that will be included, in A-1
+          background = average background value
+          peak_width = reflection width in A-1
+        Returns:
+          Qx/Qy = [1000x1000] array of coordinates
+          plane = [1000x1000] array of plane in reciprocal space
+
+        E.G. hk plane at L=3 for hexagonal system:
+            Qx,Qy,plane = xtl.generate_intensity_cut([1,0,0],[0,1,0],[0,0,3])
+            plt.figure()
+            plt.pcolormesh(Qx,Qy,plane)
+            plt.axis('image')
+        """
+        qx, qy, hkl = self.xtl.Cell.reciprocal_space_plane(x_axis, y_axis, centre, q_max, cut_width)
+
+        # Calculate intensities
+        inten = self.xtl.Scatter.intensity(hkl)
+
+        # create plotting mesh
+        pixel_size = (2.0 * q_max) / pixels
+        mesh = np.zeros([pixels, pixels])
+        mesh_x = np.linspace(-q_max, q_max, pixels)
+        xx, yy = np.meshgrid(mesh_x, mesh_x)
+
+        if peak_width is None or peak_width < pixel_size:
+            peak_width = pixel_size / 2
+
+        start_time = datetime.datetime.now()
+        print('Convolving with 2D Gaussian: |' + 50 * '-' + '|', end='\r', flush=True)
+        for n in range(len(inten)):
+            # Add each reflection as a gaussian - this is very slow!
             mesh += inten[n] * np.exp(-np.log(2) * (((xx - qx[n]) ** 2 + (yy - qy[n]) ** 2) / (peak_width / 2) ** 2))
+            if n % (len(inten)/50) < 1:
+                _done = int(n // (len(inten)/50))
+                print('Convolving with 2D Gaussian: |' + (_done * '█') + (50-_done) * '-' + '|', end='\r', flush=True)
+        print('Convolving with 2D Gaussian: |' + 50 * '█' + '|', end='\n', flush=True)
+        end_time = datetime.datetime.now()
+        time_difference = end_time - start_time
+        print('Time taken for %d reflections: %s' % (len(inten), time_difference))
 
         # Add background (if not None or 0)
         if background:

@@ -622,6 +622,8 @@ class ScatteringGui:
         self.close_twotheta = tk.DoubleVar(frame, 2)
         self.close_angle = tk.DoubleVar(frame, 10)
         self.val_i = tk.IntVar(frame, 0)
+        self.cmin = tk.StringVar(frame, '')
+        self.cmax = tk.StringVar(frame, '')
 
         # radiation
         radiations = ['X-Ray', 'Neutron', 'Electron']
@@ -864,6 +866,24 @@ class ScatteringGui:
         var = tk.Button(side, text='Arbitary Cut', font=BF, command=self.fun_cut, bg=btn,
                         activebackground=btn_active)
         var.pack()
+        # clim
+        frm = tk.Frame(side, relief=tk.RIDGE)
+        frm.pack(side=tk.TOP, pady=10)
+        line = tk.Frame(frm)
+        line.pack(side=tk.TOP)
+        var = tk.Label(line, text='Clim:', font=SF)
+        var.pack(side=tk.LEFT)
+        var = tk.Entry(line, textvariable=self.cmin, font=TF, width=6, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_clim)
+        var.bind('<KP_Enter>', self.fun_clim)
+        var = tk.Entry(line, textvariable=self.cmax, font=TF, width=6, bg=ety, fg=ety_txt)
+        var.pack(side=tk.LEFT)
+        var.bind('<Return>', self.fun_clim)
+        var.bind('<KP_Enter>', self.fun_clim)
+        var = tk.Button(line, text='Update', font=TF, command=self.fun_clim, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT, pady=2)
 
         # ---X-ray Magnetic scattering---
         box = tk.Frame(right)
@@ -1163,6 +1183,7 @@ class ScatteringGui:
         self.fun_get()
         i = self.val_i.get()
         self.xtl.Plot.simulate_hk0(i, peak_width=0.2)
+        self.fun_clim()
         plt.show()
 
     def fun_hil(self):
@@ -1170,6 +1191,7 @@ class ScatteringGui:
         self.fun_get()
         i = self.val_i.get()
         self.xtl.Plot.simulate_h0l(i, peak_width=0.2)
+        self.fun_clim()
         plt.show()
 
     def fun_ikl(self):
@@ -1177,6 +1199,7 @@ class ScatteringGui:
         self.fun_get()
         i = self.val_i.get()
         self.xtl.Plot.simulate_0kl(i, peak_width=0.2)
+        self.fun_clim()
         plt.show()
 
     def fun_hhi(self):
@@ -1184,11 +1207,25 @@ class ScatteringGui:
         self.fun_get()
         i = self.val_i.get()
         self.xtl.Plot.simulate_hhl(i, peak_width=0.2)
+        self.fun_clim()
         plt.show()
 
     def fun_cut(self):
         self.fun_get()
         ArbitaryCutGui(self.xtl)
+
+    def fun_clim(self, event=None):
+        """Update clim"""
+        try:
+            cmin = float(self.cmin.get())
+        except ValueError:
+            cmin = None
+        try:
+            cmax = float(self.cmax.get())
+        except ValueError:
+            cmax = None
+        plt.gca()
+        plt.clim(cmin, cmax)
 
     def fun_rxs(self):
         ResonantXrayGui(self)
@@ -1230,7 +1267,7 @@ class ArbitaryCutGui:
         # --- Title ---
         line = tk.Frame(frame)
         line.pack(side=tk.TOP, fill=tk.X, pady=5)
-        var = tk.Label(line, text='Arbitary HKl Cut', font=LF)
+        var = tk.Label(line, text='Arbitary HKL Cut', font=LF)
         var.pack(side=tk.LEFT)
 
         # --- Entry ---
@@ -1312,6 +1349,10 @@ class ArbitaryCutGui:
                         activebackground=btn_active)
         var.pack(side=tk.LEFT, pady=2)
 
+        var = tk.Button(line, text='Generate\nEnvelope', font=TF, command=self.fun_envelope, bg=btn,
+                        activebackground=btn_active)
+        var.pack(side=tk.LEFT, pady=2)
+
         var = tk.Button(line, text='Generate\n3D Lattice', font=TF, command=self.fun_3dlattice, bg=btn,
                         activebackground=btn_active)
         var.pack(side=tk.LEFT, pady=2)
@@ -1343,6 +1384,28 @@ class ArbitaryCutGui:
             cut_width=self.hkl_plane_width.get(),
             background=self.hkl_plane_bkg.get(),
             peak_width=self.hkl_plane_peak.get()
+        )
+        self.fun_clim()
+        if self.lattice_points.get():
+            self.xtl.Plot.axis_reciprocal_lattice_points(
+                axes=None,
+                x_axis=fg.str2array(self.hkl_plane_x.get()),
+                y_axis=fg.str2array(self.hkl_plane_y.get()),
+                centre=fg.str2array(self.hkl_plane_c.get()),
+                q_max=self.hkl_plane_q.get(),
+                cut_width=self.hkl_plane_width.get()
+            )
+        plt.show()
+
+    def fun_envelope(self):
+        """Run code"""
+        self.xtl.Plot.simulate_envelope_cut(
+            x_axis=fg.str2array(self.hkl_plane_x.get()),
+            y_axis=fg.str2array(self.hkl_plane_y.get()),
+            centre=fg.str2array(self.hkl_plane_c.get()),
+            q_max=self.hkl_plane_q.get(),
+            background=self.hkl_plane_bkg.get(),
+            pixels=301,
         )
         self.fun_clim()
         if self.lattice_points.get():
