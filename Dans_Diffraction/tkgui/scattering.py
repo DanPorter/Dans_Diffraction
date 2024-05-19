@@ -521,7 +521,7 @@ class ScatteringGuiOLD:
         pow_wid = self.powder_width.get()
         #if min_q < 0: min_q = 0.0
 
-        self.xtl.Plot.simulate_powder(energy, peak_width=pow_wid, powder_average=pow_avg)
+        self.xtl.Plot.simulate_powder(energy_kev=energy, peak_width=pow_wid, powder_average=pow_avg)
         plt.show()
 
     def fun_hki(self):
@@ -1175,7 +1175,7 @@ class ScatteringGui:
         pow_avg = self.powderaverage.get()
         pow_wid = self.powder_width.get()
 
-        self.xtl.Plot.simulate_powder(energy_kev, peak_width=pow_wid, powder_average=pow_avg)
+        self.xtl.Plot.simulate_powder(energy_kev=energy_kev, peak_width=pow_wid, powder_average=pow_avg)
         plt.show()
 
     def fun_hki(self):

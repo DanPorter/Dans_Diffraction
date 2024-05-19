@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_scattering</strong></big></big> (version 2.3.0)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_scattering</strong></big></big> (version 2.3.4)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_scattering.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\classes_scattering.py</a></font></td></tr></table>
     <p><tt><a href="#Scattering">Scattering</a>&nbsp;Class&nbsp;"classes_scattering.py"<br>
@@ -16,8 +16,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;2.3.0<br>
-Last&nbsp;updated:&nbsp;02/07/23<br>
+Version&nbsp;2.3.4<br>
+Last&nbsp;updated:&nbsp;17/05/24<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 10/09/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -42,6 +42,13 @@ Version&nbsp;History:<br>
 14/01/23&nbsp;2.1.1&nbsp;&nbsp;Corrected&nbsp;background&nbsp;error&nbsp;in&nbsp;xtl.Scatter.powder<br>
 06/05/23&nbsp;2.0.0&nbsp;&nbsp;Merged&nbsp;pull&nbsp;request&nbsp;for&nbsp;non-integer&nbsp;hkl&nbsp;option&nbsp;on&nbsp;SF&nbsp;and&nbsp;electron&nbsp;form&nbsp;factors.&nbsp;Thanks&nbsp;Prestipino!<br>
 02/07/23&nbsp;2.3.0&nbsp;&nbsp;Fixed&nbsp;rounding&nbsp;error&nbsp;in&nbsp;Scatter.powder,&nbsp;thanks&nbsp;Sergio&nbsp;I.&nbsp;Rincon!<br>
+26/09/23&nbsp;2.3.1&nbsp;&nbsp;Added&nbsp;<a href="#Scattering">Scattering</a>.orientation_reflections&nbsp;for&nbsp;automatic&nbsp;orientation&nbsp;help<br>
+19/20/23&nbsp;2.3.2&nbsp;&nbsp;Fixed&nbsp;scatteringbasis&nbsp;so&nbsp;xray_resonant()&nbsp;now&nbsp;works&nbsp;with&nbsp;non-cubic&nbsp;systems<br>
+28/03/24&nbsp;2.3.3&nbsp;&nbsp;Fixed&nbsp;scattering&nbsp;type&nbsp;comparison&nbsp;to&nbsp;compare&nbsp;.lower()&nbsp;scattering&nbsp;types<br>
+02/05/24&nbsp;2.3.4&nbsp;&nbsp;added&nbsp;min_twotheta&nbsp;to&nbsp;get_hkl,&nbsp;added&nbsp;generate_envelope_cut,&nbsp;fixed&nbsp;low&nbsp;tth&nbsp;error&nbsp;in&nbsp;powder()<br>
+15/05/24&nbsp;2.3.4&nbsp;&nbsp;Added&nbsp;"save"&nbsp;and&nbsp;"load"&nbsp;methods&nbsp;to&nbsp;structure&nbsp;factor&nbsp;calculation,&nbsp;improved&nbsp;powder&nbsp;for&nbsp;large&nbsp;calculations<br>
+16/05/24&nbsp;2.3.4&nbsp;&nbsp;Added&nbsp;printed&nbsp;progress&nbsp;bar&nbsp;to&nbsp;generate_intensity_cut&nbsp;during&nbsp;convolusion<br>
+17/05/24&nbsp;2.3.4&nbsp;&nbsp;Changed&nbsp;generate_intensity_cut&nbsp;to&nbsp;make&nbsp;it&nbsp;much&nbsp;faster<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -57,9 +64,7 @@ Version&nbsp;History:<br>
 <a href="Dans_Diffraction.functions_scattering.html">Dans_Diffraction.functions_scattering</a><br>
 </td><td width="25%" valign=top><a href="Dans_Diffraction.multiple_scattering.html">Dans_Diffraction.multiple_scattering</a><br>
 <a href="numpy.html">numpy</a><br>
-</td><td width="25%" valign=top><a href="os.html">os</a><br>
-<a href="sys.html">sys</a><br>
-</td></tr></table></td></tr></table><p>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -214,6 +219,65 @@ Returns&nbsp;an&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;length&nbsp;as&nbsp
 
 <dl><dt><a name="Scattering-find_close_reflections"><strong>find_close_reflections</strong></a>(self, HKL, energy_kev=None, max_twotheta=2, max_angle=10)</dt><dd><tt>Find&nbsp;and&nbsp;print&nbsp;list&nbsp;of&nbsp;reflections&nbsp;close&nbsp;to&nbsp;the&nbsp;given&nbsp;one</tt></dd></dl>
 
+<dl><dt><a name="Scattering-generate_envelope_cut"><strong>generate_envelope_cut</strong></a>(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0), q_max=4.0, background=0.0, pixels=301)</dt><dd><tt>*In&nbsp;Development*<br>
+Generate&nbsp;the&nbsp;envelope&nbsp;function,&nbsp;calculating&nbsp;the&nbsp;structure&nbsp;factor&nbsp;at&nbsp;discrete&nbsp;points<br>
+Inputs:<br>
+&nbsp;&nbsp;x_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;y_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;centre&nbsp;=&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;q_max&nbsp;=&nbsp;maximum&nbsp;distance&nbsp;to&nbsp;plot&nbsp;to&nbsp;-&nbsp;in&nbsp;A-1<br>
+&nbsp;&nbsp;background&nbsp;=&nbsp;average&nbsp;background&nbsp;value<br>
+&nbsp;&nbsp;pixels&nbsp;=&nbsp;size&nbsp;of&nbsp;mesh,&nbsp;calculates&nbsp;structure&nbsp;factor&nbsp;at&nbsp;each&nbsp;pixel<br>
+Returns:<br>
+&nbsp;&nbsp;Qx/Qy&nbsp;=&nbsp;[pixels&nbsp;x&nbsp;pixels]&nbsp;array&nbsp;of&nbsp;coordinates<br>
+&nbsp;&nbsp;plane&nbsp;=&nbsp;[pixels&nbsp;x&nbsp;pixels]&nbsp;array&nbsp;of&nbsp;plane&nbsp;in&nbsp;reciprocal&nbsp;space<br>
+&nbsp;<br>
+E.G.&nbsp;hk&nbsp;plane&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Qx,&nbsp;Qy,&nbsp;plane&nbsp;=&nbsp;xtl.<a href="#Scattering-generate_envelope_cut">generate_envelope_cut</a>([1,0,0],[0,1,0],[0,0,3])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.figure()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.pcolormesh(Qx,&nbsp;Qy,&nbsp;plane)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.axis('image')</tt></dd></dl>
+
+<dl><dt><a name="Scattering-generate_intensity_cut"><strong>generate_intensity_cut</strong></a>(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0), q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05, pixels=1001)</dt><dd><tt>Generate&nbsp;a&nbsp;cut&nbsp;through&nbsp;reciprocal&nbsp;space,&nbsp;returns&nbsp;an&nbsp;array&nbsp;with&nbsp;centred&nbsp;reflections<br>
+Inputs:<br>
+&nbsp;&nbsp;x_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;y_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;centre&nbsp;=&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;q_max&nbsp;=&nbsp;maximum&nbsp;distance&nbsp;to&nbsp;plot&nbsp;to&nbsp;-&nbsp;in&nbsp;A-1<br>
+&nbsp;&nbsp;cut_width&nbsp;=&nbsp;width&nbsp;in&nbsp;height&nbsp;that&nbsp;will&nbsp;be&nbsp;included,&nbsp;in&nbsp;A-1<br>
+&nbsp;&nbsp;background&nbsp;=&nbsp;average&nbsp;background&nbsp;value<br>
+&nbsp;&nbsp;peak_width&nbsp;=&nbsp;reflection&nbsp;width&nbsp;in&nbsp;A-1<br>
+&nbsp;&nbsp;pixels&nbsp;=&nbsp;size&nbsp;of&nbsp;the&nbsp;plotting&nbsp;mesh<br>
+Returns:<br>
+&nbsp;&nbsp;Qx/Qy&nbsp;=&nbsp;[pixels&nbsp;x&nbsp;pixels]&nbsp;array&nbsp;of&nbsp;coordinates<br>
+&nbsp;&nbsp;plane&nbsp;=&nbsp;[pixels&nbsp;x&nbsp;pixels]&nbsp;array&nbsp;of&nbsp;plane&nbsp;in&nbsp;reciprocal&nbsp;space<br>
+&nbsp;<br>
+E.G.&nbsp;hk&nbsp;plane&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Qx,Qy,plane&nbsp;=&nbsp;xtl.Scatter.<a href="#Scattering-generate_intensity_cut">generate_intensity_cut</a>([1,0,0],[0,1,0],[0,0,3])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.figure()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.pcolormesh(Qx,Qy,plane)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.axis('image')</tt></dd></dl>
+
+<dl><dt><a name="Scattering-generate_intensity_cut_old"><strong>generate_intensity_cut_old</strong></a>(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0), q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05, pixels=1001)</dt><dd><tt>Generate&nbsp;a&nbsp;cut&nbsp;through&nbsp;reciprocal&nbsp;space,&nbsp;returns&nbsp;an&nbsp;array&nbsp;with&nbsp;centred&nbsp;reflections<br>
+&nbsp;&nbsp;**Old&nbsp;version&nbsp;-&nbsp;creates&nbsp;full&nbsp;Gaussian&nbsp;for&nbsp;each&nbsp;peak,&nbsp;very&nbsp;slow**<br>
+Inputs:<br>
+&nbsp;&nbsp;x_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;x,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;y_axis&nbsp;=&nbsp;direction&nbsp;along&nbsp;y,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;centre&nbsp;=&nbsp;centre&nbsp;of&nbsp;the&nbsp;plot,&nbsp;in&nbsp;units&nbsp;of&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;(hkl)<br>
+&nbsp;&nbsp;q_max&nbsp;=&nbsp;maximum&nbsp;distance&nbsp;to&nbsp;plot&nbsp;to&nbsp;-&nbsp;in&nbsp;A-1<br>
+&nbsp;&nbsp;cut_width&nbsp;=&nbsp;width&nbsp;in&nbsp;height&nbsp;that&nbsp;will&nbsp;be&nbsp;included,&nbsp;in&nbsp;A-1<br>
+&nbsp;&nbsp;background&nbsp;=&nbsp;average&nbsp;background&nbsp;value<br>
+&nbsp;&nbsp;peak_width&nbsp;=&nbsp;reflection&nbsp;width&nbsp;in&nbsp;A-1<br>
+Returns:<br>
+&nbsp;&nbsp;Qx/Qy&nbsp;=&nbsp;[1000x1000]&nbsp;array&nbsp;of&nbsp;coordinates<br>
+&nbsp;&nbsp;plane&nbsp;=&nbsp;[1000x1000]&nbsp;array&nbsp;of&nbsp;plane&nbsp;in&nbsp;reciprocal&nbsp;space<br>
+&nbsp;<br>
+E.G.&nbsp;hk&nbsp;plane&nbsp;at&nbsp;L=3&nbsp;for&nbsp;hexagonal&nbsp;system:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Qx,Qy,plane&nbsp;=&nbsp;xtl.<a href="#Scattering-generate_intensity_cut">generate_intensity_cut</a>([1,0,0],[0,1,0],[0,0,3])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.figure()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.pcolormesh(Qx,Qy,plane)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.axis('image')</tt></dd></dl>
+
 <dl><dt><a name="Scattering-generate_powder"><strong>generate_powder</strong></a>(self, q_max=8, peak_width=0.01, background=0, powder_average=True)</dt><dd><tt>*DEPRECIATED*<br>
 Generates&nbsp;array&nbsp;of&nbsp;intensities&nbsp;along&nbsp;a&nbsp;spaced&nbsp;grid,&nbsp;equivalent&nbsp;to&nbsp;a&nbsp;powder&nbsp;pattern.<br>
 &nbsp;&nbsp;Q,I&nbsp;=&nbsp;<a href="#Scattering-generate_powder">generate_powder</a>(energy_kev=8.0,peak_width=0.05,background=0)<br>
@@ -337,6 +401,18 @@ Notes:<br>
 -&nbsp;Testing&nbsp;against&nbsp;structure&nbsp;factors&nbsp;calculated&nbsp;by&nbsp;Vesta.exe&nbsp;is&nbsp;very&nbsp;close,&nbsp;though&nbsp;there<br>
 &nbsp;&nbsp;are&nbsp;some&nbsp;discrepancies,&nbsp;probably&nbsp;due&nbsp;to&nbsp;the&nbsp;method&nbsp;of&nbsp;calculation&nbsp;of&nbsp;the&nbsp;form&nbsp;factor.</tt></dd></dl>
 
+<dl><dt><a name="Scattering-orientation_reflections"><strong>orientation_reflections</strong></a>(self, energy_kev, hkl_1=None)</dt><dd><tt>Return&nbsp;2&nbsp;reflections&nbsp;to&nbsp;use&nbsp;to&nbsp;orient&nbsp;a&nbsp;crystal<br>
+&nbsp;1.&nbsp;a&nbsp;strong&nbsp;reflection&nbsp;that&nbsp;is&nbsp;easy&nbsp;to&nbsp;discriminate&nbsp;in&nbsp;2-theta<br>
+&nbsp;2.&nbsp;another&nbsp;strong&nbsp;reflection&nbsp;non-parallel&nbsp;and&nbsp;non-normal&nbsp;to&nbsp;(1)<br>
+&nbsp;<br>
+hkl_1,&nbsp;hkl_2,&nbsp;alternatives&nbsp;=&nbsp;xtl.Scatter.<a href="#Scattering-orientation_reflections">orientation_reflections</a>(8)<br>
+&nbsp;<br>
+:param&nbsp;energy_kev:&nbsp;photon&nbsp;energy&nbsp;in&nbsp;keV<br>
+:param&nbsp;hkl_1:&nbsp;None&nbsp;or&nbsp;[h,k,l],&nbsp;allows&nbsp;to&nbsp;specify&nbsp;the&nbsp;first&nbsp;reflection<br>
+:returns&nbsp;hkl_1:&nbsp;[h,k,l]&nbsp;indices&nbsp;of&nbsp;reflection&nbsp;1<br>
+:returns&nbsp;hkl_2:&nbsp;[h,k,l]&nbsp;indices&nbsp;of&nbsp;reflection&nbsp;2<br>
+:returns&nbsp;hkl_2_alternatives:&nbsp;[[h,k,l],...]&nbsp;list&nbsp;of&nbsp;alternative&nbsp;reflections&nbsp;with&nbsp;same&nbsp;angles</tt></dd></dl>
+
 <dl><dt><a name="Scattering-powder"><strong>powder</strong></a>(self, scattering_type=None, units=None, peak_width=None, background=None, pixels=None, powder_average=None, lorentz_fraction=None, custom_peak=None, min_overlap=None, **options)</dt><dd><tt>Generates&nbsp;array&nbsp;of&nbsp;intensities&nbsp;along&nbsp;a&nbsp;spaced&nbsp;grid,&nbsp;equivalent&nbsp;to&nbsp;a&nbsp;powder&nbsp;pattern.<br>
 &nbsp;&nbsp;tth,&nbsp;inten,&nbsp;reflections&nbsp;=&nbsp;Scatter.<a href="#Scattering-powder">powder</a>('xray',&nbsp;units='tth',&nbsp;energy_kev=8)<br>
 &nbsp;<br>
@@ -440,7 +516,10 @@ The&nbsp;azimuthal&nbsp;angle&nbsp;defines&nbsp;a&nbsp;rotation&nbsp;about&nbsp;
 At&nbsp;an&nbsp;azimuth&nbsp;of&nbsp;0degrees,&nbsp;U1&nbsp;is&nbsp;perpendicular&nbsp;to&nbsp;Q,&nbsp;along&nbsp;the&nbsp;direction&nbsp;of&nbsp;azim_zero.</tt></dd></dl>
 
 <dl><dt><a name="Scattering-scatteringcomponents"><strong>scatteringcomponents</strong></a>(self, mxmymz, hkl, azim_zero=[1, 0, 0], psi=0)</dt><dd><tt>Transform&nbsp;magnetic&nbsp;vector&nbsp;into&nbsp;components&nbsp;within&nbsp;the&nbsp;scattering&nbsp;plane<br>
-&nbsp;&nbsp;&nbsp;&nbsp;***warning&nbsp;-&nbsp;may&nbsp;not&nbsp;be&nbsp;correct&nbsp;for&nbsp;non-cubic&nbsp;systems***</tt></dd></dl>
+First&nbsp;transforms&nbsp;the&nbsp;moments&nbsp;into&nbsp;a&nbsp;cartesian&nbsp;reference&nbsp;frame.<br>
+&nbsp;&nbsp;&nbsp;U1&nbsp;=&nbsp;direction&nbsp;||&nbsp;ki&nbsp;-&nbsp;kf&nbsp;=&nbsp;Q<br>
+&nbsp;&nbsp;&nbsp;U2&nbsp;=&nbsp;direction&nbsp;||&nbsp;kf&nbsp;+&nbsp;ki&nbsp;(within&nbsp;scattering&nbsp;plane,&nbsp;pi)<br>
+&nbsp;&nbsp;&nbsp;U3&nbsp;=&nbsp;direction&nbsp;perp.&nbsp;to&nbsp;U1,&nbsp;U2&nbsp;(normal&nbsp;to&nbsp;scattering&nbsp;plane,&nbsp;sigma)</tt></dd></dl>
 
 <dl><dt><a name="Scattering-scatteringvectors"><strong>scatteringvectors</strong></a>(self, hkl, energy_kev=None, azim_zero=[1, 0, 0], psi=0, polarisation='s-p')</dt><dd><tt>Determine&nbsp;the&nbsp;scattering&nbsp;and&nbsp;polarisation&nbsp;vectors&nbsp;of&nbsp;a&nbsp;reflection&nbsp;based&nbsp;on&nbsp;energy,&nbsp;azimuth&nbsp;and&nbsp;polarisation.<br>
 :param&nbsp;xtl:&nbsp;Crystal&nbsp;Class<br>
@@ -497,6 +576,11 @@ Notes:<br>
 -&nbsp;Crystal.scale&nbsp;is&nbsp;used&nbsp;to&nbsp;scale&nbsp;the&nbsp;complex&nbsp;structure&nbsp;factor,&nbsp;so&nbsp;the&nbsp;intensity&nbsp;is<br>
 &nbsp;reduced&nbsp;by&nbsp;(Crystal.scale)^2<br>
 -&nbsp;Testing&nbsp;against&nbsp;structure&nbsp;factors&nbsp;calculated&nbsp;by&nbsp;Vesta.exe&nbsp;is&nbsp;exactly&nbsp;the&nbsp;same&nbsp;when&nbsp;using&nbsp;Waasmaier&nbsp;structure&nbsp;factors.<br>
+&nbsp;<br>
+Save/Load&nbsp;behaviour<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Scattering-structure_factor">structure_factor</a>(...,&nbsp;save='sf.npy')&nbsp;&nbsp;#&nbsp;saves&nbsp;structure&nbsp;factors&nbsp;after&nbsp;calculation&nbsp;in&nbsp;compressed&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Scattering-structure_factor">structure_factor</a>(...,&nbsp;load='sf.npy')&nbsp;&nbsp;#&nbsp;loads&nbsp;structure&nbsp;factors&nbsp;if&nbsp;sf.npy,&nbsp;rather&nbsp;than&nbsp;calculating<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;if&nbsp;the&nbsp;number&nbsp;of&nbsp;values&nbsp;in&nbsp;load&nbsp;doesn't&nbsp;match&nbsp;the&nbsp;number&nbsp;of&nbsp;hkl&nbsp;indices,&nbsp;an&nbsp;Exception&nbsp;is&nbsp;raised<br>
 &nbsp;<br>
 :param&nbsp;hkl:&nbsp;array[n,3]&nbsp;:&nbsp;reflection&nbsp;indexes&nbsp;(h,&nbsp;k,&nbsp;l)<br>
 :param&nbsp;scattering_type:&nbsp;str&nbsp;:&nbsp;one&nbsp;of&nbsp;['xray','neutron','xray&nbsp;magnetic','neutron&nbsp;magnetic','xray&nbsp;resonant']<br>

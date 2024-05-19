@@ -9,7 +9,7 @@ def readme():
 setup(
     name='Dans_Diffraction',
     packages=['Dans_Diffraction', 'Dans_Diffraction.tkgui'],
-    version='3.1.0',
+    version='3.2.0',
     description='Generate diffracted intensities from crystals',
     long_description_content_type='text/markdown',
     long_description=readme(),
@@ -18,7 +18,7 @@ setup(
     url='https://github.com/DanPorter/Dans_Diffraction',
     keywords=[
         'crystal', 'cif', 'diffraction', 'crystallography', 'science',
-        'x-ray','neutron','resonant', 'magnetic', 'magnetism', 'multiple scattering', 
+        'x-ray', 'neutron', 'resonant', 'magnetic', 'magnetism', 'multiple scattering',
         'fdmnes', 'super structure', 'spacegroup', 'space group', 'diffractometer'
         ],
     classifiers=[

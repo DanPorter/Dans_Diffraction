@@ -32,7 +32,7 @@ Diamond
 2017
 
 Version 3.2.0
-Last updated: 15/05/24
+Last updated: 19/05/24
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -147,7 +147,7 @@ from .functions_crystallography import readcif
 
 
 __version__ = '3.2.0'
-__date__ = '15/05/24'
+__date__ = '19/05/24'
 
 
 # Build

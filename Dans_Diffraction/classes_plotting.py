@@ -8,8 +8,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 1.9.7
-Last updated: 03/05/24
+Version 1.9.8
+Last updated: 19/05/24
 
 Version History:
 18/08/17 0.1    Program created
@@ -33,6 +33,7 @@ Version History:
 15/11/21 1.9.5  Added plot_diffractometer_reciprocal_space
 25/10/23 1.9.6  Corrected Plotting.simulate_powder to display radiation and wavelength
 03/05/24 1.9.7  Switched to using Scatter.generate_intensity_cut()
+19/05/24 1.9.8  Renamed to PlottingSuperstructure.parent_generate_inensity_cut
 
 @author: DGPorter
 """
@@ -46,7 +47,7 @@ from . import functions_general as fg
 from . import functions_plotting as fp
 from . import functions_crystallography as fc
 
-__version__ = '1.9.7'
+__version__ = '1.9.8'
 
 
 class Plotting:
@@ -58,7 +59,6 @@ class Plotting:
     _figure_dpi = fp.FIGURE_DPI
 
     def __init__(self, xtl):
-        "initialise"
         self.xtl = xtl
     
     def plot_crystal(self, show_labels=False):
@@ -71,12 +71,12 @@ class Plotting:
         
         # Generate lattice
         tol = 0.05
-        uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
+        uvw, element, label, occ, uiso, mxmymz = self.xtl.Structure.generate_lattice(1, 1, 1)
         #uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.get()
         
         # Split atom types, color & radii
         labels, idx, invidx = np.unique(label, return_index=True, return_inverse=True)
-        types = type[idx]
+        types = element[idx]
         colors = plt.cm.gist_rainbow(np.linspace(0, 1, len(types)))
         #sizes = 300*np.ones(len(types))
         #sizes[types=='O'] = 50.
@@ -280,7 +280,72 @@ class Plotting:
             z = [el[2][2] for el in ex]
             ax.plot3D(x, y, z, '-', lw=5)
 
-    def simulate_powder(self, energy_kev=None, peak_width=0.01, background=0, powder_average=True):
+    def simulate_powder(self, scattering_type=None, units=None, peak_width=None, background=None, pixels=None,
+                        powder_average=None, lorentz_fraction=None, custom_peak=None, min_overlap=None, **options):
+        """
+        Generates array of intensities along a spaced grid, equivalent to a powder pattern.
+          tth, inten, reflections = Scatter.powder('xray', units='tth', energy_kev=8)
+
+        Note: This function is the new replacement for generate_power and uses both _scattering_min_twotheta
+        and _scattering_max_twotheta.
+
+        :param scattering_type: str : one of ['xray','neutron','xray magnetic','neutron magnetic','xray resonant']
+        :param units: str : one of ['tth', 'dspace', 'q']
+        :param peak_width: float : Peak with in units of inverse wavevector (Q)
+        :param background: float : if >0, a normal background around this value will be added
+        :param pixels: int : number of pixels per inverse-anstrom to add to the resulting mesh
+        :param powder_average: Bool : if True, intensities will be reduced for the powder average
+        :param lorentz_fraction: float 0-1: sets the Lorentzian fraction of the psuedo-Voight peak functions
+        :param custom_peak: array: if not None, the array will be convolved with delta-functions at each reflection.
+        :param min_overlap: minimum overlap of neighboring reflections.
+        :param options: additional arguments to pass to intensity calculation
+        :return xval: arrray : x-axis of powder scan (units)
+        :return inten: array :  intensity values at each point in x-axis
+        :return reflections: (h, k, l, xval, intensity) array of reflection positions, grouped by min_overlap
+        """
+        xval, mesh, reflections = self.xtl.Scatter.powder(
+            scattering_type=scattering_type,
+            units=units,
+            peak_width=peak_width,
+            background=background,
+            pixels=pixels,
+            powder_average=powder_average,
+            lorentz_fraction=lorentz_fraction,
+            custom_peak=custom_peak,
+            min_overlap=min_overlap,
+            **options
+        )
+        energy_kev = self.xtl.Scatter.get_energy(**options)
+        wavelength_a = fc.energy2wave(energy_kev)
+        # Scattering type
+        if scattering_type is None:
+            scattering_type = self.xtl.Scatter._scattering_type
+        # X Label
+        if units is None:
+            units = self.xtl.Scatter._powder_units
+        if units.lower() in ['tth', 'angle', 'two-theta', 'twotheta', 'theta']:
+            xlab = u'Two-Theta [Deg]'
+        elif units.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
+            xlab = u'd-spacing [\u00C5]'
+        else:
+            xlab = u'Q [\u00C5$^{-1}]$'
+
+        plt.figure(figsize=[2*self._figure_size[0], self._figure_size[1]], dpi=self._figure_dpi)
+        plt.plot(xval, mesh, label=self.xtl.name)
+        for h, k, l, x, y in reflections:
+            if x < xval.min() or x > xval.max():
+                continue
+            if y > mesh.min() + 1:
+                # reflection
+                plt.text(x, y, fc.hkl2str((h, k, l)), c='k')
+            else:
+                # extinction
+                plt.text(x, y + 1, fc.hkl2str((h, k, l)), c='r')
+        ylab = u'Intensity [a. u.]'
+        ttl = u'%s\n%s \u03BB = %1.3f \u00C5' % (self.xtl.name, scattering_type.capitalize(), wavelength_a)
+        fp.labels(ttl, xlab, ylab)
+
+    def simulate_powder_old(self, energy_kev=None, peak_width=0.01, background=0, powder_average=True):
         """
         Generates a powder pattern, plots in a new figure with labels
             see classes_scattering.generate_powder
@@ -514,68 +579,68 @@ class Plotting:
         fp.plot_vector_arrows(mesh_vec_a, mesh_vec_b, vec_a_lab, vec_b_lab, axis=axes)
         plt.text(0 - (0.2 * q_max), 0 - (0.1 * q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18)
 
-    def generate_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],
-                                    q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
-        """
-        Generate a cut through reciprocal space, returns an array with centred reflections
-        Inputs:
-          x_axis = direction along x, in units of the reciprocal lattice (hkl)
-          y_axis = direction along y, in units of the reciprocal lattice (hkl)
-          centre = centre of the plot, in units of the reciprocal lattice (hkl)
-          q_max = maximum distance to plot to - in A-1
-          cut_width = width in height that will be included, in A-1
-          background = average background value
-          peak_width = reflection width in A-1
-        Returns:
-          Qx/Qy = [1000x1000] array of coordinates
-          plane = [1000x1000] array of plane in reciprocal space 
-        
-        E.G. hk plane at L=3 for hexagonal system:
-            Qx,Qy,plane = xtl.generate_intensity_cut([1,0,0],[0,1,0],[0,0,3])
-            plt.figure()
-            plt.pcolormesh(Qx,Qy,plane)
-            plt.axis('image')
-        """
-
-        qx, qy, hkl = self.xtl.Cell.reciprocal_space_plane(x_axis, y_axis, centre, q_max, cut_width)
-        
-        # Calculate intensities
-        inten = self.xtl.Scatter.intensity(hkl)
-        
-        # create plotting mesh
-        pixels = 1001  # reduce this to make convolution faster
-        pixel_size = (2.0*q_max)/pixels
-        mesh = np.zeros([pixels, pixels])
-        mesh_x = np.linspace(-q_max, q_max, pixels)
-        xx, yy = np.meshgrid(mesh_x,mesh_x)
-
-        if peak_width is None or peak_width < pixel_size:
-            peak_width = pixel_size / 2
-
-        for n in range(len(inten)):
-            # Add each reflection as a gaussian
-            mesh += inten[n] * np.exp(-np.log(2) * (((xx - qx[n]) ** 2 + (yy - qy[n]) ** 2) / (peak_width / 2) ** 2))
-
-        """ old style using convolve2d, fast but occasional import problems, plus positions slightly inaccurate
-        # add reflections to background
-        pixel_i = ((Qx/(2*q_max) + 0.5)*pixels).astype(int)
-        pixel_j = ((Qy/(2*q_max) + 0.5)*pixels).astype(int)
-        
-        mesh[pixel_j,pixel_i] = I
-        
-        # Convolve with a gaussian (if not None or 0)
-        if peak_width:
-            peak_width_pixels = peak_width/pixel_size
-            gauss_x = np.arange(-2*peak_width_pixels,2*peak_width_pixels+1)
-            G = fg.gauss(gauss_x, gauss_x, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
-            mesh = convolve2d(mesh,G, mode='same') # this is the slowest part
-        """
-        # Add background (if not None or 0)
-        if background:
-            bkg = np.random.normal(background, np.sqrt(background), [pixels, pixels])
-            mesh = mesh+bkg
-        
-        return xx, yy, mesh
+    # def generate_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],
+    #                                 q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
+    #     """
+    #     Generate a cut through reciprocal space, returns an array with centred reflections
+    #     Inputs:
+    #       x_axis = direction along x, in units of the reciprocal lattice (hkl)
+    #       y_axis = direction along y, in units of the reciprocal lattice (hkl)
+    #       centre = centre of the plot, in units of the reciprocal lattice (hkl)
+    #       q_max = maximum distance to plot to - in A-1
+    #       cut_width = width in height that will be included, in A-1
+    #       background = average background value
+    #       peak_width = reflection width in A-1
+    #     Returns:
+    #       Qx/Qy = [1000x1000] array of coordinates
+    #       plane = [1000x1000] array of plane in reciprocal space
+    #
+    #     E.G. hk plane at L=3 for hexagonal system:
+    #         Qx,Qy,plane = xtl.generate_intensity_cut([1,0,0],[0,1,0],[0,0,3])
+    #         plt.figure()
+    #         plt.pcolormesh(Qx,Qy,plane)
+    #         plt.axis('image')
+    #     """
+    #
+    #     qx, qy, hkl = self.xtl.Cell.reciprocal_space_plane(x_axis, y_axis, centre, q_max, cut_width)
+    #
+    #     # Calculate intensities
+    #     inten = self.xtl.Scatter.intensity(hkl)
+    #
+    #     # create plotting mesh
+    #     pixels = 1001  # reduce this to make convolution faster
+    #     pixel_size = (2.0*q_max)/pixels
+    #     mesh = np.zeros([pixels, pixels])
+    #     mesh_x = np.linspace(-q_max, q_max, pixels)
+    #     xx, yy = np.meshgrid(mesh_x,mesh_x)
+    #
+    #     if peak_width is None or peak_width < pixel_size:
+    #         peak_width = pixel_size / 2
+    #
+    #     for n in range(len(inten)):
+    #         # Add each reflection as a gaussian
+    #         mesh += inten[n] * np.exp(-np.log(2) * (((xx - qx[n]) ** 2 + (yy - qy[n]) ** 2) / (peak_width / 2) ** 2))
+    #
+    #     """ old style using convolve2d, fast but occasional import problems, plus positions slightly inaccurate
+    #     # add reflections to background
+    #     pixel_i = ((Qx/(2*q_max) + 0.5)*pixels).astype(int)
+    #     pixel_j = ((Qy/(2*q_max) + 0.5)*pixels).astype(int)
+    #
+    #     mesh[pixel_j,pixel_i] = I
+    #
+    #     # Convolve with a gaussian (if not None or 0)
+    #     if peak_width:
+    #         peak_width_pixels = peak_width/pixel_size
+    #         gauss_x = np.arange(-2*peak_width_pixels,2*peak_width_pixels+1)
+    #         G = fg.gauss(gauss_x, gauss_x, height=1, cen=0, fwhm=peak_width_pixels, bkg=0)
+    #         mesh = convolve2d(mesh,G, mode='same') # this is the slowest part
+    #     """
+    #     # Add background (if not None or 0)
+    #     if background:
+    #         bkg = np.random.normal(background, np.sqrt(background), [pixels, pixels])
+    #         mesh = mesh+bkg
+    #
+    #     return xx, yy, mesh
 
     def simulate_intensity_cut(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
                                q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05):
@@ -1363,9 +1428,15 @@ class PlottingSuperstructure(Plotting):
     """
 
     _intensity_cut_parent_symmetry = True  # if True, symmetrises the cuts using the parent symmetry
-    
-    def generate_intensity_cut(self,x_axis=[1,0,0], y_axis=[0,1,0], centre=[0,0,0],
-                                    q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05):
+
+    def use_parent_symmetry(self, val=None):
+        """Set the parent symmetry flag, if True, symmetrises intensity cuts using parent symmetry"""
+        if val is None:
+            return self._intensity_cut_parent_symmetry
+        self._intensity_cut_parent_symmetry = val
+
+    def parent_generate_intensity_cut(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
+                                      q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05, pixels=1001):
         """
         Generate a cut through reciprocal space, returns an array with centred reflections
         Inputs:
@@ -1377,11 +1448,11 @@ class PlottingSuperstructure(Plotting):
           background = average background value
           peak_width = reflection width in A-1
         Returns:
-          qx/qy = [1000x1000] array of coordinates
-          plane = [1000x1000] array of plane in reciprocal space 
+          qx/qy = [pixels x pixels] array of coordinates
+          plane = [pixels x pixels] array of plane in reciprocal space
         
         E.G. hk plane at L=3 for hexagonal system:
-            qx,qy,plane = xtl.generate_intensity_cut([1,0,0],[0,1,0],[0,0,3])
+            qx,qy,plane = xtl.Plot.parent_generate_intensity_cut([1,0,0],[0,1,0],[0,0,3])
             plt.figure()
             plt.pcolormesh(qx,qy,plane)
             plt.axis('image')
@@ -1416,7 +1487,7 @@ class PlottingSuperstructure(Plotting):
             box_coord = fg.index_coordinates(symQ - c_cart, CELL)
             if np.any(np.all(np.abs(box_coord) <= 0.5, axis=1)):
                 HKLinbox += [hkl]
-        print('Number of non-symmetric reflections in box: %1.0f'%len(HKLinbox))
+        print('Number of non-symmetric reflections in box: %1.0f' % len(HKLinbox))
 
         # Calculate intensity
         inten = self.xtl.Scatter.intensity(HKLinbox)
@@ -1438,7 +1509,6 @@ class PlottingSuperstructure(Plotting):
         inten = inten[incell]
 
         # create plotting mesh
-        pixels = 1001  # reduce this to make convolution faster
         pixel_size = (2.0 * q_max) / pixels
         mesh = np.zeros([pixels, pixels])
         mesh_x = np.linspace(-q_max, q_max, pixels)
@@ -1447,9 +1517,26 @@ class PlottingSuperstructure(Plotting):
         if peak_width is None or peak_width < pixel_size:
             peak_width = pixel_size / 2
 
+        # Add Gaussian profile to each peak
+        KS = 3  # kernel size in units of peak width
+        kernel_size = int(2 * KS * peak_width * pixels / (2 * q_max))
+        kernel_size = kernel_size + 1 if kernel_size % 2 == 1 else kernel_size  # kernel_size must be even
+        hks = kernel_size // 2
+        kernel_x = np.linspace(-KS * peak_width, KS * peak_width, kernel_size)
+        kxx, kyy = np.meshgrid(kernel_x, kernel_x)
+        kernel = np.exp(-np.log(2) * ((kxx ** 2 + kyy ** 2) / (peak_width / 2) ** 2))
         for n in range(len(inten)):
-            # Add each reflection as a gaussian
-            mesh += inten[n] * np.exp(-np.log(2) * (((xx - qx[n]) ** 2 + (yy - qy[n]) ** 2) / (peak_width / 2) ** 2))
+            ix = np.nanargmin(np.abs(mesh_x - qy[n]))  # I need to switch qx,qy here for some reason
+            iy = np.nanargmin(np.abs(mesh_x - qx[n]))  # must be a flip somewhere
+            ix_min = 0 if ix < hks else ix - hks
+            ix_max = pixels if ix > (pixels - hks) else ix + hks
+            iy_min = 0 if iy < hks else iy - hks
+            iy_max = pixels if iy > (pixels - hks) else iy + hks
+            ikx_min = -(ix - hks) if ix < hks else 0
+            ikx_max = hks + pixels - ix if ix > (pixels - hks) else kernel_size
+            iky_min = -(iy - hks) if iy < hks else 0
+            iky_max = hks + pixels - iy if iy > (pixels - hks) else kernel_size
+            mesh[ix_min:ix_max, iy_min:iy_max] += inten[n] * kernel[ikx_min:ikx_max, iky_min:iky_max]
 
         """ Old method using convolve2d
         # add reflections to background
@@ -1477,10 +1564,12 @@ class PlottingSuperstructure(Plotting):
             mesh = mesh+bkg
         return xx, yy, mesh
     
-    def simulate_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0],
-                                    q_max=4.0,cut_width=0.05,background=0.0, peak_width=0.05):
+    def simulate_intensity_cut(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
+                               q_max=4.0, cut_width=0.05, background=0.0, peak_width=0.05):
         """
         Plot a cut through reciprocal space, visualising the intensity
+        This method, as part of a superstructure, overloads simulate_intensity_cut,
+        providing orientation of parent and symmetrisation of parent.
           x_axis = direction along x, in units of the parent reciprocal lattice (hkl)
           y_axis = direction along y, in units of the parent reciprocal lattice (hkl)
           centre = centre of the plot, in units of the parent reciprocal lattice (hkl)
@@ -1513,8 +1602,8 @@ class PlottingSuperstructure(Plotting):
         super_y_axis = self.xtl.parenthkl2super(y_axis)
 
         # Generate intensity cut
-        X, Y, mesh = self.generate_intensity_cut(super_x_axis, super_y_axis, centre, q_max, cut_width, background,
-                                                 peak_width)
+        X, Y, mesh = self.parent_generate_intensity_cut(super_x_axis, super_y_axis, centre, q_max, cut_width,
+                                                        background, peak_width)
 
         # create figure
         plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)

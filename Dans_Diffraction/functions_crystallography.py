@@ -3184,7 +3184,7 @@ def q2units(qmag, units='tth', energy_kev=None):
     Convert |Q| in A^-1 to choice of units
     :param qmag: float or array in inverse-Angstrom
     :param units: str: 'tth', 'dspace', 'q' (raises ValueError if wrong)
-    :param energy_kev: float
+    :param energy_kev: float or None
     :return: float or array
     """
     units = units.lower().replace(' ', '').replace('-', '')

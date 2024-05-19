@@ -1,6 +1,7 @@
 """
 Dans_Diffraction Examples
 Simulate a powder diffraction pattern from a large structrue
+This examples takes 5-10 mins to run!
 """
 
 import sys, os

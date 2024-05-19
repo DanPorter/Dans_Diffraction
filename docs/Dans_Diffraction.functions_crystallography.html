@@ -252,6 +252,24 @@ E.G.:<br>
  <dl><dt><a name="-default_atom_charge"><strong>default_atom_charge</strong></a>(element)</dt><dd><tt>Returns&nbsp;the&nbsp;default&nbsp;charge&nbsp;value&nbsp;for&nbsp;the&nbsp;element<br>
 :param&nbsp;element:&nbsp;str:&nbsp;'Fe'<br>
 :return:&nbsp;int&nbsp;or&nbsp;nan</tt></dd></dl>
+ <dl><dt><a name="-detector_angle_size"><strong>detector_angle_size</strong></a>(detector_distance_mm=565, height_mm=67, width_mm=34, pixel_size_um=172)</dt><dd><tt>Return&nbsp;the&nbsp;angular&nbsp;spread&nbsp;of&nbsp;the&nbsp;detector<br>
+&nbsp;&nbsp;delta_width,&nbsp;gamma_width,&nbsp;pixel_width&nbsp;=&nbsp;<a href="#-detector_angle_size">detector_angle_size</a>(distance,&nbsp;height,&nbsp;widht,&nbsp;pixel)<br>
+:param&nbsp;detector_distance_mm:&nbsp;Detector&nbsp;distance&nbsp;from&nbsp;sample&nbsp;in&nbsp;mm<br>
+:param&nbsp;height_mm:&nbsp;Detector&nbsp;size&nbsp;in&nbsp;the&nbsp;vertical&nbsp;direction,&nbsp;in&nbsp;mm<br>
+:param&nbsp;width_mm:&nbsp;Detector&nbsp;size&nbsp;in&nbsp;the&nbsp;horizontal&nbsp;direction,&nbsp;in&nbsp;mm<br>
+:param&nbsp;pixel_size_um:&nbsp;Pixel&nbsp;size&nbsp;in&nbsp;microns<br>
+:return&nbsp;x_angle:&nbsp;total&nbsp;angular&nbsp;spread&nbsp;in&nbsp;the&nbsp;diffractometer&nbsp;x-axis,&nbsp;in&nbsp;degrees<br>
+:return&nbsp;z_angle:&nbsp;total&nbsp;angular&nbsp;spread&nbsp;in&nbsp;the&nbsp;diffractometer&nbsp;z-axis,&nbsp;in&nbsp;degrees<br>
+:return&nbsp;pixel_angle:&nbsp;angular&nbsp;spread&nbsp;per&nbsp;pixel,&nbsp;in&nbsp;degrees</tt></dd></dl>
+ <dl><dt><a name="-detector_coverage"><strong>detector_coverage</strong></a>(wavelength_a=1.5, resolution=0.1, delta=0, gamma=0, detector_distance_mm=565, height_mm=67, width_mm=34)</dt><dd><tt>Determine&nbsp;volume&nbsp;of&nbsp;reciprocal&nbsp;space&nbsp;covered&nbsp;by&nbsp;the&nbsp;detector&nbsp;based&nbsp;on&nbsp;angular&nbsp;spread<br>
+:param&nbsp;wavelength_a:&nbsp;Incicent&nbsp;beam&nbsp;wavelength,&nbsp;in&nbsp;Angstroms<br>
+:param&nbsp;resolution:&nbsp;Incident&nbsp;beam&nbsp;resolution,&nbsp;in&nbsp;inverse-Angstroms<br>
+:param&nbsp;delta:&nbsp;float&nbsp;or&nbsp;array,&nbsp;detector&nbsp;vertical&nbsp;rotation<br>
+:param&nbsp;gamma:&nbsp;float&nbsp;or&nbsp;array,&nbsp;detector&nbsp;horizontal&nbsp;rotation<br>
+:param&nbsp;detector_distance_mm:&nbsp;Detector&nbsp;distance&nbsp;from&nbsp;sample&nbsp;in&nbsp;mm<br>
+:param&nbsp;height_mm:&nbsp;Detector&nbsp;size&nbsp;in&nbsp;the&nbsp;vertical&nbsp;direction,&nbsp;in&nbsp;mm<br>
+:param&nbsp;width_mm:&nbsp;Detector&nbsp;size&nbsp;in&nbsp;the&nbsp;horizontal&nbsp;direction,&nbsp;in&nbsp;mm<br>
+:return:&nbsp;volume&nbsp;in&nbsp;inverse-Angstroms</tt></dd></dl>
  <dl><dt><a name="-detector_rotate"><strong>detector_rotate</strong></a>(detector_position_mm=(0, 1000.0, 0), delta=0.0, gamma=0.0, labmatrix=array([[1., 0., 0.],
        [0., 1., 0.],
        [0., 0., 1.]]))</dt><dd><tt>Return&nbsp;a&nbsp;position&nbsp;array&nbsp;for&nbsp;a&nbsp;vector&nbsp;rotated&nbsp;by&nbsp;delta&nbsp;and&nbsp;gamma,&nbsp;like&nbsp;a&nbsp;detector&nbsp;along&nbsp;[0,1,0]<br>
@@ -260,6 +278,50 @@ E.G.:<br>
 :param&nbsp;gamma:&nbsp;horizontal&nbsp;rotation&nbsp;about&nbsp;x-axis&nbsp;in&nbsp;Deg<br>
 :param&nbsp;labmatrix:&nbsp;[3*3]&nbsp;orientation&nbsp;matrix&nbsp;to&nbsp;convert&nbsp;to&nbsp;alternative&nbsp;basis<br>
 :return:&nbsp;array</tt></dd></dl>
+ <dl><dt><a name="-detector_volume"><strong>detector_volume</strong></a>(wavelength_a=1.5, resolution=0.1, phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0, detector_distance_mm=565, height_mm=67, width_mm=34, lab=array([[1., 0., 0.],
+       [0., 1., 0.],
+       [0., 0., 1.]]))</dt><dd><tt>Determine&nbsp;volume&nbsp;of&nbsp;reciprocal&nbsp;space&nbsp;covered&nbsp;by&nbsp;the&nbsp;detector,&nbsp;return&nbsp;list&nbsp;of&nbsp;voxels&nbsp;covered&nbsp;by&nbsp;detector<br>
+&nbsp;&nbsp;total_volume,&nbsp;hkl&nbsp;=&nbsp;<a href="#-detector_volume">detector_volume</a>(1.5,&nbsp;0.1,&nbsp;chi=90,&nbsp;eta=30,&nbsp;delta=60)<br>
+The&nbsp;returned&nbsp;list&nbsp;of&nbsp;coordinates&nbsp;(hkl)&nbsp;is&nbsp;defined&nbsp;in&nbsp;the&nbsp;sample&nbsp;frame,&nbsp;where&nbsp;each&nbsp;coordinate&nbsp;specifies&nbsp;a&nbsp;voxel<br>
+in&nbsp;reciprocal&nbsp;space&nbsp;with&nbsp;size&nbsp;resolution(inverse-Anstroms)&nbsp;**&nbsp;3<br>
+As&nbsp;such,&nbsp;the&nbsp;total&nbsp;volume&nbsp;of&nbsp;reciprocal&nbsp;space&nbsp;measured&nbsp;is:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;total_volume&nbsp;=&nbsp;len(hkl)&nbsp;*&nbsp;fc.<a href="#-wavevector">wavevector</a>(energy_kev=energy_range_ev&nbsp;/&nbsp;1000.)&nbsp;**&nbsp;3<br>
+&nbsp;<br>
+:param&nbsp;wavelength_a:&nbsp;Incicent&nbsp;beam&nbsp;wavelength,&nbsp;in&nbsp;Angstroms<br>
+:param&nbsp;resolution:&nbsp;Incident&nbsp;beam&nbsp;resolution,&nbsp;in&nbsp;inverse-Angstroms&nbsp;(determines&nbsp;segmentation&nbsp;of&nbsp;calculation)<br>
+:param&nbsp;phi:&nbsp;float,&nbsp;phi-axis&nbsp;rotation&nbsp;about&nbsp;sample-z&nbsp;axis<br>
+:param&nbsp;chi:&nbsp;float,&nbsp;chi-axis&nbsp;rotation&nbsp;about&nbsp;sample-y'&nbsp;axis<br>
+:param&nbsp;eta:&nbsp;float,&nbsp;eta-axis&nbsp;rotation&nbsp;about&nbsp;sample-z''&nbsp;axis<br>
+:param&nbsp;mu:&nbsp;float,&nbsp;mu-axis&nbsp;rotation&nbsp;about&nbsp;sample-x'''&nbsp;axis<br>
+:param&nbsp;delta:&nbsp;float,&nbsp;detector&nbsp;rotation&nbsp;vertical&nbsp;rotation<br>
+:param&nbsp;gamma:&nbsp;float,&nbsp;detector&nbsp;rotation&nbsp;horizontal&nbsp;rotation<br>
+:param&nbsp;detector_distance_mm:&nbsp;Detector&nbsp;distance&nbsp;from&nbsp;sample&nbsp;in&nbsp;mm<br>
+:param&nbsp;height_mm:&nbsp;Detector&nbsp;size&nbsp;in&nbsp;the&nbsp;vertical&nbsp;direction,&nbsp;in&nbsp;mm<br>
+:param&nbsp;width_mm:&nbsp;Detector&nbsp;size&nbsp;in&nbsp;the&nbsp;horizontal&nbsp;direction,&nbsp;in&nbsp;mm<br>
+:param&nbsp;lab:&nbsp;[3x3]&nbsp;Transformation&nbsp;matrix&nbsp;to&nbsp;change&nbsp;the&nbsp;lab&nbsp;coordinate&nbsp;system<br>
+:return&nbsp;total_volume:&nbsp;float,&nbsp;total&nbsp;volume&nbsp;of&nbsp;reciprocal&nbsp;space&nbsp;in&nbsp;inverse&nbsp;Angstroms<br>
+:return&nbsp;hkl:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;voxels&nbsp;covered&nbsp;by&nbsp;detector,&nbsp;integer&nbsp;coordinates&nbsp;in&nbsp;the&nbsp;sample&nbsp;frame</tt></dd></dl>
+ <dl><dt><a name="-detector_volume_scan"><strong>detector_volume_scan</strong></a>(wavelength_a=1.5, resolution=0.1, phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0, detector_distance_mm=565, height_mm=67, width_mm=34, lab=array([[1., 0., 0.],
+       [0., 1., 0.],
+       [0., 0., 1.]]))</dt><dd><tt>Return&nbsp;total&nbsp;reciprocal&nbsp;space&nbsp;volume&nbsp;covered&nbsp;by&nbsp;scanning&nbsp;an&nbsp;axis&nbsp;with&nbsp;a&nbsp;detector<br>
+&nbsp;&nbsp;total,&nbsp;hkl,&nbsp;overlaps&nbsp;=&nbsp;<a href="#-detector_volume_scan">detector_volume_scan</a>(1.5,&nbsp;0.1,&nbsp;phi=np.arange(-180,180))<br>
+Rotation&nbsp;axes&nbsp;can&nbsp;be&nbsp;specified&nbsp;as&nbsp;either&nbsp;floats&nbsp;or&nbsp;arrays,&nbsp;where&nbsp;all&nbsp;arrays&nbsp;must&nbsp;have&nbsp;the&nbsp;same&nbsp;length.<br>
+&nbsp;<br>
+:param&nbsp;wavelength_a:&nbsp;Incicent&nbsp;beam&nbsp;wavelength,&nbsp;in&nbsp;Angstroms<br>
+:param&nbsp;resolution:&nbsp;Incident&nbsp;beam&nbsp;resolution,&nbsp;in&nbsp;inverse-Angstroms&nbsp;(determines&nbsp;segmentation&nbsp;of&nbsp;calculation)<br>
+:param&nbsp;phi:&nbsp;float&nbsp;or&nbsp;array,&nbsp;phi-axis&nbsp;about&nbsp;sample-z&nbsp;axis<br>
+:param&nbsp;chi:&nbsp;float&nbsp;or&nbsp;array,&nbsp;chi-axis&nbsp;about&nbsp;sample-y'&nbsp;axis<br>
+:param&nbsp;eta:&nbsp;float&nbsp;or&nbsp;array,&nbsp;eta-axis&nbsp;about&nbsp;sample-z''&nbsp;axis<br>
+:param&nbsp;mu:&nbsp;float&nbsp;or&nbsp;array,&nbsp;mu-axis&nbsp;about&nbsp;sample-x'''&nbsp;axis<br>
+:param&nbsp;delta:&nbsp;float&nbsp;or&nbsp;array,&nbsp;detector&nbsp;vertical&nbsp;rotation<br>
+:param&nbsp;gamma:&nbsp;float&nbsp;or&nbsp;array,&nbsp;detector&nbsp;horizontal&nbsp;rotation<br>
+:param&nbsp;detector_distance_mm:&nbsp;Detector&nbsp;distance&nbsp;from&nbsp;sample&nbsp;in&nbsp;mm<br>
+:param&nbsp;height_mm:&nbsp;Detector&nbsp;size&nbsp;in&nbsp;the&nbsp;vertical&nbsp;direction,&nbsp;in&nbsp;mm<br>
+:param&nbsp;width_mm:&nbsp;Detector&nbsp;size&nbsp;in&nbsp;the&nbsp;horizontal&nbsp;direction,&nbsp;in&nbsp;mm<br>
+:param&nbsp;lab:&nbsp;[3x3]&nbsp;Transformation&nbsp;matrix&nbsp;to&nbsp;change&nbsp;the&nbsp;lab&nbsp;coordinate&nbsp;system<br>
+:return&nbsp;total:&nbsp;float,&nbsp;total&nbsp;volume&nbsp;covered,&nbsp;in&nbsp;cubic&nbsp;inverse&nbsp;Angstroms<br>
+:return&nbsp;hkl:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;voxels&nbsp;covered&nbsp;by&nbsp;detector,&nbsp;integer&nbsp;coordinates&nbsp;in&nbsp;the&nbsp;sample&nbsp;frame<br>
+:return&nbsp;overlaps:&nbsp;[n]&nbsp;array&nbsp;of&nbsp;the&nbsp;number&nbsp;of&nbsp;times&nbsp;each&nbsp;voxel&nbsp;has&nbsp;been&nbsp;repeatedly&nbsp;measured&nbsp;(0&nbsp;=&nbsp;only&nbsp;measurred&nbsp;once)</tt></dd></dl>
  <dl><dt><a name="-diff2lab"><strong>diff2lab</strong></a>(vec, lab=None)</dt><dd><tt>Convert&nbsp;between&nbsp;diffractometer&nbsp;frame&nbsp;and&nbsp;lab&nbsp;frame<br>
 Lab&nbsp;frame&nbsp;according&nbsp;to&nbsp;Diamond&nbsp;I16&nbsp;beamline<br>
 Diffractometer&nbsp;frame&nbsp;according&nbsp;to&nbsp;Fig.&nbsp;1,&nbsp;H.&nbsp;You,&nbsp;J.&nbsp;Appl.&nbsp;Cryst&nbsp;32&nbsp;(1999),&nbsp;614-623<br>
@@ -323,6 +385,22 @@ The&nbsp;horizontal&nbsp;scattering&nbsp;plane&nbsp;is&nbsp;in&nbsp;the&nbsp;y-z
 :param&nbsp;eta:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees,&nbsp;left&nbsp;handed&nbsp;rotation&nbsp;about&nbsp;z'<br>
 :param&nbsp;mu:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees,&nbsp;right&nbsp;handed&nbsp;rotation&nbsp;about&nbsp;x<br>
 :return:&nbsp;&nbsp;[3*3]&nbsp;array</tt></dd></dl>
+ <dl><dt><a name="-diffractometer_step"><strong>diffractometer_step</strong></a>(wavelength_a=1.5, resolution=0.1, phi=0, chi=0, eta=0, mu=0, delta=0, gamma=0, lab=array([[1., 0., 0.],
+       [0., 1., 0.],
+       [0., 0., 1.]]))</dt><dd><tt>Determine&nbsp;the&nbsp;euler&nbsp;angle&nbsp;steps&nbsp;required&nbsp;to&nbsp;scan&nbsp;through&nbsp;reciprocal&nbsp;space&nbsp;at&nbsp;the&nbsp;required&nbsp;resolutuion<br>
+&nbsp;&nbsp;&nbsp;&nbsp;phi_step,&nbsp;chi_step,&nbsp;eta_step,&nbsp;mu_step&nbsp;=&nbsp;<a href="#-diffractometer_step">diffractometer_step</a>(1.5,&nbsp;0.1,&nbsp;chi=90,&nbsp;eta=20,&nbsp;delta=40)<br>
+The&nbsp;returned&nbsp;step&nbsp;size&nbsp;will&nbsp;provide&nbsp;a&nbsp;rotation&nbsp;that&nbsp;moves&nbsp;the&nbsp;wavevector&nbsp;transfer&nbsp;by&nbsp;approximately&nbsp;the&nbsp;resolutuion.<br>
+Any&nbsp;steps&nbsp;returning&nbsp;0&nbsp;are&nbsp;unsensitive&nbsp;to&nbsp;the&nbsp;rotation&nbsp;in&nbsp;this&nbsp;position<br>
+:param&nbsp;wavelength_a:&nbsp;Incicent&nbsp;beam&nbsp;wavelength,&nbsp;in&nbsp;Angstroms<br>
+:param&nbsp;resolution:&nbsp;float,&nbsp;combined&nbsp;resolution&nbsp;required,&nbsp;in&nbsp;inverse&nbsp;Angstroms<br>
+:param&nbsp;phi:&nbsp;float,&nbsp;phi-axis&nbsp;about&nbsp;sample-z&nbsp;axis<br>
+:param&nbsp;chi:&nbsp;float,&nbsp;chi-axis&nbsp;about&nbsp;sample-y'&nbsp;axis<br>
+:param&nbsp;eta:&nbsp;float,&nbsp;eta-axis&nbsp;about&nbsp;sample-z''&nbsp;axis<br>
+:param&nbsp;mu:&nbsp;float,&nbsp;mu-axis&nbsp;about&nbsp;sample-x'''&nbsp;axis<br>
+:param&nbsp;delta:&nbsp;float,&nbsp;detector&nbsp;vertical&nbsp;rotation<br>
+:param&nbsp;gamma:&nbsp;float,&nbsp;detector&nbsp;horizontal&nbsp;rotation<br>
+:param&nbsp;lab:&nbsp;[3x3]&nbsp;Transformation&nbsp;matrix&nbsp;to&nbsp;change&nbsp;the&nbsp;lab&nbsp;coordinate&nbsp;system<br>
+:returns:&nbsp;phi_step,&nbsp;chi_step,&nbsp;eta_step,&nbsp;mu_step</tt></dd></dl>
  <dl><dt><a name="-dspace2q"><strong>dspace2q</strong></a>(dspace)</dt><dd><tt>Calculate&nbsp;d-spacing&nbsp;from&nbsp;|Q|<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qmag&nbsp;=&nbsp;<a href="#-q2dspace">q2dspace</a>(dspace)</tt></dd></dl>
  <dl><dt><a name="-electron_energy"><strong>electron_energy</strong></a>(wavelength_a)</dt><dd><tt>Calcualte&nbsp;the&nbsp;electron&nbsp;energy&nbsp;in&nbsp;electronvolts&nbsp;using&nbsp;DeBroglie's&nbsp;formula<br>
@@ -357,7 +435,8 @@ Qff&nbsp;=&nbsp;<a href="#-xray_scattering_factor">xray_scattering_factor</a>(el
 :param&nbsp;element:&nbsp;str<br>
 :return:&nbsp;int</tt></dd></dl>
  <dl><dt><a name="-energy2wave"><strong>energy2wave</strong></a>(energy_kev)</dt><dd><tt>Converts&nbsp;energy&nbsp;in&nbsp;keV&nbsp;to&nbsp;wavelength&nbsp;in&nbsp;A<br>
-&nbsp;wavelength&nbsp;=&nbsp;<a href="#-energy2wave">energy2wave</a>(energy)</tt></dd></dl>
+&nbsp;wavelength_a&nbsp;=&nbsp;<a href="#-energy2wave">energy2wave</a>(energy_kev)<br>
+&nbsp;lambda&nbsp;[A]&nbsp;=&nbsp;h*c/E&nbsp;=&nbsp;12.3984&nbsp;/&nbsp;E&nbsp;[keV]</tt></dd></dl>
  <dl><dt><a name="-euler_moment"><strong>euler_moment</strong></a>(mxmymz, uv)</dt><dd><tt>Convert&nbsp;moment&nbsp;mxmymz&nbsp;coordinates&nbsp;from&nbsp;cif&nbsp;into&nbsp;eulerian&nbsp;basis<br>
 :param&nbsp;mxmymz:&nbsp;[nx3]&nbsp;array,&nbsp;units&nbsp;of&nbsp;Bohr&nbsp;magneton,&nbsp;directed&nbsp;along&nbsp;a,b,c<br>
 :param&nbsp;uv:&nbsp;[3x3]&nbsp;array,&nbsp;basis&nbsp;vectors&nbsp;[a,b,c]<br>
@@ -701,6 +780,15 @@ E.G.<br>
 :param&nbsp;pixels_width:&nbsp;grid&nbsp;will&nbsp;contain&nbsp;pixels&nbsp;horizontally&nbsp;and&nbsp;the&nbsp;number&nbsp;vertically&nbsp;will&nbsp;be&nbsp;scaled<br>
 :param&nbsp;background:&nbsp;if&nbsp;&gt;0,&nbsp;add&nbsp;a&nbsp;normaly&nbsp;distributed&nbsp;background&nbsp;with&nbsp;average&nbsp;level&nbsp;=&nbsp;background<br>
 :return:&nbsp;x,&nbsp;y,&nbsp;plane</tt></dd></dl>
+ <dl><dt><a name="-peakwidth_deg"><strong>peakwidth_deg</strong></a>(domain_size_a, twotheta, wavelength_a=None, energy_kev=None, instrument_resolution=0)</dt><dd><tt>Return&nbsp;the&nbsp;peak&nbsp;width&nbsp;in&nbsp;degrees&nbsp;for&nbsp;a&nbsp;given&nbsp;two-theta&nbsp;based&nbsp;on&nbsp;the<br>
+crystallite&nbsp;domain&nbsp;size&nbsp;and&nbsp;instrument&nbsp;resolution.<br>
+&nbsp;&nbsp;Equivalent&nbsp;to&nbsp;the&nbsp;Scherrer&nbsp;equation&nbsp;with&nbsp;shape&nbsp;factor&nbsp;1.0<br>
+:param&nbsp;domain_size_a:&nbsp;crystallite&nbsp;domain&nbsp;size&nbsp;in&nbsp;Anstroms<br>
+:param&nbsp;twotheta:&nbsp;scattering&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;wavelength_a:&nbsp;incident&nbsp;beam&nbsp;wavelength,&nbsp;in&nbsp;Angstroms<br>
+:param&nbsp;energy_kev:&nbsp;or,&nbsp;incident&nbsp;beam&nbsp;energy,&nbsp;in&nbsp;keV<br>
+:param&nbsp;instrument_resolution:&nbsp;instrument&nbsp;resolution&nbsp;in&nbsp;inverse&nbsp;Anstroms<br>
+:return:</tt></dd></dl>
  <dl><dt><a name="-photoabsorption_crosssection"><strong>photoabsorption_crosssection</strong></a>(elements, energy_kev)</dt><dd><tt>Calculate&nbsp;the&nbsp;photoabsorption&nbsp;cross&nbsp;section&nbsp;from&nbsp;the&nbsp;atomic&nbsp;scattering&nbsp;factors<br>
 &nbsp;&nbsp;&nbsp;&nbsp;u&nbsp;=&nbsp;2*r0*lambda*f2<br>
 See:&nbsp;https://henke.lbl.gov/optical_constants/intro.html<br>
@@ -723,7 +811,7 @@ See:&nbsp;https://henke.lbl.gov/optical_constants/intro.html<br>
  <dl><dt><a name="-q2units"><strong>q2units</strong></a>(qmag, units='tth', energy_kev=None)</dt><dd><tt>Convert&nbsp;|Q|&nbsp;in&nbsp;A^-1&nbsp;to&nbsp;choice&nbsp;of&nbsp;units<br>
 :param&nbsp;qmag:&nbsp;float&nbsp;or&nbsp;array&nbsp;in&nbsp;inverse-Angstrom<br>
 :param&nbsp;units:&nbsp;str:&nbsp;'tth',&nbsp;'dspace',&nbsp;'q'&nbsp;(raises&nbsp;ValueError&nbsp;if&nbsp;wrong)<br>
-:param&nbsp;energy_kev:&nbsp;float<br>
+:param&nbsp;energy_kev:&nbsp;float&nbsp;or&nbsp;None<br>
 :return:&nbsp;float&nbsp;or&nbsp;array</tt></dd></dl>
  <dl><dt><a name="-read_atom_properties_file"><strong>read_atom_properties_file</strong></a>(filedir)</dt><dd><tt>Reads&nbsp;the&nbsp;text&nbsp;file&nbsp;"Dans&nbsp;Element&nbsp;Properties.txt"<br>
 Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;dicts&nbsp;containing&nbsp;atomic&nbsp;properites&nbsp;from&nbsp;multiple&nbsp;sources<br>
@@ -759,6 +847,12 @@ Some&nbsp;useful&nbsp;standard&nbsp;CIF&nbsp;keywords:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_x<br>
 &nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_y<br>
 &nbsp;&nbsp;&nbsp;&nbsp;_atom_site_fract_z</tt></dd></dl>
+ <dl><dt><a name="-reciprocal_volume"><strong>reciprocal_volume</strong></a>(twotheta, twotheta_min=0, energy_kev=None, wavelength_a=1.5)</dt><dd><tt>Calculate&nbsp;the&nbsp;volume&nbsp;of&nbsp;reciprocal&nbsp;space&nbsp;covered&nbsp;between&nbsp;two&nbsp;scattering&nbsp;angles<br>
+:param&nbsp;twotheta:&nbsp;larger&nbsp;scattering&nbsp;angle&nbsp;(Bragg&nbsp;angle,&nbsp;2theta)<br>
+:param&nbsp;twotheta_min:&nbsp;smaller&nbsp;scattering&nbsp;angle<br>
+:param&nbsp;energy_kev:&nbsp;photon&nbsp;energy,&nbsp;in&nbsp;keV<br>
+:param&nbsp;wavelength_a:&nbsp;wavelength&nbsp;in&nbsp;Angstroms<br>
+:return:&nbsp;float,&nbsp;volume,&nbsp;in&nbsp;Angstroms^-3</tt></dd></dl>
  <dl><dt><a name="-reflections_on_detector"><strong>reflections_on_detector</strong></a>(qxqyqz, energy_kev, det_distance=1.0, det_normal=(0, -1.0, 0), delta=0.0, gamma=0.0, det_width=1.0, det_height=1.0, labmatrix=array([[1., 0., 0.],
        [0., 1., 0.],
        [0., 0., 1.]]))</dt><dd><tt>Return&nbsp;relative&nbsp;position&nbsp;of&nbsp;reflection&nbsp;on&nbsp;detector<br>
@@ -944,7 +1038,8 @@ Diffractometer&nbsp;frame&nbsp;according&nbsp;to&nbsp;Fig.&nbsp;1,&nbsp;H.&nbsp;
 :return:&nbsp;[3*3]&nbsp;array</tt></dd></dl>
  <dl><dt><a name="-warn"><strong>warn</strong></a>(message, category=None, stacklevel=1, source=None)</dt><dd><tt>Issue&nbsp;a&nbsp;warning,&nbsp;or&nbsp;maybe&nbsp;ignore&nbsp;it&nbsp;or&nbsp;raise&nbsp;an&nbsp;exception.</tt></dd></dl>
  <dl><dt><a name="-wave2energy"><strong>wave2energy</strong></a>(wavelength)</dt><dd><tt>Converts&nbsp;wavelength&nbsp;in&nbsp;A&nbsp;to&nbsp;energy&nbsp;in&nbsp;keV<br>
-&nbsp;Energy&nbsp;=&nbsp;<a href="#-wave2energy">wave2energy</a>(wavelength)</tt></dd></dl>
+&nbsp;energy_kev&nbsp;=&nbsp;<a href="#-wave2energy">wave2energy</a>(wavelength_a)<br>
+&nbsp;Energy&nbsp;[keV]&nbsp;=&nbsp;h*c/L&nbsp;=&nbsp;12.3984&nbsp;/&nbsp;lambda&nbsp;[A]</tt></dd></dl>
  <dl><dt><a name="-wavevector"><strong>wavevector</strong></a>(energy_kev=None, wavelength=None)</dt><dd><tt>Return&nbsp;wavevector&nbsp;=&nbsp;2pi/lambda</tt></dd></dl>
  <dl><dt><a name="-wavevector_difference"><strong>wavevector_difference</strong></a>(Q, ki)</dt><dd><tt>Returns&nbsp;the&nbsp;difference&nbsp;between&nbsp;reciprocal&nbsp;lattice&nbsp;coordinates&nbsp;and&nbsp;incident&nbsp;wavevector,&nbsp;in&nbsp;A-1<br>
 When&nbsp;the&nbsp;difference&nbsp;is&nbsp;zero,&nbsp;the&nbsp;condition&nbsp;for&nbsp;diffraction&nbsp;is&nbsp;met.<br>
@@ -955,6 +1050,12 @@ When&nbsp;the&nbsp;difference&nbsp;is&nbsp;zero,&nbsp;the&nbsp;condition&nbsp;fo
 :param&nbsp;Q:&nbsp;[[nx3]]&nbsp;array&nbsp;of&nbsp;reciprocal&nbsp;lattice&nbsp;coordinates,&nbsp;in&nbsp;A-1<br>
 :param&nbsp;ki:&nbsp;[x,y,z]&nbsp;incident&nbsp;wavevector,&nbsp;in&nbsp;A-1<br>
 :return:&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;difference,&nbsp;in&nbsp;A-1</tt></dd></dl>
+ <dl><dt><a name="-wavevector_resolution"><strong>wavevector_resolution</strong></a>(energy_range_ev=200, wavelength_range_a=None, domain_size_a=1000)</dt><dd><tt>Calculate&nbsp;the&nbsp;combined&nbsp;wavevector&nbsp;resolutuion&nbsp;in&nbsp;inverse&nbsp;Angstroms<br>
+Combines&nbsp;instrument&nbsp;incident&nbsp;beam&nbsp;resolution&nbsp;and&nbsp;the&nbsp;mosaic&nbsp;of&nbsp;the&nbsp;crystal<br>
+:param&nbsp;energy_range_ev:&nbsp;Incident&nbsp;x-ray&nbsp;beam&nbsp;resolution&nbsp;in&nbsp;eV<br>
+:param&nbsp;wavelength_range_a:&nbsp;Incident&nbsp;beam&nbsp;resolution&nbsp;in&nbsp;Angstroms<br>
+:param&nbsp;domain_size_a:&nbsp;crysallite&nbsp;size&nbsp;in&nbsp;Angstroms&nbsp;(provides&nbsp;mosic&nbsp;using&nbsp;Scherrer&nbsp;equation)<br>
+:return:&nbsp;float,&nbsp;resolutuion&nbsp;in&nbsp;inverse&nbsp;Angstroms</tt></dd></dl>
  <dl><dt><a name="-write_cif"><strong>write_cif</strong></a>(cifvals, filename=None, comments=None)</dt><dd><tt>Write&nbsp;.cif&nbsp;file&nbsp;with&nbsp;values&nbsp;from&nbsp;a&nbsp;cif&nbsp;dict,<br>
 Only&nbsp;basic&nbsp;items&nbsp;are&nbsp;saved,&nbsp;rather&nbsp;than&nbsp;returning&nbsp;the&nbsp;orginal&nbsp;file<br>
 :param&nbsp;cifvals:&nbsp;dict&nbsp;from&nbsp;readcif<br>

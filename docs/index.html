@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>Dans_Diffraction</strong></big></big> (version 3.1.0, 20/07/23)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>Dans_Diffraction</strong></big></big> (version 3.2.0, 19/05/24)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5C__init__.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\__init__.py</a></font></td></tr></table>
     <p><tt>Dans_Diffraction<br>
@@ -20,7 +20,7 @@ or<br>
 $&nbsp;python&nbsp;-m&nbsp;pip&nbsp;install&nbsp;git+https://github.com/DanPorter/Dans_Diffraction.git<br>
 &nbsp;<br>
 Requirements:<br>
-Python&nbsp;2.7+/3+&nbsp;with&nbsp;packages:&nbsp;Numpy,&nbsp;Matplotlib,&nbsp;Tkinter<br>
+Python&nbsp;3.5+&nbsp;with&nbsp;packages:&nbsp;Numpy,&nbsp;Matplotlib,&nbsp;Tkinter<br>
 BuiltIn&nbsp;packages&nbsp;used:&nbsp;sys,&nbsp;os,&nbsp;re,&nbsp;glob,&nbsp;warnings,&nbsp;json,&nbsp;itertools<br>
 &nbsp;<br>
 Usage:<br>
@@ -41,8 +41,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;3.1.0<br>
-Last&nbsp;updated:&nbsp;11/07/23<br>
+Version&nbsp;3.2.0<br>
+Last&nbsp;updated:&nbsp;19/05/24<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 02/03/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;History&nbsp;started.<br>
@@ -80,6 +80,12 @@ Version&nbsp;History:<br>
 25/06/23&nbsp;3.0.0&nbsp;&nbsp;Added&nbsp;new&nbsp;GUI&nbsp;elements&nbsp;including&nbsp;new&nbsp;Scattering&nbsp;UI&nbsp;and&nbsp;diffractomter&nbsp;simulator,&nbsp;plus&nbsp;other&nbsp;updates<br>
 11/07/23&nbsp;3.0.1&nbsp;&nbsp;Some&nbsp;fixes&nbsp;for&nbsp;plotting&nbsp;and&nbsp;additions&nbsp;to&nbsp;diffractometer&nbsp;orientation.&nbsp;Thanks&nbsp;asteppke!<br>
 20/07/23&nbsp;3.1.0&nbsp;&nbsp;Refactored&nbsp;FDMNES&nbsp;wrapper&nbsp;with&nbsp;new&nbsp;methods&nbsp;and&nbsp;new&nbsp;defaults.&nbsp;Thanks&nbsp;YvesJoly!<br>
+26/09/23&nbsp;3.1.1&nbsp;&nbsp;Minor&nbsp;changes&nbsp;and&nbsp;improvments.&nbsp;Added&nbsp;hkl1,&nbsp;hkl2&nbsp;=&nbsp;xtl.scatter.orientation_reflections()<br>
+19/10/23&nbsp;3.1.2&nbsp;&nbsp;xray_resonant()&nbsp;now&nbsp;works&nbsp;with&nbsp;non-cubic&nbsp;systems,&nbsp;fixed&nbsp;scaling&nbsp;issue&nbsp;in&nbsp;diffractometer.py<br>
+25/10/23&nbsp;3.1.3&nbsp;&nbsp;Fixed&nbsp;error&nbsp;with&nbsp;powder&nbsp;plot&nbsp;for&nbsp;Neutrons.&nbsp;Thanks&nbsp;Cyril!<br>
+28/03/24&nbsp;3.1.4&nbsp;&nbsp;Fixed&nbsp;error&nbsp;with&nbsp;site&nbsp;symmetries&nbsp;having&nbsp;spaces&nbsp;in&nbsp;AtomsGui,&nbsp;added&nbsp;Properties.relative_positions()<br>
+10/05/24&nbsp;3.1.5&nbsp;&nbsp;Fixed&nbsp;SyntaxWarnings&nbsp;from&nbsp;Unrecognized&nbsp;escape&nbsp;sequences&nbsp;in&nbsp;Python&nbsp;3.12,&nbsp;various&nbsp;fixes&nbsp;to&nbsp;scattering<br>
+15/05/24&nbsp;3.2.0&nbsp;&nbsp;Added&nbsp;"save"&nbsp;and&nbsp;"load"&nbsp;methods&nbsp;to&nbsp;structure&nbsp;factor&nbsp;calculation,&nbsp;improved&nbsp;powder&nbsp;for&nbsp;large&nbsp;calculations<br>
 &nbsp;<br>
 Acknoledgements:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;2018&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Hepesu&nbsp;for&nbsp;help&nbsp;with&nbsp;Python3&nbsp;support&nbsp;and&nbsp;ideas&nbsp;about&nbsp;breaking&nbsp;up&nbsp;calculations<br>
@@ -97,9 +103,13 @@ Acknoledgements:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;June&nbsp;2023&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Sergio&nbsp;I.&nbsp;Rincon&nbsp;for&nbsp;pointing&nbsp;out&nbsp;the&nbsp;rounding&nbsp;error&nbsp;in&nbsp;Scatter.powder<br>
 &nbsp;&nbsp;&nbsp;&nbsp;July&nbsp;2023&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;asteppke&nbsp;for&nbsp;suggested&nbsp;update&nbsp;to&nbsp;Arrow3D&nbsp;for&nbsp;matplotlib&nbsp;V&gt;3.4<br>
 &nbsp;&nbsp;&nbsp;&nbsp;July&nbsp;2023&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Yves&nbsp;Joly&nbsp;for&nbsp;helpful&nbsp;suggestions&nbsp;on&nbsp;FDMNES&nbsp;wrapper<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Oct&nbsp;2023&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;asteppke&nbsp;for&nbsp;pointing&nbsp;out&nbsp;scaling&nbsp;issue&nbsp;in&nbsp;diffractometer&nbsp;gui<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Oct&nbsp;2023&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Cyril&nbsp;Cayron&nbsp;for&nbsp;pointing&nbsp;out&nbsp;the&nbsp;error&nbsp;with&nbsp;plotting&nbsp;neutron&nbsp;power&nbsp;spectra<br>
+&nbsp;&nbsp;&nbsp;&nbsp;May&nbsp;2024&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Innbig&nbsp;for&nbsp;spotting&nbsp;some&nbsp;errors&nbsp;in&nbsp;large&nbsp;liquid&nbsp;crystal&nbsp;powder&nbsp;patterns<br>
+&nbsp;&nbsp;&nbsp;&nbsp;May&nbsp;2024&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;paul-cares&nbsp;pointing&nbsp;out&nbsp;a&nbsp;silly&nbsp;spelling&nbsp;error&nbsp;in&nbsp;the&nbsp;title!<br>
 &nbsp;<br>
 -----------------------------------------------------------------------------<br>
-&nbsp;&nbsp;&nbsp;Copyright&nbsp;2023&nbsp;Diamond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
+&nbsp;&nbsp;&nbsp;Copyright&nbsp;2024&nbsp;Diamond&nbsp;Light&nbsp;Source&nbsp;Ltd.<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;Licensed&nbsp;under&nbsp;the&nbsp;Apache&nbsp;License,&nbsp;Version&nbsp;2.0&nbsp;(the&nbsp;"License");<br>
 &nbsp;&nbsp;&nbsp;you&nbsp;may&nbsp;not&nbsp;use&nbsp;this&nbsp;file&nbsp;except&nbsp;in&nbsp;compliance&nbsp;with&nbsp;the&nbsp;License.<br>

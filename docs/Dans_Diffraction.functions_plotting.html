@@ -103,137 +103,184 @@ Useage:<br>
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="Arrow3D-__init__"><strong>__init__</strong></a>(self, xs, ys, zs, *args, **kwargs)</dt><dd><tt>If&nbsp;*posA*&nbsp;and&nbsp;*posB*&nbsp;are&nbsp;given,&nbsp;a&nbsp;path&nbsp;connecting&nbsp;two&nbsp;points&nbsp;is<br>
-created&nbsp;according&nbsp;to&nbsp;*connectionstyle*.&nbsp;The&nbsp;path&nbsp;will&nbsp;be<br>
-clipped&nbsp;with&nbsp;*patchA*&nbsp;and&nbsp;*patchB*&nbsp;and&nbsp;further&nbsp;shrunken&nbsp;by<br>
-*shrinkA*&nbsp;and&nbsp;*shrinkB*.&nbsp;An&nbsp;arrow&nbsp;is&nbsp;drawn&nbsp;along&nbsp;this<br>
-resulting&nbsp;path&nbsp;using&nbsp;the&nbsp;*arrowstyle*&nbsp;parameter.<br>
+<dl><dt><a name="Arrow3D-__init__"><strong>__init__</strong></a>(self, xs, ys, zs, *args, **kwargs)</dt><dd><tt>There&nbsp;are&nbsp;two&nbsp;ways&nbsp;for&nbsp;defining&nbsp;an&nbsp;arrow:<br>
 &nbsp;<br>
-Alternatively&nbsp;if&nbsp;*path*&nbsp;is&nbsp;provided,&nbsp;an&nbsp;arrow&nbsp;is&nbsp;drawn&nbsp;along&nbsp;this&nbsp;path<br>
-and&nbsp;*patchA*,&nbsp;*patchB*,&nbsp;*shrinkA*,&nbsp;and&nbsp;*shrinkB*&nbsp;are&nbsp;ignored.<br>
+-&nbsp;If&nbsp;*posA*&nbsp;and&nbsp;*posB*&nbsp;are&nbsp;given,&nbsp;a&nbsp;path&nbsp;connecting&nbsp;two&nbsp;points&nbsp;is<br>
+&nbsp;&nbsp;created&nbsp;according&nbsp;to&nbsp;*connectionstyle*.&nbsp;The&nbsp;path&nbsp;will&nbsp;be<br>
+&nbsp;&nbsp;clipped&nbsp;with&nbsp;*patchA*&nbsp;and&nbsp;*patchB*&nbsp;and&nbsp;further&nbsp;shrunken&nbsp;by<br>
+&nbsp;&nbsp;*shrinkA*&nbsp;and&nbsp;*shrinkB*.&nbsp;An&nbsp;arrow&nbsp;is&nbsp;drawn&nbsp;along&nbsp;this<br>
+&nbsp;&nbsp;resulting&nbsp;path&nbsp;using&nbsp;the&nbsp;*arrowstyle*&nbsp;parameter.<br>
+&nbsp;<br>
+-&nbsp;Alternatively&nbsp;if&nbsp;*path*&nbsp;is&nbsp;provided,&nbsp;an&nbsp;arrow&nbsp;is&nbsp;drawn&nbsp;along&nbsp;this<br>
+&nbsp;&nbsp;path&nbsp;and&nbsp;*patchA*,&nbsp;*patchB*,&nbsp;*shrinkA*,&nbsp;and&nbsp;*shrinkB*&nbsp;are&nbsp;ignored.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
+posA,&nbsp;posB&nbsp;:&nbsp;(float,&nbsp;float),&nbsp;default:&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(x,&nbsp;y)&nbsp;coordinates&nbsp;of&nbsp;arrow&nbsp;tail&nbsp;and&nbsp;arrow&nbsp;head&nbsp;respectively.<br>
 &nbsp;<br>
-posA,&nbsp;posB&nbsp;:&nbsp;None,&nbsp;tuple,&nbsp;optional&nbsp;(default:&nbsp;None)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(x,y)&nbsp;coordinates&nbsp;of&nbsp;arrow&nbsp;tail&nbsp;and&nbsp;arrow&nbsp;head&nbsp;respectively.<br>
+path&nbsp;:&nbsp;`~matplotlib.path.Path`,&nbsp;default:&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;provided,&nbsp;an&nbsp;arrow&nbsp;is&nbsp;drawn&nbsp;along&nbsp;this&nbsp;path&nbsp;and&nbsp;*patchA*,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*patchB*,&nbsp;*shrinkA*,&nbsp;and&nbsp;*shrinkB*&nbsp;are&nbsp;ignored.<br>
 &nbsp;<br>
-path&nbsp;:&nbsp;None,&nbsp;Path&nbsp;(default:&nbsp;None)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;:class:`matplotlib.path.Path`&nbsp;instance.&nbsp;If&nbsp;provided,&nbsp;an&nbsp;arrow&nbsp;is<br>
-&nbsp;&nbsp;&nbsp;&nbsp;drawn&nbsp;along&nbsp;this&nbsp;path&nbsp;and&nbsp;*patchA*,&nbsp;*patchB*,&nbsp;*shrinkA*,&nbsp;and<br>
-&nbsp;&nbsp;&nbsp;&nbsp;*shrinkB*&nbsp;are&nbsp;ignored.<br>
-&nbsp;<br>
-arrowstyle&nbsp;:&nbsp;str&nbsp;or&nbsp;ArrowStyle,&nbsp;optional&nbsp;(default:&nbsp;'simple')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Describes&nbsp;how&nbsp;the&nbsp;fancy&nbsp;arrow&nbsp;will&nbsp;be<br>
-&nbsp;&nbsp;&nbsp;&nbsp;drawn.&nbsp;It&nbsp;can&nbsp;be&nbsp;string&nbsp;of&nbsp;the&nbsp;available&nbsp;arrowstyle&nbsp;names,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;optional&nbsp;comma-separated&nbsp;attributes,&nbsp;or&nbsp;an<br>
-&nbsp;&nbsp;&nbsp;&nbsp;:class:`ArrowStyle`&nbsp;instance.&nbsp;The&nbsp;optional&nbsp;attributes&nbsp;are&nbsp;meant&nbsp;to<br>
-&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;scaled&nbsp;with&nbsp;the&nbsp;*mutation_scale*.&nbsp;The&nbsp;following&nbsp;arrow&nbsp;styles&nbsp;are<br>
-&nbsp;&nbsp;&nbsp;&nbsp;available:<br>
+arrowstyle&nbsp;:&nbsp;str&nbsp;or&nbsp;`.ArrowStyle`,&nbsp;default:&nbsp;'simple'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;`.ArrowStyle`&nbsp;with&nbsp;which&nbsp;the&nbsp;fancy&nbsp;arrow&nbsp;is&nbsp;drawn.&nbsp;&nbsp;If&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;string,&nbsp;it&nbsp;should&nbsp;be&nbsp;one&nbsp;of&nbsp;the&nbsp;available&nbsp;arrowstyle&nbsp;names,&nbsp;with<br>
+&nbsp;&nbsp;&nbsp;&nbsp;optional&nbsp;comma-separated&nbsp;attributes.&nbsp;&nbsp;The&nbsp;optional&nbsp;attributes&nbsp;are<br>
+&nbsp;&nbsp;&nbsp;&nbsp;meant&nbsp;to&nbsp;be&nbsp;scaled&nbsp;with&nbsp;the&nbsp;*mutation_scale*.&nbsp;&nbsp;The&nbsp;following&nbsp;arrow<br>
+&nbsp;&nbsp;&nbsp;&nbsp;styles&nbsp;are&nbsp;available:<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;=============&nbsp;&nbsp;&nbsp;==========&nbsp;&nbsp;&nbsp;==========================================================================<br>
-&nbsp;&nbsp;Class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Attrs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;=============&nbsp;&nbsp;&nbsp;==========&nbsp;&nbsp;&nbsp;==========================================================================<br>
-&nbsp;&nbsp;Curve&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``-``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;CurveB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``-&gt;``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;BracketB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``-[``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;widthB=1.0,&nbsp;lengthB=0.2,&nbsp;angleB=None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;CurveFilledB&nbsp;&nbsp;&nbsp;&nbsp;``-|&gt;``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;CurveA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``&lt;-``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;CurveAB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``&lt;-&gt;``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;CurveFilledA&nbsp;&nbsp;&nbsp;&nbsp;``&lt;|-``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;CurveFilledAB&nbsp;&nbsp;&nbsp;``&lt;|-|&gt;``&nbsp;&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;BracketA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``]-``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;widthA=1.0,&nbsp;lengthA=0.2,&nbsp;angleA=None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;BracketAB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``]-[``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;widthA=1.0,&nbsp;lengthA=0.2,&nbsp;angleA=None,&nbsp;widthB=1.0,&nbsp;lengthB=0.2,&nbsp;angleB=None<br>
-&nbsp;&nbsp;Fancy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``fancy``&nbsp;&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.4,&nbsp;tail_width=0.4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;Simple&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``simple``&nbsp;&nbsp;&nbsp;head_length=0.5,&nbsp;head_width=0.5,&nbsp;tail_width=0.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;Wedge&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``wedge``&nbsp;&nbsp;&nbsp;&nbsp;tail_width=0.3,&nbsp;shrink_factor=0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;BarAB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``|-|``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;widthA=1.0,&nbsp;angleA=None,&nbsp;widthB=1.0,&nbsp;angleB=None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;=============&nbsp;&nbsp;&nbsp;==========&nbsp;&nbsp;&nbsp;==========================================================================<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=============&nbsp;&nbsp;==========&nbsp;&nbsp;===============================================================================================================================<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Attrs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=============&nbsp;&nbsp;==========&nbsp;&nbsp;===============================================================================================================================<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Curve&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``-``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;CurveA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``&lt;-``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.2,&nbsp;widthA=1.0,&nbsp;widthB=1.0,&nbsp;lengthA=0.2,&nbsp;lengthB=0.2,&nbsp;angleA=0,&nbsp;angleB=0,&nbsp;scaleA=None,&nbsp;scaleB=None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;CurveB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``-&gt;``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.2,&nbsp;widthA=1.0,&nbsp;widthB=1.0,&nbsp;lengthA=0.2,&nbsp;lengthB=0.2,&nbsp;angleA=0,&nbsp;angleB=0,&nbsp;scaleA=None,&nbsp;scaleB=None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;CurveAB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``&lt;-&gt;``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.2,&nbsp;widthA=1.0,&nbsp;widthB=1.0,&nbsp;lengthA=0.2,&nbsp;lengthB=0.2,&nbsp;angleA=0,&nbsp;angleB=0,&nbsp;scaleA=None,&nbsp;scaleB=None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;CurveFilledA&nbsp;&nbsp;&nbsp;``&lt;|-``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.2,&nbsp;widthA=1.0,&nbsp;widthB=1.0,&nbsp;lengthA=0.2,&nbsp;lengthB=0.2,&nbsp;angleA=0,&nbsp;angleB=0,&nbsp;scaleA=None,&nbsp;scaleB=None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;CurveFilledB&nbsp;&nbsp;&nbsp;``-|&gt;``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.2,&nbsp;widthA=1.0,&nbsp;widthB=1.0,&nbsp;lengthA=0.2,&nbsp;lengthB=0.2,&nbsp;angleA=0,&nbsp;angleB=0,&nbsp;scaleA=None,&nbsp;scaleB=None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;CurveFilledAB&nbsp;&nbsp;``&lt;|-|&gt;``&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.2,&nbsp;widthA=1.0,&nbsp;widthB=1.0,&nbsp;lengthA=0.2,&nbsp;lengthB=0.2,&nbsp;angleA=0,&nbsp;angleB=0,&nbsp;scaleA=None,&nbsp;scaleB=None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;BracketA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``]-``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;widthA=1.0,&nbsp;lengthA=0.2,&nbsp;angleA=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;BracketB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``-[``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;widthB=1.0,&nbsp;lengthB=0.2,&nbsp;angleB=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;BracketAB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``]-[``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;widthA=1.0,&nbsp;lengthA=0.2,&nbsp;angleA=0,&nbsp;widthB=1.0,&nbsp;lengthB=0.2,&nbsp;angleB=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;BarAB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``|-|``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;widthA=1.0,&nbsp;angleA=0,&nbsp;widthB=1.0,&nbsp;angleB=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;BracketCurve&nbsp;&nbsp;&nbsp;``]-&gt;``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;widthA=1.0,&nbsp;lengthA=0.2,&nbsp;angleA=None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;CurveBracket&nbsp;&nbsp;&nbsp;``&lt;-[``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;widthB=1.0,&nbsp;lengthB=0.2,&nbsp;angleB=None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Simple&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``simple``&nbsp;&nbsp;head_length=0.5,&nbsp;head_width=0.5,&nbsp;tail_width=0.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Fancy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``fancy``&nbsp;&nbsp;&nbsp;head_length=0.4,&nbsp;head_width=0.4,&nbsp;tail_width=0.4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Wedge&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``wedge``&nbsp;&nbsp;&nbsp;tail_width=0.3,&nbsp;shrink_factor=0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=============&nbsp;&nbsp;==========&nbsp;&nbsp;===============================================================================================================================<br>
 &nbsp;<br>
-&nbsp;<br>
-arrow_transmuter<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Ignored<br>
-&nbsp;<br>
-connectionstyle&nbsp;:&nbsp;str,&nbsp;ConnectionStyle,&nbsp;or&nbsp;None,&nbsp;optional<br>
-(default:&nbsp;'arc3')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Describes&nbsp;how&nbsp;*posA*&nbsp;and&nbsp;*posB*&nbsp;are&nbsp;connected.&nbsp;It&nbsp;can&nbsp;be&nbsp;an<br>
-&nbsp;&nbsp;&nbsp;&nbsp;instance&nbsp;of&nbsp;the&nbsp;:class:`ConnectionStyle`&nbsp;class&nbsp;or&nbsp;a&nbsp;string&nbsp;of&nbsp;the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;connectionstyle&nbsp;name,&nbsp;with&nbsp;optional&nbsp;comma-separated&nbsp;attributes.&nbsp;The<br>
-&nbsp;&nbsp;&nbsp;&nbsp;following&nbsp;connection&nbsp;styles&nbsp;are&nbsp;available:<br>
+connectionstyle&nbsp;:&nbsp;str&nbsp;or&nbsp;`.ConnectionStyle`&nbsp;or&nbsp;None,&nbsp;optional,&nbsp;default:&nbsp;'arc3'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;`.ConnectionStyle`&nbsp;with&nbsp;which&nbsp;*posA*&nbsp;and&nbsp;*posB*&nbsp;are&nbsp;connected.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;a&nbsp;string,&nbsp;it&nbsp;should&nbsp;be&nbsp;one&nbsp;of&nbsp;the&nbsp;available&nbsp;connectionstyle<br>
+&nbsp;&nbsp;&nbsp;&nbsp;names,&nbsp;with&nbsp;optional&nbsp;comma-separated&nbsp;attributes.&nbsp;&nbsp;The&nbsp;following<br>
+&nbsp;&nbsp;&nbsp;&nbsp;connection&nbsp;styles&nbsp;are&nbsp;available:<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;======&nbsp;&nbsp;&nbsp;==========&nbsp;&nbsp;&nbsp;=================================================<br>
-&nbsp;&nbsp;Class&nbsp;&nbsp;&nbsp;&nbsp;Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Attrs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;======&nbsp;&nbsp;&nbsp;==========&nbsp;&nbsp;&nbsp;=================================================<br>
-&nbsp;&nbsp;Angle&nbsp;&nbsp;&nbsp;&nbsp;``angle``&nbsp;&nbsp;&nbsp;&nbsp;angleA=90,&nbsp;angleB=0,&nbsp;rad=0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;Angle3&nbsp;&nbsp;&nbsp;``angle3``&nbsp;&nbsp;&nbsp;angleA=90,&nbsp;angleB=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;Arc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``arc``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;angleA=0,&nbsp;angleB=0,&nbsp;armA=None,&nbsp;armB=None,&nbsp;rad=0.0<br>
-&nbsp;&nbsp;Arc3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``arc3``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rad=0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;Bar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``bar``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;armA=0.0,&nbsp;armB=0.0,&nbsp;fraction=0.3,&nbsp;angle=None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;======&nbsp;&nbsp;&nbsp;==========&nbsp;&nbsp;&nbsp;=================================================<br>
+&nbsp;&nbsp;&nbsp;&nbsp;======&nbsp;&nbsp;==========&nbsp;&nbsp;=================================================<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Class&nbsp;&nbsp;&nbsp;Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Attrs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;======&nbsp;&nbsp;==========&nbsp;&nbsp;=================================================<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Arc3&nbsp;&nbsp;&nbsp;&nbsp;``arc3``&nbsp;&nbsp;&nbsp;&nbsp;rad=0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Angle3&nbsp;&nbsp;``angle3``&nbsp;&nbsp;angleA=90,&nbsp;angleB=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Angle&nbsp;&nbsp;&nbsp;``angle``&nbsp;&nbsp;&nbsp;angleA=90,&nbsp;angleB=0,&nbsp;rad=0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Arc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``arc``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;angleA=0,&nbsp;angleB=0,&nbsp;armA=None,&nbsp;armB=None,&nbsp;rad=0.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``bar``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;armA=0.0,&nbsp;armB=0.0,&nbsp;fraction=0.3,&nbsp;angle=None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;======&nbsp;&nbsp;==========&nbsp;&nbsp;=================================================<br>
 &nbsp;<br>
+patchA,&nbsp;patchB&nbsp;:&nbsp;`~matplotlib.patches.Patch`,&nbsp;default:&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Head&nbsp;and&nbsp;tail&nbsp;patches,&nbsp;respectively.<br>
 &nbsp;<br>
-connector<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Ignored<br>
+shrinkA,&nbsp;shrinkB&nbsp;:&nbsp;float,&nbsp;default:&nbsp;2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Shrinking&nbsp;factor&nbsp;of&nbsp;the&nbsp;tail&nbsp;and&nbsp;head&nbsp;of&nbsp;the&nbsp;arrow&nbsp;respectively.<br>
 &nbsp;<br>
-patchA,&nbsp;patchB&nbsp;:&nbsp;None,&nbsp;Patch,&nbsp;optional&nbsp;(default:&nbsp;None)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Head&nbsp;and&nbsp;tail&nbsp;patch&nbsp;respectively.&nbsp;:class:`matplotlib.patch.Patch`<br>
-&nbsp;&nbsp;&nbsp;&nbsp;instance.<br>
-&nbsp;<br>
-shrinkA,&nbsp;shrinkB&nbsp;:&nbsp;scalar,&nbsp;optional&nbsp;(default:&nbsp;2)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Shrinking&nbsp;factor&nbsp;of&nbsp;the&nbsp;tail&nbsp;and&nbsp;head&nbsp;of&nbsp;the&nbsp;arrow&nbsp;respectively<br>
-&nbsp;<br>
-mutation_scale&nbsp;:&nbsp;scalar,&nbsp;optional&nbsp;(default:&nbsp;1)<br>
+mutation_scale&nbsp;:&nbsp;float,&nbsp;default:&nbsp;1<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Value&nbsp;with&nbsp;which&nbsp;attributes&nbsp;of&nbsp;*arrowstyle*&nbsp;(e.g.,&nbsp;*head_length*)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;will&nbsp;be&nbsp;scaled.<br>
 &nbsp;<br>
-mutation_aspect&nbsp;:&nbsp;None,&nbsp;scalar,&nbsp;optional&nbsp;(default:&nbsp;None)<br>
+mutation_aspect&nbsp;:&nbsp;None&nbsp;or&nbsp;float,&nbsp;default:&nbsp;None<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;height&nbsp;of&nbsp;the&nbsp;rectangle&nbsp;will&nbsp;be&nbsp;squeezed&nbsp;by&nbsp;this&nbsp;value&nbsp;before<br>
 &nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;mutation&nbsp;and&nbsp;the&nbsp;mutated&nbsp;box&nbsp;will&nbsp;be&nbsp;stretched&nbsp;by&nbsp;the&nbsp;inverse<br>
 &nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;it.<br>
 &nbsp;<br>
-dpi_cor&nbsp;:&nbsp;scalar,&nbsp;optional&nbsp;(default:&nbsp;1)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;dpi_cor&nbsp;is&nbsp;currently&nbsp;used&nbsp;for&nbsp;linewidth-related&nbsp;things&nbsp;and&nbsp;shrink<br>
-&nbsp;&nbsp;&nbsp;&nbsp;factor.&nbsp;Mutation&nbsp;scale&nbsp;is&nbsp;affected&nbsp;by&nbsp;this.<br>
+Other&nbsp;Parameters<br>
+----------------<br>
+**kwargs&nbsp;:&nbsp;`~matplotlib.patches.Patch`&nbsp;properties,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Here&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;available&nbsp;`.Patch`&nbsp;properties:<br>
 &nbsp;<br>
-Notes<br>
------<br>
-Valid&nbsp;kwargs&nbsp;are:<br>
-&nbsp;&nbsp;agg_filter:&nbsp;a&nbsp;filter&nbsp;function,&nbsp;which&nbsp;takes&nbsp;a&nbsp;(m,&nbsp;n,&nbsp;3)&nbsp;float&nbsp;array&nbsp;and&nbsp;a&nbsp;dpi&nbsp;value,&nbsp;and&nbsp;returns&nbsp;a&nbsp;(m,&nbsp;n,&nbsp;3)&nbsp;array<br>
-&nbsp;&nbsp;alpha:&nbsp;float&nbsp;or&nbsp;None<br>
-&nbsp;&nbsp;animated:&nbsp;bool<br>
-&nbsp;&nbsp;antialiased&nbsp;or&nbsp;aa:&nbsp;unknown<br>
-&nbsp;&nbsp;capstyle:&nbsp;{'butt',&nbsp;'round',&nbsp;'projecting'}<br>
-&nbsp;&nbsp;clip_box:&nbsp;`.Bbox`<br>
-&nbsp;&nbsp;clip_on:&nbsp;bool<br>
-&nbsp;&nbsp;clip_path:&nbsp;[(`~matplotlib.path.Path`,&nbsp;`.Transform`)&nbsp;|&nbsp;`.Patch`&nbsp;|&nbsp;None]<br>
-&nbsp;&nbsp;color:&nbsp;color<br>
-&nbsp;&nbsp;contains:&nbsp;callable<br>
-&nbsp;&nbsp;edgecolor&nbsp;or&nbsp;ec:&nbsp;color&nbsp;or&nbsp;None&nbsp;or&nbsp;'auto'<br>
-&nbsp;&nbsp;facecolor&nbsp;or&nbsp;fc:&nbsp;color&nbsp;or&nbsp;None<br>
-&nbsp;&nbsp;figure:&nbsp;`.Figure`<br>
-&nbsp;&nbsp;fill:&nbsp;bool<br>
-&nbsp;&nbsp;gid:&nbsp;str<br>
-&nbsp;&nbsp;hatch:&nbsp;{'/',&nbsp;'\\',&nbsp;'|',&nbsp;'-',&nbsp;'+',&nbsp;'x',&nbsp;'o',&nbsp;'O',&nbsp;'.',&nbsp;'*'}<br>
-&nbsp;&nbsp;in_layout:&nbsp;bool<br>
-&nbsp;&nbsp;joinstyle:&nbsp;{'miter',&nbsp;'round',&nbsp;'bevel'}<br>
-&nbsp;&nbsp;label:&nbsp;object<br>
-&nbsp;&nbsp;linestyle&nbsp;or&nbsp;ls:&nbsp;{'-',&nbsp;'--',&nbsp;'-.',&nbsp;':',&nbsp;'',&nbsp;(offset,&nbsp;on-off-seq),&nbsp;...}<br>
-&nbsp;&nbsp;linewidth&nbsp;or&nbsp;lw:&nbsp;float&nbsp;or&nbsp;None<br>
-&nbsp;&nbsp;path_effects:&nbsp;`.AbstractPathEffect`<br>
-&nbsp;&nbsp;picker:&nbsp;None&nbsp;or&nbsp;bool&nbsp;or&nbsp;float&nbsp;or&nbsp;callable<br>
-&nbsp;&nbsp;rasterized:&nbsp;bool&nbsp;or&nbsp;None<br>
-&nbsp;&nbsp;sketch_params:&nbsp;(scale:&nbsp;float,&nbsp;length:&nbsp;float,&nbsp;randomness:&nbsp;float)<br>
-&nbsp;&nbsp;snap:&nbsp;bool&nbsp;or&nbsp;None<br>
-&nbsp;&nbsp;transform:&nbsp;`.Transform`<br>
-&nbsp;&nbsp;url:&nbsp;str<br>
-&nbsp;&nbsp;visible:&nbsp;bool<br>
-&nbsp;&nbsp;zorder:&nbsp;float</tt></dd></dl>
+Properties:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;agg_filter:&nbsp;a&nbsp;filter&nbsp;function,&nbsp;which&nbsp;takes&nbsp;a&nbsp;(m,&nbsp;n,&nbsp;3)&nbsp;float&nbsp;array&nbsp;and&nbsp;a&nbsp;dpi&nbsp;value,&nbsp;and&nbsp;returns&nbsp;a&nbsp;(m,&nbsp;n,&nbsp;3)&nbsp;array&nbsp;and&nbsp;two&nbsp;offsets&nbsp;from&nbsp;the&nbsp;bottom&nbsp;left&nbsp;corner&nbsp;of&nbsp;the&nbsp;image<br>
+&nbsp;&nbsp;&nbsp;&nbsp;alpha:&nbsp;unknown<br>
+&nbsp;&nbsp;&nbsp;&nbsp;animated:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;antialiased&nbsp;or&nbsp;aa:&nbsp;bool&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;capstyle:&nbsp;`.CapStyle`&nbsp;or&nbsp;{'butt',&nbsp;'projecting',&nbsp;'round'}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;clip_box:&nbsp;`.Bbox`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;clip_on:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;clip_path:&nbsp;Patch&nbsp;or&nbsp;(Path,&nbsp;Transform)&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;color:&nbsp;color<br>
+&nbsp;&nbsp;&nbsp;&nbsp;edgecolor&nbsp;or&nbsp;ec:&nbsp;color&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;facecolor&nbsp;or&nbsp;fc:&nbsp;color&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;figure:&nbsp;`.Figure`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fill:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gid:&nbsp;str<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hatch:&nbsp;{'/',&nbsp;'\\',&nbsp;'|',&nbsp;'-',&nbsp;'+',&nbsp;'x',&nbsp;'o',&nbsp;'O',&nbsp;'.',&nbsp;'*'}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;in_layout:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;joinstyle:&nbsp;`.JoinStyle`&nbsp;or&nbsp;{'miter',&nbsp;'round',&nbsp;'bevel'}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;label:&nbsp;object<br>
+&nbsp;&nbsp;&nbsp;&nbsp;linestyle&nbsp;or&nbsp;ls:&nbsp;{'-',&nbsp;'--',&nbsp;'-.',&nbsp;':',&nbsp;'',&nbsp;(offset,&nbsp;on-off-seq),&nbsp;...}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;linewidth&nbsp;or&nbsp;lw:&nbsp;float&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mouseover:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;path_effects:&nbsp;`.AbstractPathEffect`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;picker:&nbsp;None&nbsp;or&nbsp;bool&nbsp;or&nbsp;float&nbsp;or&nbsp;callable<br>
+&nbsp;&nbsp;&nbsp;&nbsp;rasterized:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sketch_params:&nbsp;(scale:&nbsp;float,&nbsp;length:&nbsp;float,&nbsp;randomness:&nbsp;float)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;snap:&nbsp;bool&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;transform:&nbsp;`.Transform`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;url:&nbsp;str<br>
+&nbsp;&nbsp;&nbsp;&nbsp;visible:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zorder:&nbsp;float<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;In&nbsp;contrast&nbsp;to&nbsp;other&nbsp;patches,&nbsp;the&nbsp;default&nbsp;``capstyle``&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``joinstyle``&nbsp;for&nbsp;`<a href="matplotlib.patches.html#FancyArrowPatch">FancyArrowPatch</a>`&nbsp;are&nbsp;set&nbsp;to&nbsp;``"round"``.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-do_3d_projection"><strong>do_3d_projection</strong></a>(self, renderer=None)</dt><dd><tt>#&nbsp;Fix&nbsp;for&nbsp;change&nbsp;in&nbsp;matplotlib&nbsp;3.5.0&nbsp;(https://github.com/matplotlib/matplotlib/issues/21688)</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-draw"><strong>draw</strong></a>(self, renderer)</dt><dd><tt>Draw&nbsp;the&nbsp;:class:`Patch`&nbsp;to&nbsp;the&nbsp;given&nbsp;*renderer*.</tt></dd></dl>
+<dl><dt><a name="Arrow3D-draw"><strong>draw</strong></a>(self, renderer)</dt><dd><tt>Draw&nbsp;the&nbsp;Artist&nbsp;(and&nbsp;its&nbsp;children)&nbsp;using&nbsp;the&nbsp;given&nbsp;renderer.<br>
+&nbsp;<br>
+This&nbsp;has&nbsp;no&nbsp;effect&nbsp;if&nbsp;the&nbsp;artist&nbsp;is&nbsp;not&nbsp;visible&nbsp;(`.Artist.get_visible`<br>
+returns&nbsp;False).<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+renderer&nbsp;:&nbsp;`.RendererBase`&nbsp;subclass.<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+This&nbsp;method&nbsp;is&nbsp;overridden&nbsp;in&nbsp;the&nbsp;Artist&nbsp;subclasses.</tt></dd></dl>
+
+<dl><dt><a name="Arrow3D-set"><strong>set</strong></a>(self, *, agg_filter=&lt;UNSET&gt;, alpha=&lt;UNSET&gt;, animated=&lt;UNSET&gt;, antialiased=&lt;UNSET&gt;, arrowstyle=&lt;UNSET&gt;, capstyle=&lt;UNSET&gt;, clip_box=&lt;UNSET&gt;, clip_on=&lt;UNSET&gt;, clip_path=&lt;UNSET&gt;, color=&lt;UNSET&gt;, connectionstyle=&lt;UNSET&gt;, edgecolor=&lt;UNSET&gt;, facecolor=&lt;UNSET&gt;, fill=&lt;UNSET&gt;, gid=&lt;UNSET&gt;, hatch=&lt;UNSET&gt;, in_layout=&lt;UNSET&gt;, joinstyle=&lt;UNSET&gt;, label=&lt;UNSET&gt;, linestyle=&lt;UNSET&gt;, linewidth=&lt;UNSET&gt;, mouseover=&lt;UNSET&gt;, mutation_aspect=&lt;UNSET&gt;, mutation_scale=&lt;UNSET&gt;, patchA=&lt;UNSET&gt;, patchB=&lt;UNSET&gt;, path_effects=&lt;UNSET&gt;, picker=&lt;UNSET&gt;, positions=&lt;UNSET&gt;, rasterized=&lt;UNSET&gt;, sketch_params=&lt;UNSET&gt;, snap=&lt;UNSET&gt;, transform=&lt;UNSET&gt;, url=&lt;UNSET&gt;, visible=&lt;UNSET&gt;, zorder=&lt;UNSET&gt;)</dt><dd><tt>Set&nbsp;multiple&nbsp;properties&nbsp;at&nbsp;once.<br>
+&nbsp;<br>
+Supported&nbsp;properties&nbsp;are<br>
+&nbsp;<br>
+Properties:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;agg_filter:&nbsp;a&nbsp;filter&nbsp;function,&nbsp;which&nbsp;takes&nbsp;a&nbsp;(m,&nbsp;n,&nbsp;3)&nbsp;float&nbsp;array&nbsp;and&nbsp;a&nbsp;dpi&nbsp;value,&nbsp;and&nbsp;returns&nbsp;a&nbsp;(m,&nbsp;n,&nbsp;3)&nbsp;array&nbsp;and&nbsp;two&nbsp;offsets&nbsp;from&nbsp;the&nbsp;bottom&nbsp;left&nbsp;corner&nbsp;of&nbsp;the&nbsp;image<br>
+&nbsp;&nbsp;&nbsp;&nbsp;alpha:&nbsp;scalar&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;animated:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;antialiased&nbsp;or&nbsp;aa:&nbsp;bool&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;arrowstyle:&nbsp;str&nbsp;or&nbsp;`~matplotlib.patches.ArrowStyle`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;capstyle:&nbsp;`.CapStyle`&nbsp;or&nbsp;{'butt',&nbsp;'projecting',&nbsp;'round'}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;clip_box:&nbsp;`.Bbox`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;clip_on:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;clip_path:&nbsp;Patch&nbsp;or&nbsp;(Path,&nbsp;Transform)&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;color:&nbsp;color<br>
+&nbsp;&nbsp;&nbsp;&nbsp;connectionstyle:&nbsp;[&nbsp;'arc3'&nbsp;|&nbsp;'angle3'&nbsp;|&nbsp;'angle'&nbsp;|&nbsp;'arc'&nbsp;|&nbsp;'bar'&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;edgecolor&nbsp;or&nbsp;ec:&nbsp;color&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;facecolor&nbsp;or&nbsp;fc:&nbsp;color&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;figure:&nbsp;`.Figure`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fill:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gid:&nbsp;str<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hatch:&nbsp;{'/',&nbsp;'\\',&nbsp;'|',&nbsp;'-',&nbsp;'+',&nbsp;'x',&nbsp;'o',&nbsp;'O',&nbsp;'.',&nbsp;'*'}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;in_layout:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;joinstyle:&nbsp;`.JoinStyle`&nbsp;or&nbsp;{'miter',&nbsp;'round',&nbsp;'bevel'}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;label:&nbsp;object<br>
+&nbsp;&nbsp;&nbsp;&nbsp;linestyle&nbsp;or&nbsp;ls:&nbsp;{'-',&nbsp;'--',&nbsp;'-.',&nbsp;':',&nbsp;'',&nbsp;(offset,&nbsp;on-off-seq),&nbsp;...}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;linewidth&nbsp;or&nbsp;lw:&nbsp;float&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mouseover:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mutation_aspect:&nbsp;float<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mutation_scale:&nbsp;float<br>
+&nbsp;&nbsp;&nbsp;&nbsp;patchA:&nbsp;`.patches.Patch`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;patchB:&nbsp;`.patches.Patch`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;path_effects:&nbsp;`.AbstractPathEffect`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;picker:&nbsp;None&nbsp;or&nbsp;bool&nbsp;or&nbsp;float&nbsp;or&nbsp;callable<br>
+&nbsp;&nbsp;&nbsp;&nbsp;positions:&nbsp;unknown<br>
+&nbsp;&nbsp;&nbsp;&nbsp;rasterized:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sketch_params:&nbsp;(scale:&nbsp;float,&nbsp;length:&nbsp;float,&nbsp;randomness:&nbsp;float)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;snap:&nbsp;bool&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;transform:&nbsp;`.Transform`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;url:&nbsp;str<br>
+&nbsp;&nbsp;&nbsp;&nbsp;visible:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zorder:&nbsp;float</tt></dd></dl>
 
 <hr>
 Methods inherited from <a href="matplotlib.patches.html#FancyArrowPatch">matplotlib.patches.FancyArrowPatch</a>:<br>
@@ -241,14 +288,7 @@ Methods inherited from <a href="matplotlib.patches.html#FancyArrowPatch">matplot
 
 <dl><dt><a name="Arrow3D-get_arrowstyle"><strong>get_arrowstyle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;arrowstyle&nbsp;object.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_connectionstyle"><strong>get_connectionstyle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;:class:`ConnectionStyle`&nbsp;instance.</tt></dd></dl>
-
-<dl><dt><a name="Arrow3D-get_dpi_cor"><strong>get_dpi_cor</strong></a>(self)</dt><dd><tt>dpi_cor&nbsp;is&nbsp;currently&nbsp;used&nbsp;for&nbsp;linewidth-related&nbsp;things&nbsp;and<br>
-shrink&nbsp;factor.&nbsp;Mutation&nbsp;scale&nbsp;is&nbsp;affected&nbsp;by&nbsp;this.<br>
-&nbsp;<br>
-Returns<br>
--------<br>
-dpi_cor&nbsp;:&nbsp;scalar</tt></dd></dl>
+<dl><dt><a name="Arrow3D-get_connectionstyle"><strong>get_connectionstyle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;`ConnectionStyle`&nbsp;used.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-get_mutation_aspect"><strong>get_mutation_aspect</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;aspect&nbsp;ratio&nbsp;of&nbsp;the&nbsp;bbox&nbsp;mutation.</tt></dd></dl>
 
@@ -256,86 +296,111 @@ dpi_cor&nbsp;:&nbsp;scalar</tt></dd></dl>
 &nbsp;<br>
 Returns<br>
 -------<br>
-scale&nbsp;:&nbsp;scalar</tt></dd></dl>
+scalar</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_path"><strong>get_path</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;path&nbsp;of&nbsp;the&nbsp;arrow&nbsp;in&nbsp;the&nbsp;data&nbsp;coordinates.&nbsp;Use<br>
-<a href="#Arrow3D-get_path_in_displaycoord">get_path_in_displaycoord</a>()&nbsp;method&nbsp;to&nbsp;retrieve&nbsp;the&nbsp;arrow&nbsp;path<br>
-in&nbsp;display&nbsp;coordinates.</tt></dd></dl>
+<dl><dt><a name="Arrow3D-get_path"><strong>get_path</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;path&nbsp;of&nbsp;the&nbsp;arrow&nbsp;in&nbsp;the&nbsp;data&nbsp;coordinates.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_path_in_displaycoord"><strong>get_path_in_displaycoord</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;mutated&nbsp;path&nbsp;of&nbsp;the&nbsp;arrow&nbsp;in&nbsp;display&nbsp;coordinates.</tt></dd></dl>
-
-<dl><dt><a name="Arrow3D-set_arrowstyle"><strong>set_arrowstyle</strong></a>(self, arrowstyle=None, **kw)</dt><dd><tt>Set&nbsp;the&nbsp;arrow&nbsp;style.&nbsp;Old&nbsp;attributes&nbsp;are&nbsp;forgotten.&nbsp;Without&nbsp;arguments<br>
-(or&nbsp;with&nbsp;``arrowstyle=None``)&nbsp;returns&nbsp;available&nbsp;box&nbsp;styles&nbsp;as&nbsp;a&nbsp;list&nbsp;of<br>
-strings.<br>
+<dl><dt><a name="Arrow3D-set_arrowstyle"><strong>set_arrowstyle</strong></a>(self, arrowstyle=None, **kwargs)</dt><dd><tt>Set&nbsp;the&nbsp;arrow&nbsp;style,&nbsp;possibly&nbsp;with&nbsp;further&nbsp;attributes.<br>
+&nbsp;<br>
+Attributes&nbsp;from&nbsp;the&nbsp;previous&nbsp;arrow&nbsp;style&nbsp;are&nbsp;not&nbsp;reused.<br>
+&nbsp;<br>
+Without&nbsp;argument&nbsp;(or&nbsp;with&nbsp;``arrowstyle=None``),&nbsp;the&nbsp;available&nbsp;box<br>
+styles&nbsp;are&nbsp;returned&nbsp;as&nbsp;a&nbsp;human-readable&nbsp;string.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-arrowstyle&nbsp;:&nbsp;None,&nbsp;ArrowStyle,&nbsp;str,&nbsp;optional&nbsp;(default:&nbsp;None)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Can&nbsp;be&nbsp;a&nbsp;string&nbsp;with&nbsp;arrowstyle&nbsp;name&nbsp;with&nbsp;optional&nbsp;comma-separated<br>
-&nbsp;&nbsp;&nbsp;&nbsp;attributes,&nbsp;e.g.::<br>
+arrowstyle&nbsp;:&nbsp;str&nbsp;or&nbsp;`~matplotlib.patches.ArrowStyle`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;style&nbsp;of&nbsp;the&nbsp;arrow:&nbsp;either&nbsp;a&nbsp;`.ArrowStyle`&nbsp;instance,&nbsp;or&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;string,&nbsp;which&nbsp;is&nbsp;the&nbsp;style&nbsp;name&nbsp;and&nbsp;optionally&nbsp;comma&nbsp;separated<br>
+&nbsp;&nbsp;&nbsp;&nbsp;attributes&nbsp;(e.g.&nbsp;"Fancy,head_length=0.2").&nbsp;Such&nbsp;a&nbsp;string&nbsp;is&nbsp;used&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;construct&nbsp;a&nbsp;`.ArrowStyle`&nbsp;object,&nbsp;as&nbsp;documented&nbsp;in&nbsp;that&nbsp;class.<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Arrow3D-set_arrowstyle">set_arrowstyle</a>("Fancy,head_length=0.2")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;following&nbsp;arrow&nbsp;styles&nbsp;are&nbsp;available:<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Alternatively&nbsp;attributes&nbsp;can&nbsp;be&nbsp;provided&nbsp;as&nbsp;keywords,&nbsp;e.g.::<br>
+&nbsp;&nbsp;&nbsp;&nbsp;%(ArrowStyle:table_and_accepts)s<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Arrow3D-set_arrowstyle">set_arrowstyle</a>("fancy",&nbsp;head_length=0.2)</tt></dd></dl>
+**kwargs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Additional&nbsp;attributes&nbsp;for&nbsp;the&nbsp;arrow&nbsp;style.&nbsp;See&nbsp;the&nbsp;table&nbsp;above&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;supported&nbsp;parameters.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Arrow3D-set_arrowstyle">set_arrowstyle</a>("Fancy,head_length=0.2")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Arrow3D-set_arrowstyle">set_arrowstyle</a>("fancy",&nbsp;head_length=0.2)</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-set_connectionstyle"><strong>set_connectionstyle</strong></a>(self, connectionstyle, **kw)</dt><dd><tt>Set&nbsp;the&nbsp;connection&nbsp;style.&nbsp;Old&nbsp;attributes&nbsp;are&nbsp;forgotten.<br>
+<dl><dt><a name="Arrow3D-set_connectionstyle"><strong>set_connectionstyle</strong></a>(self, connectionstyle=None, **kwargs)</dt><dd><tt>Set&nbsp;the&nbsp;connection&nbsp;style,&nbsp;possibly&nbsp;with&nbsp;further&nbsp;attributes.<br>
+&nbsp;<br>
+Attributes&nbsp;from&nbsp;the&nbsp;previous&nbsp;connection&nbsp;style&nbsp;are&nbsp;not&nbsp;reused.<br>
+&nbsp;<br>
+Without&nbsp;argument&nbsp;(or&nbsp;with&nbsp;``connectionstyle=None``),&nbsp;the&nbsp;available&nbsp;box<br>
+styles&nbsp;are&nbsp;returned&nbsp;as&nbsp;a&nbsp;human-readable&nbsp;string.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-connectionstyle&nbsp;:&nbsp;None,&nbsp;ConnectionStyle&nbsp;instance,&nbsp;or&nbsp;string<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Can&nbsp;be&nbsp;a&nbsp;string&nbsp;with&nbsp;connectionstyle&nbsp;name&nbsp;with<br>
-&nbsp;&nbsp;&nbsp;&nbsp;optional&nbsp;comma-separated&nbsp;attributes,&nbsp;e.g.::<br>
+connectionstyle&nbsp;:&nbsp;str&nbsp;or&nbsp;`~matplotlib.patches.ConnectionStyle`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;style&nbsp;of&nbsp;the&nbsp;connection:&nbsp;either&nbsp;a&nbsp;`.ConnectionStyle`&nbsp;instance,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;or&nbsp;a&nbsp;string,&nbsp;which&nbsp;is&nbsp;the&nbsp;style&nbsp;name&nbsp;and&nbsp;optionally&nbsp;comma&nbsp;separated<br>
+&nbsp;&nbsp;&nbsp;&nbsp;attributes&nbsp;(e.g.&nbsp;"Arc,armA=30,rad=10").&nbsp;Such&nbsp;a&nbsp;string&nbsp;is&nbsp;used&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;construct&nbsp;a&nbsp;`.ConnectionStyle`&nbsp;object,&nbsp;as&nbsp;documented&nbsp;in&nbsp;that&nbsp;class.<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Arrow3D-set_connectionstyle">set_connectionstyle</a>("arc,angleA=0,armA=30,rad=10")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;following&nbsp;connection&nbsp;styles&nbsp;are&nbsp;available:<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Alternatively,&nbsp;the&nbsp;attributes&nbsp;can&nbsp;be&nbsp;provided&nbsp;as&nbsp;keywords,&nbsp;e.g.::<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;======&nbsp;&nbsp;==========&nbsp;&nbsp;=================================================<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Class&nbsp;&nbsp;&nbsp;Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Attrs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;======&nbsp;&nbsp;==========&nbsp;&nbsp;=================================================<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Arc3&nbsp;&nbsp;&nbsp;&nbsp;``arc3``&nbsp;&nbsp;&nbsp;&nbsp;rad=0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Angle3&nbsp;&nbsp;``angle3``&nbsp;&nbsp;angleA=90,&nbsp;angleB=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Angle&nbsp;&nbsp;&nbsp;``angle``&nbsp;&nbsp;&nbsp;angleA=90,&nbsp;angleB=0,&nbsp;rad=0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Arc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``arc``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;angleA=0,&nbsp;angleB=0,&nbsp;armA=None,&nbsp;armB=None,&nbsp;rad=0.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``bar``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;armA=0.0,&nbsp;armB=0.0,&nbsp;fraction=0.3,&nbsp;angle=None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;======&nbsp;&nbsp;==========&nbsp;&nbsp;=================================================<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Arrow3D-set_connectionstyle">set_connectionstyle</a>("arc",&nbsp;angleA=0,armA=30,rad=10)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;..&nbsp;ACCEPTS:&nbsp;[&nbsp;'arc3'&nbsp;|&nbsp;'angle3'&nbsp;|&nbsp;'angle'&nbsp;|&nbsp;'arc'&nbsp;|&nbsp;'bar'&nbsp;]<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Without&nbsp;any&nbsp;arguments&nbsp;(or&nbsp;with&nbsp;``connectionstyle=None``),&nbsp;return<br>
-&nbsp;&nbsp;&nbsp;&nbsp;available&nbsp;styles&nbsp;as&nbsp;a&nbsp;list&nbsp;of&nbsp;strings.</tt></dd></dl>
-
-<dl><dt><a name="Arrow3D-set_dpi_cor"><strong>set_dpi_cor</strong></a>(self, dpi_cor)</dt><dd><tt>dpi_cor&nbsp;is&nbsp;currently&nbsp;used&nbsp;for&nbsp;linewidth-related&nbsp;things&nbsp;and<br>
-shrink&nbsp;factor.&nbsp;Mutation&nbsp;scale&nbsp;is&nbsp;affected&nbsp;by&nbsp;this.<br>
+**kwargs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Additional&nbsp;attributes&nbsp;for&nbsp;the&nbsp;connection&nbsp;style.&nbsp;See&nbsp;the&nbsp;table&nbsp;above<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;supported&nbsp;parameters.<br>
 &nbsp;<br>
-Parameters<br>
-----------<br>
-dpi_cor&nbsp;:&nbsp;scalar</tt></dd></dl>
+Examples<br>
+--------<br>
+::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Arrow3D-set_connectionstyle">set_connectionstyle</a>("Arc,armA=30,rad=10")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Arrow3D-set_connectionstyle">set_connectionstyle</a>("arc",&nbsp;armA=30,&nbsp;rad=10)</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-set_mutation_aspect"><strong>set_mutation_aspect</strong></a>(self, aspect)</dt><dd><tt>Set&nbsp;the&nbsp;aspect&nbsp;ratio&nbsp;of&nbsp;the&nbsp;bbox&nbsp;mutation.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-aspect&nbsp;:&nbsp;scalar</tt></dd></dl>
+aspect&nbsp;:&nbsp;float</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-set_mutation_scale"><strong>set_mutation_scale</strong></a>(self, scale)</dt><dd><tt>Set&nbsp;the&nbsp;mutation&nbsp;scale.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-scale&nbsp;:&nbsp;scalar</tt></dd></dl>
+scale&nbsp;:&nbsp;float</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-set_patchA"><strong>set_patchA</strong></a>(self, patchA)</dt><dd><tt>Set&nbsp;the&nbsp;tail&nbsp;patch.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-patchA&nbsp;:&nbsp;Patch<br>
-&nbsp;&nbsp;&nbsp;&nbsp;:class:`matplotlib.patch.Patch`&nbsp;instance.</tt></dd></dl>
+patchA&nbsp;:&nbsp;`.patches.Patch`</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-set_patchB"><strong>set_patchB</strong></a>(self, patchB)</dt><dd><tt>Set&nbsp;the&nbsp;head&nbsp;patch.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-patchB&nbsp;:&nbsp;Patch<br>
-&nbsp;&nbsp;&nbsp;&nbsp;:class:`matplotlib.patch.Patch`&nbsp;instance.</tt></dd></dl>
+patchB&nbsp;:&nbsp;`.patches.Patch`</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-set_positions"><strong>set_positions</strong></a>(self, posA, posB)</dt><dd><tt>Set&nbsp;the&nbsp;begin&nbsp;and&nbsp;end&nbsp;positions&nbsp;of&nbsp;the&nbsp;connecting&nbsp;path.<br>
+<dl><dt><a name="Arrow3D-set_positions"><strong>set_positions</strong></a>(self, posA, posB)</dt><dd><tt>Set&nbsp;the&nbsp;start&nbsp;and&nbsp;end&nbsp;positions&nbsp;of&nbsp;the&nbsp;connecting&nbsp;path.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
 posA,&nbsp;posB&nbsp;:&nbsp;None,&nbsp;tuple<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(x,y)&nbsp;coordinates&nbsp;of&nbsp;arrow&nbsp;tail&nbsp;and&nbsp;arrow&nbsp;head&nbsp;respectively.&nbsp;If<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(x,&nbsp;y)&nbsp;coordinates&nbsp;of&nbsp;arrow&nbsp;tail&nbsp;and&nbsp;arrow&nbsp;head&nbsp;respectively.&nbsp;If<br>
 &nbsp;&nbsp;&nbsp;&nbsp;`None`&nbsp;use&nbsp;current&nbsp;value.</tt></dd></dl>
 
 <hr>
@@ -346,43 +411,94 @@ Returns<br>
 -------<br>
 (bool,&nbsp;empty&nbsp;dict)</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-contains_point"><strong>contains_point</strong></a>(self, point, radius=None)</dt><dd><tt>Returns&nbsp;``True``&nbsp;if&nbsp;the&nbsp;given&nbsp;*point*&nbsp;is&nbsp;inside&nbsp;the&nbsp;path<br>
-(transformed&nbsp;with&nbsp;its&nbsp;transform&nbsp;attribute).<br>
+<dl><dt><a name="Arrow3D-contains_point"><strong>contains_point</strong></a>(self, point, radius=None)</dt><dd><tt>Return&nbsp;whether&nbsp;the&nbsp;given&nbsp;point&nbsp;is&nbsp;inside&nbsp;the&nbsp;patch.<br>
 &nbsp;<br>
-*radius*&nbsp;allows&nbsp;the&nbsp;path&nbsp;to&nbsp;be&nbsp;made&nbsp;slightly&nbsp;larger&nbsp;or&nbsp;smaller.</tt></dd></dl>
+Parameters<br>
+----------<br>
+point&nbsp;:&nbsp;(float,&nbsp;float)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;point&nbsp;(x,&nbsp;y)&nbsp;to&nbsp;check,&nbsp;in&nbsp;target&nbsp;coordinates&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``self.<a href="#Arrow3D-get_transform">get_transform</a>()``.&nbsp;These&nbsp;are&nbsp;display&nbsp;coordinates&nbsp;for&nbsp;patches<br>
+&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;are&nbsp;added&nbsp;to&nbsp;a&nbsp;figure&nbsp;or&nbsp;axes.<br>
+radius&nbsp;:&nbsp;float,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Additional&nbsp;margin&nbsp;on&nbsp;the&nbsp;patch&nbsp;in&nbsp;target&nbsp;coordinates&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``self.<a href="#Arrow3D-get_transform">get_transform</a>()``.&nbsp;See&nbsp;`.Path.contains_point`&nbsp;for&nbsp;further<br>
+&nbsp;&nbsp;&nbsp;&nbsp;details.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+bool<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+The&nbsp;proper&nbsp;use&nbsp;of&nbsp;this&nbsp;method&nbsp;depends&nbsp;on&nbsp;the&nbsp;transform&nbsp;of&nbsp;the&nbsp;patch.<br>
+Isolated&nbsp;patches&nbsp;do&nbsp;not&nbsp;have&nbsp;a&nbsp;transform.&nbsp;In&nbsp;this&nbsp;case,&nbsp;the&nbsp;patch<br>
+creation&nbsp;coordinates&nbsp;and&nbsp;the&nbsp;point&nbsp;coordinates&nbsp;match.&nbsp;The&nbsp;following<br>
+example&nbsp;checks&nbsp;that&nbsp;the&nbsp;center&nbsp;of&nbsp;a&nbsp;circle&nbsp;is&nbsp;within&nbsp;the&nbsp;circle<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;center&nbsp;=&nbsp;0,&nbsp;0<br>
+&gt;&gt;&gt;&nbsp;c&nbsp;=&nbsp;Circle(center,&nbsp;radius=1)<br>
+&gt;&gt;&gt;&nbsp;c.<a href="#Arrow3D-contains_point">contains_point</a>(center)<br>
+True<br>
+&nbsp;<br>
+The&nbsp;convention&nbsp;of&nbsp;checking&nbsp;against&nbsp;the&nbsp;transformed&nbsp;patch&nbsp;stems&nbsp;from<br>
+the&nbsp;fact&nbsp;that&nbsp;this&nbsp;method&nbsp;is&nbsp;predominantly&nbsp;used&nbsp;to&nbsp;check&nbsp;if&nbsp;display<br>
+coordinates&nbsp;(e.g.&nbsp;from&nbsp;mouse&nbsp;events)&nbsp;are&nbsp;within&nbsp;the&nbsp;patch.&nbsp;If&nbsp;you&nbsp;want<br>
+to&nbsp;do&nbsp;the&nbsp;above&nbsp;check&nbsp;with&nbsp;data&nbsp;coordinates,&nbsp;you&nbsp;have&nbsp;to&nbsp;properly<br>
+transform&nbsp;them&nbsp;first:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;center&nbsp;=&nbsp;0,&nbsp;0<br>
+&gt;&gt;&gt;&nbsp;c&nbsp;=&nbsp;Circle(center,&nbsp;radius=1)<br>
+&gt;&gt;&gt;&nbsp;plt.gca().add_patch(c)<br>
+&gt;&gt;&gt;&nbsp;transformed_center&nbsp;=&nbsp;c.<a href="#Arrow3D-get_transform">get_transform</a>().transform(center)<br>
+&gt;&gt;&gt;&nbsp;c.<a href="#Arrow3D-contains_point">contains_point</a>(transformed_center)<br>
+True</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-contains_points"><strong>contains_points</strong></a>(self, points, radius=None)</dt><dd><tt>Returns&nbsp;a&nbsp;bool&nbsp;array&nbsp;which&nbsp;is&nbsp;``True``&nbsp;if&nbsp;the&nbsp;(closed)&nbsp;path<br>
-contains&nbsp;the&nbsp;corresponding&nbsp;point.<br>
-(transformed&nbsp;with&nbsp;its&nbsp;transform&nbsp;attribute).<br>
+<dl><dt><a name="Arrow3D-contains_points"><strong>contains_points</strong></a>(self, points, radius=None)</dt><dd><tt>Return&nbsp;whether&nbsp;the&nbsp;given&nbsp;points&nbsp;are&nbsp;inside&nbsp;the&nbsp;patch.<br>
 &nbsp;<br>
-*points*&nbsp;must&nbsp;be&nbsp;Nx2&nbsp;array.<br>
-*radius*&nbsp;allows&nbsp;the&nbsp;path&nbsp;to&nbsp;be&nbsp;made&nbsp;slightly&nbsp;larger&nbsp;or&nbsp;smaller.</tt></dd></dl>
+Parameters<br>
+----------<br>
+points&nbsp;:&nbsp;(N,&nbsp;2)&nbsp;array<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;points&nbsp;to&nbsp;check,&nbsp;in&nbsp;target&nbsp;coordinates&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``self.<a href="#Arrow3D-get_transform">get_transform</a>()``.&nbsp;These&nbsp;are&nbsp;display&nbsp;coordinates&nbsp;for&nbsp;patches<br>
+&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;are&nbsp;added&nbsp;to&nbsp;a&nbsp;figure&nbsp;or&nbsp;axes.&nbsp;Columns&nbsp;contain&nbsp;x&nbsp;and&nbsp;y&nbsp;values.<br>
+radius&nbsp;:&nbsp;float,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Additional&nbsp;margin&nbsp;on&nbsp;the&nbsp;patch&nbsp;in&nbsp;target&nbsp;coordinates&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``self.<a href="#Arrow3D-get_transform">get_transform</a>()``.&nbsp;See&nbsp;`.Path.contains_point`&nbsp;for&nbsp;further<br>
+&nbsp;&nbsp;&nbsp;&nbsp;details.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+length-N&nbsp;bool&nbsp;array<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+The&nbsp;proper&nbsp;use&nbsp;of&nbsp;this&nbsp;method&nbsp;depends&nbsp;on&nbsp;the&nbsp;transform&nbsp;of&nbsp;the&nbsp;patch.<br>
+See&nbsp;the&nbsp;notes&nbsp;on&nbsp;`.Patch.contains_point`.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-get_aa"><strong>get_aa</strong></a>(self)</dt><dd><tt>Alias&nbsp;for&nbsp;`get_antialiased`.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_antialiased"><strong>get_antialiased</strong></a>(self)</dt><dd><tt>Returns&nbsp;True&nbsp;if&nbsp;the&nbsp;:class:`Patch`&nbsp;is&nbsp;to&nbsp;be&nbsp;drawn&nbsp;with&nbsp;antialiasing.</tt></dd></dl>
+<dl><dt><a name="Arrow3D-get_antialiased"><strong>get_antialiased</strong></a>(self)</dt><dd><tt>Return&nbsp;whether&nbsp;antialiasing&nbsp;is&nbsp;used&nbsp;for&nbsp;drawing.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_capstyle"><strong>get_capstyle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;current&nbsp;capstyle</tt></dd></dl>
+<dl><dt><a name="Arrow3D-get_capstyle"><strong>get_capstyle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;capstyle.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_data_transform"><strong>get_data_transform</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;:class:`~matplotlib.transforms.Transform`&nbsp;instance&nbsp;which<br>
-maps&nbsp;data&nbsp;coordinates&nbsp;to&nbsp;physical&nbsp;coordinates.</tt></dd></dl>
+<dl><dt><a name="Arrow3D-get_data_transform"><strong>get_data_transform</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;`~.transforms.Transform`&nbsp;mapping&nbsp;data&nbsp;coordinates&nbsp;to<br>
+physical&nbsp;coordinates.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-get_ec"><strong>get_ec</strong></a>(self)</dt><dd><tt>Alias&nbsp;for&nbsp;`get_edgecolor`.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_edgecolor"><strong>get_edgecolor</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;edge&nbsp;color&nbsp;of&nbsp;the&nbsp;:class:`Patch`.</tt></dd></dl>
+<dl><dt><a name="Arrow3D-get_edgecolor"><strong>get_edgecolor</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;edge&nbsp;color.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_extents"><strong>get_extents</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;:class:`~matplotlib.transforms.Bbox`&nbsp;object&nbsp;defining<br>
-the&nbsp;axis-aligned&nbsp;extents&nbsp;of&nbsp;the&nbsp;:class:`Patch`.</tt></dd></dl>
+<dl><dt><a name="Arrow3D-get_extents"><strong>get_extents</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;`Patch`'s&nbsp;axis-aligned&nbsp;extents&nbsp;as&nbsp;a&nbsp;`~.transforms.Bbox`.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_facecolor"><strong>get_facecolor</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;face&nbsp;color&nbsp;of&nbsp;the&nbsp;:class:`Patch`.</tt></dd></dl>
+<dl><dt><a name="Arrow3D-get_facecolor"><strong>get_facecolor</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;face&nbsp;color.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-get_fc"><strong>get_fc</strong></a>(self)</dt><dd><tt>Alias&nbsp;for&nbsp;`get_facecolor`.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_fill"><strong>get_fill</strong></a>(self)</dt><dd><tt>return&nbsp;whether&nbsp;fill&nbsp;is&nbsp;set</tt></dd></dl>
+<dl><dt><a name="Arrow3D-get_fill"><strong>get_fill</strong></a>(self)</dt><dd><tt>Return&nbsp;whether&nbsp;the&nbsp;patch&nbsp;is&nbsp;filled.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_hatch"><strong>get_hatch</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;current&nbsp;hatching&nbsp;pattern</tt></dd></dl>
+<dl><dt><a name="Arrow3D-get_hatch"><strong>get_hatch</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;hatching&nbsp;pattern.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_joinstyle"><strong>get_joinstyle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;current&nbsp;joinstyle</tt></dd></dl>
+<dl><dt><a name="Arrow3D-get_joinstyle"><strong>get_joinstyle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;joinstyle.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-get_linestyle"><strong>get_linestyle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;linestyle.</tt></dd></dl>
 
@@ -392,23 +508,21 @@ the&nbsp;axis-aligned&nbsp;extents&nbsp;of&nbsp;the&nbsp;:class:`Patch`.</tt></d
 
 <dl><dt><a name="Arrow3D-get_lw"><strong>get_lw</strong></a>(self)</dt><dd><tt>Alias&nbsp;for&nbsp;`get_linewidth`.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_patch_transform"><strong>get_patch_transform</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;:class:`~matplotlib.transforms.Transform`&nbsp;instance&nbsp;which<br>
-takes&nbsp;patch&nbsp;coordinates&nbsp;to&nbsp;data&nbsp;coordinates.<br>
+<dl><dt><a name="Arrow3D-get_patch_transform"><strong>get_patch_transform</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;`~.transforms.Transform`&nbsp;instance&nbsp;mapping&nbsp;patch&nbsp;coordinates<br>
+to&nbsp;data&nbsp;coordinates.<br>
 &nbsp;<br>
 For&nbsp;example,&nbsp;one&nbsp;may&nbsp;define&nbsp;a&nbsp;patch&nbsp;of&nbsp;a&nbsp;circle&nbsp;which&nbsp;represents&nbsp;a<br>
 radius&nbsp;of&nbsp;5&nbsp;by&nbsp;providing&nbsp;coordinates&nbsp;for&nbsp;a&nbsp;unit&nbsp;circle,&nbsp;and&nbsp;a<br>
 transform&nbsp;which&nbsp;scales&nbsp;the&nbsp;coordinates&nbsp;(the&nbsp;patch&nbsp;coordinate)&nbsp;by&nbsp;5.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_transform"><strong>get_transform</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;:class:`~matplotlib.transforms.Transform`&nbsp;applied<br>
-to&nbsp;the&nbsp;:class:`Patch`.</tt></dd></dl>
+<dl><dt><a name="Arrow3D-get_transform"><strong>get_transform</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;`~.transforms.Transform`&nbsp;applied&nbsp;to&nbsp;the&nbsp;`Patch`.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_verts"><strong>get_verts</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;vertices&nbsp;used&nbsp;in&nbsp;this&nbsp;patch<br>
+<dl><dt><a name="Arrow3D-get_verts"><strong>get_verts</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;vertices&nbsp;used&nbsp;in&nbsp;this&nbsp;patch.<br>
 &nbsp;<br>
-If&nbsp;the&nbsp;patch&nbsp;contains&nbsp;Bezier&nbsp;curves,&nbsp;the&nbsp;curves&nbsp;will&nbsp;be<br>
-interpolated&nbsp;by&nbsp;line&nbsp;segments.&nbsp;&nbsp;To&nbsp;access&nbsp;the&nbsp;curves&nbsp;as<br>
-curves,&nbsp;use&nbsp;:meth:`get_path`.</tt></dd></dl>
+If&nbsp;the&nbsp;patch&nbsp;contains&nbsp;Bézier&nbsp;curves,&nbsp;the&nbsp;curves&nbsp;will&nbsp;be&nbsp;interpolated&nbsp;by<br>
+line&nbsp;segments.&nbsp;&nbsp;To&nbsp;access&nbsp;the&nbsp;curves&nbsp;as&nbsp;curves,&nbsp;use&nbsp;`get_path`.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_window_extent"><strong>get_window_extent</strong></a>(self, renderer=None)</dt><dd><tt>Get&nbsp;the&nbsp;axes&nbsp;bounding&nbsp;box&nbsp;in&nbsp;display&nbsp;space.<br>
+<dl><dt><a name="Arrow3D-get_window_extent"><strong>get_window_extent</strong></a>(self, renderer=None)</dt><dd><tt>Get&nbsp;the&nbsp;artist's&nbsp;bounding&nbsp;box&nbsp;in&nbsp;display&nbsp;space.<br>
 &nbsp;<br>
 The&nbsp;bounding&nbsp;box'&nbsp;width&nbsp;and&nbsp;height&nbsp;are&nbsp;nonnegative.<br>
 &nbsp;<br>
@@ -426,23 +540,27 @@ but&nbsp;will&nbsp;save&nbsp;incorrectly.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-set_aa"><strong>set_aa</strong></a>(self, aa)</dt><dd><tt>Alias&nbsp;for&nbsp;`set_antialiased`.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-set_alpha"><strong>set_alpha</strong></a>(self, alpha)</dt><dd><tt>Set&nbsp;the&nbsp;alpha&nbsp;transparency&nbsp;of&nbsp;the&nbsp;patch.<br>
+<dl><dt><a name="Arrow3D-set_alpha"><strong>set_alpha</strong></a>(self, alpha)</dt><dd><tt>Set&nbsp;the&nbsp;alpha&nbsp;value&nbsp;used&nbsp;for&nbsp;blending&nbsp;-&nbsp;not&nbsp;supported&nbsp;on&nbsp;all&nbsp;backends.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-alpha&nbsp;:&nbsp;float&nbsp;or&nbsp;None</tt></dd></dl>
+alpha&nbsp;:&nbsp;scalar&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*alpha*&nbsp;must&nbsp;be&nbsp;within&nbsp;the&nbsp;0-1&nbsp;range,&nbsp;inclusive.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-set_antialiased"><strong>set_antialiased</strong></a>(self, aa)</dt><dd><tt>Set&nbsp;whether&nbsp;to&nbsp;use&nbsp;antialiased&nbsp;rendering.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-b&nbsp;:&nbsp;bool&nbsp;or&nbsp;None</tt></dd></dl>
+aa&nbsp;:&nbsp;bool&nbsp;or&nbsp;None</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-set_capstyle"><strong>set_capstyle</strong></a>(self, s)</dt><dd><tt>Set&nbsp;the&nbsp;patch&nbsp;capstyle<br>
+<dl><dt><a name="Arrow3D-set_capstyle"><strong>set_capstyle</strong></a>(self, s)</dt><dd><tt>Set&nbsp;the&nbsp;`.CapStyle`.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;capstyle&nbsp;is&nbsp;'round'&nbsp;for&nbsp;`.<a href="matplotlib.patches.html#FancyArrowPatch">FancyArrowPatch</a>`&nbsp;and&nbsp;'butt'&nbsp;for<br>
+all&nbsp;other&nbsp;patches.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-s&nbsp;:&nbsp;{'butt',&nbsp;'round',&nbsp;'projecting'}</tt></dd></dl>
+s&nbsp;:&nbsp;`.CapStyle`&nbsp;or&nbsp;{'butt',&nbsp;'projecting',&nbsp;'round'}</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-set_color"><strong>set_color</strong></a>(self, c)</dt><dd><tt>Set&nbsp;both&nbsp;the&nbsp;edgecolor&nbsp;and&nbsp;the&nbsp;facecolor.<br>
 &nbsp;<br>
@@ -461,7 +579,7 @@ Patch.set_facecolor,&nbsp;Patch.set_edgecolor<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-color&nbsp;:&nbsp;color&nbsp;or&nbsp;None&nbsp;or&nbsp;'auto'</tt></dd></dl>
+color&nbsp;:&nbsp;color&nbsp;or&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-set_facecolor"><strong>set_facecolor</strong></a>(self, color)</dt><dd><tt>Set&nbsp;the&nbsp;patch&nbsp;face&nbsp;color.<br>
 &nbsp;<br>
@@ -477,7 +595,7 @@ Parameters<br>
 ----------<br>
 b&nbsp;:&nbsp;bool</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-set_hatch"><strong>set_hatch</strong></a>(self, hatch)</dt><dd><tt>Set&nbsp;the&nbsp;hatching&nbsp;pattern<br>
+<dl><dt><a name="Arrow3D-set_hatch"><strong>set_hatch</strong></a>(self, hatch)</dt><dd><tt>Set&nbsp;the&nbsp;hatching&nbsp;pattern.<br>
 &nbsp;<br>
 *hatch*&nbsp;can&nbsp;be&nbsp;one&nbsp;of::<br>
 &nbsp;<br>
@@ -503,26 +621,30 @@ Parameters<br>
 ----------<br>
 hatch&nbsp;:&nbsp;{'/',&nbsp;'\\',&nbsp;'|',&nbsp;'-',&nbsp;'+',&nbsp;'x',&nbsp;'o',&nbsp;'O',&nbsp;'.',&nbsp;'*'}</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-set_joinstyle"><strong>set_joinstyle</strong></a>(self, s)</dt><dd><tt>Set&nbsp;the&nbsp;patch&nbsp;joinstyle<br>
+<dl><dt><a name="Arrow3D-set_joinstyle"><strong>set_joinstyle</strong></a>(self, s)</dt><dd><tt>Set&nbsp;the&nbsp;`.JoinStyle`.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;joinstyle&nbsp;is&nbsp;'round'&nbsp;for&nbsp;`.<a href="matplotlib.patches.html#FancyArrowPatch">FancyArrowPatch</a>`&nbsp;and&nbsp;'miter'&nbsp;for<br>
+all&nbsp;other&nbsp;patches.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-s&nbsp;:&nbsp;{'miter',&nbsp;'round',&nbsp;'bevel'}</tt></dd></dl>
+s&nbsp;:&nbsp;`.JoinStyle`&nbsp;or&nbsp;{'miter',&nbsp;'round',&nbsp;'bevel'}</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-set_linestyle"><strong>set_linestyle</strong></a>(self, ls)</dt><dd><tt>Set&nbsp;the&nbsp;patch&nbsp;linestyle.<br>
 &nbsp;<br>
-===========================&nbsp;&nbsp;&nbsp;=================<br>
-linestyle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;description<br>
-===========================&nbsp;&nbsp;&nbsp;=================<br>
-``'-'``&nbsp;or&nbsp;``'solid'``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;solid&nbsp;line<br>
-``'--'``&nbsp;or&nbsp;&nbsp;``'dashed'``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dashed&nbsp;line<br>
-``'-.'``&nbsp;or&nbsp;&nbsp;``'dashdot'``&nbsp;&nbsp;&nbsp;&nbsp;dash-dotted&nbsp;line<br>
-``':'``&nbsp;or&nbsp;``'dotted'``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dotted&nbsp;line<br>
-===========================&nbsp;&nbsp;&nbsp;=================<br>
+==========================================&nbsp;&nbsp;=================<br>
+linestyle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;description<br>
+==========================================&nbsp;&nbsp;=================<br>
+``'-'``&nbsp;or&nbsp;``'solid'``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;solid&nbsp;line<br>
+``'--'``&nbsp;or&nbsp;&nbsp;``'dashed'``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dashed&nbsp;line<br>
+``'-.'``&nbsp;or&nbsp;&nbsp;``'dashdot'``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dash-dotted&nbsp;line<br>
+``':'``&nbsp;or&nbsp;``'dotted'``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dotted&nbsp;line<br>
+``'none'``,&nbsp;``'None'``,&nbsp;``'&nbsp;'``,&nbsp;or&nbsp;``''``&nbsp;&nbsp;draw&nbsp;nothing<br>
+==========================================&nbsp;&nbsp;=================<br>
 &nbsp;<br>
 Alternatively&nbsp;a&nbsp;dash&nbsp;tuple&nbsp;of&nbsp;the&nbsp;following&nbsp;form&nbsp;can&nbsp;be&nbsp;provided::<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(offset,&nbsp;onoffseq),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(offset,&nbsp;onoffseq)<br>
 &nbsp;<br>
 where&nbsp;``onoffseq``&nbsp;is&nbsp;an&nbsp;even&nbsp;length&nbsp;tuple&nbsp;of&nbsp;on&nbsp;and&nbsp;off&nbsp;ink&nbsp;in&nbsp;points.<br>
 &nbsp;<br>
@@ -541,19 +663,15 @@ w&nbsp;:&nbsp;float&nbsp;or&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-set_lw"><strong>set_lw</strong></a>(self, w)</dt><dd><tt>Alias&nbsp;for&nbsp;`set_linewidth`.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-update_from"><strong>update_from</strong></a>(self, other)</dt><dd><tt>Updates&nbsp;this&nbsp;:class:`Patch`&nbsp;from&nbsp;the&nbsp;properties&nbsp;of&nbsp;*other*.</tt></dd></dl>
+<dl><dt><a name="Arrow3D-update_from"><strong>update_from</strong></a>(self, other)</dt><dd><tt>Copy&nbsp;properties&nbsp;from&nbsp;*other*&nbsp;to&nbsp;*self*.</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="matplotlib.patches.html#Patch">matplotlib.patches.Patch</a>:<br>
 <dl><dt><strong>fill</strong></dt>
-<dd><tt>return&nbsp;whether&nbsp;fill&nbsp;is&nbsp;set</tt></dd>
+<dd><tt>Return&nbsp;whether&nbsp;the&nbsp;patch&nbsp;is&nbsp;filled.</tt></dd>
 </dl>
 <hr>
 Data and other attributes inherited from <a href="matplotlib.patches.html#Patch">matplotlib.patches.Patch</a>:<br>
-<dl><dt><strong>validCap</strong> = ('butt', 'round', 'projecting')</dl>
-
-<dl><dt><strong>validJoin</strong> = ('miter', 'round', 'bevel')</dl>
-
 <dl><dt><strong>zorder</strong> = 1</dl>
 
 <hr>
@@ -575,7 +693,7 @@ func&nbsp;:&nbsp;callable<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-oid&nbsp;:&nbsp;int<br>
+int<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;observer&nbsp;id&nbsp;associated&nbsp;with&nbsp;the&nbsp;callback.&nbsp;This&nbsp;id&nbsp;can&nbsp;be<br>
 &nbsp;&nbsp;&nbsp;&nbsp;used&nbsp;for&nbsp;removing&nbsp;the&nbsp;callback&nbsp;with&nbsp;`.remove_callback`&nbsp;later.<br>
 &nbsp;<br>
@@ -585,12 +703,12 @@ remove_callback</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-convert_xunits"><strong>convert_xunits</strong></a>(self, x)</dt><dd><tt>Convert&nbsp;*x*&nbsp;using&nbsp;the&nbsp;unit&nbsp;type&nbsp;of&nbsp;the&nbsp;xaxis.<br>
 &nbsp;<br>
-If&nbsp;the&nbsp;artist&nbsp;is&nbsp;not&nbsp;in&nbsp;contained&nbsp;in&nbsp;an&nbsp;Axes&nbsp;or&nbsp;if&nbsp;the&nbsp;xaxis&nbsp;does&nbsp;not<br>
+If&nbsp;the&nbsp;artist&nbsp;is&nbsp;not&nbsp;contained&nbsp;in&nbsp;an&nbsp;Axes&nbsp;or&nbsp;if&nbsp;the&nbsp;xaxis&nbsp;does&nbsp;not<br>
 have&nbsp;units,&nbsp;*x*&nbsp;itself&nbsp;is&nbsp;returned.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-convert_yunits"><strong>convert_yunits</strong></a>(self, y)</dt><dd><tt>Convert&nbsp;*y*&nbsp;using&nbsp;the&nbsp;unit&nbsp;type&nbsp;of&nbsp;the&nbsp;yaxis.<br>
 &nbsp;<br>
-If&nbsp;the&nbsp;artist&nbsp;is&nbsp;not&nbsp;in&nbsp;contained&nbsp;in&nbsp;an&nbsp;Axes&nbsp;or&nbsp;if&nbsp;the&nbsp;yaxis&nbsp;does&nbsp;not<br>
+If&nbsp;the&nbsp;artist&nbsp;is&nbsp;not&nbsp;contained&nbsp;in&nbsp;an&nbsp;Axes&nbsp;or&nbsp;if&nbsp;the&nbsp;yaxis&nbsp;does&nbsp;not<br>
 have&nbsp;units,&nbsp;*y*&nbsp;itself&nbsp;is&nbsp;returned.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-findobj"><strong>findobj</strong></a>(self, match=None, include_self=True)</dt><dd><tt>Find&nbsp;artist&nbsp;objects.<br>
@@ -614,7 +732,7 @@ include_self&nbsp;:&nbsp;bool<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-artists&nbsp;:&nbsp;list&nbsp;of&nbsp;`.Artist`</tt></dd></dl>
+list&nbsp;of&nbsp;`.Artist`</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-format_cursor_data"><strong>format_cursor_data</strong></a>(self, data)</dt><dd><tt>Return&nbsp;a&nbsp;string&nbsp;representation&nbsp;of&nbsp;*data*.<br>
 &nbsp;<br>
@@ -624,7 +742,9 @@ artists&nbsp;:&nbsp;list&nbsp;of&nbsp;`.Artist`</tt></dd></dl>
 &nbsp;&nbsp;&nbsp;&nbsp;method&nbsp;yourself.<br>
 &nbsp;<br>
 The&nbsp;default&nbsp;implementation&nbsp;converts&nbsp;ints&nbsp;and&nbsp;floats&nbsp;and&nbsp;arrays&nbsp;of&nbsp;ints<br>
-and&nbsp;floats&nbsp;into&nbsp;a&nbsp;comma-separated&nbsp;string&nbsp;enclosed&nbsp;in&nbsp;square&nbsp;brackets.<br>
+and&nbsp;floats&nbsp;into&nbsp;a&nbsp;comma-separated&nbsp;string&nbsp;enclosed&nbsp;in&nbsp;square&nbsp;brackets,<br>
+unless&nbsp;the&nbsp;artist&nbsp;has&nbsp;an&nbsp;associated&nbsp;colorbar,&nbsp;in&nbsp;which&nbsp;case&nbsp;scalar<br>
+values&nbsp;are&nbsp;formatted&nbsp;using&nbsp;the&nbsp;colorbar's&nbsp;formatter.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
@@ -633,9 +753,9 @@ get_cursor_data</tt></dd></dl>
 <dl><dt><a name="Arrow3D-get_agg_filter"><strong>get_agg_filter</strong></a>(self)</dt><dd><tt>Return&nbsp;filter&nbsp;function&nbsp;to&nbsp;be&nbsp;used&nbsp;for&nbsp;agg&nbsp;filter.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-get_alpha"><strong>get_alpha</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;alpha&nbsp;value&nbsp;used&nbsp;for&nbsp;blending&nbsp;-&nbsp;not&nbsp;supported&nbsp;on&nbsp;all<br>
-backends</tt></dd></dl>
+backends.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_animated"><strong>get_animated</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;animated&nbsp;state.</tt></dd></dl>
+<dl><dt><a name="Arrow3D-get_animated"><strong>get_animated</strong></a>(self)</dt><dd><tt>Return&nbsp;whether&nbsp;the&nbsp;artist&nbsp;is&nbsp;animated.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-get_children"><strong>get_children</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;child&nbsp;`.Artist`\s&nbsp;of&nbsp;this&nbsp;`.Artist`.</tt></dd></dl>
 
@@ -644,12 +764,6 @@ backends</tt></dd></dl>
 <dl><dt><a name="Arrow3D-get_clip_on"><strong>get_clip_on</strong></a>(self)</dt><dd><tt>Return&nbsp;whether&nbsp;the&nbsp;artist&nbsp;uses&nbsp;clipping.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-get_clip_path"><strong>get_clip_path</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;clip&nbsp;path.</tt></dd></dl>
-
-<dl><dt><a name="Arrow3D-get_contains"><strong>get_contains</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;custom&nbsp;contains&nbsp;function&nbsp;of&nbsp;the&nbsp;artist&nbsp;if&nbsp;set,&nbsp;or&nbsp;*None*.<br>
-&nbsp;<br>
-See&nbsp;Also<br>
---------<br>
-set_contains</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-get_cursor_data"><strong>get_cursor_data</strong></a>(self, event)</dt><dd><tt>Return&nbsp;the&nbsp;cursor&nbsp;data&nbsp;for&nbsp;a&nbsp;given&nbsp;event.<br>
 &nbsp;<br>
@@ -671,7 +785,7 @@ in&nbsp;the&nbsp;status&nbsp;bar&nbsp;of&nbsp;a&nbsp;plot&nbsp;window,&nbsp;whil
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-event&nbsp;:&nbsp;`matplotlib.backend_bases.MouseEvent`<br>
+event&nbsp;:&nbsp;`~matplotlib.backend_bases.MouseEvent`<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
@@ -690,6 +804,9 @@ E.g.&nbsp;:doc:`/tutorials/intermediate/constrainedlayout_guide`,<br>
 
 <dl><dt><a name="Arrow3D-get_label"><strong>get_label</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;label&nbsp;used&nbsp;for&nbsp;this&nbsp;artist&nbsp;in&nbsp;the&nbsp;legend.</tt></dd></dl>
 
+<dl><dt><a name="Arrow3D-get_mouseover"><strong>get_mouseover</strong></a>(self)</dt><dd><tt>Return&nbsp;whether&nbsp;this&nbsp;artist&nbsp;is&nbsp;queried&nbsp;for&nbsp;custom&nbsp;context&nbsp;information<br>
+when&nbsp;the&nbsp;mouse&nbsp;cursor&nbsp;moves&nbsp;over&nbsp;it.</tt></dd></dl>
+
 <dl><dt><a name="Arrow3D-get_path_effects"><strong>get_path_effects</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="Arrow3D-get_picker"><strong>get_picker</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;picking&nbsp;behavior&nbsp;of&nbsp;the&nbsp;artist.<br>
@@ -702,11 +819,11 @@ set_picker,&nbsp;pickable,&nbsp;pick</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-get_rasterized"><strong>get_rasterized</strong></a>(self)</dt><dd><tt>Return&nbsp;whether&nbsp;the&nbsp;artist&nbsp;is&nbsp;to&nbsp;be&nbsp;rasterized.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_sketch_params"><strong>get_sketch_params</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;sketch&nbsp;parameters&nbsp;for&nbsp;the&nbsp;artist.<br>
+<dl><dt><a name="Arrow3D-get_sketch_params"><strong>get_sketch_params</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;sketch&nbsp;parameters&nbsp;for&nbsp;the&nbsp;artist.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-sketch_params&nbsp;:&nbsp;tuple&nbsp;or&nbsp;None<br>
+tuple&nbsp;or&nbsp;None<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;3-tuple&nbsp;with&nbsp;the&nbsp;following&nbsp;elements:<br>
 &nbsp;<br>
@@ -718,22 +835,22 @@ sketch_params&nbsp;:&nbsp;tuple&nbsp;or&nbsp;None<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;*None*&nbsp;if&nbsp;no&nbsp;sketch&nbsp;parameters&nbsp;were&nbsp;set.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_snap"><strong>get_snap</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;snap&nbsp;setting.<br>
+<dl><dt><a name="Arrow3D-get_snap"><strong>get_snap</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;snap&nbsp;setting.<br>
 &nbsp;<br>
 See&nbsp;`.set_snap`&nbsp;for&nbsp;details.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-get_tightbbox"><strong>get_tightbbox</strong></a>(self, renderer)</dt><dd><tt>Like&nbsp;`Artist.get_window_extent`,&nbsp;but&nbsp;includes&nbsp;any&nbsp;clipping.<br>
+<dl><dt><a name="Arrow3D-get_tightbbox"><strong>get_tightbbox</strong></a>(self, renderer=None)</dt><dd><tt>Like&nbsp;`.Artist.get_window_extent`,&nbsp;but&nbsp;includes&nbsp;any&nbsp;clipping.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-renderer&nbsp;:&nbsp;`.RendererBase`&nbsp;instance<br>
+renderer&nbsp;:&nbsp;`.RendererBase`&nbsp;subclass<br>
 &nbsp;&nbsp;&nbsp;&nbsp;renderer&nbsp;that&nbsp;will&nbsp;be&nbsp;used&nbsp;to&nbsp;draw&nbsp;the&nbsp;figures&nbsp;(i.e.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;``fig.canvas.get_renderer()``)<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-bbox&nbsp;:&nbsp;`.BBox`<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;enclosing&nbsp;bounding&nbsp;box&nbsp;(in&nbsp;figure&nbsp;pixel&nbsp;co-ordinates).</tt></dd></dl>
+`.Bbox`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;enclosing&nbsp;bounding&nbsp;box&nbsp;(in&nbsp;figure&nbsp;pixel&nbsp;coordinates).</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-get_transformed_clip_path_and_affine"><strong>get_transformed_clip_path_and_affine</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;clip&nbsp;path&nbsp;with&nbsp;the&nbsp;non-affine&nbsp;part&nbsp;of&nbsp;its<br>
 transformation&nbsp;applied,&nbsp;and&nbsp;the&nbsp;remaining&nbsp;affine&nbsp;part&nbsp;of&nbsp;its<br>
@@ -745,7 +862,7 @@ transformation.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-get_zorder"><strong>get_zorder</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;artist's&nbsp;zorder.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-have_units"><strong>have_units</strong></a>(self)</dt><dd><tt>Return&nbsp;*True*&nbsp;if&nbsp;units&nbsp;are&nbsp;set&nbsp;on&nbsp;the&nbsp;*x*&nbsp;or&nbsp;*y*&nbsp;axes.</tt></dd></dl>
+<dl><dt><a name="Arrow3D-have_units"><strong>have_units</strong></a>(self)</dt><dd><tt>Return&nbsp;whether&nbsp;units&nbsp;are&nbsp;set&nbsp;on&nbsp;any&nbsp;axis.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-is_transform_set"><strong>is_transform_set</strong></a>(self)</dt><dd><tt>Return&nbsp;whether&nbsp;the&nbsp;Artist&nbsp;has&nbsp;an&nbsp;explicitly&nbsp;set&nbsp;transform.<br>
 &nbsp;<br>
@@ -794,20 +911,28 @@ See&nbsp;Also<br>
 --------<br>
 add_callback</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-set"><strong>set</strong></a>(self, **kwargs)</dt><dd><tt>A&nbsp;property&nbsp;batch&nbsp;setter.&nbsp;&nbsp;Pass&nbsp;*kwargs*&nbsp;to&nbsp;set&nbsp;properties.</tt></dd></dl>
-
 <dl><dt><a name="Arrow3D-set_agg_filter"><strong>set_agg_filter</strong></a>(self, filter_func)</dt><dd><tt>Set&nbsp;the&nbsp;agg&nbsp;filter.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
 filter_func&nbsp;:&nbsp;callable<br>
-&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;filter&nbsp;function,&nbsp;which&nbsp;takes&nbsp;a&nbsp;(m,&nbsp;n,&nbsp;3)&nbsp;float&nbsp;array&nbsp;and&nbsp;a&nbsp;dpi<br>
-&nbsp;&nbsp;&nbsp;&nbsp;value,&nbsp;and&nbsp;returns&nbsp;a&nbsp;(m,&nbsp;n,&nbsp;3)&nbsp;array.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;filter&nbsp;function,&nbsp;which&nbsp;takes&nbsp;a&nbsp;(m,&nbsp;n,&nbsp;depth)&nbsp;float&nbsp;array<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;a&nbsp;dpi&nbsp;value,&nbsp;and&nbsp;returns&nbsp;a&nbsp;(m,&nbsp;n,&nbsp;depth)&nbsp;array&nbsp;and&nbsp;two<br>
+&nbsp;&nbsp;&nbsp;&nbsp;offsets&nbsp;from&nbsp;the&nbsp;bottom&nbsp;left&nbsp;corner&nbsp;of&nbsp;the&nbsp;image<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;..&nbsp;ACCEPTS:&nbsp;a&nbsp;filter&nbsp;function,&nbsp;which&nbsp;takes&nbsp;a&nbsp;(m,&nbsp;n,&nbsp;3)&nbsp;float&nbsp;array<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;a&nbsp;dpi&nbsp;value,&nbsp;and&nbsp;returns&nbsp;a&nbsp;(m,&nbsp;n,&nbsp;3)&nbsp;array</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;a&nbsp;dpi&nbsp;value,&nbsp;and&nbsp;returns&nbsp;a&nbsp;(m,&nbsp;n,&nbsp;3)&nbsp;array&nbsp;and&nbsp;two&nbsp;offsets<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;the&nbsp;bottom&nbsp;left&nbsp;corner&nbsp;of&nbsp;the&nbsp;image</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-set_animated"><strong>set_animated</strong></a>(self, b)</dt><dd><tt>Set&nbsp;the&nbsp;artist's&nbsp;animation&nbsp;state.<br>
+<dl><dt><a name="Arrow3D-set_animated"><strong>set_animated</strong></a>(self, b)</dt><dd><tt>Set&nbsp;whether&nbsp;the&nbsp;artist&nbsp;is&nbsp;intended&nbsp;to&nbsp;be&nbsp;used&nbsp;in&nbsp;an&nbsp;animation.<br>
+&nbsp;<br>
+If&nbsp;True,&nbsp;the&nbsp;artist&nbsp;is&nbsp;excluded&nbsp;from&nbsp;regular&nbsp;drawing&nbsp;of&nbsp;the&nbsp;figure.<br>
+You&nbsp;have&nbsp;to&nbsp;call&nbsp;`.Figure.draw_artist`&nbsp;/&nbsp;`.Axes.draw_artist`<br>
+explicitly&nbsp;on&nbsp;the&nbsp;artist.&nbsp;This&nbsp;approach&nbsp;is&nbsp;used&nbsp;to&nbsp;speed&nbsp;up&nbsp;animations<br>
+using&nbsp;blitting.<br>
+&nbsp;<br>
+See&nbsp;also&nbsp;`matplotlib.animation`&nbsp;and<br>
+:doc:`/tutorials/advanced/blitting`.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
@@ -817,52 +942,43 @@ b&nbsp;:&nbsp;bool</tt></dd></dl>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-clipbox&nbsp;:&nbsp;`.Bbox`</tt></dd></dl>
+clipbox&nbsp;:&nbsp;`.Bbox`<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Typically&nbsp;would&nbsp;be&nbsp;created&nbsp;from&nbsp;a&nbsp;`.TransformedBbox`.&nbsp;For<br>
+&nbsp;&nbsp;&nbsp;&nbsp;instance&nbsp;``TransformedBbox(Bbox([[0,&nbsp;0],&nbsp;[1,&nbsp;1]]),&nbsp;ax.transAxes)``<br>
+&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;the&nbsp;default&nbsp;clipping&nbsp;for&nbsp;an&nbsp;artist&nbsp;added&nbsp;to&nbsp;an&nbsp;Axes.</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-set_clip_on"><strong>set_clip_on</strong></a>(self, b)</dt><dd><tt>Set&nbsp;whether&nbsp;the&nbsp;artist&nbsp;uses&nbsp;clipping.<br>
 &nbsp;<br>
-When&nbsp;False&nbsp;artists&nbsp;will&nbsp;be&nbsp;visible&nbsp;out&nbsp;side&nbsp;of&nbsp;the&nbsp;axes&nbsp;which<br>
+When&nbsp;False,&nbsp;artists&nbsp;will&nbsp;be&nbsp;visible&nbsp;outside&nbsp;the&nbsp;Axes&nbsp;which<br>
 can&nbsp;lead&nbsp;to&nbsp;unexpected&nbsp;results.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
 b&nbsp;:&nbsp;bool</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-set_clip_path"><strong>set_clip_path</strong></a>(self, path, transform=None)</dt><dd><tt>Set&nbsp;the&nbsp;artist's&nbsp;clip&nbsp;path,&nbsp;which&nbsp;may&nbsp;be:<br>
-&nbsp;<br>
--&nbsp;a&nbsp;:class:`~matplotlib.patches.Patch`&nbsp;(or&nbsp;subclass)&nbsp;instance;&nbsp;or<br>
--&nbsp;a&nbsp;:class:`~matplotlib.path.Path`&nbsp;instance,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;:class:`~matplotlib.transforms.Transform`&nbsp;instance,&nbsp;which&nbsp;will&nbsp;be<br>
-&nbsp;&nbsp;applied&nbsp;to&nbsp;the&nbsp;path&nbsp;before&nbsp;using&nbsp;it&nbsp;for&nbsp;clipping,&nbsp;must&nbsp;be&nbsp;provided;<br>
-&nbsp;&nbsp;or<br>
--&nbsp;``None``,&nbsp;to&nbsp;remove&nbsp;a&nbsp;previously&nbsp;set&nbsp;clipping&nbsp;path.<br>
-&nbsp;<br>
-For&nbsp;efficiency,&nbsp;if&nbsp;the&nbsp;path&nbsp;happens&nbsp;to&nbsp;be&nbsp;an&nbsp;axis-aligned&nbsp;rectangle,<br>
-this&nbsp;method&nbsp;will&nbsp;set&nbsp;the&nbsp;clipping&nbsp;box&nbsp;to&nbsp;the&nbsp;corresponding&nbsp;rectangle<br>
-and&nbsp;set&nbsp;the&nbsp;clipping&nbsp;path&nbsp;to&nbsp;``None``.<br>
-&nbsp;<br>
-ACCEPTS:&nbsp;[(`~matplotlib.path.Path`,&nbsp;`.Transform`)&nbsp;|&nbsp;`.Patch`&nbsp;|&nbsp;None]</tt></dd></dl>
-
-<dl><dt><a name="Arrow3D-set_contains"><strong>set_contains</strong></a>(self, picker)</dt><dd><tt>Define&nbsp;a&nbsp;custom&nbsp;contains&nbsp;test&nbsp;for&nbsp;the&nbsp;artist.<br>
-&nbsp;<br>
-The&nbsp;provided&nbsp;callable&nbsp;replaces&nbsp;the&nbsp;default&nbsp;`.contains`&nbsp;method<br>
-of&nbsp;the&nbsp;artist.<br>
+<dl><dt><a name="Arrow3D-set_clip_path"><strong>set_clip_path</strong></a>(self, path, transform=None)</dt><dd><tt>Set&nbsp;the&nbsp;artist's&nbsp;clip&nbsp;path.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-picker&nbsp;:&nbsp;callable<br>
-&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;custom&nbsp;picker&nbsp;function&nbsp;to&nbsp;evaluate&nbsp;if&nbsp;an&nbsp;event&nbsp;is&nbsp;within&nbsp;the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;artist.&nbsp;The&nbsp;function&nbsp;must&nbsp;have&nbsp;the&nbsp;signature::<br>
+path&nbsp;:&nbsp;`~matplotlib.patches.Patch`&nbsp;or&nbsp;`.Path`&nbsp;or&nbsp;`.TransformedPath`&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;clip&nbsp;path.&nbsp;If&nbsp;given&nbsp;a&nbsp;`.Path`,&nbsp;*transform*&nbsp;must&nbsp;be&nbsp;provided&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;well.&nbsp;If&nbsp;*None*,&nbsp;a&nbsp;previously&nbsp;set&nbsp;clip&nbsp;path&nbsp;is&nbsp;removed.<br>
+transform&nbsp;:&nbsp;`~matplotlib.transforms.Transform`,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Only&nbsp;used&nbsp;if&nbsp;*path*&nbsp;is&nbsp;a&nbsp;`.Path`,&nbsp;in&nbsp;which&nbsp;case&nbsp;the&nbsp;given&nbsp;`.Path`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;converted&nbsp;to&nbsp;a&nbsp;`.TransformedPath`&nbsp;using&nbsp;*transform*.<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#Arrow3D-contains">contains</a>(artist:&nbsp;Artist,&nbsp;event:&nbsp;MouseEvent)&nbsp;-&gt;&nbsp;bool,&nbsp;dict<br>
+Notes<br>
+-----<br>
+For&nbsp;efficiency,&nbsp;if&nbsp;*path*&nbsp;is&nbsp;a&nbsp;`.Rectangle`&nbsp;this&nbsp;method&nbsp;will&nbsp;set&nbsp;the<br>
+clipping&nbsp;box&nbsp;to&nbsp;the&nbsp;corresponding&nbsp;rectangle&nbsp;and&nbsp;set&nbsp;the&nbsp;clipping&nbsp;path<br>
+to&nbsp;``None``.<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;returns:<br>
+For&nbsp;technical&nbsp;reasons&nbsp;(support&nbsp;of&nbsp;`~.Artist.set`),&nbsp;a&nbsp;tuple<br>
+(*path*,&nbsp;*transform*)&nbsp;is&nbsp;also&nbsp;accepted&nbsp;as&nbsp;a&nbsp;single&nbsp;positional<br>
+parameter.<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;a&nbsp;bool&nbsp;indicating&nbsp;if&nbsp;the&nbsp;event&nbsp;is&nbsp;within&nbsp;the&nbsp;artist<br>
-&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;a&nbsp;dict&nbsp;of&nbsp;additional&nbsp;information.&nbsp;The&nbsp;dict&nbsp;should&nbsp;at&nbsp;least<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;the&nbsp;same&nbsp;information&nbsp;as&nbsp;the&nbsp;default&nbsp;``<a href="#Arrow3D-contains">contains</a>()``<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;implementation&nbsp;of&nbsp;the&nbsp;respective&nbsp;artist,&nbsp;but&nbsp;may&nbsp;provide<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;additional&nbsp;information.</tt></dd></dl>
+..&nbsp;ACCEPTS:&nbsp;Patch&nbsp;or&nbsp;(Path,&nbsp;Transform)&nbsp;or&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Arrow3D-set_figure"><strong>set_figure</strong></a>(self, fig)</dt><dd><tt>Set&nbsp;the&nbsp;`.Figure`&nbsp;instance&nbsp;the&nbsp;artist&nbsp;belongs&nbsp;to.<br>
 &nbsp;<br>
@@ -892,6 +1008,19 @@ Parameters<br>
 s&nbsp;:&nbsp;object<br>
 &nbsp;&nbsp;&nbsp;&nbsp;*s*&nbsp;will&nbsp;be&nbsp;converted&nbsp;to&nbsp;a&nbsp;string&nbsp;by&nbsp;calling&nbsp;`str`.</tt></dd></dl>
 
+<dl><dt><a name="Arrow3D-set_mouseover"><strong>set_mouseover</strong></a>(self, mouseover)</dt><dd><tt>Set&nbsp;whether&nbsp;this&nbsp;artist&nbsp;is&nbsp;queried&nbsp;for&nbsp;custom&nbsp;context&nbsp;information&nbsp;when<br>
+the&nbsp;mouse&nbsp;cursor&nbsp;moves&nbsp;over&nbsp;it.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+mouseover&nbsp;:&nbsp;bool<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+get_cursor_data<br>
+.ToolCursorPosition<br>
+.NavigationToolbar2</tt></dd></dl>
+
 <dl><dt><a name="Arrow3D-set_path_effects"><strong>set_path_effects</strong></a>(self, path_effects)</dt><dd><tt>Set&nbsp;the&nbsp;path&nbsp;effects.<br>
 &nbsp;<br>
 Parameters<br>
@@ -913,7 +1042,7 @@ picker&nbsp;:&nbsp;None&nbsp;or&nbsp;bool&nbsp;or&nbsp;float&nbsp;or&nbsp;callab
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;A&nbsp;float:&nbsp;If&nbsp;picker&nbsp;is&nbsp;a&nbsp;number&nbsp;it&nbsp;is&nbsp;interpreted&nbsp;as&nbsp;an<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;epsilon&nbsp;tolerance&nbsp;in&nbsp;points&nbsp;and&nbsp;the&nbsp;artist&nbsp;will&nbsp;fire<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off&nbsp;an&nbsp;event&nbsp;if&nbsp;it's&nbsp;data&nbsp;is&nbsp;within&nbsp;epsilon&nbsp;of&nbsp;the&nbsp;mouse<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off&nbsp;an&nbsp;event&nbsp;if&nbsp;its&nbsp;data&nbsp;is&nbsp;within&nbsp;epsilon&nbsp;of&nbsp;the&nbsp;mouse<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;event.&nbsp;&nbsp;For&nbsp;some&nbsp;artists&nbsp;like&nbsp;lines&nbsp;and&nbsp;patch&nbsp;collections,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;artist&nbsp;may&nbsp;provide&nbsp;additional&nbsp;data&nbsp;to&nbsp;the&nbsp;pick&nbsp;event<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;is&nbsp;generated,&nbsp;e.g.,&nbsp;the&nbsp;indices&nbsp;of&nbsp;the&nbsp;data&nbsp;within<br>
@@ -929,31 +1058,37 @@ picker&nbsp;:&nbsp;None&nbsp;or&nbsp;bool&nbsp;or&nbsp;float&nbsp;or&nbsp;callab
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;artist,&nbsp;return&nbsp;*hit=True*&nbsp;and&nbsp;props&nbsp;is&nbsp;a&nbsp;dictionary&nbsp;of<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;properties&nbsp;you&nbsp;want&nbsp;added&nbsp;to&nbsp;the&nbsp;PickEvent&nbsp;attributes.</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-set_rasterized"><strong>set_rasterized</strong></a>(self, rasterized)</dt><dd><tt>Force&nbsp;rasterized&nbsp;(bitmap)&nbsp;drawing&nbsp;in&nbsp;vector&nbsp;backend&nbsp;output.<br>
+<dl><dt><a name="Arrow3D-set_rasterized"><strong>set_rasterized</strong></a>(self, rasterized)</dt><dd><tt>Force&nbsp;rasterized&nbsp;(bitmap)&nbsp;drawing&nbsp;for&nbsp;vector&nbsp;graphics&nbsp;output.<br>
 &nbsp;<br>
-Defaults&nbsp;to&nbsp;None,&nbsp;which&nbsp;implies&nbsp;the&nbsp;backend's&nbsp;default&nbsp;behavior.<br>
+Rasterized&nbsp;drawing&nbsp;is&nbsp;not&nbsp;supported&nbsp;by&nbsp;all&nbsp;artists.&nbsp;If&nbsp;you&nbsp;try&nbsp;to<br>
+enable&nbsp;this&nbsp;on&nbsp;an&nbsp;artist&nbsp;that&nbsp;does&nbsp;not&nbsp;support&nbsp;it,&nbsp;the&nbsp;command&nbsp;has&nbsp;no<br>
+effect&nbsp;and&nbsp;a&nbsp;warning&nbsp;will&nbsp;be&nbsp;issued.<br>
+&nbsp;<br>
+This&nbsp;setting&nbsp;is&nbsp;ignored&nbsp;for&nbsp;pixel-based&nbsp;output.<br>
+&nbsp;<br>
+See&nbsp;also&nbsp;:doc:`/gallery/misc/rasterization_demo`.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-rasterized&nbsp;:&nbsp;bool&nbsp;or&nbsp;None</tt></dd></dl>
+rasterized&nbsp;:&nbsp;bool</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-set_sketch_params"><strong>set_sketch_params</strong></a>(self, scale=None, length=None, randomness=None)</dt><dd><tt>Sets&nbsp;the&nbsp;sketch&nbsp;parameters.<br>
+<dl><dt><a name="Arrow3D-set_sketch_params"><strong>set_sketch_params</strong></a>(self, scale=None, length=None, randomness=None)</dt><dd><tt>Set&nbsp;the&nbsp;sketch&nbsp;parameters.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-&nbsp;<br>
 scale&nbsp;:&nbsp;float,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;amplitude&nbsp;of&nbsp;the&nbsp;wiggle&nbsp;perpendicular&nbsp;to&nbsp;the&nbsp;source<br>
 &nbsp;&nbsp;&nbsp;&nbsp;line,&nbsp;in&nbsp;pixels.&nbsp;&nbsp;If&nbsp;scale&nbsp;is&nbsp;`None`,&nbsp;or&nbsp;not&nbsp;provided,&nbsp;no<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sketch&nbsp;filter&nbsp;will&nbsp;be&nbsp;provided.<br>
-&nbsp;<br>
 length&nbsp;:&nbsp;float,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;length&nbsp;of&nbsp;the&nbsp;wiggle&nbsp;along&nbsp;the&nbsp;line,&nbsp;in&nbsp;pixels<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(default&nbsp;128.0)<br>
-&nbsp;<br>
 randomness&nbsp;:&nbsp;float,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;scale&nbsp;factor&nbsp;by&nbsp;which&nbsp;the&nbsp;length&nbsp;is&nbsp;shrunken&nbsp;or<br>
 &nbsp;&nbsp;&nbsp;&nbsp;expanded&nbsp;(default&nbsp;16.0)<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;PGF&nbsp;backend&nbsp;uses&nbsp;this&nbsp;argument&nbsp;as&nbsp;an&nbsp;RNG&nbsp;seed&nbsp;and&nbsp;not&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;described&nbsp;above.&nbsp;Using&nbsp;the&nbsp;same&nbsp;seed&nbsp;yields&nbsp;the&nbsp;same&nbsp;random&nbsp;shape.<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;..&nbsp;ACCEPTS:&nbsp;(scale:&nbsp;float,&nbsp;length:&nbsp;float,&nbsp;randomness:&nbsp;float)</tt></dd></dl>
 
@@ -1005,27 +1140,21 @@ Parameters<br>
 ----------<br>
 level&nbsp;:&nbsp;float</tt></dd></dl>
 
-<dl><dt><a name="Arrow3D-update"><strong>update</strong></a>(self, props)</dt><dd><tt>Update&nbsp;this&nbsp;artist's&nbsp;properties&nbsp;from&nbsp;the&nbsp;dictionary&nbsp;*props*.</tt></dd></dl>
+<dl><dt><a name="Arrow3D-update"><strong>update</strong></a>(self, props)</dt><dd><tt>Update&nbsp;this&nbsp;artist's&nbsp;properties&nbsp;from&nbsp;the&nbsp;dict&nbsp;*props*.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+props&nbsp;:&nbsp;dict</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="matplotlib.artist.html#Artist">matplotlib.artist.Artist</a>:<br>
-<dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
-<dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
-<dl><dt><strong>aname</strong></dt>
-</dl>
-<dl><dt><strong>axes</strong></dt>
-<dd><tt>The&nbsp;`~.axes.Axes`&nbsp;instance&nbsp;the&nbsp;artist&nbsp;resides&nbsp;in,&nbsp;or&nbsp;*None*.</tt></dd>
-</dl>
-<dl><dt><strong>mouseover</strong></dt>
-</dl>
-<dl><dt><strong>stale</strong></dt>
-<dd><tt>Whether&nbsp;the&nbsp;artist&nbsp;is&nbsp;'stale'&nbsp;and&nbsp;needs&nbsp;to&nbsp;be&nbsp;re-drawn&nbsp;for&nbsp;the&nbsp;output<br>
-to&nbsp;match&nbsp;the&nbsp;internal&nbsp;state&nbsp;of&nbsp;the&nbsp;artist.</tt></dd>
-</dl>
+Class methods inherited from <a href="matplotlib.artist.html#Artist">matplotlib.artist.Artist</a>:<br>
+<dl><dt><a name="Arrow3D-__init_subclass__"><strong>__init_subclass__</strong></a>()<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>This&nbsp;method&nbsp;is&nbsp;called&nbsp;when&nbsp;a&nbsp;class&nbsp;is&nbsp;subclassed.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;implementation&nbsp;does&nbsp;nothing.&nbsp;It&nbsp;may&nbsp;be<br>
+overridden&nbsp;to&nbsp;extend&nbsp;subclasses.</tt></dd></dl>
+
+<hr>
+Readonly properties inherited from <a href="matplotlib.artist.html#Artist">matplotlib.artist.Artist</a>:<br>
 <dl><dt><strong>sticky_edges</strong></dt>
 <dd><tt>``x``&nbsp;and&nbsp;``y``&nbsp;sticky&nbsp;edge&nbsp;lists&nbsp;for&nbsp;autoscaling.<br>
 &nbsp;<br>
@@ -1035,14 +1164,37 @@ view&nbsp;limit&nbsp;"sticks"&nbsp;to&nbsp;the&nbsp;edge.&nbsp;A&nbsp;typical&nb
 where&nbsp;one&nbsp;usually&nbsp;expects&nbsp;no&nbsp;margin&nbsp;on&nbsp;the&nbsp;bottom&nbsp;edge&nbsp;(0)&nbsp;of&nbsp;the<br>
 histogram.<br>
 &nbsp;<br>
+Moreover,&nbsp;margin&nbsp;expansion&nbsp;"bumps"&nbsp;against&nbsp;sticky&nbsp;edges&nbsp;and&nbsp;cannot<br>
+cross&nbsp;them.&nbsp;&nbsp;For&nbsp;example,&nbsp;if&nbsp;the&nbsp;upper&nbsp;data&nbsp;limit&nbsp;is&nbsp;1.0,&nbsp;the&nbsp;upper<br>
+view&nbsp;limit&nbsp;computed&nbsp;by&nbsp;simple&nbsp;margin&nbsp;application&nbsp;is&nbsp;1.2,&nbsp;but&nbsp;there&nbsp;is&nbsp;a<br>
+sticky&nbsp;edge&nbsp;at&nbsp;1.1,&nbsp;then&nbsp;the&nbsp;actual&nbsp;upper&nbsp;view&nbsp;limit&nbsp;will&nbsp;be&nbsp;1.1.<br>
+&nbsp;<br>
 This&nbsp;attribute&nbsp;cannot&nbsp;be&nbsp;assigned&nbsp;to;&nbsp;however,&nbsp;the&nbsp;``x``&nbsp;and&nbsp;``y``<br>
 lists&nbsp;can&nbsp;be&nbsp;modified&nbsp;in&nbsp;place&nbsp;as&nbsp;needed.<br>
 &nbsp;<br>
 Examples<br>
 --------<br>
-&nbsp;<br>
 &gt;&gt;&gt;&nbsp;artist.sticky_edges.x[:]&nbsp;=&nbsp;(xmin,&nbsp;xmax)<br>
 &gt;&gt;&gt;&nbsp;artist.sticky_edges.y[:]&nbsp;=&nbsp;(ymin,&nbsp;ymax)</tt></dd>
+</dl>
+<hr>
+Data descriptors inherited from <a href="matplotlib.artist.html#Artist">matplotlib.artist.Artist</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>axes</strong></dt>
+<dd><tt>The&nbsp;`~.axes.Axes`&nbsp;instance&nbsp;the&nbsp;artist&nbsp;resides&nbsp;in,&nbsp;or&nbsp;*None*.</tt></dd>
+</dl>
+<dl><dt><strong>mouseover</strong></dt>
+<dd><tt>Return&nbsp;whether&nbsp;this&nbsp;artist&nbsp;is&nbsp;queried&nbsp;for&nbsp;custom&nbsp;context&nbsp;information<br>
+when&nbsp;the&nbsp;mouse&nbsp;cursor&nbsp;moves&nbsp;over&nbsp;it.</tt></dd>
+</dl>
+<dl><dt><strong>stale</strong></dt>
+<dd><tt>Whether&nbsp;the&nbsp;artist&nbsp;is&nbsp;'stale'&nbsp;and&nbsp;needs&nbsp;to&nbsp;be&nbsp;re-drawn&nbsp;for&nbsp;the&nbsp;output<br>
+to&nbsp;match&nbsp;the&nbsp;internal&nbsp;state&nbsp;of&nbsp;the&nbsp;artist.</tt></dd>
 </dl>
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -1222,7 +1374,7 @@ E.G.<br>
 ---select&nbsp;figure&nbsp;to&nbsp;save&nbsp;by&nbsp;clicking&nbsp;on&nbsp;it---<br>
 <a href="#-saveplot">saveplot</a>('test')<br>
 E.G.<br>
-<a href="#-saveplot">saveplot</a>('c:\somedirpicture.jpg',&nbsp;dpi=600,&nbsp;figure=3)</tt></dd></dl>
+<a href="#-saveplot">saveplot</a>('c:\somedir\apicture.jpg',&nbsp;dpi=600,&nbsp;figure=3)</tt></dd></dl>
  <dl><dt><a name="-set_plot_defaults"><strong>set_plot_defaults</strong></a>(rcdefaults=False)</dt><dd><tt>Set&nbsp;custom&nbsp;matplotlib&nbsp;rcparams,&nbsp;or&nbsp;revert&nbsp;to&nbsp;matplotlib&nbsp;defaults<br>
 These&nbsp;handle&nbsp;the&nbsp;default&nbsp;look&nbsp;of&nbsp;matplotlib&nbsp;plots<br>
 See:&nbsp;https://matplotlib.org/stable/tutorials/introductory/customizing.html#the-default-matplotlibrc-file<br>

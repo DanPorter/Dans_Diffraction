@@ -676,6 +676,9 @@ def plot_lattice_lines(latt, vec_a=(1, 0, 0), vec_b=(0, 1, 0), axis=None, *args,
         axis = plt.gca()
     axsize = axis.axis()
 
+    if 'c' not in kwargs and 'color' not in kwargs:
+        kwargs['color'] = 'k'
+
     # vectors
     A = np.asarray(vec_a, dtype=float).reshape([3])
     B = np.asarray(vec_b, dtype=float).reshape([3])
@@ -691,16 +694,16 @@ def plot_lattice_lines(latt, vec_a=(1, 0, 0), vec_b=(0, 1, 0), axis=None, *args,
         uv2_1 = lp - B
         uv2_2 = lp + B
 
-        axis.plot([uv1_1[0], uv1_2[0]], [uv1_1[1], uv1_2[1]], 'k-', *args, **kwargs)
-        axis.plot([uv2_1[0], uv2_2[0]], [uv2_1[1], uv2_2[1]], 'k-', *args, **kwargs)
+        axis.plot([uv1_1[0], uv1_2[0]], [uv1_1[1], uv1_2[1]], '-', *args, **kwargs)
+        axis.plot([uv2_1[0], uv2_2[0]], [uv2_1[1], uv2_2[1]], '-', *args, **kwargs)
         if abs(angle - np.pi / 3) < 0.01:  # 60Deg
             uv3_1 = lp + A - B
             uv3_2 = lp - A + B
-            axis.plot([uv3_1[0], uv3_2[0]], [uv3_1[1], uv3_2[1]], 'k-', *args, **kwargs)
+            axis.plot([uv3_1[0], uv3_2[0]], [uv3_1[1], uv3_2[1]], '-', *args, **kwargs)
         elif abs(angle - 2 * np.pi / 3) < 0.01:  # 120 Deg
             uv3_1 = lp + A + B
             uv3_2 = lp - A - B
-            axis.plot([uv3_1[0], uv3_2[0]], [uv3_1[1], uv3_2[1]], 'k-', *args, **kwargs)
+            axis.plot([uv3_1[0], uv3_2[0]], [uv3_1[1], uv3_2[1]], '-', *args, **kwargs)
     axis.axis(axsize)
 
 

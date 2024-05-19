@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_general</strong></big></big> (version 2.2.1, 01/June/2023)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_general</strong></big></big> (version 2.2.2, 15/May/2024)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_general.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_general.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;Generally&nbsp;useful&nbsp;functions&nbsp;"functions_general.py"<br>
@@ -36,6 +36,7 @@ Version&nbsp;History:<br>
 02/02/21&nbsp;2.0.0&nbsp;&nbsp;Merged&nbsp;changes&nbsp;in&nbsp;other&nbsp;versions,&nbsp;added&nbsp;vector_intersection&nbsp;and&nbsp;you_normal_vector<br>
 15/11/21&nbsp;2.1.0&nbsp;&nbsp;Added&nbsp;normal_basis<br>
 11/03/22&nbsp;2.2.0&nbsp;&nbsp;Added&nbsp;Lorentzian,&nbsp;pVoight,&nbsp;peak_function&nbsp;functions<br>
+15/05/24&nbsp;2.2.2&nbsp;&nbsp;Added&nbsp;sph2cart,&nbsp;meshgrid_sphere<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -99,14 +100,14 @@ A&nbsp;=&nbsp;[[1,2],[3,4]]<br>
  <dl><dt><a name="-find_vector"><strong>find_vector</strong></a>(A, V, difference=0.01)</dt><dd><tt>Return&nbsp;the&nbsp;index(s)&nbsp;of&nbsp;vectors&nbsp;in&nbsp;array&nbsp;A&nbsp;within&nbsp;difference&nbsp;of&nbsp;vector&nbsp;V<br>
 Comparison&nbsp;is&nbsp;based&nbsp;on&nbsp;vector&nbsp;difference&nbsp;A[n,:]-V<br>
 &nbsp;<br>
-Returns&nbsp;None&nbsp;if&nbsp;no&nbsp;matching&nbsp;vector&nbsp;is&nbsp;present.<br>
+Returns&nbsp;[]&nbsp;if&nbsp;no&nbsp;matching&nbsp;vector&nbsp;is&nbsp;present.<br>
 &nbsp;<br>
 E.G.<br>
 A&nbsp;=&nbsp;[[1,2,3],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[4,5,6],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[7,8,9]]<br>
 <a href="#-find_index">find_index</a>(A,[4,5,6])<br>
-&nbsp;&gt;&gt;&nbsp;1<br>
+&nbsp;&gt;&gt;&nbsp;[1]<br>
 &nbsp;<br>
 A&nbsp;=&nbsp;[[0,&nbsp;2.5,&nbsp;0],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[1,&nbsp;0.1,&nbsp;0],<br>
@@ -199,6 +200,11 @@ E.G.<br>
 :param&nbsp;widths:&nbsp;width&nbsp;of&nbsp;convolved&nbsp;gaussian,&nbsp;with&nbsp;same&nbsp;units&nbsp;as&nbsp;points<br>
 :param&nbsp;background:&nbsp;add&nbsp;a&nbsp;normal&nbsp;(random)&nbsp;background&nbsp;with&nbsp;width&nbsp;sqrt(background)<br>
 :return:&nbsp;points,&nbsp;values</tt></dd></dl>
+ <dl><dt><a name="-meshgrid_sphere"><strong>meshgrid_sphere</strong></a>(sep, r_max, r_min=0)</dt><dd><tt>Return&nbsp;a&nbsp;cartesian&nbsp;grid&nbsp;of&nbsp;points&nbsp;within&nbsp;a&nbsp;spherical&nbsp;shell<br>
+:param&nbsp;sep:&nbsp;average&nbsp;separation&nbsp;between&nbsp;lattice&nbsp;points<br>
+:param&nbsp;r_max:&nbsp;outer&nbsp;shell&nbsp;radiuc<br>
+:param&nbsp;r_min:&nbsp;inner&nbsp;shell&nbsp;radius<br>
+:return:&nbsp;array([u,&nbsp;v,&nbsp;w])&nbsp;of&nbsp;lattice&nbsp;points</tt></dd></dl>
  <dl><dt><a name="-multi_replace"><strong>multi_replace</strong></a>(string, old=[], new=[])</dt><dd><tt>Replace&nbsp;multiple&nbsp;strings&nbsp;at&nbsp;once<br>
 :param&nbsp;string:<br>
 :param&nbsp;old:<br>
@@ -282,6 +288,11 @@ E.G.<br>
 <a href="#-readstfm">readstfm</a>('0.01(2)')&nbsp;=&nbsp;(0.01,&nbsp;0.02)<br>
 <a href="#-readstfm">readstfm</a>('1000(300)')&nbsp;=&nbsp;(1000.,300.)<br>
 <a href="#-readstfm">readstfm</a>('1.23(3)E4')&nbsp;=&nbsp;(12300.0,&nbsp;300.0)</tt></dd></dl>
+ <dl><dt><a name="-rebin_volume"><strong>rebin_volume</strong></a>(volume, step=(1, 1, 1), average_points=True)</dt><dd><tt>Rebins&nbsp;the&nbsp;array&nbsp;volume&nbsp;along&nbsp;3&nbsp;dimensions,&nbsp;taking&nbsp;the&nbsp;average&nbsp;of&nbsp;elements&nbsp;within&nbsp;each&nbsp;step<br>
+:param&nbsp;volume:&nbsp;Volume&nbsp;object&nbsp;or&nbsp;numpy.array&nbsp;with&nbsp;ndim==3<br>
+:param&nbsp;step:&nbsp;[i',&nbsp;j',&nbsp;k']&nbsp;step&nbsp;size&nbsp;along&nbsp;each&nbsp;dimension<br>
+:param&nbsp;average_points:&nbsp;Bool,&nbsp;if&nbsp;True,&nbsp;averages&nbsp;the&nbsp;points&nbsp;along&nbsp;each&nbsp;step,&nbsp;otherwise&nbsp;just&nbsp;sum<br>
+:return:&nbsp;volume[i//i',j//j',k//k']</tt></dd></dl>
  <dl><dt><a name="-replace_bracket_multiple"><strong>replace_bracket_multiple</strong></a>(name)</dt><dd><tt>Replace&nbsp;any&nbsp;numbers&nbsp;in&nbsp;brackets&nbsp;with&nbsp;numbers&nbsp;multipled&nbsp;by&nbsp;bracket&nbsp;multiplyer<br>
 Assumes&nbsp;bracket&nbsp;multiplier&nbsp;is&nbsp;on&nbsp;the&nbsp;left&nbsp;side<br>
 e.g.<br>
@@ -295,12 +306,14 @@ where&nbsp;alpha&nbsp;=&nbsp;angle&nbsp;from&nbsp;X&nbsp;axis&nbsp;to&nbsp;Y&nbs
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;beta&nbsp;&nbsp;=&nbsp;angle&nbsp;from&nbsp;Z&nbsp;axis&nbsp;to&nbsp;X&nbsp;axis&nbsp;(Pitch)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gamma&nbsp;=&nbsp;angle&nbsp;from&nbsp;Y&nbsp;axis&nbsp;to&nbsp;Z&nbsp;axis&nbsp;(Roll)<br>
 angles&nbsp;in&nbsp;degrees<br>
-In&nbsp;a&nbsp;right&nbsp;handed&nbsp;coordinate&nbsp;system.<br>
+In&nbsp;a&nbsp;right-handed&nbsp;coordinate&nbsp;system.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Z<br>
-&nbsp;&nbsp;&nbsp;/|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+&nbsp;&nbsp;&nbsp;/|\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|<br>
 &nbsp;&nbsp;&nbsp;&nbsp;|________\Y<br>
 &nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_\/X</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_\/X</tt></dd></dl>
  <dl><dt><a name="-rotate_about_axis"><strong>rotate_about_axis</strong></a>(point, axis, angle)</dt><dd><tt>Rotate&nbsp;vector&nbsp;A&nbsp;about&nbsp;vector&nbsp;Axis&nbsp;by&nbsp;angle<br>
 Using&nbsp;Rodrigues'&nbsp;rotation&nbsp;formula:&nbsp;https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula<br>
 :param&nbsp;point:&nbsp;[x,y,z]&nbsp;coordinate&nbsp;to&nbsp;rotate<br>
@@ -331,6 +344,14 @@ e.g.<br>
  <dl><dt><a name="-shortstr"><strong>shortstr</strong></a>(string)</dt><dd><tt>Shorten&nbsp;string&nbsp;by&nbsp;removing&nbsp;long&nbsp;floats<br>
 :param&nbsp;string:&nbsp;string,&nbsp;e.g.&nbsp;'#810002&nbsp;scan&nbsp;eta&nbsp;74.89533603616637&nbsp;76.49533603616636&nbsp;0.02&nbsp;pil3_100k&nbsp;1&nbsp;roi2'<br>
 :return:&nbsp;shorter&nbsp;string,&nbsp;e.g.&nbsp;'#810002&nbsp;scan&nbsp;eta&nbsp;74.895&nbsp;76.495&nbsp;0.02&nbsp;pil3_100k&nbsp;1&nbsp;roi2'</tt></dd></dl>
+ <dl><dt><a name="-sph2cart"><strong>sph2cart</strong></a>(r_th_ph, deg=False)</dt><dd><tt>Convert&nbsp;coordinates&nbsp;in&nbsp;spherical&nbsp;to&nbsp;coordinates&nbsp;in&nbsp;cartesian<br>
+https://en.wikipedia.org/wiki/Spherical_coordinate_system<br>
+&nbsp;&nbsp;&nbsp;&nbsp;radius&nbsp;=&nbsp;sphere&nbsp;radius<br>
+&nbsp;&nbsp;&nbsp;&nbsp;theta&nbsp;=&nbsp;angle&nbsp;from&nbsp;Z-axis&nbsp;to&nbsp;X-axis<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;phi&nbsp;=&nbsp;angle&nbsp;from&nbsp;X-axis&nbsp;to&nbsp;component&nbsp;in&nbsp;XY&nbsp;plane<br>
+:param&nbsp;r_th_ph:&nbsp;[[radius,&nbsp;theta,&nbsp;phi],&nbsp;]<br>
+:param&nbsp;deg:&nbsp;if&nbsp;True,&nbsp;converts&nbsp;theta,&nbsp;phi&nbsp;from&nbsp;degrees<br>
+:return:&nbsp;[x,y,z]</tt></dd></dl>
  <dl><dt><a name="-sphere_array"><strong>sphere_array</strong></a>(A, max_angle1=90, max_angle2=90, step1=1, step2=1)</dt><dd><tt>Rotate&nbsp;points&nbsp;in&nbsp;array&nbsp;A&nbsp;by&nbsp;multiple&nbsp;angles<br>
 &nbsp;B&nbsp;=&nbsp;<a href="#-sphere_array">sphere_array</a>(A,&nbsp;max_angle1,&nbsp;max_angle2,&nbsp;step1,&nbsp;step2)<br>
 &nbsp;<br>
@@ -388,6 +409,9 @@ newarray,uniqueidx,matchidx&nbsp;=&nbsp;<a href="#-unique_vector">unique_vector<
 &gt;&gt;&nbsp;newarray&nbsp;=&nbsp;[[1,0,0],[0,1,0]]<br>
 &gt;&gt;&nbsp;uniqueidx=&nbsp;[0,2]<br>
 &gt;&gt;&nbsp;matchidx&nbsp;=&nbsp;[0,0,1]</tt></dd></dl>
+ <dl><dt><a name="-unique_vectors_fast"><strong>unique_vectors_fast</strong></a>(vecarray, tol)</dt><dd><tt>:param&nbsp;vecarray:<br>
+:param&nbsp;tol:<br>
+:return:</tt></dd></dl>
  <dl><dt><a name="-vector_intersection"><strong>vector_intersection</strong></a>(point1, direction1, point2, direction2)</dt><dd><tt>Calculate&nbsp;the&nbsp;point&nbsp;in&nbsp;2D&nbsp;where&nbsp;two&nbsp;lines&nbsp;cross.<br>
 If&nbsp;lines&nbsp;are&nbsp;parallel,&nbsp;return&nbsp;nan<br>
 For&nbsp;derivation,&nbsp;see:&nbsp;<a href="http://paulbourke.net/geometry/pointlineplane/">http://paulbourke.net/geometry/pointlineplane/</a><br>
@@ -435,9 +459,15 @@ Gives&nbsp;the&nbsp;absolute&nbsp;angle,&nbsp;negatives&nbsp;are&nbsp;not&nbsp;g
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>A</strong> = 1e-10<br>
+<strong>AA</strong> = 'Å'<br>
+<strong>Am1</strong> = 'Å⁻¹'<br>
 <strong>Cu</strong> = 8.048<br>
+<strong>DELTA</strong> = 'Δ'<br>
 <strong>Mo</strong> = 17.4808<br>
 <strong>Na</strong> = 6.022e+23<br>
+<strong>PI</strong> = 'π'<br>
+<strong>SIGMA</strong> = 'σ'<br>
+<strong>THETA</strong> = 'θ'<br>
 <strong>c</strong> = 299792458<br>
 <strong>directory</strong> = r'C:\Users\grp66007\OneDrive - Diamond Light Sourc...\PythonProjects\Dans_Diffraction\Dans_Diffraction'<br>
 <strong>e</strong> = 1.6021733e-19<br>

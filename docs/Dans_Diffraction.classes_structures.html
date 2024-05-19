@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_structures</strong></big></big> (version 1.1)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_structures</strong></big></big> (version 1.2)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_structures.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\classes_structures.py</a></font></td></tr></table>
     <p><tt>CIF&nbsp;Directory<br>
@@ -16,17 +16,19 @@ Usage:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;classes_structures&nbsp;import&nbsp;<a href="#Structures">Structures</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;structure_list&nbsp;=&nbsp;<a href="#Structures">Structures</a>()&nbsp;#&nbsp;builds&nbsp;database&nbsp;of&nbsp;all&nbsp;cif&nbsp;files&nbsp;in&nbsp;<a href="#Structures">Structures</a>&nbsp;Directory<br>
 &nbsp;&nbsp;&nbsp;&nbsp;xtl&nbsp;=&nbsp;structure_list.Silicon()&nbsp;#&nbsp;builds&nbsp;Crystal&nbsp;class&nbsp;of&nbsp;selected&nbsp;structure<br>
+&nbsp;&nbsp;&nbsp;&nbsp;all_xts&nbsp;=&nbsp;[xtl&nbsp;for&nbsp;xtl&nbsp;in&nbsp;structure_list]<br>
 &nbsp;<br>
 By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2018<br>
 &nbsp;<br>
-Version&nbsp;1.1<br>
-Last&nbsp;updated:&nbsp;07/08/19<br>
+Version&nbsp;1.2<br>
+Last&nbsp;updated:&nbsp;18/08/23<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 02/03/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
-07/08/19&nbsp;1.1&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;_call__&nbsp;and&nbsp;__repr__&nbsp;methods<br>
+07/08/19&nbsp;1.1&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;__call__&nbsp;and&nbsp;__repr__&nbsp;methods<br>
+18/08/23&nbsp;1.2&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;__getitem__&nbsp;to&nbsp;<a href="#Structures">Structures</a>&nbsp;class<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -75,6 +77,8 @@ Builds&nbsp;a&nbsp;Crystal&nbsp;class.<br>&nbsp;</tt></td></tr>
 
 <dl><dt><a name="BuildCrystal-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
 
+<dl><dt><a name="BuildCrystal-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>Return&nbsp;str(self).</tt></dd></dl>
+
 <dl><dt><a name="BuildCrystal-build"><strong>build</strong></a>(self)</dt></dl>
 
 <hr>
@@ -96,10 +100,19 @@ Data descriptors defined here:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;S&nbsp;=&nbsp;<a href="#Structures">Structures</a>()&nbsp;#&nbsp;builds&nbsp;database<br>
 &nbsp;&nbsp;&nbsp;&nbsp;xtl&nbsp;=&nbsp;S.Diamond.build()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Use&nbsp;S.list&nbsp;to&nbsp;see&nbsp;the&nbsp;available&nbsp;structures<br>&nbsp;</tt></td></tr>
+&nbsp;&nbsp;&nbsp;&nbsp;Use&nbsp;S.list&nbsp;to&nbsp;see&nbsp;the&nbsp;available&nbsp;structures<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Use&nbsp;S.cif_files&nbsp;to&nbsp;see&nbsp;filenames&nbsp;of&nbsp;structures<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Iterating&nbsp;over&nbsp;all&nbsp;structures:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;xtl&nbsp;in&nbsp;S:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print(xtl)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
+<dl><dt><a name="Structures-__getitem__"><strong>__getitem__</strong></a>(self, item)</dt></dl>
+
 <dl><dt><a name="Structures-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="Structures-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>Return&nbsp;str(self).</tt></dd></dl>
 
 <dl><dt><a name="Structures-info"><strong>info</strong></a>(self)</dt><dd><tt>"Print&nbsp;Available&nbsp;<a href="#Structures">Structures</a></tt></dd></dl>
 

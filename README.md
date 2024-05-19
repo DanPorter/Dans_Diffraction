@@ -1,7 +1,7 @@
 # Dans_Diffraction
 Reads crystallographic cif files, calculates crystal properties and simulates diffraction.
 
-**Version 3.1**
+**Version 3.2**
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8106031.svg)](https://doi.org/10.5281/zenodo.8106031)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/DanPorter/Dans_Diffraction/6be78ef800167276d61d3e73da3b74a8367dbbe7?urlpath=lab%2Ftree%2FDans_Diffraction.ipynb) 

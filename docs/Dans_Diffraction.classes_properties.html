@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_properties</strong></big></big> (version 1.9)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.classes_properties</strong></big></big> (version 2.0)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cclasses_properties.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\classes_properties.py</a></font></td></tr></table>
     <p><tt><a href="#Properties">Properties</a>&nbsp;Class&nbsp;"classes_properties.py"<br>
@@ -16,8 +16,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2017<br>
 &nbsp;<br>
-Version&nbsp;1.9<br>
-Last&nbsp;updated:&nbsp;20/07/23<br>
+Version&nbsp;2.0<br>
+Last&nbsp;updated:&nbsp;19/02/24<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 10/11/17&nbsp;0.1&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created<br>
@@ -31,6 +31,7 @@ Version&nbsp;History:<br>
 26/01/21&nbsp;1.7&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;calculation&nbsp;of&nbsp;xray&nbsp;attenuation,&nbsp;transmission&nbsp;and&nbsp;refractive&nbsp;index<br>
 16/05/23&nbsp;1.8&nbsp;&nbsp;&nbsp;&nbsp;Fixed&nbsp;reflectivity&nbsp;calculation<br>
 20/07/23&nbsp;1.9&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;FDMNES&nbsp;indata&nbsp;writer<br>
+19/02/24&nbsp;2.0&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;relative_positions&nbsp;function<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -191,6 +192,23 @@ central&nbsp;atom.<br>
 :return:&nbsp;[m]&nbsp;array&nbsp;of&nbsp;scattering&nbsp;lengths&nbsp;for&nbsp;each&nbsp;atom</tt></dd></dl>
 
 <dl><dt><a name="Properties-orbitals"><strong>orbitals</strong></a>(self)</dt><dd><tt>Return&nbsp;orbital&nbsp;Compound&nbsp;from&nbsp;classes_orbitals</tt></dd></dl>
+
+<dl><dt><a name="Properties-relative_positions"><strong>relative_positions</strong></a>(self, position, min_distance=0.0, max_distance=3.2, elements=None)</dt><dd><tt>Returns&nbsp;atomic&nbsp;positions&nbsp;relative&nbsp;to&nbsp;given&nbsp;position<br>
+&nbsp;&nbsp;&nbsp;&nbsp;rel_pos,&nbsp;atom_type,&nbsp;label,&nbsp;occ,&nbsp;uiso,&nbsp;mxmymz&nbsp;=&nbsp;<a href="#Properties">Properties</a>.<a href="#Properties-relative_positions">relative_positions</a>([0,&nbsp;0,&nbsp;0])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;rel_distance&nbsp;=&nbsp;np.sqrt(np.sum(np.square(rel_pos),&nbsp;axis=1))<br>
+&nbsp;<br>
+Note:&nbsp;all&nbsp;output&nbsp;positions&nbsp;are&nbsp;sorted&nbsp;in&nbsp;increasing&nbsp;order&nbsp;of&nbsp;distance&nbsp;from&nbsp;position.<br>
+&nbsp;<br>
+:param&nbsp;position:&nbsp;[x,y,z]&nbsp;position&nbsp;vector&nbsp;in&nbsp;Angstroms<br>
+:param&nbsp;min_distance:&nbsp;min&nbsp;distance&nbsp;to&nbsp;find&nbsp;atoms,&nbsp;in&nbsp;Angstroms<br>
+:param&nbsp;max_distance:&nbsp;max&nbsp;distance&nbsp;to&nbsp;find&nbsp;atoms,&nbsp;in&nbsp;Angstroms<br>
+:param&nbsp;elements:&nbsp;str&nbsp;or&nbsp;list&nbsp;of&nbsp;str,&nbsp;atom&nbsp;types&nbsp;to&nbsp;return<br>
+:return&nbsp;relative_position:&nbsp;[[dx,dy,dz],&nbsp;...]&nbsp;relative&nbsp;positions&nbsp;in&nbsp;Angstroms<br>
+:return&nbsp;atom_type:&nbsp;['El',&nbsp;..]&nbsp;elements<br>
+:return&nbsp;label:&nbsp;['El1',&nbsp;..]&nbsp;site&nbsp;labels<br>
+:return&nbsp;occ:&nbsp;[occ,&nbsp;..]&nbsp;occupancy<br>
+:return&nbsp;uiso:&nbsp;[uiso,&nbsp;..]&nbsp;Uiso&nbsp;parameters<br>
+:return&nbsp;mxmymz:&nbsp;[[mx,my,mz],&nbsp;..]&nbsp;magnetic&nbsp;moments</tt></dd></dl>
 
 <dl><dt><a name="Properties-resonant_element"><strong>resonant_element</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;likely&nbsp;x-ray&nbsp;absorbing&nbsp;element&nbsp;in&nbsp;this&nbsp;material<br>
 &nbsp;&nbsp;Returns&nbsp;the&nbsp;first&nbsp;d&nbsp;or&nbsp;f&nbsp;block&nbsp;element,<br>

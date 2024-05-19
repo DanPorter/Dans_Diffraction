@@ -570,10 +570,13 @@ class Scattering:
 
         # Units
         min_twotheta = self._scattering_min_twotheta
-        if min_twotheta <= 0: min_twotheta = 1.0
+        if min_twotheta <= 1.0: min_twotheta = 1.0
         max_twotheta = self._scattering_max_twotheta
+        if max_twotheta >= 179: max_twotheta = 179
         q_min = fc.calqmag(min_twotheta, energy_kev) - ext * peak_width
         q_max = fc.calqmag(max_twotheta, energy_kev) + ext * peak_width
+        if q_min <= 0: q_min = 0.0
+        if q_max >= fc.calqmag(179, energy_kev): q_max = fc.calqmag(179, energy_kev)
         q_range = q_max - q_min
 
         # create plotting mesh
@@ -632,8 +635,12 @@ class Scattering:
         reflections = np.transpose([grp_hkl[:, 0], grp_hkl[:, 1], grp_hkl[:, 2], grp_xval, grp_inten])
 
         # Remove extended part
-        mesh = mesh[ext * peak_width_pixels:-ext * peak_width_pixels - 1]
-        xval = xval[ext * peak_width_pixels:-ext * peak_width_pixels - 1]
+        ixmin = np.nanargmin(np.abs(xval - fc.q2units(fc.calqmag(min_twotheta, energy_kev), units, energy_kev)))
+        ixmax = np.nanargmin(np.abs(xval - fc.q2units(fc.calqmag(max_twotheta, energy_kev), units, energy_kev)))
+        # mesh = mesh[ext * peak_width_pixels:-ext * peak_width_pixels - 1]
+        # xval = xval[ext * peak_width_pixels:-ext * peak_width_pixels - 1]
+        mesh = mesh[ixmin:ixmax]
+        xval = xval[ixmin:ixmax]
         return xval, mesh, reflections
 
     def generate_intensity_cut(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0),
@@ -648,12 +655,13 @@ class Scattering:
           cut_width = width in height that will be included, in A-1
           background = average background value
           peak_width = reflection width in A-1
+          pixels = size of the plotting mesh
         Returns:
-          Qx/Qy = [1000x1000] array of coordinates
-          plane = [1000x1000] array of plane in reciprocal space
+          Qx/Qy = [pixels x pixels] array of coordinates
+          plane = [pixels x pixels] array of plane in reciprocal space
 
         E.G. hk plane at L=3 for hexagonal system:
-            Qx,Qy,plane = xtl.generate_intensity_cut([1,0,0],[0,1,0],[0,0,3])
+            Qx,Qy,plane = xtl.Scatter.generate_intensity_cut([1,0,0],[0,1,0],[0,0,3])
             plt.figure()
             plt.pcolormesh(Qx,Qy,plane)
             plt.axis('image')
@@ -672,6 +680,7 @@ class Scattering:
         if peak_width is None or peak_width < pixel_size:
             peak_width = pixel_size / 2
 
+        # Add Gaussian profile to each peak
         KS = 3  # kernel size in units of peak width
         kernel_size = int(2 * KS * peak_width * pixels / (2 * q_max))
         kernel_size = kernel_size + 1 if kernel_size % 2 == 1 else kernel_size  # kernel_size must be even
