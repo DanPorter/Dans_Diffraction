@@ -95,6 +95,7 @@ Acknoledgements:
     July 2023   Thanks to Yves Joly for helpful suggestions on FDMNES wrapper
     Oct 2023    Thanks to asteppke for pointing out scaling issue in diffractometer gui
     Oct 2023    Thanks to Cyril Cayron for pointing out the error with plotting neutron power spectra
+    Jan 2024    Thanks to Carmelo Prestipino for adding search_distance and plot_distance
     May 2024    Thanks to Innbig for spotting some errors in large liquid crystal powder patterns
     May 2024    Thanks to paul-cares pointing out a silly spelling error in the title!
 

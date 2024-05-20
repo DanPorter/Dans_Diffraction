@@ -4,7 +4,7 @@ Reads crystallographic cif files, calculates crystal properties and simulates di
 **Version 3.2**
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8106031.svg)](https://doi.org/10.5281/zenodo.8106031)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/DanPorter/Dans_Diffraction/6be78ef800167276d61d3e73da3b74a8367dbbe7?urlpath=lab%2Ftree%2FDans_Diffraction.ipynb) 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/DanPorter/Dans_Diffraction/master?labpath=Dans_Diffraction.ipynb) 
 [![](https://img.shields.io/github/forks/DanPorter/Dans_Diffraction?label=GitHub%20Repo&style=social)](https://github.com/DanPorter/Dans_Diffraction)
 
 
@@ -37,7 +37,7 @@ xtl.start_gui()
 
 Full code documentation available [here](https://danporter.github.io/Dans_Diffraction/).
 
-Try it out on [mybinder!](https://mybinder.org/v2/gh/DanPorter/Dans_Diffraction/6be78ef800167276d61d3e73da3b74a8367dbbe7?urlpath=lab%2Ftree%2FDans_Diffraction.ipynb)
+Try it out on [mybinder!](https://mybinder.org/v2/gh/DanPorter/Dans_Diffraction/master?labpath=Dans_Diffraction.ipynb)
 
 For comments, queries or bugs - email [dan.porter@diamond.ac.uk](mailto:dan.porter@diamond.ac.uk)
 
@@ -61,12 +61,18 @@ $ python -m pip install git+https://github.com/DanPorter/Dans_Diffraction.git
 Or, Download the latest version from GitHub (with examples!):
 ```text
 $ git clone https://github.com/DanPorter/Dans_Diffraction.git
+$ cd Dans_Diffraction
+$ python -m pip install .
 ```
 
 
 
 # Operation
-Dans_Diffraction is best run within an interactive python environment:
+From version 3.2, installing Dans_Diffraction will include a run script for the gui:
+```text
+$ dansdiffraction
+```
+Alternatively, Dans_Diffraction is best run within an interactive python environment:
 ```text
 $ ipython -i -m Dans_Diffraction
 ```
@@ -259,25 +265,26 @@ Once activated, FDMNES GUI elements become available from the main window, emula
 
 
 # Acknoledgements
-| Date       | Thanks to...                                                                            |
-|------------|-----------------------------------------------------------------------------------------|
-| 2018       | Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations |
-| Dec 2019   | Thanks to Gareth Nisbet for allowing me to inlude his multiple scattering siumulation   |
-| April 2020 | Thanks to ChunHai Wang for helpful suggestions in readcif!                              |
-| May 2020   | Thanks to AndreEbel for helpful suggestions on citations                                |
-| Dec 2020   | Thanks to Chris Drozdowski for suggestions about reflection families                    |
-| Jan 2021   | Thanks to aslarsen for suggestions about outputting the structure factor                |
-| April 2021 | Thanks to Trygve Ræder for suggestions about x-ray scattering factors                   |
-| Feb 2022   | Thanks to Mirko for pointing out the error in two-theta values in Scatter.powder        |
-| March 2022 | Thanks to yevgenyr for suggesting new peak profiles in Scatter.powder                   |
-| Jan 2023   | Thanks to Anuradha Vibhakar for pointing out the error in f0 + if'-if''                 |
-| Jan 2023   | Thanks to Andreas Rosnes for testing the installation in jupyterlab                     |
-| May 2023   | Thanks to Carmelo Prestipino for adding electron scattering factors                     |
-| June 2023  | Thanks to Sergio I. Rincon for pointing out the rounding error in Scatter.powder        |
-| July 2023  | Thanks to asteppke for suggested update to Arrow3D for matplotlib V>3.4                 |
-| July 2023  | Thanks to Yves Joly for helpful suggestions on FDMNES wrapper                           |
-| April 2024 | Thanks to Innbig for pointing out an issue with liquid crystal simulations              |
-| May 2024   | Thanks to paul-cares pointing out a silly spelling error in the title!                  |
+| Date        | Thanks to...                                                                            |
+|-------------|-----------------------------------------------------------------------------------------|
+| 2018        | Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations |
+| Dec 2019    | Thanks to Gareth Nisbet for allowing me to inlude his multiple scattering siumulation   |
+| April 2020  | Thanks to ChunHai Wang for helpful suggestions in readcif!                              |
+| May 2020    | Thanks to AndreEbel for helpful suggestions on citations                                |
+| Dec 2020    | Thanks to Chris Drozdowski for suggestions about reflection families                    |
+| Jan 2021    | Thanks to aslarsen for suggestions about outputting the structure factor                |
+| April 2021  | Thanks to Trygve Ræder for suggestions about x-ray scattering factors                   |
+| Feb 2022    | Thanks to Mirko for pointing out the error in two-theta values in Scatter.powder        |
+| March 2022  | Thanks to yevgenyr for suggesting new peak profiles in Scatter.powder                   |
+| Jan 2023    | Thanks to Anuradha Vibhakar for pointing out the error in f0 + if'-if''                 |
+| Jan 2023    | Thanks to Andreas Rosnes for testing the installation in jupyterlab                     |
+| May 2023    | Thanks to Carmelo Prestipino for adding electron scattering factors                     |
+| June 2023   | Thanks to Sergio I. Rincon for pointing out the rounding error in Scatter.powder        |
+| July 2023   | Thanks to asteppke for suggested update to Arrow3D for matplotlib V>3.4                 |
+| July 2023   | Thanks to Yves Joly for helpful suggestions on FDMNES wrapper                           |
+| Jan 2024    | Thanks to Carmelo Prestipino for adding search_distance and plot_distance               | 
+| April 2024  | Thanks to Innbig for pointing out an issue with liquid crystal simulations              |
+| May 2024    | Thanks to paul-cares pointing out a silly spelling error in the title!                  |
 
 Copyright
 -----------------------------------------------------------------------------

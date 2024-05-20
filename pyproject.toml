@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools >= 61.0", "wheel", "numpy", "matplotlib"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Dans_Diffraction"
+version = "3.2.0"
+dependencies = [
+  "numpy",
+  "matplotlib",
+]
+requires-python = ">=3.7"
+authors = [
+  {name = "Dan Porter", email = "d.g.porter@outlook.com"},
+]
+maintainers = [
+  {name = "Dan Porter", email = "d.g.porter@outlook.com"},
+]
+description = "Generate diffracted intensities from crystals"
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = [
+  'crystal', 'cif', 'diffraction', 'crystallography', 'science',
+  'x-ray', 'neutron', 'resonant', 'magnetic', 'magnetism', 'multiple scattering',
+  'fdmnes', 'super structure', 'spacegroup', 'space group', 'diffractometer'
+]
+classifiers = [
+  'Programming Language :: Python :: 3.7',
+  'Intended Audience :: Science/Research',
+  'Topic :: Scientific/Engineering :: Physics',
+  'License :: OSI Approved :: Apache Software License',
+  'Development Status :: 3 - Alpha',
+]
+
+[project.urls]
+Homepage = "https://github.com/DanPorter/Dans_Diffraction"
+Documentation = "https://danporter.github.io/Dans_Diffraction"
+Repository = "https://github.com/DanPorter/Dans_Diffraction"
+"Bug Tracker" = "https://github.com/DanPorter/Dans_Diffraction/issues"
+Changelog = "https://github.com/DanPorter/Dans_Diffraction/blob/master/README.md"
+
+[project.scripts]
+dansdiffraction = "Dans_Diffraction:start_gui"
+
+[project.gui-scripts]
+dansdiffraction = "Dans_Diffraction:start_gui"
