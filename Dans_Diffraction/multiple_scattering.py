@@ -9,8 +9,8 @@ Example:
     mslist = run_calcms(xtl, [0,0,3], [0,1,0], [1,0], [2.83, 2.85], plot=True)
 
 Created from python package "calcms"
-Version 1.0
-12/12/2019
+Version 1.1
+29/07/2024
  -------------------------------------------
  Copyright 2014 Diamond Light Source Ltd.123
 
@@ -36,7 +36,7 @@ import matplotlib.pyplot as plt
 import itertools
 
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 
 def run_calcms(xtl, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], numsteps=60,
@@ -365,14 +365,21 @@ class Calcms(object):
         else:
             self.tvprime = hklnotlist
         # Build Ewald Sphere
-        brag1 = np.empty(self.hkl2.shape[0]) * 0 + 1.0 * Bragg(self.lattice, self.hkl, self.energy).th()
+        # brag1 = np.empty(self.hkl2.shape[0]) * 0 + 1.0 * Bragg(self.lattice, self.hkl, self.energy).th()
+        hkl_bragg = Bragg(self.lattice, self.hkl, self.energy).th()
+        brag1 = hkl_bragg * np.ones(len(self.hkl2))  # Dan 26/7/2024
         self.brag1 = brag1
         keV2A = 12.398
         ko = (self.energy / keV2A)
         self.ko = ko
         #   height dependent radius of ewald slice in the hk plane
+        # Dan: rewl is a (nxn) matrix, not sure if this is intentional...
         rewl = ko * np.cos((np.arcsin(
             ((ko * np.sin(-brag1 * np.pi / 180.0)) + (realvecthkl[:, 2])) / ko) * 180.0 / np.pi) * np.pi / 180.0)
+        # Dan: this fix below results in the calculation looking wrong...
+        # height = np.array(realvecthkl[:, 2]).reshape(-1)
+        # rewl = ko * np.cos((np.arcsin(
+        #     ((ko * np.sin(-brag1 * np.pi / 180.0)) + height) / ko) * 180.0 / np.pi) * np.pi / 180.0)
         rhk = np.sqrt(np.square(realvecthkl[:, 0]) + np.square(realvecthkl[:, 1]))
         #   Origin of intersecting circle
         orighk = np.empty(self.hkl2.shape[0]) * 0 + (ko * np.cos(brag1[0] * np.pi / 180.))

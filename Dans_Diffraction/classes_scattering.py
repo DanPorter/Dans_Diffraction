@@ -357,10 +357,20 @@ class Scattering:
     def structure_factor(self, hkl=None, scattering_type=None, int_hkl=True, **kwargs):
         """
         Calculate the structure factor at reflection indexes (h,k,l)
+                sf = sum( f_i * occ_i * dw_i * exp( -i * 2 * pi * hkl.uvw )
+        Where f_i is the elemental scattering factor, occ_i is the site occupancy, dw_i
+        is the Debye-Waller thermal factor, hkl is the reflection and uvw is the site position.
+
+        The following options for scattering_type are  supported:
+          'xray'  - uses x-ray form factors
+          'neutron' - uses neutron scattering lengths
+          'xray magnetic' - calculates the magnetic (non-resonant) component of the x-ray scattering
+          'neutron magnetic' - calculates the magnetic component of neutron scattering
+          'xray resonant' - calculates magnetic resonant scattering
+          'xray dispersion' - uses x-ray form factors including f'-if'' components
+
         Notes:
         - Uses x-ray atomic form factors, calculated from approximated tables in the ITC
-        - This may be a little slow for large numbers of reflections, as it is not currently
-         possible to use accelerated calculation methods in Jython.
         - Debye-Waller factor (atomic displacement) is applied for isotropic ADPs
         - Crystal.scale is used to scale the complex structure factor, so the intensity is
          reduced by (Crystal.scale)^2
@@ -515,6 +525,18 @@ class Scattering:
     def intensity(self, hkl=None, scattering_type=None, int_hkl=True, **options):
         """
         Return the structure factor squared
+                I = |sum( f_i * occ_i * dw_i * exp( -i * 2 * pi * hkl.uvw ) |^2
+        Where f_i is the elemental scattering factor, occ_i is the site occupancy, dw_i
+        is the Debye-Waller thermal factor, hkl is the reflection and uvw is the site position.
+
+        The following options for scattering_type are  supported:
+          'xray'  - uses x-ray form factors
+          'neutron' - uses neutron scattering lengths
+          'xray magnetic' - calculates the magnetic (non-resonant) component of the x-ray scattering
+          'neutron magnetic' - calculates the magnetic component of neutron scattering
+          'xray resonant' - calculates magnetic resonant scattering
+          'xray dispersion' - uses x-ray form factors including f'-if'' components
+
         :param hkl: array[n,3] : reflection indexes (h, k, l)
         :param scattering_type: str : one of ['xray','neutron', 'electron', 'xray magnetic','neutron magnetic','xray resonant']
         :param int_hkl: Bool : when True, hkl values are converted to integer.
@@ -2448,7 +2470,7 @@ class Scattering:
                              full=full, pv1=pv1, pv2=pv2, sfonly=sfonly, pv1xsf1=pv1xsf1)
 
     def ms_azimuth(self, hkl, energy_kev, azir=[0, 0, 1], pv=[1, 0], numsteps=3, peak_width=0.1,
-                   full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False):
+                   full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False, energy_sum_range=0.002):
         """
         Returns an azimuthal dependence at a particular energy
 
@@ -2464,10 +2486,11 @@ class Scattering:
         :param pv2: True/False: calculation type: pv2
         :param sfonly: True/False: calculation type: sfonly *default
         :param pv1xsf1: True/False: calculation type: pv1xsf1?
+        :param energy_sum_range: energy in keV to sum the calculation over (from energy_kev-range/2 to energy_kev+range/2)
         :return: None
         """
 
-        energy_range = [energy_kev-0.001, energy_kev+0.001]
+        energy_range = [energy_kev-energy_sum_range/2, energy_kev+energy_sum_range/2]
         mslist = self.xtl.Scatter.multiple_scattering(hkl, azir, pv, energy_range, numsteps,
                                                       full=full, pv1=pv1, pv2=pv2, sfonly=sfonly, pv1xsf1=pv1xsf1)
 

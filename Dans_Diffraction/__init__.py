@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.2.1
-Last updated: 20/05/24
+Version 3.2.2
+Last updated: 29/07/24
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -77,6 +77,7 @@ Version History:
 10/05/24 3.1.5  Fixed SyntaxWarnings from Unrecognized escape sequences in Python 3.12, various fixes to scattering
 15/05/24 3.2.0  Added "save" and "load" methods to structure factor calculation, improved powder for large calculations
 20/05/24 3.2.1  Added pyproject.toml file for installation, including dansdiffraction script
+29/07/24 3.2.2  Fix for issue #19 in multiple_scattering code, other minor improvements
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -148,8 +149,8 @@ from .classes_fdmnes import fdmnes_checker, Fdmnes, FdmnesAnalysis
 from .functions_crystallography import readcif
 
 
-__version__ = '3.2.1'
-__date__ = '20/05/24'
+__version__ = '3.2.2'
+__date__ = '29/07/24'
 
 
 # Build

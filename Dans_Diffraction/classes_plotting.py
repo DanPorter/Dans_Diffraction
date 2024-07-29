@@ -1330,7 +1330,8 @@ class Plotting:
         plt.subplots_adjust(bottom=0.12, top=0.88)
 
     def plot_ms_azimuth(self, hkl, energy_kev, azir=[0, 0, 1], pv=[1, 0], numsteps=3, peak_width=0.1,
-                        full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False, log=False):
+                        full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False,
+                        log=False, energy_sum_range=0.002):
         """
         Run the multiple scattering code and plot the result
         See multiple_scattering.py for more details.
@@ -1347,6 +1348,7 @@ class Plotting:
         :param sfonly: True/False: calculation type: sfonly *default
         :param pv1xsf1: True/False: calculation type: pv1xsf1?
         :param log: log y scale
+        :param energy_sum_range: energy in keV to sum the calculation over (from energy_kev-range/2 to energy_kev+range/2)
         :return: None
         """
 
