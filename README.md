@@ -129,10 +129,10 @@ X-ray or neutron structure factors/ intensities are calculated based on the full
 form-factors (x-rays) or coherent scattering lengths (neutrons).
 ```python
 # Choose scattering options (see help(xtl.Scatter.setup_scatter))
-xtl.Scatter.setup_scatter(type='x-ray', energy_keV=8.0)
+xtl.Scatter.setup_scatter(scattering_type='x-ray', energy_keV=8.0)
 # Allowed radiation types:
 #    'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
-xtl.Scatter.print_all_refelctions() # Returns formated string of all allowed reflections
+xtl.Scatter.print_all_reflections() # Returns formated string of all allowed reflections
 inten = xtl.Scatter.intensity([h,k,l]) # Returns intensity
 twotheta, iten, reflections = xtl.Scatter.powder(units='twotheta')
 # Plot Experimental Intensities
