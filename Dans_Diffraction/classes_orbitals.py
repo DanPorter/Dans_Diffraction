@@ -33,12 +33,13 @@ By Dan Porter, PhD
 Diamond
 2020
 
-Version 1.0.0
-Last updated: 12/07/20
+Version 1.1.0
+Last updated: 04/09/24
 
 Version History:
 09/05/20 0.1.0  Version History started.
 12/07/20 1.0.0  Program functional, performed some testing
+04/09/24 1.1.0  Added missing orbitals in Atom.assign_charge
 
 @author: DGPorter
 """
@@ -50,7 +51,7 @@ from warnings import warn
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 OXIDATION_FILE = os.path.join(fc.datadir, 'Element_OxidationStates.txt')
 
@@ -307,7 +308,20 @@ class Atom:
         self.charge = charge
         intcharge = np.floor(charge)
         deccharge = charge % 1
-        self.orbitals = [Orbital(s) for s in fc.orbital_configuration(self.element_symbol, intcharge)]
+        # self.orbitals = [Orbital(s) for s in fc.orbital_configuration(self.element_symbol, intcharge)]
+        # # add empty orbitals
+        # for n, orbital in enumerate(self.orbitals[:-1]):
+        #     next_orbital = orbital.next_orbital(fill=0)  # empty orbital
+        #     if next_orbital not in self.orbitals:
+        #         self.orbitals.insert(n + 1, next_orbital)
+        neutral_orbitals = [Orbital(s) for s in fc.orbital_configuration(self.element_symbol, 0)]
+        charge_orbitals = [Orbital(s) for s in fc.orbital_configuration(self.element_symbol, intcharge)]
+        # add missing orbitals
+        for n, orbital in enumerate(neutral_orbitals):
+            if orbital not in charge_orbitals:
+                orbital.fill = 0
+                charge_orbitals.insert(n, orbital)
+        self.orbitals = charge_orbitals
         if deccharge > 0:
             self.orbitals[-1].remove_electron(deccharge)
 
