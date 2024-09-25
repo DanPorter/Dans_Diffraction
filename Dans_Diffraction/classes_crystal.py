@@ -1764,6 +1764,8 @@ class Symmetry:
         self.symmetry_operations_magnetic = fc.symmetry_ops2magnetic(symops)
         self.symmetry_operations_time = [1] * len(symops)
 
+        self.generate_matrices()
+
     def load_magnetic_spacegroup(self, msg_number=None, sg_dict=None):
         """
         Load symmetry operations from a magnetic spacegroup from Bilbao crystallographic server
@@ -1785,6 +1787,8 @@ class Symmetry:
         self.symmetry_operations = symops
         self.symmetry_operations_magnetic = symmag
         self.symmetry_operations_time = fc.sym_op_time(symops)
+
+        self.generate_matrices()
 
     def changesym(self, idx, operation):
         """
