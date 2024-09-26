@@ -470,7 +470,8 @@ class Scattering:
                     qmag = fg.mag(_q)      # q magnitude
                     # Scattering factors
                     if scattering_type in fs.SCATTERING_TYPES['neutron']:
-                        ff = fc.atom_properties(atom_type, 'Coh_b')
+                        # ff = fc.atom_properties(atom_type, 'Coh_b')
+                        ff = fc.neutron_scattering_length(atom_type)
                     elif scattering_type in fs.SCATTERING_TYPES['electron']:
                         ff = fc.electron_scattering_factor(atom_type, qmag)
                     elif scattering_type in fs.SCATTERING_TYPES['xray fast']:
@@ -999,7 +1000,7 @@ class Scattering:
             dw = 1
         
         # Calculate dot product
-        dot_KR = np.dot(HKL,uvw.T)
+        dot_KR = np.dot(HKL, uvw.T)
         
         # Calculate structure factor
         SF = np.sum(ff * dw * occ * np.exp(1j * 2 * np.pi * dot_KR), axis=1)

@@ -11,8 +11,8 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.8.2
-Last updated: 02/07/23
+Version 3.9.0
+Last updated: 26/09/24
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -43,6 +43,7 @@ Version History:
 07/05/23 3.8.0  Added electron_scattering_factors and electron wavelength formula
 22/05/23 3.8.1  Added wyckoff_label, find_spacegroup
 02/07/23 3.8.2  Added wavelength options to several functions, plut DeBroglie wavelength function
+26/09/24 3.9.0  Added complex neutron scattering lengths for isotopes from package periodictable
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -58,14 +59,14 @@ from warnings import warn
 
 from . import functions_general as fg
 
-__version__ = '3.8.2'
+__version__ = '3.9.0'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
 datadir = os.path.join(datadir, 'data')
 ATOMFILE = os.path.join(datadir, 'Dans Element Properties.txt')
 PENGFILE = os.path.join(datadir, 'peng.dat')
-
+NSLFILE = os.path.join(datadir, 'neutron_isotope_scattering_lengths.dat')
 
 # List of Elements in order sorted by length of name
 ELEMENT_LIST = [
@@ -94,6 +95,7 @@ ELEMENT_LIST = [
     'D', 'd',  # add Deuterium
 ]
 element_regex = re.compile('|'.join(ELEMENT_LIST))
+regex_sub_element = re.compile('[^a-zA-Z]')  # 'Li' = regex_sub_element.sub('', '7-Li2+')
 
 
 # Required CIF keys, must be available and not '?'
@@ -879,7 +881,8 @@ def atom_properties(elements=None, fields=None):
         all_elements = [el.lower() for el in data['Element']]
         # This will error if the required element doesn't exist
         try:
-            index = [all_elements.index(el) for el in elements]
+            # regex to remove additional characters
+            index = [all_elements.index(regex_sub_element.sub('', el)) for el in elements]
         except ValueError as ve:
             raise Exception('Element not available: %s' % ve)
         data = data[index]
@@ -913,16 +916,42 @@ def print_atom_properties(elements=None):
     return out
 
 
-def neutron_scattering_length(element):
+def read_neutron_scattering_lengths():
+    """
+    Read neutron scattering length of element or isotope
+    Returns table of complex bound coherent neutron scattering length, in fm for elements and isotopes
+
+        Natural average for each element given by 'element', e.g. 'Ti'
+        Isotope value given by 'weight-element', e.g. '46-Ti'
+
+    Values are taken from package periodictable (https://github.com/pkienzle/periodictable)
+    :return: {'isotope': complex}
+    """
+    nsl = {}
+    with open(NSLFILE) as f:
+        for line in f:
+            if line.startswith('#'):
+                continue
+            isotope, real, imag = line.split(',')
+            nsl[isotope.lower()] = complex(float(real), float(imag))
+    return nsl
+
+
+def neutron_scattering_length(elements):
     """
     Return neutron scattering length, b, in fm
     Uses bound coherent scattering length from NIST
     https://www.ncnr.nist.gov/resources/n-lengths/
      b = neutron_scattering_length('Co')
-    :param element: [n*str] list or array of elements
+    Now includes complex neutron scattering lengths for isotopes from package periodictable
+    https://github.com/pkienzle/periodictable
+     b = neutron_scattering_length('7-Li')
+    :param elements: [n*str] list or array of elements
     :return: [n] array of scattering lengths
     """
-    b = atom_properties(element, ['Coh_b'])
+    # b = atom_properties(element, ['Coh_b'])
+    nsl = read_neutron_scattering_lengths()
+    b = np.array([nsl[element] for element in np.char.lower(np.asarray(elements).reshape(-1))])
     return b
 
 
