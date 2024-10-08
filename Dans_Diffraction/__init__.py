@@ -80,6 +80,7 @@ Version History:
 29/07/24 3.2.2  Fix for issue #19 in multiple_scattering code, other minor improvements
 04/09/24 3.2.3  Updated method of generating charge states in classes_orbtials.py, Thanks Seonghun!
 25/09/24 3.2.4  Fixed error of missing rotation matrices after load_spacegroup. Thanks asteppke!
+26/09/24 3.3.0  Added complex neutron scattering lengths for isotopes from package periodictable. Thanks thamnos!
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
