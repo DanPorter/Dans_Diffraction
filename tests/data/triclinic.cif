@@ -1,0 +1,31 @@
+
+#======================================================================
+# CRYSTAL DATA
+#----------------------------------------------------------------------
+data_VESTA_phase_1
+
+_chemical_name_common                  'Test_Triclinic'
+_cell_length_a                         6.867000
+_cell_length_b                         16.705999
+_cell_length_c                         5.399000
+_cell_angle_alpha                      62.980000
+_cell_angle_beta                       42.250000
+_cell_angle_gamma                      52.160000
+_cell_volume                           328.878918
+_space_group_name_H-M_alt              'P 1'
+_space_group_IT_number                 1
+
+loop_
+_space_group_symop_operation_xyz
+   'x, y, z'
+
+loop_
+   _atom_site_label
+   _atom_site_occupancy
+   _atom_site_fract_x
+   _atom_site_fract_y
+   _atom_site_fract_z
+   _atom_site_adp_type
+   _atom_site_U_iso_or_equiv
+   _atom_site_type_symbol
+   Fe1        1.0     0.000000     0.000000     0.000000    Uiso  0.050000 Fe
