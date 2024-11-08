@@ -8,8 +8,6 @@ import numpy as np
 
 data_dir = os.path.join(os.path.dirname(__file__), 'data')
 
-CIF = os.path.join(data_dir, 'triclinic.cif')
-RUTILE = os.path.join(data_dir, 'Rutile.cif')
 WAVELENGTH = 1.54059  # angstrom (Cu Ka)
 LATTICE = {
     'cubic': {'a': 3.92},

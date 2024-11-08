@@ -1,5 +1,6 @@
 import pytest
 
+import Dans_Diffraction as dif
 from Dans_Diffraction import functions_lattice as fl
 
 from .load_data import LATTICE, HKL, VOLUMES, VestaData
@@ -34,4 +35,16 @@ def test_basis_options(vesta_data):
             basis_lp = fl.basis2latpar(basis)
             assert sum(abs(a-b) for a, b in zip(lp, basis_lp)) < 0.01, f"lattice parameters wrong for basis {n+1}, {latt}"
 
+
+def test_crystal(vesta_data):
+    basis_options = ['materialsproject', 'vesta', 'busingandlevy']
+    for latt, latpar in LATTICE.items():
+        xtl = dif.structure_list.triclinic()
+        xtl.Cell.latt(**latpar)
+        for opt in basis_options:
+            xtl.Cell.choose_basis(opt)
+            for hkl in HKL:
+                calc_dspace = xtl.Cell.dspace(hkl)
+                check_dspace = vesta_data[latt].get_dspace(hkl)
+                assert abs(calc_dspace - check_dspace) < 0.01, f"d-space wrong for {hkl}, {latt}"
 

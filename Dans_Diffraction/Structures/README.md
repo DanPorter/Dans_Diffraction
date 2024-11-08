@@ -37,3 +37,4 @@ The files are downloaded or generated from a range of data sources, for example:
 * [ISODISTORT](https://stokes.byu.edu/iso/isodistort.php)
 * [Jana2006](http://www-xray.fzu.cz/jana/jana.html)
 * [Vesta](http://jp-minerals.org/vesta/en/)
+* [CrystalMaker](https://crystalmaker.com/index.html)
