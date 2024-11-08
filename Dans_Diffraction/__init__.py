@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.2.4
-Last updated: 25/09/24
+Version 3.3.1
+Last updated: 08/11/2024
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -80,7 +80,8 @@ Version History:
 29/07/24 3.2.2  Fix for issue #19 in multiple_scattering code, other minor improvements
 04/09/24 3.2.3  Updated method of generating charge states in classes_orbtials.py, Thanks Seonghun!
 25/09/24 3.2.4  Fixed error of missing rotation matrices after load_spacegroup. Thanks asteppke!
-06/11/24 3.3.0  Fixed incorrect cell basis for triclinic cells. Added functions_lattice.py and tests. Thanks LeeRichter!
+26/09/24 3.3.0  Added complex neutron scattering lengths for isotopes from package periodictable. Thanks thamnos!
+06/11/24 3.3.1  Fixed incorrect cell basis for triclinic cells. Added functions_lattice.py and tests. Thanks LeeRichter!
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -105,6 +106,7 @@ Acknoledgements:
     May 2024    Thanks to paul-cares pointing out a silly spelling error in the title!
     Aug 2024    Thanks to Seonghun for pointing out the error with charge states in Hf
     Aug 2024    Thanks to MaxPelly for spell checks in examples
+    Sep 2024    Thanks to thamnos for suggestion to add complex neutron scattering lengths
     Oct 2024    Thanks to Lee Richter for pointing out the error in triclinic basis definition
 
 -----------------------------------------------------------------------------
@@ -160,8 +162,8 @@ __all__ = ['fg', 'fp', 'fl', 'fc', 'Crystal', 'MultiCrystal', 'readcif',
            'Structures', 'Fdmnes', 'FdmnesAnalysis']
 
 
-__version__ = '3.3.0'
-__date__ = '25/11/06'
+__version__ = '3.3.1'
+__date__ = '2024/11/08'
 
 
 # Build
