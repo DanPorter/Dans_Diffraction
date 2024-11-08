@@ -15,11 +15,9 @@ Version History:
 @author: DGPorter
 """
 
-import sys, os, re
 import numpy as np
-from warnings import warn
 
-from . import functions_general as fg
+from . import functions_lattice as fl
 from . import functions_crystallography as fc
 
 __version__ = '1.0.0'
@@ -174,10 +172,9 @@ class CrystalOrientation:
       x-axis : vector normal to phi axis where phi=0 (toward ceiling (+y) in lab frame)
       y-axis : vector normal to x,z axes (parallel to beam (+z) in lab frame)
     """
-    def __init__(self, lattice_parameters=(), *args, **kwargs):
+    def __init__(self, *lattice_parameters, **kwargs):
         self.a, self.b, self.c, self.alpha, self.beta, self.gamma = fc.gen_lattice_parameters(
-            lattice_parameters,
-            *args,
+            *lattice_parameters,
             **kwargs
         )
         self.orientation = Orientation()
@@ -218,17 +215,15 @@ class CrystalOrientation:
 
     def lp_star(self):
         """Return tuple of reciprocal lattice parameters in inverse-angstroms and degrees"""
-        uv = self._uv()
-        return fc.latpar_reciprocal(uv)
+        return fl.reciprocal_lattice_parameters(*self.lp())
 
     def _uv(self):
-        """Return unit vectors [a,b,c] in default frame (b along X)"""
-        return fc.latpar2uv_rot(self.a, self.b, self.c, self.alpha, self.beta, self.gamma)
+        """Return unit vectors [a,b,c] in default frame (a* along X)"""
+        return fl.basis_3(*self.lp())
 
     def _uvstar(self):
         """Return unit vectors in recirpocal space in default frame (a* along X)"""
-        uv = self._uv()
-        return fc.RcSp(uv)
+        return fl.reciprocal_basis(self._uv())
 
     def unit_vectors(self):
         """Return real space unit vectors [a, b, c]"""
@@ -240,7 +235,7 @@ class CrystalOrientation:
 
     def bmatrix(self):
         """Return the B matrix from Busing & Levy in the diffractometer frame"""
-        return fc.Bmatrix(self._uv())
+        return fl.busingandlevy(*self.lp())
 
     def ubmatrix(self):
         """Return UB matrix from Busing & Levy in the diffractometer frame"""
