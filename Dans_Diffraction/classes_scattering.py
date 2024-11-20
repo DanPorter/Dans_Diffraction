@@ -104,6 +104,9 @@ class Scattering:
     # Uses the coefficients for analytical approximation to the scattering factors from:
     #        "Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431"
     _use_waaskirf_scattering_factor = False
+
+    # Use the neutron scattering factors from the Internation tables (Sears 1995)
+    _use_sears_scattering_lengths = False
     
     # Thermal Factors
     _use_isotropic_thermal_factor = True
@@ -161,6 +164,8 @@ class Scattering:
         out += '      max twotheta: %s\n' % self._scattering_max_twotheta
         out += ' ---X-Ray Settings---\n'
         out += ' Waasmaier scattering factor: %s\n' % self._use_waaskirf_scattering_factor
+        out += ' ---Neutron Settings---\n'
+        out += ' Sears (ITC) scattering lengths: %s\n' % self._use_sears_scattering_lengths
         out += ' ---Magnetic Settings---\n'
         out += '   Mag. scattering: %s\n' % self._calclate_magnetic_component
         out += '  Mag. form factor: %s\n' % self._use_magnetic_form_factor
@@ -185,7 +190,7 @@ class Scattering:
                       powder_units=None, powder_pixels=None, powder_lorentz=None, powder_overlap=None,
                       specular=None, parallel=None, theta_offset=None,
                       min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None,
-                      output=True, scattering_factors=None, magnetic_formfactor=None,
+                      output=True, scattering_factors=None, scattering_lengths=None, magnetic_formfactor=None,
                       polarisation=None, polarisation_vector=None, azimuthal_reference=None, azimuth=None, flm=None):
         """
         Simple way to set scattering parameters, each parameter is internal to xtl (self)
@@ -205,6 +210,7 @@ class Scattering:
         specular    : self._scattering_specular_direction : [h,k,l] : reflections normal to sample surface
         parallel    : self._scattering_parallel_direction : [h,k,l] : reflections normal to sample surface
         scattering_factors: self._use_waaskirf_scattering_factor : xray scattering factor ['waaskirf', 'itc']
+        scattering_lengths: self._use_sears_scattering_lengths : neutron scattering lengths ['sears', 'default']
         magnetic_formfactor: self._use_magnetic_form_factor: True/False magnetic form factor for magnetic SF
         polarisation: self._polarisation                  : beam polarisation setting ['ss', 'sp'*, 'sp', 'pp']
         polarisation_vector: _polarisation_vector_incident: [x,y,z] incident polarisation vector
@@ -262,6 +268,14 @@ class Scattering:
             else:
                 print('Using scattering factors from: International Tables of Crystallography Vol. C, Table 6.1.1.4')
                 self._use_waaskirf_scattering_factor = False
+
+        if scattering_lengths is not None:
+            if scattering_lengths.lower() in ['sears', 'itc', 'alternate', 'alt']:
+                print('Using scattering lengths from International Tables of Crystallography Vol. C, Table 4.4.4.1')
+                self._use_sears_scattering_lengths = True
+            else:
+                print('Using scattering lengths from Neutron Data Booklet')
+                self._use_sears_scattering_lengths = False
 
         if magnetic_formfactor is not None:
             self._use_magnetic_form_factor = magnetic_formfactor
@@ -470,8 +484,11 @@ class Scattering:
                     qmag = fg.mag(_q)      # q magnitude
                     # Scattering factors
                     if scattering_type in fs.SCATTERING_TYPES['neutron']:
-                        # ff = fc.atom_properties(atom_type, 'Coh_b')
-                        ff = fc.neutron_scattering_length(atom_type)
+                        if self._use_sears_scattering_lengths:
+                            ff = fc.neutron_scattering_length(atom_type, 'Sears')
+                        else:
+                            # ff = fc.atom_properties(atom_type, 'Coh_b')
+                            ff = fc.neutron_scattering_length(atom_type)
                     elif scattering_type in fs.SCATTERING_TYPES['electron']:
                         ff = fc.electron_scattering_factor(atom_type, qmag)
                     elif scattering_type in fs.SCATTERING_TYPES['xray fast']:

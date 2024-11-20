@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.3.1
-Last updated: 08/11/2024
+Version 3.3.2
+Last updated: 20/11/2024
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -82,6 +82,7 @@ Version History:
 25/09/24 3.2.4  Fixed error of missing rotation matrices after load_spacegroup. Thanks asteppke!
 26/09/24 3.3.0  Added complex neutron scattering lengths for isotopes from package periodictable. Thanks thamnos!
 06/11/24 3.3.1  Fixed incorrect cell basis for triclinic cells. Added functions_lattice.py and tests. Thanks LeeRichter!
+20/11/24 3.3.2  Added alternate option for neutron scattering lengths
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -162,8 +163,8 @@ __all__ = ['fg', 'fp', 'fl', 'fc', 'Crystal', 'MultiCrystal', 'readcif',
            'Structures', 'Fdmnes', 'FdmnesAnalysis']
 
 
-__version__ = '3.3.1'
-__date__ = '2024/11/08'
+__version__ = '3.3.2'
+__date__ = '2024/11/20'
 
 
 # Build

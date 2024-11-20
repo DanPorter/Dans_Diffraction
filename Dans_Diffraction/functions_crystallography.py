@@ -11,7 +11,7 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 4.0.0
+Version 4.0.1
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -44,6 +44,7 @@ Version History:
 02/07/23 3.8.2  Added wavelength options to several functions, plut DeBroglie wavelength function
 26/09/24 3.9.0  Added complex neutron scattering lengths for isotopes from package periodictable
 06/11/24 4.0.0  Fixed error with triclinic bases, added function_lattice.
+20/11/24 4.0.1  Added alternative neutron scattering length table
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -62,7 +63,7 @@ from warnings import warn
 from . import functions_general as fg
 from . import functions_lattice as fl
 
-__version__ = '4.0.0'
+__version__ = '4.0.1'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -70,6 +71,7 @@ datadir = os.path.join(datadir, 'data')
 ATOMFILE = os.path.join(datadir, 'Dans Element Properties.txt')
 PENGFILE = os.path.join(datadir, 'peng.dat')
 NSLFILE = os.path.join(datadir, 'neutron_isotope_scattering_lengths.dat')
+NSLFILE_SEARS = os.path.join(datadir, 'neutron_isotope_scattering_lengths_sears.dat')
 
 # List of Elements in order sorted by length of name
 ELEMENT_LIST = [
@@ -915,7 +917,7 @@ def print_atom_properties(elements=None):
     return out
 
 
-def read_neutron_scattering_lengths():
+def read_neutron_scattering_lengths(table='neutron data booklet'):
     """
     Read neutron scattering length of element or isotope
     Returns table of complex bound coherent neutron scattering length, in fm for elements and isotopes
@@ -923,11 +925,22 @@ def read_neutron_scattering_lengths():
         Natural average for each element given by 'element', e.g. 'Ti'
         Isotope value given by 'weight-element', e.g. '46-Ti'
 
-    Values are taken from package periodictable (https://github.com/pkienzle/periodictable)
-    :return: {'isotope': complex}
+    Default values are extracted from Periodic Table https://github.com/pkienzle/periodictable
+     - Values originally from Neutron Data Booklet, by A-J Dianoux, G. Lander (2003), with additions and corrections upto v1.7.0 (2023)
+
+    Alternative values are also available:
+     - ITC Vol. C, Section 4.4.4., By V. F. Sears Table 4.4.4.1 (Jan 1995)
+
+    :param table: name of data table to use, options are 'neutron data booklet' or 'sears'
+    :return: {'isotope': complex, ...}
     """
+    if table.lower() in ['sears', 'itc']:
+        table_file = NSLFILE_SEARS
+    else:
+        table_file = NSLFILE
+
     nsl = {}
-    with open(NSLFILE) as f:
+    with open(table_file) as f:
         for line in f:
             if line.startswith('#'):
                 continue
@@ -936,20 +949,30 @@ def read_neutron_scattering_lengths():
     return nsl
 
 
-def neutron_scattering_length(elements):
+def neutron_scattering_length(elements, table='neutron data booklet'):
     """
     Return neutron scattering length, b, in fm
-    Uses bound coherent scattering length from NIST
-    https://www.ncnr.nist.gov/resources/n-lengths/
-     b = neutron_scattering_length('Co')
+
+        b = neutron_scattering_length('Co')
+
     Now includes complex neutron scattering lengths for isotopes from package periodictable
-    https://github.com/pkienzle/periodictable
-     b = neutron_scattering_length('7-Li')
+        b = neutron_scattering_length('7-Li')
+
+    Lists of elements also allowed
+        [bLi, bCo, bO] = neutron_scattering_length(['7-Li', 'Co', 'O'])
+
+    Default values are extracted from Periodic Table https://github.com/pkienzle/periodictable
+     - Values originally from Neutron Data Booklet, by A-J Dianoux, G. Lander (2003), with additions and corrections upto v1.7.0 (2023)
+
+    Alternative values are also available:
+     - ITC Vol. C, Section 4.4.4., By V. F. Sears Table 4.4.4.1 (Jan 1995)
+
     :param elements: [n*str] list or array of elements
+    :param table: name of data table to use, options are 'neutron data booklet' or 'sears'
     :return: [n] array of scattering lengths
     """
     # b = atom_properties(element, ['Coh_b'])
-    nsl = read_neutron_scattering_lengths()
+    nsl = read_neutron_scattering_lengths(table)
     b = np.array([nsl[element] for element in np.char.lower(np.asarray(elements).reshape(-1))])
     return b
 

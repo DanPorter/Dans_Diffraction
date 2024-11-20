@@ -16,7 +16,12 @@ def test_lattice(vesta_data):
     for latt, latpar in LATTICE.items():
         xtl = dif.structure_list.triclinic()
         xtl.Cell.latt(**latpar)
-        xtl.Scatter.setup_scatter(wavelength_a=1.54059, scattering_factors='waaskirf', output=False)  # match vesta
+        xtl.Scatter.setup_scatter(  # values match vesta
+            wavelength_a=1.54059,
+            scattering_factors='waaskirf',
+            scattering_lengths='Sears',
+            output=False
+        )
         sf = xtl.Scatter.structure_factor(HKL)
         for hkl, sf_calc in zip(HKL, sf):
             sf_vesta = vesta_data[latt].get_sf(hkl)
@@ -34,7 +39,12 @@ def test_rutile():
     xtl.Atoms.changeatom([0, 1], uiso=0.0126651)  # B=1
     xtl.generate_structure()
 
-    xtl.Scatter.setup_scatter(wavelength_a=1.54059, scattering_factors='waaskirf', output=False)
+    xtl.Scatter.setup_scatter(  # values match vesta
+        wavelength_a=1.54059,
+        scattering_factors='waaskirf',
+        scattering_lengths='Sears',
+        output=False
+    )
 
     for hkl, sf_xray, sf_neutron in zip(vesta_hkl, vesta_xray, vesta_neutron):
         calc_xray = xtl.Scatter.intensity(hkl, scattering_type='xray')[0]
@@ -44,7 +54,7 @@ def test_rutile():
         print(f"{hkl}:    xray: {sf_xray ** 2:.2f} - {calc_xray:.2f}")
         print(f"{hkl}: neutron: {sf_neutron ** 2:.2f} - {calc_neutron:.2f}")
         assert abs(calc_xray - sf_xray**2) < 0.01, f"x-ray intensity wrong for hkl"
-        assert abs(calc_neutron - sf_neutron ** 2) < 0.3, f"neutron intensity wrong for hkl"
+        assert abs(calc_neutron - sf_neutron ** 2) < 0.01, f"neutron intensity wrong for hkl"
 
 
 def test_rutile_xray():
@@ -70,10 +80,10 @@ def test_rutile_neutron():
 
     xtl = dif.structure_list.Rutile()
 
-    xtl.Scatter.setup_scatter(wavelength_a=1.54059, output=False)
+    xtl.Scatter.setup_scatter(wavelength_a=1.54059, scattering_lengths='Sears', output=False)
     calc_neutron = xtl.Scatter.intensity(hkl, scattering_type='neutron')
 
     for hh, vs, dd in zip(hkl, vesta_sf2, calc_neutron):
         print(f"{hh}: neutron: {vs:.2f} - {dd:.2f}")
-    assert sum((vesta_sf2 - calc_neutron) ** 2) < 2.0, 'difference in rutile neutron intensities'
+    assert sum((vesta_sf2 - calc_neutron) ** 2) < 0.01, 'difference in rutile neutron intensities'
 
