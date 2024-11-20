@@ -11,8 +11,7 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 3.9.0
-Last updated: 26/09/24
+Version 4.0.1
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -44,10 +43,14 @@ Version History:
 22/05/23 3.8.1  Added wyckoff_label, find_spacegroup
 02/07/23 3.8.2  Added wavelength options to several functions, plut DeBroglie wavelength function
 26/09/24 3.9.0  Added complex neutron scattering lengths for isotopes from package periodictable
+06/11/24 4.0.0  Fixed error with triclinic bases, added function_lattice.
+20/11/24 4.0.1  Added alternative neutron scattering length table
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
     May 2023    Thanks to Carmelo Prestipino for adding electron scattering factors
+    Sep 2024    Thanks to thamnos for suggestion to add complex neutron scattering lengths
+    Oct 2024    Thanks to Lee Richter for pointing out the error in triclinic basis definition
 
 @author: DGPorter
 """
@@ -58,8 +61,9 @@ import numpy as np
 from warnings import warn
 
 from . import functions_general as fg
+from . import functions_lattice as fl
 
-__version__ = '3.9.0'
+__version__ = '4.0.1'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
@@ -67,6 +71,7 @@ datadir = os.path.join(datadir, 'data')
 ATOMFILE = os.path.join(datadir, 'Dans Element Properties.txt')
 PENGFILE = os.path.join(datadir, 'peng.dat')
 NSLFILE = os.path.join(datadir, 'neutron_isotope_scattering_lengths.dat')
+NSLFILE_SEARS = os.path.join(datadir, 'neutron_isotope_scattering_lengths_sears.dat')
 
 # List of Elements in order sorted by length of name
 ELEMENT_LIST = [
@@ -351,7 +356,7 @@ def cif2dict(cifvals):
     alpha, dalpha = fg.readstfm(cifvals['_cell_angle_alpha'])
     beta, dbeta = fg.readstfm(cifvals['_cell_angle_beta'])
     gamma, dgamma = fg.readstfm(cifvals['_cell_angle_gamma'])
-    UV = latpar2uv(a, b, c, alpha, beta, gamma)
+    UV = fl.basis_3(a, b, c, alpha, beta, gamma)
 
     # Get atom names & labels
     label = cifvals['_atom_site_label']
@@ -413,13 +418,13 @@ def cif2dict(cifvals):
         symops_tim = cifvals['_space_group_symop.magn_operation_xyz']
         # Each symop given with time value: x,y,z,+1, separate them:
         symops = [','.join(s.split(',')[:3]) for s in symops_tim]  # x,y,z
-        symtim = [np.int(s.split(',')[-1]) for s in symops_tim]  # +1
+        symtim = [int(s.split(',')[-1]) for s in symops_tim]  # +1
         symmag = cifvals['_space_group_symop.magn_operation_mxmymz']
 
         # Centring vectors also given in this case
         symcen_tim = cifvals['_space_group_symop.magn_centering_xyz']
         symcen = [','.join(s.split(',')[:3]) for s in symcen_tim]  # x,y,z
-        symcentim = [np.int(s.split(',')[-1]) for s in symcen_tim]  # +1
+        symcentim = [int(s.split(',')[-1]) for s in symcen_tim]  # +1
         symcenmag = cifvals['_space_group_symop.magn_centering_mxmymz']
     else:
         symops = ['x,y,z']
@@ -532,31 +537,27 @@ def cif2dict(cifvals):
     else:
         sgn = 0
 
-    # print mag_pos
-    # print p1mag
-    # print p1vec
-    # print fg.mag(p1vec)
     # Add values to the dict
-    crys = {}
-    crys['filename'] = cifvals['Filename']
-    crys['name'] = cifvals['FileTitle']
-    crys['unit vector'] = UV
-    crys['parent cell'] = UV
-    crys['origin'] = np.array([[0., 0., 0.]])
-    crys['symmetry'] = symops
-    crys['atom type'] = p1typ
-    crys['atom label'] = p1lbl
-    crys['atom position'] = p1pos
-    crys['atom occupancy'] = p1occ
-    crys['atom uiso'] = p1Uiso
-    crys['atom uaniso'] = np.zeros([len(p1pos), 6])
-    crys['mag moment'] = p1vec
-    crys['mag time'] = p1tim
-    crys['normalise'] = 1.
-    crys['misc'] = [element, label, cif_pos, occ, Uiso]
-    crys['space group'] = spacegroup
-    crys['space group number'] = sgn
-    crys['cif'] = cifvals
+    crys = {
+        'filename': cifvals['Filename'],
+        'name': cifvals['FileTitle'],
+        'unit vector': UV,
+        'parent cell': UV,
+        'origin': np.array([[0., 0., 0.]]),
+        'symmetry': symops,
+        'atom type': p1typ,
+        'atom label': p1lbl,
+        'atom position': p1pos,
+        'atom occupancy': p1occ,
+        'atom uiso': p1Uiso,
+        'atom uaniso': np.zeros([len(p1pos), 6]),
+        'mag moment': p1vec, 'mag time': p1tim,
+        'normalise': 1.,
+        'misc': [element, label, cif_pos, occ, Uiso],
+        'space group': spacegroup,
+        'space group number': sgn,
+        'cif': cifvals
+    }
     return crys
 
 
@@ -916,7 +917,7 @@ def print_atom_properties(elements=None):
     return out
 
 
-def read_neutron_scattering_lengths():
+def read_neutron_scattering_lengths(table='neutron data booklet'):
     """
     Read neutron scattering length of element or isotope
     Returns table of complex bound coherent neutron scattering length, in fm for elements and isotopes
@@ -924,11 +925,22 @@ def read_neutron_scattering_lengths():
         Natural average for each element given by 'element', e.g. 'Ti'
         Isotope value given by 'weight-element', e.g. '46-Ti'
 
-    Values are taken from package periodictable (https://github.com/pkienzle/periodictable)
-    :return: {'isotope': complex}
+    Default values are extracted from Periodic Table https://github.com/pkienzle/periodictable
+     - Values originally from Neutron Data Booklet, by A-J Dianoux, G. Lander (2003), with additions and corrections upto v1.7.0 (2023)
+
+    Alternative values are also available:
+     - ITC Vol. C, Section 4.4.4., By V. F. Sears Table 4.4.4.1 (Jan 1995)
+
+    :param table: name of data table to use, options are 'neutron data booklet' or 'sears'
+    :return: {'isotope': complex, ...}
     """
+    if table.lower() in ['sears', 'itc']:
+        table_file = NSLFILE_SEARS
+    else:
+        table_file = NSLFILE
+
     nsl = {}
-    with open(NSLFILE) as f:
+    with open(table_file) as f:
         for line in f:
             if line.startswith('#'):
                 continue
@@ -937,20 +949,30 @@ def read_neutron_scattering_lengths():
     return nsl
 
 
-def neutron_scattering_length(elements):
+def neutron_scattering_length(elements, table='neutron data booklet'):
     """
     Return neutron scattering length, b, in fm
-    Uses bound coherent scattering length from NIST
-    https://www.ncnr.nist.gov/resources/n-lengths/
-     b = neutron_scattering_length('Co')
+
+        b = neutron_scattering_length('Co')
+
     Now includes complex neutron scattering lengths for isotopes from package periodictable
-    https://github.com/pkienzle/periodictable
-     b = neutron_scattering_length('7-Li')
+        b = neutron_scattering_length('7-Li')
+
+    Lists of elements also allowed
+        [bLi, bCo, bO] = neutron_scattering_length(['7-Li', 'Co', 'O'])
+
+    Default values are extracted from Periodic Table https://github.com/pkienzle/periodictable
+     - Values originally from Neutron Data Booklet, by A-J Dianoux, G. Lander (2003), with additions and corrections upto v1.7.0 (2023)
+
+    Alternative values are also available:
+     - ITC Vol. C, Section 4.4.4., By V. F. Sears Table 4.4.4.1 (Jan 1995)
+
     :param elements: [n*str] list or array of elements
+    :param table: name of data table to use, options are 'neutron data booklet' or 'sears'
     :return: [n] array of scattering lengths
     """
     # b = atom_properties(element, ['Coh_b'])
-    nsl = read_neutron_scattering_lengths()
+    nsl = read_neutron_scattering_lengths(table)
     b = np.array([nsl[element] for element in np.char.lower(np.asarray(elements).reshape(-1))])
     return b
 
@@ -1182,7 +1204,7 @@ def magnetic_form_factor(element, Qmag=0.):
     return Qff
 
 
-def attenuation(element_z, energy_keV):
+def attenuation(element_z, energy_kev):
     """
      Returns the x-ray mass attenuation, u/p, in cm^2/g
        e.g. A = attenuation(23,np.arange(7,8,0.01)) # Cu
@@ -1190,17 +1212,17 @@ def attenuation(element_z, energy_keV):
             a = attenuation(19,4.5) # K
     """
     element_z = np.asarray(element_z).reshape(-1)
-    energy_keV = np.asarray(energy_keV).reshape(-1)
+    energy_kev = np.asarray(energy_kev).reshape(-1)
 
     xma_file = os.path.join(datadir, 'XRayMassAtten_mup.dat')
     xma_data = np.loadtxt(xma_file)
 
     energies = xma_data[:, 0] / 1000.
-    out = np.zeros([len(energy_keV), len(element_z)])
+    out = np.zeros([len(energy_kev), len(element_z)])
     for n, z in enumerate(element_z):
         # Interpolating the log values is much more reliable
-        out[:, n] = np.exp(np.interp(np.log(energy_keV), np.log(energies), np.log(xma_data[:, z])))
-        out[:, n] = np.interp(energy_keV, energies, xma_data[:, z])
+        out[:, n] = np.exp(np.interp(np.log(energy_kev), np.log(energies), np.log(xma_data[:, z])))
+        out[:, n] = np.interp(energy_kev, energies, xma_data[:, z])
     if len(element_z) == 1:
         return out[:, 0]
     return out
@@ -1548,16 +1570,17 @@ def find_spacegroup(sg_symbol):
     sg_symbol = sg_symbol.replace(' ', '').replace('\"', '')
     sg_dict = spacegroups()
     sg_keys = list(sg_dict.keys())
-    sg_names = [sg_dict[sg]['space group name'] for sg in sg_dict]
+    sg_names = [sg['space group name'] for sg in sg_dict.values()]
     if sg_symbol in sg_names:
         key = sg_keys[sg_names.index(sg_symbol)]
         return sg_dict[key]
-    sg_dict = spacegroups_magnetic()
-    sg_keys = list(sg_dict.keys())
-    sg_names = [sg_dict[sg]['space group name'] for sg in sg_dict]
+
+    sg_dict_mag = spacegroups_magnetic()
+    sg_keys = list(sg_dict_mag.keys())
+    sg_names = [sg['space group name'] for sg in sg_dict_mag.values()]
     if sg_symbol in sg_names:
         key = sg_keys[sg_names.index(sg_symbol)]
-        return sg_dict[key]
+        return sg_dict_mag[key]
     return None
 
 
@@ -1774,7 +1797,8 @@ def balance_atom_charge(list_of_elements, occupancy=None):
     """
     Determine the default charges and assign remaining charge to
     unspecified elements
-    :param list_of_elements:
+    :param list_of_elements: list of element symbols ['Co', 'Fe', ...]
+    :param occupancy: None or list of occupancies, same length as above
     :return: [list of charges]
     """
 
@@ -2043,6 +2067,37 @@ def filter_transmission(chemical_formula, energy_kev, density, thickness_um=100)
 '-------------------Lattice Transformations------------------------------'
 
 
+gen_lattice_parameters = fl.gen_lattice_parameters
+
+
+def latpar2uv(*lattice_parameters, **kwargs):
+    """
+    Convert a,b,c,alpha,beta,gamma to UV=[A,B,C]
+     UV = latpar2uv(a,b,c,alpha=90.,beta=90.,gamma=120.)
+     Vector c is defined along [0,0,1]
+     Vector a and b are defined by the angles
+    """
+    return fl.basis_1(*lattice_parameters, **kwargs)
+
+
+def latpar2uv_rot(*lattice_parameters, **kwargs):
+    """
+    Convert a,b,c,alpha,beta,gamma to UV=[A,B,C]
+     UV = latpar2uv_rot(a,b,c,alpha=90.,beta=90.,gamma=120.)
+     Vector b is defined along [0,1,0]
+     Vector a and c are defined by the angles
+    """
+    return fl.basis_3(*lattice_parameters, **kwargs)
+
+
+def UV2latpar(UV):
+    """
+    Convert UV=[a,b,c] to a,b,c,alpha,beta,gamma
+     a,b,c,alpha,beta,gamma = UV2latpar(UV)
+    """
+    return fl.basis2latpar(UV)
+
+
 def RcSp(UV):
     """
     Generate reciprocal cell from real space unit vecors
@@ -2056,20 +2111,23 @@ def RcSp(UV):
     # b3 = 2*np.pi*np.cross(UV[0],UV[1])/np.dot(UV[0],np.cross(UV[1],UV[2]))
     # UVs = np.array([b1,b2,b3])
 
-    UVs = 2 * np.pi * np.linalg.inv(UV).T
-    return UVs
+    # UVs = 2 * np.pi * np.linalg.inv(UV).T
+    return fl.reciprocal_basis(UV)
 
 
-def indx(Q, UV):
+def indx(coords, basis_vectors):
     """
-    Index Q(x,y,z) on on lattice [h,k,l] with unit vectors UV
-    Usage:
-      HKL = indx(Q,UV)
-      Q = [[nx3]] array of vectors
-      UV = [[3x3]] matrix of vectors [a,b,c]
+    Index cartesian coordinates on a lattice defined by basis vectors
+    Usage (reciprocal space):
+        [[h, k, l], ...] = index_lattice([[qx, qy, qz], ...], [a*, b*, c*])
+    Usage (direct space):
+        [u, v, w] = index_lattice([x, y, z], [a, b, c])
+
+    :param coords: [nx3] array of coordinates
+    :param basis_vectors: [3*3] array of basis vectors [a[3], b[3], c[3]]
+    :return: [nx3] array of vectors in units of reciprocal lattice vectors
     """
-    HKL = np.dot(Q, np.linalg.inv(UV))
-    return HKL
+    return fl.index_lattice(coords, basis_vectors)
 
 
 def wavevector_difference(Q, ki):
@@ -2089,83 +2147,23 @@ def wavevector_difference(Q, ki):
     # return np.array([np.dot(q, q) + 2 * np.dot(q, ki) for q in Q])
 
 
-def latparvolume(a, b=None, c=None, alpha=90., beta=90., gamma=90.):
+def Bmatrix(basis_vectors):
     """
-    Calcualte the unit cell volume in A^3
-    :param a, b, c: float lattice parameters
-    :param alpha, beta, gamma: float lattice angles
-    :return: float volume in Angstrom^3
-    """
-    if b is None:
-        b = a
-    if c is None:
-        c = a
-    ca = np.cos(np.deg2rad(alpha))
-    cb = np.cos(np.deg2rad(beta))
-    cg = np.cos(np.deg2rad(gamma))
-    return np.sqrt(a**2 * b**2 * c**2 * (1 + 2 * ca * cb * cg - ca**2 - cb**2 - cg**2))
-
-
-def latpar_reciprocal(UV):
-    """
-    Return the reciprocal lattice parameters in inverse-angstroms and degrees
-    :param UV: [3*3] unit vector [a,b,c]
-    :return: a*, b*, c*, alpha*, beta*, gamma*
-    """
-    UVs = RcSp(UV) / (2 * np.pi)
-    b1, b2, b3 = fg.mag(UVs)
-    beta3 = fg.ang(UVs[0, :], UVs[1, :], 'deg')
-    beta2 = fg.ang(UVs[0, :], UVs[2, :], 'deg')
-    beta1 = fg.ang(UVs[1, :], UVs[2, :], 'deg')
-    return b1, b2, b3, beta1, beta2, beta3
-
-
-def Bmatrix(UV):
-    """
-    Calculate the Busing and Levy B matrix from a real space UV
+    Calculate the Busing and Levy B matrix from real space basis vectors, with units of 2pi
     "choose the x-axis parallel to a*, the y-axis in the plane of a* and b*, and the z-axis perpendicular to that plane"
     From: W. R. Busing and H. A. Levy, Acta Cryst. (1967). 22, 457-464
     "Angle calculations for 3- and 4-circle X-ray and neutron diffractometers"
     See also: https://docs.mantidproject.org/nightly/concepts/Lattice.html
-    """
 
-    """
-    a1, a2, a3 = fg.mag(UV)
-    alpha3 = fg.ang(UV[0, :], UV[1, :])
-    alpha2 = fg.ang(UV[0, :], UV[2, :])
-    alpha1 = fg.ang(UV[1, :], UV[2, :])
-    UVs = RcSp(UV) / (2 * np.pi)
-    b1, b2, b3 = fg.mag(UVs)
-    beta3 = fg.ang(UVs[0, :], UVs[1, :])
-    beta2 = fg.ang(UVs[0, :], UVs[2, :])
-    beta1 = fg.ang(UVs[1, :], UVs[2, :])
+    B = [[b1, b2 * cos(beta3), b3 * cos(beta2)],
+        [0, b2 * sin(beta3), -b3 * sin(beta2) * cos(alpha1)],
+        [0, 0, 1 / a3]]
+    return 2pi * B  # equivalent to transpose([a*, b*, c*])
 
-    B = np.array([[b1, b2 * np.cos(beta3), b3 * np.cos(beta2)],
-                  [0, b2 * np.sin(beta3), -b3 * np.sin(beta2) * np.cos(alpha1)],
-                  [0, 0, 1 / a3]])
-    return 2 * np.pi * B  # equivalent to transpose(UVs)
+    :param basis_vectors: [3*3] array of basis vectors [a[3], b[3], c[3]]
+    :return: [3*3] B matrix * 2 pi
     """
-    return RcSp(UV).T
-
-
-def latparBmatrix(a, b=None, c=None, alpha=90., beta=90., gamma=90.):
-    """
-    Calculate the Busing and Levy B matrix from a real space UV
-    "choose  the x  axis parallel  to a, the  y  axis  in  the  plane  of  a  and  b,  and  the  z  axis
-    perpendicular  to  that  plane"
-    From: W. R. Busing and H. A. Levy, Acta Cryst. (1967). 22, 457-464
-    "Angle calculations for 3- and 4-circle X-ray and neutron diffractometers"
-    See also: https://docs.mantidproject.org/nightly/concepts/Lattice.html
-    :param a, b, c: float lattice parameters
-    :param alpha, beta, gamma: float lattice angles
-    :return: [3*3] array
-    """
-    if b is None:
-        b = a
-    if c is None:
-        c = a
-    uv = latpar2uv_rot(a,b, c, alpha, beta, gamma)
-    return Bmatrix(uv)
+    return fl.basis2bandl(basis_vectors)
 
 
 def umatrix(a_axis=None, b_axis=None, c_axis=None):
@@ -2191,7 +2189,7 @@ def umatrix(a_axis=None, b_axis=None, c_axis=None):
 
 def ubmatrix(uv, u):
     """
-    Return UB matrix
+    Return UB matrix (units of 2pi)
     :param uv: [3*3] unit vector [a,b,c]
     :param u: [3*3] orientation matrix in the diffractometer frame
     :return: [3*3] array
@@ -2928,131 +2926,6 @@ def orthogonal_axes(x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
 '----------------------------Conversions-------------------------------'
 
 
-def gen_lattice_parameters(lattice_parameters=(), *args, **kwargs):
-    """
-    Generate list of lattice parameters:
-     a,b,c,alpha,beta,gamma = gen_lattice_parameters(args)
-    args:
-      1 -> a=b=c=1,alpha=beta=gamma=90
-      [1,2,3] -> a=1,b=2,c=3,alpha=beta=gamma=90
-      [1,2,3,120] -> a=1,b=2,c=3,alpha=beta=90,gamma=120
-      [1,2,3,10,20,30] -> a=1,b=2,c=3,alpha=10,beta=20,gamma=30
-      1,2,3,10,20,30 -> a=1,b=2,c=3,alpha=10,beta=20,gamma=30
-      a=1,b=2,c=3,alpha=10,beta=20,gamma=30 -> a=1,b=2,c=3,alpha=10,beta=20,gamma=30
-    :param lattice_parameters: float or list
-    :param args: floats
-    :param kwargs: lattice parameters
-    :return: a,b,c,alpha,beta,gamma
-    """
-
-    lattice_parameters = np.array(lattice_parameters, dtype=float).reshape(-1)
-    lattice_parameters = np.append(lattice_parameters, args)
-    if len(lattice_parameters) not in [0, 1, 3, 4, 6]:
-        raise Exception('Incorrect number of lattice parameters')
-    a = b = c = 1.0
-    alpha = beta = gamma = 90.0
-
-    if len(lattice_parameters) > 0:
-        a = lattice_parameters[0]
-        b = 1.0 * a
-        c = 1.0 * a
-
-    if len(lattice_parameters) > 1:
-        b = lattice_parameters[1]
-        c = lattice_parameters[2]
-
-    if len(lattice_parameters) == 4:
-        gamma = lattice_parameters[3]
-
-    if len(lattice_parameters) == 6:
-        alpha = lattice_parameters[3]
-        beta = lattice_parameters[4]
-        gamma = lattice_parameters[5]
-
-    if 'a' in kwargs:
-        a = float(kwargs.get('a'))
-    if 'b' in kwargs:
-        b = float(kwargs.get('b'))
-    if 'c' in kwargs:
-        c = float(kwargs.get('c'))
-    if 'alpha' in kwargs:
-        alpha = float(kwargs.get('alpha'))
-    if 'beta' in kwargs:
-        beta = float(kwargs.get('beta'))
-    if 'gamma' in kwargs:
-        gamma = float(kwargs.get('gamma'))
-    return a, b, c, alpha, beta, gamma
-
-
-def latpar2uv(lattice_parameters=(), *args, **kwargs):
-    """
-    Convert a,b,c,alpha,beta,gamma to UV=[A,B,C]
-     UV = latpar2uv(a,b,c,alpha=90.,beta=90.,gamma=120.)
-     Vector c is defined along [0,0,1]
-     Vector a and b are defined by the angles
-    """
-    a, b, c, alpha, beta, gamma = gen_lattice_parameters(lattice_parameters, *args, **kwargs)
-
-    # From http://pymatgen.org/_modules/pymatgen/core/lattice.html
-    alpha_r = np.radians(alpha)
-    beta_r = np.radians(beta)
-    gamma_r = np.radians(gamma)
-    val = (np.cos(alpha_r) * np.cos(beta_r) - np.cos(gamma_r)) \
-          / (np.sin(alpha_r) * np.sin(beta_r))
-    # Sometimes rounding errors result in values slightly > 1.
-    val = abs(val)
-    gamma_star = np.arccos(val)
-    aa = [a * np.sin(beta_r), 0.0, a * np.cos(beta_r)]
-    bb = [-b * np.sin(alpha_r) * np.cos(gamma_star),
-          b * np.sin(alpha_r) * np.sin(gamma_star),
-          b * np.cos(alpha_r)]
-    cc = [0.0, 0.0, c]
-
-    return np.round(np.array([aa, bb, cc]), 8)
-
-
-def latpar2uv_rot(lattice_parameters=(), *args, **kwargs):
-    """
-    Convert a,b,c,alpha,beta,gamma to UV=[A,B,C]
-     UV = latpar2uv_rot(a,b,c,alpha=90.,beta=90.,gamma=120.)
-     Vector b is defined along [0,1,0]
-     Vector a and c are defined by the angles
-    """
-    a, b, c, alpha, beta, gamma = gen_lattice_parameters(lattice_parameters, *args, **kwargs)
-
-    # From http://pymatgen.org/_modules/pymatgen/core/lattice.html
-    alpha_r = np.radians(alpha)
-    beta_r = np.radians(gamma)
-    gamma_r = np.radians(beta)
-    val = (np.cos(alpha_r) * np.cos(beta_r) - np.cos(gamma_r)) \
-          / (np.sin(alpha_r) * np.sin(beta_r))
-    # Sometimes rounding errors result in values slightly > 1.
-    val = abs(val)
-    gamma_star = np.arccos(val)
-    aa = [a * np.sin(beta_r), a * np.cos(beta_r), 0.0]
-    bb = [0.0, b, 0.0]
-    cc = [-c * np.sin(alpha_r) * np.cos(gamma_star),
-          c * np.cos(alpha_r),
-          c * np.sin(alpha_r) * np.sin(gamma_star)]
-
-    return np.round(np.array([aa, bb, cc]), 8)
-
-
-def UV2latpar(UV):
-    """
-    Convert UV=[a,b,c] to a,b,c,alpha,beta,gamma
-     a,b,c,alpha,beta,gamma = UV2latpar(UV)
-    """
-
-    a = np.sqrt(np.sum(UV[0] ** 2))
-    b = np.sqrt(np.sum(UV[1] ** 2))
-    c = np.sqrt(np.sum(UV[2] ** 2))
-    alpha = np.arctan2(np.linalg.norm(np.cross(UV[1], UV[2])), np.dot(UV[1], UV[2])) * 180 / np.pi
-    beta = np.arctan2(np.linalg.norm(np.cross(UV[0], UV[2])), np.dot(UV[0], UV[2])) * 180 / np.pi
-    gamma = np.arctan2(np.linalg.norm(np.cross(UV[0], UV[1])), np.dot(UV[0], UV[1])) * 180 / np.pi
-    return a, b, c, alpha, beta, gamma
-
-
 def hkl2Q(hkl, UVstar):
     """
     Convert reflection indices (hkl) to orthogonal basis in A-1
@@ -3110,19 +2983,17 @@ def hkl2dspace(hkl, UVstar):
     return q2dspace(Qmag)
 
 
-def lattice_hkl2dspace(hkl, lattice_parameters=(), *args, **kwargs):
+def lattice_hkl2dspace(hkl, *lattice_parameters, **kwargs):
     """
     Calcualte dspace from lattice parameters
     :param hkl: [nx3] array of reflections
     :param lattice_parameters: a,b,c,alpha,beta,gamma
     :return: float, d-spacing in A
     """
-    uv = latpar2uv(lattice_parameters, *args, **kwargs)
-    uvs = RcSp(uv)
-    return hkl2dspace(hkl, uvs)
+    return fl.dspacing(*hkl, *lattice_parameters, **kwargs)
 
 
-def lattice_hkl2twotheta(hkl, energy_kev=17.794, lattice_parameters=(), *args, **kwargs):
+def lattice_hkl2twotheta(hkl, *lattice_parameters, energy_kev=17.794, wavelength_a=None, **kwargs):
     """
     Calcualte dspace from lattice parameters
     :param hkl: [nx3] array of reflections
@@ -3130,15 +3001,23 @@ def lattice_hkl2twotheta(hkl, energy_kev=17.794, lattice_parameters=(), *args, *
     :param lattice_parameters: a,b,c,alpha,beta,gamma
     :return: float, d-spacing in A
     """
-    uv = latpar2uv(lattice_parameters, *args, **kwargs)
-    uvs = RcSp(uv)
+    dspace = fl.dspacing(*hkl, *lattice_parameters, **kwargs)
+    qmag = dspace2q(dspace)
+    return cal2theta(qmag, energy_kev=energy_kev, wavelength_a=wavelength_a)
     return hkl2twotheta(hkl, uvs, energy_kev)
 
 
 def calqmag(twotheta, energy_kev=17.794, wavelength_a=None):
     """
     Calculate |Q| at a particular 2-theta (deg) for energy in keV
-     magQ = calqmag(twotheta, energy_kev=17.794)
+      magQ = calqmag(twotheta, energy_kev=17.794)
+       - equivalent to -
+      qmag = 4 * pi * sin(theta) / wl
+
+    :param twotheta: float or array of scattering angles, in degrees
+    :param energy_kev: float photon energy in keV
+    :param wavelength_a: float wavelength in Anstrom
+    :return wavevector magnitude in inverse-Angstrom
     """
     if wavelength_a is None:
         wavelength_a = energy2wave(energy_kev)  # wavelength form photon energy
@@ -3153,8 +3032,15 @@ def calqmag(twotheta, energy_kev=17.794, wavelength_a=None):
 
 def cal2theta(qmag, energy_kev=17.794, wavelength_a=None):
     """
-    Calculate theta at particular energy in keV from |Q|
-     twotheta = cal2theta(Qmag,energy_kev=17.794)
+    Calculate scattering angle at particular energy in keV from magnitude of the wavevector, |Q|
+     twotheta = cal2theta(Qmag, energy_kev=17.794)
+     - equivalent to -
+     twotheta = 2 * arcsin( qmag * wl / 4pi )
+
+    :param qmag: float or array of wavevector magnitudes, in inverse-Angstroms
+    :param energy_kev: float photon energy in keV
+    :param wavelength_a: float wavelength in Anstrom
+    :return two-theta angle in degrees (or array if qmag is array)
     """
     if wavelength_a is None:
         wavelength_a = energy2wave(energy_kev)  # wavelength form photon energy
@@ -3172,7 +3058,14 @@ def cal2theta(qmag, energy_kev=17.794, wavelength_a=None):
 def caldspace(twotheta, energy_kev=17.794, wavelength_a=None):
     """
     Calculate d-spacing from two-theta
-     dspace = caldspace(tth, energy_kev)
+      dspace = caldspace(tth, energy_kev)
+       - equivalent to -
+      dspace = wl / (2 * sin(theta))
+
+    :param twotheta: float or array of scattering angles, in degrees
+    :param energy_kev: float photon energy in keV
+    :param wavelength_a: float wavelength in Anstrom
+    :return lattice d-spacing in Anstrom
     """
     qmag = calqmag(twotheta, energy_kev, wavelength_a)
     dspace = q2dspace(qmag)
@@ -3550,7 +3443,7 @@ def group_intensities(q_values, intensity, min_overlap=0.01):
 
 
 def calc_vol(UV):
-    "Calculate volume in Angstrom^3 from unit vectors"
+    """Calculate volume in Angstrom^3 from unit vectors"""
     a, b, c = UV
     return np.dot(a, np.cross(b, c))
 

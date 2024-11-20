@@ -23,6 +23,8 @@ $ ipython -i -m Dans_Diffraction
 ### Datasources
 The data is taken from a number of sources:
 * Neutron scattering lengths: [NIST](http://www.ncnr.nist.gov/resources/n-lengths/)
+* Neutron scattering lengths (Neutron Data Bookelet, 2003-2023)(default): [Periodic Table](https://github.com/pkienzle/periodictable)
+* Neutron scattering lengths (V. F. Sears 1995): [ITC](https://it.iucr.org/C/), Table 4.4.4.1
 * X-ray Form factor: [ITC](https://it.iucr.org/C/), p578, Table 6.1.1.4
 * X-ray Form factor (Waasmaier & Kirfel, Acta Cryst. A 51, 416-431 (1995)): [diffpy](https://github.com/diffpy/libdiffpy/blob/master/src/runtime/f0_WaasKirf.dat)
 * Magnetic Form Factor: [ILL](https://www.ill.eu/sites/ccsl/ffacts/ffactnode4.html)
@@ -86,7 +88,7 @@ Where f^0(|Q|) is the standard form factor and f', f'' are the dispersion correc
 online tables can be converted to f', f'' using the following:
  <div align="center">f' = f1 - f^0(0)</div>
  <div align="center">f'' = -f2</div>
-For a particular energy or energy range, f' and f'' can be calcualted, as well as the toal scattering factor:
+For a particular energy or energy range, f' and f'' can be calcualted, as well as the total scattering factor:
 
 ```python
 en = np.arange(5, 10, 0.001)
@@ -94,4 +96,21 @@ en = np.arange(5, 10, 0.001)
 f1, f2 = dif.fc.xray_dispersion_corrections('Co', en)
 # Total: f0+f1+if2 (complex)
 f = dif.fc.xray_scattering_factor_resonant('Co', Qmag=0, energy_kev=en)
+```
+
+### Neutron Scattering Lengths
+Neutron scattering lengths of elements and isotopes has been extracted from several sources:
+
+* [NIST Website](http://www.ncnr.nist.gov/resources/n-lengths/), with data originally from [V. F. Sears, Neutron News, Vol. 3, No. 3, 1992, pp. 29-37.](https://doi.org/10.1080/10448639208218770)
+* [Periodic Table](https://github.com/pkienzle/periodictable), with data originally from [Neutron Data Booklet](https://www.ill.eu/fileadmin/user_upload/ILL/1_About_ILL/Documentation/NeutronDataBooklet.pdf), by A-J Dianoux, G. Lander (2003), with additions and corrections upto v1.7.0 (2023) 
+* Table 4.4.4.1 in [International Tables Crystallography, Vol. C](https://it.iucr.org/C/) by V. F. Sears, 1995
+
+Thie NIST website values were originally used and stored in the `Dans Element Properties.txt` file with other elemental data.
+More recent values, including complex scattering lengths for isotopes are now included in `neutron_isotope_scattering_lengths.dat`.
+Complex isotope scattering lengths from the table by Sears(1995) is also included, stored in `neutron_isotope_scattering_lengths_sears.dat`.
+
+Neutron scattering lengths can be read using the built in functions:
+
+```python
+
 ```

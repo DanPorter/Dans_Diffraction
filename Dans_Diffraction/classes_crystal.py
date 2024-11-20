@@ -57,8 +57,9 @@ import numpy as np
 from warnings import warn
 
 # Internal functions
-from . import functions_general as fg, functions_crystallography as fc
+from . import functions_general as fg
 from . import functions_crystallography as fc
+from . import functions_lattice as fl
 from .classes_orientation import Orientation
 from .classes_properties import Properties
 # from .classes_orbitals import CrystalOrbitals
@@ -514,9 +515,10 @@ class Cell:
         self.alpha = float(alpha)
         self.beta = float(beta)
         self.gamma = float(gamma)
+        self._basis_function = fl.basis_3
         self.orientation = Orientation()
 
-    def latt(self, lattice_parameters=(), *args, **kwargs):
+    def latt(self, *lattice_parameters, **kwargs):
         """ 
         Generate lattice parameters with list
           latt(1) -> a=b=c=1,alpha=beta=gamma=90
@@ -527,7 +529,7 @@ class Cell:
           latt(a=1,b=2,c=3,alpha=10,beta=20,gamma=30]) -> a=1,b=2,c=3,alpha=10,beta=20,gamma=30
         """
 
-        lp = fc.gen_lattice_parameters(lattice_parameters, *args, **kwargs)
+        lp = fc.gen_lattice_parameters(*lattice_parameters, **kwargs)
         self.a = lp[0]
         self.b = lp[1]
         self.c = lp[2]
@@ -585,35 +587,46 @@ class Cell:
         """
         return self.a, self.b, self.c, self.alpha, self.beta, self.gamma
 
+    def choose_basis(self, option='default'):
+        """
+        Choose the basis function
+        Options:
+            1. c || z, b* || y - basis choice of Materials Project
+            2. a || x, c* || z - basis choice of Vesta
+            3. c || z, a* || x - basis choice of Busing & Levy (Default)
+        :param option: name or number of basis
+        """
+        self._basis_function = fl.choose_basis(option)
+
     def UV(self):
         """
          Returns the unit cell as a [3x3] array, [A,B,C]
          The vector A is directed along the x-axis
         """
-        return self.orientation(fc.latpar2uv_rot(*self.lp()))
+        return self.orientation(self._basis_function(*self.lp()))
 
     def UVstar(self):
         """
         Returns the reciprocal unit cell as a [3x3] array, [A*,B*,C*]
         :return: [a*;b*;c*]
         """
-        return fc.RcSp(self.UV())
+        return fl.reciprocal_basis(self.UV())
 
     def volume(self):
         """
         Returns the volume of the unit cell, in A^3
         :return: volume
         """
-        return fc.calc_vol(self.UV())
+        return fl.lattice_volume(*self.lp())
 
     def Bmatrix(self):
         """
         Calculate the Busing and Levy B matrix from a real space UV
          "choose the x-axis parallel to a*, the y-axis in the plane of a* and b*, and the z-axis perpendicular to
          that plane"
-         W. R. Busing & H. A. Levy, Acta  Cryst.  (1967). 22,  457
+        W. R. Busing & H. A. Levy, Acta  Cryst.  (1967). 22,  457
         """
-        return fc.Bmatrix(self.UV())
+        return fl.busingandlevy(*self.lp())
 
     def info(self):
         """
@@ -660,7 +673,7 @@ class Cell:
             > HKL = [1,0,0]
         """
         Q = np.reshape(np.asarray(Q, dtype=float), [-1, 3])
-        return fc.indx(Q, self.UVstar())
+        return fl.index_lattice(Q, self.UVstar())
 
     def calculateR(self, UVW):
         """
@@ -685,7 +698,7 @@ class Cell:
             > UVW = [0.1,0,0]
         """
         R = np.reshape(np.asarray(R, dtype=float), [-1, 3])
-        return fc.indx(R, self.UV())
+        return fl.index_lattice(R, self.UV())
 
     def moment(self, mxmymz):
         """Calcualte moment from value stored in cif"""
@@ -892,7 +905,7 @@ class Cell:
         selected = (tth_dif < max_twotheta) * (all_angles < max_angle)
         return all_hkl[selected, :]
 
-    def reciprocal_space_plane(self, x_axis=[1, 0, 0], y_axis=[0, 1, 0], centre=[0, 0, 0], q_max=4.0, cut_width=0.05):
+    def reciprocal_space_plane(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), centre=(0, 0, 0), q_max=4.0, cut_width=0.05):
         """
         Returns positions within a reciprocal space plane
           x_axis = direction along x, in units of the reciprocal lattice (hkl)
@@ -1481,7 +1494,7 @@ class Atoms:
     def fitincell(self):
         """Adjust all atom positions to fit within unit cell"""
         uvw = fc.fitincell(self.uvw())
-
+        self.u, self.v, self.w = uvw.T
 
     def uvw(self):
         """
@@ -2366,7 +2379,7 @@ class Superstructure(Crystal):
         self.P = np.asarray(P, dtype=float)
         self.Parent = Parent
         newUV = Parent.Cell.calculateR(P)
-        self.new_cell(fc.UV2latpar(newUV))
+        self.new_cell(fl.basis2latpar(newUV))
         self.scale = Parent.scale * np.prod(self.P)
 
         # Add exta functions

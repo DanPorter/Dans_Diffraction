@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.2.4
-Last updated: 25/09/24
+Version 3.3.2
+Last updated: 20/11/2024
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -81,6 +81,8 @@ Version History:
 04/09/24 3.2.3  Updated method of generating charge states in classes_orbtials.py, Thanks Seonghun!
 25/09/24 3.2.4  Fixed error of missing rotation matrices after load_spacegroup. Thanks asteppke!
 26/09/24 3.3.0  Added complex neutron scattering lengths for isotopes from package periodictable. Thanks thamnos!
+06/11/24 3.3.1  Fixed incorrect cell basis for triclinic cells. Added functions_lattice.py and tests. Thanks LeeRichter!
+20/11/24 3.3.2  Added alternate option for neutron scattering lengths
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -105,6 +107,8 @@ Acknoledgements:
     May 2024    Thanks to paul-cares pointing out a silly spelling error in the title!
     Aug 2024    Thanks to Seonghun for pointing out the error with charge states in Hf
     Aug 2024    Thanks to MaxPelly for spell checks in examples
+    Sep 2024    Thanks to thamnos for suggestion to add complex neutron scattering lengths
+    Oct 2024    Thanks to Lee Richter for pointing out the error in triclinic basis definition
 
 -----------------------------------------------------------------------------
    Copyright 2024 Diamond Light Source Ltd.
@@ -146,6 +150,7 @@ Other files are either covered by their own licence or not licenced for other us
 # Dans Diffraction
 from . import functions_general as fg
 from . import functions_plotting as fp
+from . import functions_lattice as fl
 from . import functions_crystallography as fc
 from .classes_crystal import Crystal
 from .classes_multicrystal import MultiCrystal
@@ -154,8 +159,12 @@ from .classes_fdmnes import fdmnes_checker, Fdmnes, FdmnesAnalysis
 from .functions_crystallography import readcif
 
 
-__version__ = '3.2.4'
-__date__ = '25/09/24'
+__all__ = ['fg', 'fp', 'fl', 'fc', 'Crystal', 'MultiCrystal', 'readcif',
+           'Structures', 'Fdmnes', 'FdmnesAnalysis']
+
+
+__version__ = '3.3.2'
+__date__ = '2024/11/20'
 
 
 # Build
