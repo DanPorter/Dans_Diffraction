@@ -1,0 +1,42 @@
+name: Code CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  dist:
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build sdist and wheel
+        run: pipx run build
+
+      - name: Upload sdist and wheel as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+  pypi:
+    # upload to PyPI and make a release on every tag
+    if: github.ref_type == 'tag'
+    needs: [dist]
+
+    runs-on: ubuntu-latest
+    permissions:
+      # this permission is mandatory for trusted publishing To PyPI
+      id-token: write
+    # Specify the GitHub Environment to publish to
+    environment: release
+
+    steps:
+      # download sdist and wheel from dist job
+      - uses: actions/download-artifact@v3
+
+      # publish to PyPI using trusted publishing
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

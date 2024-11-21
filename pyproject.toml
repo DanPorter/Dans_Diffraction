@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools >= 61.0", "wheel", "numpy", "matplotlib"]
+requires = ["setuptools >= 61.0", "wheel", "pytest", "numpy", "matplotlib"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "Dans_Diffraction"
-version = "3.3.0"
+dynamic = ['version']
 dependencies = [
   "numpy",
   "matplotlib",
@@ -44,3 +44,6 @@ dansdiffraction = "Dans_Diffraction:start_gui"
 
 [project.gui-scripts]
 dansdiffraction = "Dans_Diffraction:start_gui"
+
+[tool.setuptools.dynamic]
+version = {attr = "Dans_Diffraction.__version__"}
