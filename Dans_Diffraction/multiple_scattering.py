@@ -9,8 +9,8 @@ Example:
     mslist = run_calcms(xtl, [0,0,3], [0,1,0], [1,0], [2.83, 2.85], plot=True)
 
 Created from python package "calcms"
-Version 1.1
-29/07/2024
+Version 1.2
+21/11/2024
  -------------------------------------------
  Copyright 2014 Diamond Light Source Ltd.123
 
@@ -36,7 +36,7 @@ import matplotlib.pyplot as plt
 import itertools
 
 
-__version__ = '1.1'
+__version__ = '1.2'
 
 
 def run_calcms(xtl, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], numsteps=60,
@@ -64,7 +64,7 @@ def run_calcms(xtl, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], num
     #                         DMS Calculation
     # ===============================================================================
 
-    mslist = [[np.NAN, np.NAN, np.NAN, np.NAN, np.NAN, np.NAN, np.NAN, np.NAN, np.NAN]]
+    mslist = [[np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]]
 
     # ================= Generate Reflist from Cif ===================================
     sf, reflist, lattice, structure = loadcif(xtl, energy_range[-1])
@@ -81,7 +81,7 @@ def run_calcms(xtl, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], num
         return None
     elif pv1 + pv2 + sfonly + full + pv1xsf1 == 0:
         print('Geometry Only')
-        mslist = [[np.NAN, np.NAN, np.NAN, np.NAN, np.NAN, np.NAN, np.NAN]]
+        mslist = [[np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]]
 
     for enval in np.linspace(energy_range[0], energy_range[1], numsteps):
         print(str(loopnum) + ' of ' + str(numsteps))
@@ -291,7 +291,7 @@ class Bragg(object):
         #        if wl/2.0/d <= 1:
         theta = 180 / np.pi * np.arcsin(wl / 2.0 / d)
         #        else:
-        #            theta = np.NAN;
+        #            theta = np.nan;
         return theta
 
 
@@ -317,7 +317,7 @@ class Hklgen(object):
 class Vfind(object):
     def __init__(self, vlist, v):
         #         result1=list(np.where(vlist-v==0)[0])
-        #         self.refindex=[x if result1.count(x) >= 3 else np.NAN for x in result1]
+        #         self.refindex=[x if result1.count(x) >= 3 else np.nan for x in result1]
         v = np.array(v)
         refindex2 = []
         for i1 in range(v.shape[0]):
@@ -325,7 +325,7 @@ class Vfind(object):
             try:
                 refindex = [x for x in result1 if result1.count(x) >= 3][0]
             except:
-                refindex = np.NAN
+                refindex = np.nan
             refindex2.append(refindex)
         self.refindex = refindex2
 
