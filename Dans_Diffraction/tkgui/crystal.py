@@ -399,7 +399,12 @@ class CrystalGui:
         filename = filedialog.askopenfilename(
             title='Select CIF to open',
             initialdir=defdir,
-            filetypes=[('cif file', '.cif'), ('magnetic cif', '.mcif'), ('All files', '.*')],
+            filetypes=[
+                ('cif files', ('.cif', '.mcif')),
+                ('cif file', '.cif'),
+                ('magnetic cif', '.mcif'),
+                ('All files', '.*')
+            ],
             parent=self.root
         )
         if filename:

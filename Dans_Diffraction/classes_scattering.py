@@ -7,8 +7,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 2.3.4
-Last updated: 17/05/24
+Version 2.3.5
+Last updated: 23/12/24
 
 Version History:
 10/09/17 0.1    Program created
@@ -40,6 +40,7 @@ Version History:
 15/05/24 2.3.4  Added "save" and "load" methods to structure factor calculation, improved powder for large calculations
 16/05/24 2.3.4  Added printed progress bar to generate_intensity_cut during convolusion
 17/05/24 2.3.4  Changed generate_intensity_cut to make it much faster
+23/12/24 2.3.5  Added polarised neutron options
 
 @author: DGPorter
 """
@@ -53,13 +54,7 @@ from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '2.3.4'
-__scattering_types__ = {'xray': ['xray', 'x', 'x-ray', 'thomson', 'charge'],
-                        'neutron': ['neutron', 'n', 'nuclear'],
-                        'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'],
-                        'neutron magnetic': ['neutron magnetic', 'magnetic neutron', 'magnetic'],
-                        'xray resonant': ['xray resonant', 'resonant', 'resonant xray', 'rxs'],
-                        'xray dispersion': ['dispersion', 'xray dispersion']}
+__version__ = '2.3.5'
 
 
 class Scattering:
@@ -119,14 +114,14 @@ class Scattering:
     # Polarisation Options
     _polarised = False
     _polarisation = 'sp'
-    _polarisation_vector_incident = [0, 1, 0]
+    _polarisation_vector_incident = (0, 1, 0)
     
     # Radiation energy
     _energy_kev = fg.Cu
     
     # Resonant X-ray Options
     _azimuthal_angle = 0
-    _azimuthal_reference = [1,0,0]
+    _azimuthal_reference = [1, 0, 0]
     _resonant_flm = (0, 1, 0)
     _resonant_approximation_e1e1 = True
     _resonant_approximation_e2e2 = False
@@ -137,7 +132,7 @@ class Scattering:
         self.xtl = xtl
 
         # Initialise the scattering type container
-        self.Type = ScatteringTypes(self, __scattering_types__)
+        self.Type = ScatteringTypes(self, fs.SCATTERING_TYPES)
 
     def __repr__(self):
         return 'Scattering(%s, %s)' % (self.xtl.name, self._scattering_type)
@@ -195,7 +190,7 @@ class Scattering:
         """
         Simple way to set scattering parameters, each parameter is internal to xtl (self)
 
-        scattering_type: self._scattering type            :  'xray','neutron','xray magnetic','neutron magnetic','xray resonant', 'xray dispersion'
+        scattering_type: self._scattering type            :  'xray','neutron','xray magnetic','neutron magnetic','xray resonant', 'xray dispersion', 'neutron polarised', 'xray polarised'
         energy_kev  : self._energy_kev                    :  radiation energy in keV
         wavelength_a: self._wavelength_a                  :  radiation wavelength in Angstrom
         powder_units: self._powder_units                  :  units to use when displaying/ plotting ['twotheta', 'd',' 'q']
@@ -379,9 +374,11 @@ class Scattering:
           'xray'  - uses x-ray form factors
           'neutron' - uses neutron scattering lengths
           'xray magnetic' - calculates the magnetic (non-resonant) component of the x-ray scattering
-          'neutron magnetic' - calculates the magnetic component of neutron scattering
+          'neutron magnetic' - calculates the magnetic component of neutron scattering with average polarisation
           'xray resonant' - calculates magnetic resonant scattering
           'xray dispersion' - uses x-ray form factors including f'-if'' components
+          'neutron polarised' - calcualtes magnetic component with incident polarised neutrons
+          'xray polarised' - calcualtes magnetic component with incident polarised x-rays
 
         Notes:
         - Uses x-ray atomic form factors, calculated from approximated tables in the ITC
@@ -1088,7 +1085,7 @@ class Scattering:
         # Calculate intensity
         I = SF * np.conj(SF)
         return np.real(I)
-    
+
     def xray_magnetic(self, HKL):
         """
         Calculate the non-resonant magnetic component of the structure factor 
@@ -1102,51 +1099,53 @@ class Scattering:
         No orbital component assumed
         magnetic moments assumed to be in the same reference frame as the polarisation
         """
-        
-        HKL = np.asarray(np.rint(HKL),dtype=float).reshape([-1,3])
+
+        HKL = np.asarray(np.rint(HKL), dtype=float).reshape([-1, 3])
         Nref = len(HKL)
-        
-        uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.get()
+
+        uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
         Nat = len(uvw)
-        
+
         Qmag = self.xtl.Cell.Qmag(HKL)
-        
+
         # Get magnetic form factors
         if self._use_magnetic_form_factor:
-            ff = fc.magnetic_form_factor(type,Qmag)
+            ff = fc.magnetic_form_factor(type, Qmag)
         else:
-            ff = np.ones([len(HKL),Nat])
-        
+            ff = np.ones([len(HKL), Nat])
+
         # Calculate moment
-        momentmag = fg.mag(mxmymz).reshape([-1,1])
-        momentxyz = self.xtl.Cell.calculateR(mxmymz) # moment direction in cartesian reference frame
-        moment = momentmag*fg.norm(momentxyz) # broadcast n*1 x n*3 = n*3
+        momentmag = fg.mag(mxmymz).reshape([-1, 1])
+        momentxyz = self.xtl.Cell.calculateR(mxmymz)  # moment direction in cartesian reference frame
+        moment = momentmag * fg.norm(momentxyz)  # broadcast n*1 x n*3 = n*3
         moment[np.isnan(moment)] = 0.
-        
+
         # Calculate dot product
-        dot_KR = np.dot(HKL,uvw.T)
-        
+        dot_KR = np.dot(HKL, uvw.T)
+
         # Calculate structure factor
-        SF = np.zeros(Nref,dtype=complex)
+        SF = np.zeros(Nref, dtype=complex)
         for n in range(Nref):
             # Calculate vector structure factor
-            SFm = [0.,0.,0.]
-            for m,mom in enumerate(moment):
-                SFm = SFm + ff[n,m]*np.exp(1j*2*np.pi*dot_KR[n,m])*mom
-            
+            SFm = [0., 0., 0.]
+            for m, mom in enumerate(moment):
+                SFm = SFm + ff[n, m] * np.exp(1j * 2 * np.pi * dot_KR[n, m]) * mom
+
             # Calculate polarisation with incident x-ray
             # The reference frame of the x-ray and the crystal are assumed to be the same
             # i.e. pol=[1,0,0] || mom=[1,0,0] || (1,0,0)
             if self._polarised:
-                SF[n] = np.dot(SFm,self._polarisation_vector_incident)
+                SF[n] = np.dot(SFm, self._polarisation_vector_incident)
             else:
-                #SF[n] = np.dot(SFm,SFm) # maximum possible
-                SF[n] = (np.dot(SFm,[1,0,0]) + np.dot(SFm,[0,1,0]) + np.dot(SFm,[0,0,1]))/3 # average polarisation
-        
-        SF = SF/self.xtl.scale
-        
+                # SF[n] = np.dot(SFm,SFm) # maximum possible
+                SF[n] = (
+                                np.dot(SFm, [1, 0, 0]) + np.dot(SFm, [0, 1, 0]) + np.dot(SFm, [0, 0, 1])
+                        ) / 3  # average polarisation
+
+        SF = SF / self.xtl.scale
+
         if self._return_structure_factor: return SF
-        
+
         # Calculate intensity
         I = SF * np.conj(SF)
         return np.real(I)
@@ -1207,7 +1206,7 @@ class Scattering:
             
             # Calculate structure factor
             # Broadcasting used on 2D fxres
-            SF[:,psival] = np.sum(fxres*dw*occ*np.exp(1j*2*np.pi*dot_KR),axis=1)
+            SF[:, psival] = np.sum(fxres*dw*occ*np.exp(1j*2*np.pi*dot_KR), axis=1)
             
         SF = SF/self.xtl.scale
         

@@ -66,6 +66,8 @@ SCATTERING_TYPES = {
     'neutron': ['neutron', 'n', 'nuclear'],
     'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'],
     'neutron magnetic': ['neutron magnetic', 'magnetic neutron', 'magnetic'],
+    'neutron polarised': ['neutron polarised', 'neutron polarized'],
+    'xray polarised': ['xray polarised', 'xray polarized'],
     'xray resonant': ['xray resonant', 'resonant', 'resonant xray', 'rxs'],
     'xray dispersion': ['dispersion', 'xray dispersion'],
     'electron': ['electron', 'ele', 'e'],
@@ -237,7 +239,7 @@ def sf_magnetic_neutron(q, r, moment, magnetic_formfactor=None, occ=None,  debye
 
         # Calculate polarisation with incident neutron
         # sf[n] = np.dot(sfm, incident_polarisation_vector)
-        # SF[n] = np.dot(SFm,SFm) # maximum possible
+        # sf[n] = np.dot(sfm, sfm)  # maximum possible
         # average polarisation
         sf[n] = (np.dot(sfm, [1, 0, 0]) + np.dot(sfm, [0, 1, 0]) + np.dot(sfm, [0, 0, 1])) / 3
     return sf
@@ -283,7 +285,7 @@ def sf_magnetic_neutron_polarised(q, r, moment, incident_polarisation_vector=(1,
             qm = mom - np.dot(qh, mom) * qh
 
             # Calculate structure factor
-            sfm = sfm + (magnetic_formfactor[n, m] * debyewaller[n, m] * occ[m] * phase * qm)
+            sfm = sfm + (magnetic_formfactor[n, m] * debyewaller[n, m] * occ[m] * phase[n, m] * qm)
 
         # Calculate polarisation with incident neutron
         sf[n] = np.dot(sfm, incident_polarisation_vector)
@@ -819,6 +821,10 @@ def get_scattering_function(scattering_type):
         return sf_magnetic_xray
     if scattering_type in SCATTERING_TYPES['neutron magnetic']:
         return sf_magnetic_neutron
+    if scattering_type in SCATTERING_TYPES['neutron polarised']:
+        return sf_magnetic_neutron_polarised
+    if scattering_type in SCATTERING_TYPES['xray polarised']:
+        return sf_magnetic_xray_polarised
     if scattering_type in SCATTERING_TYPES['xray resonant']:
         return sf_magnetic_xray_resonant
     raise(Exception('Scattering name %s not recognised' % scattering_type))

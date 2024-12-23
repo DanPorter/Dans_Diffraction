@@ -83,6 +83,7 @@ Version History:
 26/09/24 3.3.0  Added complex neutron scattering lengths for isotopes from package periodictable. Thanks thamnos!
 06/11/24 3.3.1  Fixed incorrect cell basis for triclinic cells. Added functions_lattice.py and tests. Thanks LeeRichter!
 20/11/24 3.3.2  Added alternate option for neutron scattering lengths
+23/12/24 3.3.3  Added scattering options for polarised neutron and x-ray scattering. Thanks dragonyanglong!
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -109,6 +110,7 @@ Acknoledgements:
     Aug 2024    Thanks to MaxPelly for spell checks in examples
     Sep 2024    Thanks to thamnos for suggestion to add complex neutron scattering lengths
     Oct 2024    Thanks to Lee Richter for pointing out the error in triclinic basis definition
+    Dec 2024    Thanks to dragonyanglong for pointing out the error with magnetic neutron scattering
 
 -----------------------------------------------------------------------------
    Copyright 2024 Diamond Light Source Ltd.
@@ -163,8 +165,8 @@ __all__ = ['fg', 'fp', 'fl', 'fc', 'Crystal', 'MultiCrystal', 'readcif',
            'Structures', 'Fdmnes', 'FdmnesAnalysis']
 
 
-__version__ = '3.3.2'
-__date__ = '2024/11/20'
+__version__ = '3.3.3'
+__date__ = '2024/12/23'
 
 
 # Build

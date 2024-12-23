@@ -624,6 +624,9 @@ class ScatteringGui:
         self.val_i = tk.IntVar(frame, 0)
         self.cmin = tk.StringVar(frame, '')
         self.cmax = tk.StringVar(frame, '')
+        self.polarisation = tk.StringVar(frame, '1 0 0')
+        self.average_polarisation = tk.BooleanVar(frame, True)
+        self.mag_form_factor = tk.BooleanVar(frame, True)
 
         # radiation
         radiations = ['X-Ray', 'Neutron', 'Electron']
@@ -774,6 +777,20 @@ class ScatteringGui:
         # Powder average tickbox
         var = tk.Checkbutton(line, text='Powder average', variable=self.powderaverage, font=SF)
         var.pack(side=tk.LEFT, padx=6)
+
+        # Polarisation
+        if self.xtl.Structure.ismagnetic():
+            line = tk.Frame(box)
+            line.pack(side=tk.TOP, fill=tk.X, pady=5)
+
+            var = tk.Label(line, text='Polarisation:', font=SF)
+            var.pack(side=tk.LEFT, padx=3)
+            var = tk.Entry(line, textvariable=self.polarisation, font=TF, width=5, bg=ety, fg=ety_txt)
+            var.pack(side=tk.LEFT)
+            var = tk.Checkbutton(line, text='average', variable=self.average_polarisation, font=SF)
+            var.pack(side=tk.LEFT, padx=6)
+            var = tk.Checkbutton(line, text='Mag. form factor', variable=self.mag_form_factor, font=SF)
+            var.pack(side=tk.LEFT, padx=6)
 
         # ---Intensities---
         right = tk.Frame(frm)
@@ -935,14 +952,19 @@ class ScatteringGui:
         # scatering type
         radiation = self.radiation.get()
         magnetic = self.check_magnetic.get()
+        av_pol = self.average_polarisation.get()
         if radiation == 'X-Ray':
-            if magnetic:
+            if magnetic and av_pol:
                 scat._scattering_type = 'xray magnetic'
+            elif magnetic:
+                scat._scattering_type = 'xray polarised'
             else:
                 scat._scattering_type = 'xray'
         elif radiation == 'Neutron':
-            if magnetic:
+            if magnetic and av_pol:
                 scat._scattering_type = 'neutron magnetic'
+            elif magnetic:
+                scat._scattering_type = 'neutron polarised'
             else:
                 scat._scattering_type = 'neutron'
         else:
@@ -955,6 +977,8 @@ class ScatteringGui:
         scat._scattering_min_twotheta = self.twotheta_min.get()
         scat._scattering_max_twotheta = self.twotheta_max.get()
         scat._powder_units = self.powder_units.get()
+        scat._polarisation_vector_incident = fg.str2array(self.polarisation.get())
+        scat._use_magnetic_form_factor = self.mag_form_factor.get()
 
         if self.orientation.get() == 'Reflection':
             scat._scattering_specular_direction[0] = self.direction_h.get()
@@ -1019,6 +1043,7 @@ class ScatteringGui:
         self.radiation.set('X-Ray')
         self.energy_unit.set('keV')
         self.set_energy(8)
+        self.fun_energy()
         self.edge.set('Edge')
         self.powder_units.set('Two-Theta')
         self.powderaverage.set(False)
@@ -1035,6 +1060,7 @@ class ScatteringGui:
         self.radiation.set('Neutron')
         self.energy_unit.set('meV')
         self.set_wavelength(0.7)
+        self.fun_wavelength()
         self.edge.set('Edge')
         self.powder_units.set('d-spacing')
         self.orientation.set('None')
@@ -1051,6 +1077,7 @@ class ScatteringGui:
         idx = self.xr_edges.index('Mo Ka')
         self.edge.set('Mo Ka')
         self.set_energy(self.xr_energies[idx])
+        self.fun_energy()
         self.powder_units.set('Two-Theta')
         self.orientation.set('None')
         self.theta_offset.set(0.0)
@@ -1116,17 +1143,17 @@ class ScatteringGui:
         I = self.xtl.Scatter.intensity(hkl)
 
         unit = self.powder_units.get()
-        energy = self.get_energy()
-        tth = self.xtl.Cell.tth(hkl, energy)
+        wavelength = self.get_wavelength()
+        tth = self.xtl.Cell.tth(hkl, wavelength_a=wavelength)
 
         if unit.lower() in ['tth', 'angle', 'twotheta', 'theta', 'two-theta']:
             self.hkl_result.set('I:%10.0f TTH:%8.2f' % (I, tth))
         elif unit.lower() in ['d', 'dspace', 'd-spacing', 'dspacing']:
-            q = fc.calqmag(tth, energy)
+            q = fc.calqmag(tth, wavelength_a=wavelength)
             d = fc.q2dspace(q)
             self.hkl_result.set(u'I:%10.0f   d:%8.2f \u212B' % (I, d))
         else:
-            q = fc.calqmag(tth, energy)
+            q = fc.calqmag(tth, wavelength_a=wavelength)
             self.hkl_result.set(u'I:%8.0f   Q:%8.2f \u212B\u207B\u00B9' % (I, q))
 
     def fun_hklsym(self):
