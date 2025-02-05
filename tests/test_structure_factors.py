@@ -94,4 +94,4 @@ def test_magnetic_mno():
         scattering_type='neutron polarised',
         polarisation_vector=[1, 0, 0]
     )
-    assert xtl.Scatter.intensity([1, 1, 1]) > 0.1, 'missing polarised neutron intensity'
+    assert abs(xtl.Scatter.intensity([1, 1, 1]) - 4332.39) < 0.01, 'incorrect polarised neutron intensity'

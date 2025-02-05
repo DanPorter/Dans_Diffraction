@@ -241,7 +241,7 @@ def sf_magnetic_neutron(q, r, moment, magnetic_formfactor=None, occ=None,  debye
         # sf[n] = np.dot(sfm, incident_polarisation_vector)
         # sf[n] = np.dot(sfm, sfm)  # maximum possible
         # average polarisation
-        sf[n] = (np.dot(sfm, [1, 0, 0]) + np.dot(sfm, [0, 1, 0]) + np.dot(sfm, [0, 0, 1])) / 3
+        # sf[n] = (np.dot(sfm, [1, 0, 0]) + np.dot(sfm, [0, 1, 0]) + np.dot(sfm, [0, 0, 1])) / 3
     return sf
 
 
@@ -818,16 +818,16 @@ def get_scattering_function(scattering_type):
     if scattering_type in SCATTERING_TYPES['electron']:
         return sf_atom
     if scattering_type in SCATTERING_TYPES['xray magnetic']:
-        return sf_magnetic_xray
+        return sf_magnetic_xray_polarised
     if scattering_type in SCATTERING_TYPES['neutron magnetic']:
-        return sf_magnetic_neutron
+        return sf_magnetic_neutron_polarised
     if scattering_type in SCATTERING_TYPES['neutron polarised']:
         return sf_magnetic_neutron_polarised
     if scattering_type in SCATTERING_TYPES['xray polarised']:
         return sf_magnetic_xray_polarised
     if scattering_type in SCATTERING_TYPES['xray resonant']:
         return sf_magnetic_xray_resonant
-    raise(Exception('Scattering name %s not recognised' % scattering_type))
+    raise Exception('Scattering name %s not recognised' % scattering_type)
 
 
 def options(occ=None, debyewaller=None, scattering_factor=None,
@@ -853,10 +853,39 @@ def options(occ=None, debyewaller=None, scattering_factor=None,
     return locals()
 
 
+def scattering_factors(scattering_type, atom_type, qmag, enval,
+                       use_sears=False, use_wasskirf=False):
+    """
+    Return an array of scattering factors based on the radiation
+    :param scattering_type: str radiation, see "get_scattering_function()"
+    :param atom_type: [nx1] str array of element symbols
+    :param qmag: [mx1] or None, float array of wavevector magnitudes for reflections
+    :param enval: [ox1] or None, float array of energies in keV
+    :param use_sears: if True, use neutron scattering lengths from ITC Vol. C, By V. F. Sears
+    :param use_wasskirf: if True, use x-ray scattering factors from Waasmaier and Kirfel
+    :return: [nxmxo] array of scattering factors
+    """
+    if scattering_type in SCATTERING_TYPES['neutron']:
+        if use_sears:
+            return fc.neutron_scattering_length(atom_type, 'Sears')
+        else:
+            return fc.neutron_scattering_length(atom_type)
+    elif scattering_type in SCATTERING_TYPES['electron']:
+        return fc.electron_scattering_factor(atom_type, qmag)
+    elif scattering_type in SCATTERING_TYPES['xray fast']:
+        return fc.atom_properties(atom_type, 'Z')
+    elif scattering_type in SCATTERING_TYPES['xray dispersion']:
+        return fc.xray_scattering_factor_resonant(atom_type, qmag, enval)
+    elif use_wasskirf:
+        return fc.xray_scattering_factor_WaasKirf(atom_type, qmag)
+    else:
+        return fc.xray_scattering_factor(atom_type, qmag)
+
+
 def autostructurefactor(scattering_type, q, r, *args, **kwargs):
     """
     Choose a scattering type can calcuate the structure factor
-    :param scattering_type:
+    :param scattering_type: str radiation, see "get_scattering_function()"
     :param q: array [n,3] reflection positions in A^-1
     :param r: array [m,3] atomic positions in A
     :param args: additional arguments to pass to choosen scattering function

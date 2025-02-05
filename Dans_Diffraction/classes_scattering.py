@@ -480,22 +480,14 @@ class Scattering:
                         print(' Starting %2.0f/%2.0f: %d:%d' % (n + 1, n_arrays, ls, ls + len(_q)))
                     qmag = fg.mag(_q)      # q magnitude
                     # Scattering factors
-                    if scattering_type in fs.SCATTERING_TYPES['neutron']:
-                        if self._use_sears_scattering_lengths:
-                            ff = fc.neutron_scattering_length(atom_type, 'Sears')
-                        else:
-                            # ff = fc.atom_properties(atom_type, 'Coh_b')
-                            ff = fc.neutron_scattering_length(atom_type)
-                    elif scattering_type in fs.SCATTERING_TYPES['electron']:
-                        ff = fc.electron_scattering_factor(atom_type, qmag)
-                    elif scattering_type in fs.SCATTERING_TYPES['xray fast']:
-                        ff = fc.atom_properties(atom_type, 'Z')
-                    elif scattering_type in fs.SCATTERING_TYPES['xray dispersion']:
-                        ff = fc.xray_scattering_factor_resonant(atom_type, qmag, enval)
-                    elif self._use_waaskirf_scattering_factor:
-                        ff = fc.xray_scattering_factor_WaasKirf(atom_type, qmag)
-                    else:
-                        ff = fc.xray_scattering_factor(atom_type, qmag)
+                    ff = fs.scattering_factors(
+                        scattering_type=scattering_type,
+                        atom_type=atom_type,
+                        qmag=qmag,
+                        enval=enval,
+                        use_sears=self._use_sears_scattering_lengths,
+                        use_wasskirf=self._use_waaskirf_scattering_factor
+                    )
 
                     # Get Debye-Waller factor
                     if self._use_isotropic_thermal_factor:
@@ -2260,7 +2252,7 @@ class Scattering:
             outstr+= '(%5.3g,%5.3g,%5.3g)\n' % (symHKL[n,0],symHKL[n,1],symHKL[n,2])
         return outstr
     
-    def print_atomic_contributions(self,HKL):
+    def print_atomic_contributions(self, HKL):
         """
         Prints the atomic contributions to the structure factor
         """
@@ -2308,7 +2300,7 @@ class Scattering:
             outstr+= '(%2.0f,%2.0f,%2.0f) %9.2f    %s\n' % (HKL[n,0],HKL[n,1],HKL[n,2],I[n],ss)
         return outstr
 
-    def print_symmetry_contributions(self,HKL):
+    def print_symmetry_contributions(self, HKL):
         """
         Prints the symmetry contributions to the structure factor for each atomic site
         """
@@ -2404,7 +2396,7 @@ class Scattering:
         hkl_2_options = (abs(angles - angles[idx]) < 1.) * (abs(tth_2 - tth_2[idx]) < 1.)
         return hkl_1, hkl_2, next_refs[hkl_2_options]
 
-    def find_close_reflections(self,HKL,energy_kev=None,max_twotheta=2,max_angle=10):
+    def find_close_reflections(self, HKL, energy_kev=None, max_twotheta=2, max_angle=10):
         """
         Find and print list of reflections close to the given one
         """
