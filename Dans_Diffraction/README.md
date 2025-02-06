@@ -46,7 +46,7 @@ xtl.Cell.gamma
 
 Selected functions (see internal documentation for more):
  ```python
-xtl.Cell.latt([2.85,2.85,10.8,90,90,120]) # Define the lattice parameters from a list
+xtl.Cell.latt([2.85,2.85,10.8,90,90,120]) # Define the lattice parameters from a list or subset
 xtl.Cell.tth([0,0,12],energy_kev=8.0) # Calculate the two-theta of a reflection
 xtl.Cell.lp() # Returns the current lattice parameters
 xtl.Cell.volume() # Returns the calculated volume in A^3
@@ -111,16 +111,16 @@ xtl.Structrue contains all atomic positions in the unit cell.
 
 Each atom has properties:
 
-|   Property   |      |  
-| ------------- | ------------- |
-|   u   | Fractional atomic coordinates along direction of **a**  |
-|   v  | Fractional atomic coordinates along direction of **b**   |
-|   w   | Fractional atomic coordinates along direction of **c**   |
-|   type    | element species, given as element name, e.g. 'Fe'   |
-|   label   |   Name of atomic position, e.g. 'Fe1'   |
-|   occupancy   |   Occupancy of this atom at this atomic position   |
-|   uiso     |   atomic displacement factor (ADP) <u^2>   |
-|   mxmymz   |   magnetic moment direction [x,y,z]   |
+| Property  |                                                          |  
+|-----------|----------------------------------------------------------|
+| u         | Fractional atomic coordinates along direction of **a**   |
+| v         | Fractional atomic coordinates along direction of **b**   |
+| w         | Fractional atomic coordinates along direction of **c**   |
+| type      | element species, given as element name, e.g. 'Fe'        |
+| label     | Name of atomic position, e.g. 'Fe1'                      |
+| occupancy | Occupancy of this atom at this atomic position           |
+| uiso      | atomic displacement factor (ADP) <u^2>                   |
+| mxmymz    | magnetic moment direction [x,y,z]                        |
 
 Functions available:
 ```python
@@ -176,13 +176,14 @@ xtl.Plot.tensor_scattering_stokes # Return tensor scattering intensities for non
 ### Scattering
 Simulate diffraction from the crystal structure, for various scattering types, including:
 
-|   Name   |   Explanation   |
-|   ----   |   -----------    |
-| 'xray' | X-Ray diffraction, using atomic form factors |
-| 'neutron' | Neutron difraction, using neutron scattering lengths. |
-| 'neutron magnetic' | Magnetic neutron diffraction |
-| 'xray magnetic' | Non-resonant x-ray magnetic diffraction |
-| 'xray resonant' | Resonant x-ray magnetic diffraction |
+| Name               | Explanation                                              |
+|--------------------|----------------------------------------------------------|
+| 'xray'             | X-Ray diffraction, using atomic form factors             |
+| 'neutron'          | Neutron difraction, using neutron scattering lengths.    |
+| 'neutron magnetic' | Magnetic neutron diffraction                             |
+| 'xray magnetic'    | Non-resonant x-ray magnetic diffraction                  |
+| 'xray resonant'    | Resonant x-ray magnetic diffraction                      |
+| 'xray dispersion'  | X-Ray diffraction using energy dispersive form factors   |
 
 Functions calculate the complex structure factor based on the equation:
 
@@ -192,19 +193,27 @@ Scattering factors and scattering lengths for available elements are found in [d
 
 Setup the scattering attributes with the *xtl.Scatter.setup_scatter(parameter)* function:
 
-|   Parameter   |   Explanation   |
-|  ----------   |   -----------   |
-|    type         |  'xray','neutron','xray magnetic','neutron magnetic','xray resonant'  |
-|    energy_kev   |  radiation energy in keV  |
-|    wavelength_a |  radiation wavelength in Angstrom  |
-|    powder_units |  units to use when displaying/ plotting ['twotheta', 'd',' 'q']  |
-|    min_twotheta |  minimum detector (two-theta) angle  |
-|    max_twotheta |  maximum detector (two-theta) angle  |
-|    min_theta    |  minimum sample angle = -opening angle  |
-|    max_theta    |  maximum sample angle = opening angle  |
-|    theta_offset |  sample offset angle  |
-|    specular     | [h,k,l] : reflections normal to sample surface  |
-|    parallel     | [h,k,l] : reflections normal to sample surface  |
+| Parameter           | Explanation                                                                             |
+|---------------------|-----------------------------------------------------------------------------------------|
+| scattering_type     | 'xray','neutron','xray magnetic','neutron magnetic','xray resonant', 'xray dispersion'  |
+| energy_kev          | radiation energy in keV                                                                 |
+| wavelength_a        | radiation wavelength in Angstrom                                                        |
+| powder_units        | units to use when displaying/ plotting ['twotheta', 'd',' 'q']                          |
+| min_twotheta        | minimum detector (two-theta) angle                                                      |
+| max_twotheta        | maximum detector (two-theta) angle                                                      |
+| min_theta           | minimum sample angle = -opening angle                                                   |
+| max_theta           | maximum sample angle = opening angle                                                    |
+| theta_offset        | sample offset angle                                                                     |
+| specular            | [h,k,l] : reflections normal to sample surface                                          |
+| parallel            | [h,k,l] : reflections normal to sample surface                                          |
+| scattering_factors  | xray scattering factor, either 'waaskirf' or 'itc'                                      |
+| scattering_lengths  | neutron scattering lengths either 'sears' or 'default'                                  |
+| magnetic_formfactor | True/False magnetic form factor for magnetic SF                                         |
+| polarisation        | beam polarisation setting ['ss', 'sp'*, 'sp', 'pp']                                     |
+| polarisation_vector | [x,y,z] incident polarisation vector                                                    | 
+| azimuthal_reference | [h,k,l] direction of azimuthal zero angle                                               |
+| azimuth             | azimuthal angle in deg                                                                  |
+| flm                 | Resonant settings (flm1, flm2, flm3)                                                    |
 
 
 Selected functions (see internal documentation for more):

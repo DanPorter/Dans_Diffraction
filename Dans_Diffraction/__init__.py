@@ -29,10 +29,10 @@ Citation DOI: https://doi.org/10.5281/zenodo.8106031
 
 By Dan Porter, PhD
 Diamond
-2017
+2017-2025
 
-Version 3.3.2
-Last updated: 20/11/2024
+Version 3.3.3
+Last updated: 06/02/2025
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -83,7 +83,7 @@ Version History:
 26/09/24 3.3.0  Added complex neutron scattering lengths for isotopes from package periodictable. Thanks thamnos!
 06/11/24 3.3.1  Fixed incorrect cell basis for triclinic cells. Added functions_lattice.py and tests. Thanks LeeRichter!
 20/11/24 3.3.2  Added alternate option for neutron scattering lengths
-23/12/24 3.3.3  Added scattering options for polarised neutron and x-ray scattering. Thanks dragonyanglong!
+06/02/25 3.3.3  Added scattering options for polarised neutron and x-ray scattering. Thanks dragonyanglong!
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -166,7 +166,7 @@ __all__ = ['fg', 'fp', 'fl', 'fc', 'Crystal', 'MultiCrystal', 'readcif',
 
 
 __version__ = '3.3.3'
-__date__ = '2024/12/23'
+__date__ = '2025/02/06'
 
 
 # Build

@@ -88,7 +88,7 @@ help(xtl)  # all functions (nearly!) are documented
 
 ### Alter atomic positions
 ```python
-xtl.Cell.latt([2.85,2.85,10.8,90,90,120]) #  set lattice parameters
+xtl.Cell.latt(2.85, 2.85, 10.8, 90, 90, 120) #  set lattice parameters
 xtl.Atoms.info() # Print Symmetric positions
 xtl.Structure.info() # Print All positions in P1 symmetry (same structure and functions as xtl.Atoms)
 # Symmetric positions
