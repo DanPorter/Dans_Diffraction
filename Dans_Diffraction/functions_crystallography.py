@@ -1581,6 +1581,7 @@ def find_spacegroup(sg_symbol):
     if sg_symbol in sg_names:
         key = sg_keys[sg_names.index(sg_symbol)]
         return sg_dict_mag[key]
+    # TODO: add closest matching spacegroup
     return None
 
 

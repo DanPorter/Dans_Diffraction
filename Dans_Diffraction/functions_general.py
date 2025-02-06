@@ -9,8 +9,8 @@ By Dan Porter, PhD
 Diamond
 2021
 
-Version 2.2.0
-Last updated: 11/03/22
+Version 2.2.3
+Last updated: 06/02/25
 
 Version History:
 06/01/18 1.0    Program created from DansGeneralProgs.py V2.3
@@ -28,6 +28,7 @@ Version History:
 15/11/21 2.1.0  Added normal_basis
 11/03/22 2.2.0  Added Lorentzian, pVoight, peak_function functions
 15/05/24 2.2.2  Added sph2cart, meshgrid_sphere
+06/02/25 2.2.3  refactored norm to remove inspection errors
 
 @author: DGPorter
 """
@@ -36,8 +37,8 @@ import sys, os, re
 import numpy as np
 import inspect
 
-__version__ = '2.2.2'
-__date__ = '15/May/2024'
+__version__ = '2.2.3'
+__date__ = '06/Feb/2025'
 
 # File directory
 directory = os.path.abspath(os.path.dirname(__file__))
@@ -88,25 +89,26 @@ def norm(A):
     """
     Returns normalised vector A
     If A has 2 dimensions, returns an array of normalised vectors
-    The returned array will be the same shape as the given array.
+    The returned array of vectors will be squeezed to the minimum dimension
 
     E.G.
-     norm([1,1,1]) = [1,1,1]/1.732 = [ 0.57735,  0.57735,  0.57735]
-     norm(array([[1,1,1],[2,2,2]]) = [ [ 0.57735,  0.57735,  0.57735] , [ 0.57735,  0.57735,  0.57735] ]
-     """
+        norm([1,1,1]) = [1,1,1]/1.732 = [ 0.57735,  0.57735,  0.57735]
+        norm(array([[1,1,1],[2,2,2]]) = [ [ 0.57735,  0.57735,  0.57735] , [ 0.57735,  0.57735,  0.57735] ]
+    """
 
-    A = np.asarray(A, dtype=float).reshape((-1, np.shape(A)[-1]))
-    mag = np.sqrt(np.sum(A ** 2, axis=A.ndim - 1)).reshape((-1, 1))
-    mag[mag == 0] = 1  # stop warning errors
-    N = A / mag
-    if A.shape[0] == 1:
-        N = N.reshape(-1)
-    return N
+    array = np.asarray(A, dtype=float).reshape((-1, np.shape(A)[-1]))
+    magnitude = np.sqrt(np.sum(array ** 2, axis=array.ndim - 1)).reshape((-1, 1))
+    magnitude[magnitude == 0] = 1  # stop warning errors
+    normalised = array / magnitude
+    # if array.shape[0] == 1:
+    #     normalised = normalised.reshape(-1)
+    return normalised.squeeze()
 
 
 def quad(A):
     """
     Returns +/-1 depending on quadrant of 3D vector A
+
     i.e.:    A      Returns
         [ 1, 1, 1]    1
         [-1, 1, 1]    1

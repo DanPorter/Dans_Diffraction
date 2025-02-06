@@ -87,3 +87,11 @@ def test_rutile_neutron():
         print(f"{hh}: neutron: {vs:.2f} - {dd:.2f}")
     assert sum((vesta_sf2 - calc_neutron) ** 2) < 0.01, 'difference in rutile neutron intensities'
 
+
+def test_magnetic_mno():
+    xtl = dif.structure_list.MnO()
+    xtl.Scatter.setup_scatter(
+        scattering_type='neutron polarised',
+        polarisation_vector=[1, 0, 0]
+    )
+    assert abs(xtl.Scatter.intensity([1, 1, 1]) - 4332.39) < 0.01, 'incorrect polarised neutron intensity'

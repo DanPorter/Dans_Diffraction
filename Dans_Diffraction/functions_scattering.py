@@ -39,12 +39,13 @@ By Dan Porter, PhD
 Diamond
 2018
 
-Version 0.9
-Last updated: 13/07/21
+Version 1.0
+Last updated: 06/02/25
 
 Version History:
 11/11/18 0.1    Version History started.
 13/07/21 0.9    Functions re-written and tested
+06/02/25 1.0    Removed refrences to unpolarised magnetic scattering due to incorrect averaging
 
 @author: DGPorter
 """
@@ -55,7 +56,7 @@ import datetime
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '0.9'
+__version__ = '1.0'
 
 MAX_QR_ARRAY = 1.0e7
 TIME_REPORT = True
@@ -66,6 +67,8 @@ SCATTERING_TYPES = {
     'neutron': ['neutron', 'n', 'nuclear'],
     'xray magnetic': ['xray magnetic', 'magnetic xray', 'spin xray', 'xray spin'],
     'neutron magnetic': ['neutron magnetic', 'magnetic neutron', 'magnetic'],
+    'neutron polarised': ['neutron polarised', 'neutron polarized'],
+    'xray polarised': ['xray polarised', 'xray polarized'],
     'xray resonant': ['xray resonant', 'resonant', 'resonant xray', 'rxs'],
     'xray dispersion': ['dispersion', 'xray dispersion'],
     'electron': ['electron', 'ele', 'e'],
@@ -196,6 +199,7 @@ def sf_xray_dispersion(q, r, scattering_factor, occ=None, debyewaller=None, **kw
 
 def sf_magnetic_neutron(q, r, moment, magnetic_formfactor=None, occ=None,  debyewaller=None, **kwargs):
     """
+    ***Not currently used because of incorrect method of averaging polarisations***
     Calculate the magnetic structure factor for the given HKL, using neutron magnetic form factor
     Assumes an unpolarised incident beam.
         Reference: G. L. Squires, Introduction to the Theory of Thermal Neutron Scattering (Cambridge University Press, 1997).
@@ -237,8 +241,8 @@ def sf_magnetic_neutron(q, r, moment, magnetic_formfactor=None, occ=None,  debye
 
         # Calculate polarisation with incident neutron
         # sf[n] = np.dot(sfm, incident_polarisation_vector)
-        # SF[n] = np.dot(SFm,SFm) # maximum possible
-        # average polarisation
+        # sf[n] = np.dot(sfm, sfm)  # maximum possible
+        # average polarisation  # 6/2/25: this method is incorrect for averaging polarisations, should combine intensity
         sf[n] = (np.dot(sfm, [1, 0, 0]) + np.dot(sfm, [0, 1, 0]) + np.dot(sfm, [0, 0, 1])) / 3
     return sf
 
@@ -283,7 +287,7 @@ def sf_magnetic_neutron_polarised(q, r, moment, incident_polarisation_vector=(1,
             qm = mom - np.dot(qh, mom) * qh
 
             # Calculate structure factor
-            sfm = sfm + (magnetic_formfactor[n, m] * debyewaller[n, m] * occ[m] * phase * qm)
+            sfm = sfm + (magnetic_formfactor[n, m] * debyewaller[n, m] * occ[m] * phase[n, m] * qm)
 
         # Calculate polarisation with incident neutron
         sf[n] = np.dot(sfm, incident_polarisation_vector)
@@ -292,6 +296,7 @@ def sf_magnetic_neutron_polarised(q, r, moment, incident_polarisation_vector=(1,
 
 def sf_magnetic_xray(q, r, moment, magnetic_formfactor=None, occ=None, debyewaller=None, **kwargs):
     """
+    ***Not currently used because of incorrect method of averaging polarisations***
     Calculate the non-resonant magnetic component of the structure factor
     :param q: [n,3] array of hkl reflections
     :param r: [m,3] array of atomic positions in r.l.u.
@@ -342,6 +347,21 @@ def sf_magnetic_xray_polarised(q, r, moment, incident_polarisation_vector=(1, 0,
                                magnetic_formfactor=None, occ=None, debyewaller=None, **kwargs):
     """
     Calculate the non-resonant magnetic component of the structure factor
+
+        f_non-res_mag = i.r0.(hw/mc^2).fD.[.5.L.A + S.B]
+        B = e_o X e_i + (k_o X e_o) * k_o.e_i - (k_i X e_i) * k_i.e_o - (k_o X e_o) X (k_i X e_i)
+
+    - ignore orbital moment L
+    - fD = magnetic form factor
+    - S = spin moment
+    - k_i, k_o = wavevector in, out
+    - e_i, e_o = polarisation in, out
+
+    From Hill+McMorrow Acta Cryst. 1996 A52, 236-244 Equ. (2)
+    Book: "X-ray Scattering and Absorption by Magnetic Materials" by Loevesy and Collins. Ch 2. Eqn.2.21+1
+    No orbital component assumed
+    magnetic moments assumed to be in the same reference frame as the polarisation
+
     :param q: [n,3] array of hkl reflections
     :param r: [m,3] array of atomic positions in r.l.u.
     :param moment: [m,3] array of magnetic moment direction in orthogonal basis
@@ -351,18 +371,6 @@ def sf_magnetic_xray_polarised(q, r, moment, incident_polarisation_vector=(1, 0,
     :param debyewaller: [n,m] array of thermal factors for each atom and reflection
     :param kwargs: additional options[*unused]
     :return sf: [n] complex array of structure factors
-
-        f_non-res_mag = i.r0.(hw/mc^2).fD.[.5.L.A + S.B]
-        B = e_o X e_i + (k_o X e_o) * k_o.e_i - (k_i X e_i) * k_i.e_o - (k_o X e_o) X (k_i X e_i)
-    - ignore orbital moment L
-    - fD = magnetic form factor
-    - S = spin moment
-    - k_i, k_o = wavevector in, out
-    - e_i, e_o = polarisation in, out
-    From Hill+McMorrow Acta Cryst. 1996 A52, 236-244 Equ. (2)
-    Book: "X-ray Scattering and Absorption by Magnetic Materials" by Loevesy and Collins. Ch 2. Eqn.2.21+1
-    No orbital component assumed
-    magnetic moments assumed to be in the same reference frame as the polarisation
     """
 
     phase = phase_factor_qr(q, r)
@@ -393,7 +401,22 @@ def sf_magnetic_xray_polarised(q, r, moment, incident_polarisation_vector=(1, 0,
 def sf_magnetic_xray_beamline(q, r, moment, energy_kev, magnetic_formfactor=None, occ=None, debyewaller=None,
                               azi_ref_q=(1, 0, 0), psi=0, polarisation='s-p', **kwargs):
     """
-    Calculate the non-resonant magnetic component of the structure factor
+    Calculate the non-resonant magnetic component of the structure factor, using standard beamline polarisation
+
+        f_non-res_mag = i.r0.(hw/mc^2).fD.[.5.L.A + S.B]
+        B = e_o X e_i + (k_o X e_o) * k_o.e_i - (k_i X e_i) * k_i.e_o - (k_o X e_o) X (k_i X e_i)
+
+    - ignore orbital moment L
+    - fD = magnetic form factor
+    - S = spin moment
+    - k_i, k_o = wavevector in, out
+    - e_i, e_o = polarisation in, out
+
+    From Hill+McMorrow Acta Cryst. 1996 A52, 236-244 Equ. (2)
+    Book: "X-ray Scattering and Absorption by Magnetic Materials" by Loevesy and Collins. Ch 2. Eqn.2.21+1
+    No orbital component assumed
+    magnetic moments assumed to be in the same reference frame as the polarisation
+
     :param q: [n,3] array of hkl reflections
     :param r: [m,3] array of atomic positions in r.l.u.
     :param moment: [m,3] array of magnetic moment direction in orthogonal basis
@@ -406,19 +429,6 @@ def sf_magnetic_xray_beamline(q, r, moment, energy_kev, magnetic_formfactor=None
     :param polarisation: str definition of the polarisation can be: ['ss','sp','ps','pp'] with 's'=sigma, 'p'=pi
     :param kwargs: additional options[*unused]
     :return sf: [n, p] complex array of structure factors for different reflections and azimuths
-
-        f_non-res_mag = i.r0.(hw/mc^2).fD.[.5.L.A + S.B]
-        B = e_o X e_i + (k_o X e_o) * k_o.e_i - (k_i X e_i) * k_i.e_o - (k_o X e_o) X (k_i X e_i)
-    - ignore orbital moment L
-    - fD = magnetic form factor
-    - S = spin moment
-    - k_i, k_o = wavevector in, out
-    - e_i, e_o = polarisation in, out
-
-    From Hill+McMorrow Acta Cryst. 1996 A52, 236-244 Equ. (2)
-    Book: "X-ray Scattering and Absorption by Magnetic Materials" by Loevesy and Collins. Ch 2. Eqn.2.21+1
-    No orbital component assumed
-    magnetic moments assumed to be in the same reference frame as the polarisation
     """
 
     phase = phase_factor_qr(q, r)
@@ -429,13 +439,13 @@ def sf_magnetic_xray_beamline(q, r, moment, energy_kev, magnetic_formfactor=None
         debyewaller = np.ones(phase.shape)
     if magnetic_formfactor is None:
         magnetic_formfactor = np.ones(phase.shape)
-    psi = np.asarray(psi, dtype=float).reshape([-1])
-    npsi = len(psi)
+    psi_array = np.asarray(psi, dtype=float).reshape([-1])
+    npsi = len(psi_array)
 
     _debug('sf_magnetic_xray_beamline(phase.shape=%s, npsi=%d)' % (phase.shape, npsi))
     sf = np.zeros([len(q), npsi], dtype=complex)
-    for psival in range(npsi):
-        kin, kout, ein, eout = scatteringvectors(q, energy_kev, azi_ref_q, psi, polarisation)
+    for p, psival in enumerate(psi_array):
+        kin, kout, ein, eout = scatteringvectors(q, energy_kev, azi_ref_q, psival, polarisation)
 
         # Magnetic form factor
         # f_non-res_mag = i.r0.(hw/mc^2).fD.[.5.L.A + S.B] #equ 2 Hill+McMorrow 1996
@@ -447,7 +457,7 @@ def sf_magnetic_xray_beamline(q, r, moment, energy_kev, magnetic_formfactor=None
                 np.cross(kin[n], ein[n]) * np.dot(kin[n], eout[n]) - \
                 np.cross(np.cross(kout[n], eout[n]), np.cross(kin[n], ein[n]))
             fspin[n, :] = 1j * magnetic_formfactor[n, :] * np.dot(moment, B)
-        sf[:, psival] = np.sum(fspin * occ * debyewaller * phase, axis=1)
+        sf[:, p] = np.sum(fspin * occ * debyewaller * phase, axis=1)
     if npsi == 1:
         return sf[:, 0]
     return sf
@@ -457,6 +467,14 @@ def sf_magnetic_xray_resonant(q, r, moment, energy_kev, occ=None, debyewaller=No
                               polarisation='sp', f0=0, f1=1, f2=0, **kwargs):
     """
     Calculate the non-resonant magnetic component of the structure factor
+
+    f_res_mag = [(e'.e)F0 - i(e'xe).Z*F1 + (e'.Z)*(e.Z)*F2]
+
+    From Hill+McMorrow Acta Cryst. 1996 A52, 236-244 Equ. (2)
+    Book: "X-ray Scattering and Absorption by Magnetic Materials" by Loevesy and Collins. Ch 2. Eqn.2.21+1
+    No orbital component assumed
+    magnetic moments assumed to be in the same reference frame as the polarisation
+
     :param q: [n,3] array of hkl reflections
     :param r: [m,3] array of atomic positions in r.l.u.
     :param moment: [m,3] array of magnetic moment direction in orthogonal basis
@@ -471,13 +489,6 @@ def sf_magnetic_xray_resonant(q, r, moment, energy_kev, occ=None, debyewaller=No
     :param f2: float Flm value 2
     :param kwargs: additional options[*unused]
     :return sf: [n, p] complex array of structure factors for different reflections and azimuths
-
-    f_res_mag = [(e'.e)F0 - i(e'xe).Z*F1 + (e'.Z)*(e.Z)*F2]
-
-    From Hill+McMorrow Acta Cryst. 1996 A52, 236-244 Equ. (2)
-    Book: "X-ray Scattering and Absorption by Magnetic Materials" by Loevesy and Collins. Ch 2. Eqn.2.21+1
-    No orbital component assumed
-    magnetic moments assumed to be in the same reference frame as the polarisation
     """
 
     phase = phase_factor_qr(q, r)
@@ -489,13 +500,13 @@ def sf_magnetic_xray_resonant(q, r, moment, energy_kev, occ=None, debyewaller=No
         debyewaller = np.ones(phase.shape)
     if debyewaller is None:
         debyewaller = np.ones(phase.shape)
-    psi = np.asarray(psi, dtype=float).reshape([-1])
-    npsi = len(psi)
+    psi_array = np.asarray(psi, dtype=float).reshape([-1])
+    npsi = len(psi_array)
 
     _debug('sf_magnetic_xray_resonant(phase.shape=%s, npsi=%d)' % (phase.shape, npsi))
     sf = np.zeros([len(q), npsi], dtype=complex)
-    for psival in range(npsi):
-        kin, kout, ein, eout = scatteringvectors(q, energy_kev, azi_ref_q, psi[psival], polarisation)
+    for p, psival in enumerate(psi_array):
+        kin, kout, ein, eout = scatteringvectors(q, energy_kev, azi_ref_q, psival, polarisation)
 
         fe1e1 = np.zeros([len(q), len(r)], dtype=complex)
         flm0, flm1, flm2 = 0, 0, 0
@@ -522,7 +533,7 @@ def sf_magnetic_xray_resonant(q, r, moment, energy_kev, occ=None, debyewaller=No
         # fe1e1 = flm0 * f0 - 1j * flm1 * f1 + flm2 * f2
 
         # Calculate structure factor
-        sf[:, psival] = np.sum(fe1e1 * debyewaller * occ * phase, axis=1)
+        sf[:, p] = np.sum(fe1e1 * debyewaller * occ * phase, axis=1)
     if npsi == 1:
         return sf[:, 0]
     return sf
@@ -532,20 +543,6 @@ def sf_magnetic_xray_resonant_alternate(q, r, moment, energy_kev, occ=None, deby
                                         azi_ref_q=(1, 0, 0), psi=0, f0=0, f1=1, f2=0, **kwargs):
     """
     Calculate structure factors using resonant scattering factors in the dipolar approximation
-    :param q: [n,3] array of hkl reflections
-    :param r: [m,3] array of atomic positions in r.l.u.
-    :param moment: [m,3] array of magnetic moment direction in orthogonal basis
-    :param energy_kev: float value of incident x-ray energy in keV
-    :param occ: [m,1] array of atomic occupancies
-    :param debyewaller: [n,m] array of thermal factors for each atom and reflection
-    :param azi_ref_q: [1,3] azimuthal refence, in cartesian basis (Q)
-    :param psi: [p] array of azimthal angles - the rotation out of the scattering plane.
-    :param polarisation: str definition of the polarisation can be: ['ss','sp','ps','pp'] with 's'=sigma, 'p'=pi
-    :param f0: float Flm value 0 (charge)
-    :param f1: float Flm value 1
-    :param f2: float Flm value 2
-    :param kwargs: additional options[*unused]
-    :return sf: [n, p] complex array of structure factors for different reflections and azimuths
 
       I = Scattering.xray_resonant(HKL,energy_kev,polarisation,F0,F1,F2)
     Returns an array with the same length as HKL, giving the real intensity at each reflection.
@@ -567,6 +564,21 @@ def sf_magnetic_xray_resonant_alternate(q, r, moment, energy_kev, occ=None, deby
             ( p-s  p-p )
 
     From Hill+McMorrow Acta Cryst. 1996 A52, 236-244 Equ. (15)
+
+    :param q: [n,3] array of hkl reflections
+    :param r: [m,3] array of atomic positions in r.l.u.
+    :param moment: [m,3] array of magnetic moment direction in orthogonal basis
+    :param energy_kev: float value of incident x-ray energy in keV
+    :param occ: [m,1] array of atomic occupancies
+    :param debyewaller: [n,m] array of thermal factors for each atom and reflection
+    :param azi_ref_q: [1,3] azimuthal refence, in cartesian basis (Q)
+    :param psi: [p] array of azimthal angles - the rotation out of the scattering plane.
+    :param polarisation: str definition of the polarisation can be: ['ss','sp','ps','pp'] with 's'=sigma, 'p'=pi
+    :param f0: float Flm value 0 (charge)
+    :param f1: float Flm value 1
+    :param f2: float Flm value 2
+    :param kwargs: additional options[*unused]
+    :return sf: [n, p] complex array of structure factors for different reflections and azimuths
     """
 
     phase = phase_factor_qr(q, r)
@@ -578,20 +590,20 @@ def sf_magnetic_xray_resonant_alternate(q, r, moment, energy_kev, occ=None, deby
         debyewaller = np.ones(phase.shape)
     if debyewaller is None:
         debyewaller = np.ones(phase.shape)
-    psi = np.asarray(psi, dtype=float).reshape([-1])
-    npsi = len(psi)
+    psi_array = np.asarray(psi, dtype=float).reshape([-1])
+    npsi = len(psi_array)
 
     _debug('sf_magnetic_xray_resonant_alternate(phase.shape=%s, npsi=%d)' % (phase.shape, npsi))
     sf = np.zeros([len(q), npsi], dtype=complex)
-    for psival in range(npsi):
+    for p, psival in enumerate(psi_array):
         # Get resonant form factor
         fxres = xray_resonant_scattering_factor(q, moment, energy_kev, polarisation,
-                                                (f0, f1, f2), psi[psival], azi_ref_q)
+                                                (f0, f1, f2), psival, azi_ref_q)
         # Calculate structure factor
         # Broadcasting used on 2D fxres
-        sf[:, psival] = np.sum(fxres * debyewaller * occ * phase, axis=1)
+        sf[:, p] = np.sum(fxres * debyewaller * occ * phase, axis=1)
     if npsi == 1:
-        return sf[:,0]
+        return sf[:, 0]
     return sf
 
 
@@ -816,12 +828,16 @@ def get_scattering_function(scattering_type):
     if scattering_type in SCATTERING_TYPES['electron']:
         return sf_atom
     if scattering_type in SCATTERING_TYPES['xray magnetic']:
-        return sf_magnetic_xray
+        return sf_magnetic_xray_polarised
     if scattering_type in SCATTERING_TYPES['neutron magnetic']:
-        return sf_magnetic_neutron
+        return sf_magnetic_neutron_polarised
+    if scattering_type in SCATTERING_TYPES['neutron polarised']:
+        return sf_magnetic_neutron_polarised
+    if scattering_type in SCATTERING_TYPES['xray polarised']:
+        return sf_magnetic_xray_polarised
     if scattering_type in SCATTERING_TYPES['xray resonant']:
         return sf_magnetic_xray_resonant
-    raise(Exception('Scattering name %s not recognised' % scattering_type))
+    raise Exception('Scattering name %s not recognised' % scattering_type)
 
 
 def options(occ=None, debyewaller=None, scattering_factor=None,
@@ -847,10 +863,39 @@ def options(occ=None, debyewaller=None, scattering_factor=None,
     return locals()
 
 
+def scattering_factors(scattering_type, atom_type, qmag, enval,
+                       use_sears=False, use_wasskirf=False):
+    """
+    Return an array of scattering factors based on the radiation
+    :param scattering_type: str radiation, see "get_scattering_function()"
+    :param atom_type: [nx1] str array of element symbols
+    :param qmag: [mx1] or None, float array of wavevector magnitudes for reflections
+    :param enval: [ox1] or None, float array of energies in keV
+    :param use_sears: if True, use neutron scattering lengths from ITC Vol. C, By V. F. Sears
+    :param use_wasskirf: if True, use x-ray scattering factors from Waasmaier and Kirfel
+    :return: [nxmxo] array of scattering factors
+    """
+    if scattering_type in SCATTERING_TYPES['neutron']:
+        if use_sears:
+            return fc.neutron_scattering_length(atom_type, 'Sears')
+        else:
+            return fc.neutron_scattering_length(atom_type)
+    elif scattering_type in SCATTERING_TYPES['electron']:
+        return fc.electron_scattering_factor(atom_type, qmag)
+    elif scattering_type in SCATTERING_TYPES['xray fast']:
+        return fc.atom_properties(atom_type, 'Z')
+    elif scattering_type in SCATTERING_TYPES['xray dispersion']:
+        return fc.xray_scattering_factor_resonant(atom_type, qmag, enval)
+    elif use_wasskirf:
+        return fc.xray_scattering_factor_WaasKirf(atom_type, qmag)
+    else:
+        return fc.xray_scattering_factor(atom_type, qmag)
+
+
 def autostructurefactor(scattering_type, q, r, *args, **kwargs):
     """
     Choose a scattering type can calcuate the structure factor
-    :param scattering_type:
+    :param scattering_type: str radiation, see "get_scattering_function()"
     :param q: array [n,3] reflection positions in A^-1
     :param r: array [m,3] atomic positions in A
     :param args: additional arguments to pass to choosen scattering function

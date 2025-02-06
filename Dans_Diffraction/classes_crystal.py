@@ -24,8 +24,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.2.4
-Last updated: 22/05/23
+Version 3.3.0
+Last updated: 06/02/25
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -49,6 +49,7 @@ Version History:
 15/11/21 3.2.2  Added Cell.orientation, updated Cell.UV()
 12/01/21 3.2.3  Added Symmetry.axial_vector
 22/05/23 3.2.4  Added Symmetry.wyckoff_label(), Symmetry.spacegroup_dict
+06/05/25 3.3.0  Symmetry.from_cif now loads operations from find_spacegroup if not already loaded
 
 @author: DGPorter
 """
@@ -67,7 +68,7 @@ from .classes_scattering import Scattering
 from .classes_multicrystal import MultiCrystal
 from .classes_plotting import Plotting, PlottingSuperstructure
 
-__version__ = '3.2.4'
+__version__ = '3.3.0'
 
 
 class Crystal:
@@ -227,13 +228,13 @@ class Crystal:
         else:
             fc.write_cif(cifvals, filename, comments)
 
-    def new_cell(self, lattice_parameters=(), *args, **kwargs):
+    def new_cell(self, *lattice_parameters, **kwargs):
         """
         Replace the lattice parameters
         :param lattice_parameters: [a,b,c,alpha,beta,gamma]
         :return: None
         """
-        self.Cell.latt(lattice_parameters, *args, **kwargs)
+        self.Cell.latt(*lattice_parameters, **kwargs)
 
     def new_atoms(self, u=[0], v=[0], w=[0], type=None,
                   label=None, occupancy=None, uiso=None, mxmymz=None):
@@ -468,8 +469,9 @@ class Crystal:
         out += '{}\n'.format(self.name)
         out += 'Formula: {}\n'.format(self.Properties.molname())
         out += 'Magnetic: {}\n'.format(self.Structure.ismagnetic())
+        out += 'Spacegroup: %s\n' % repr(self.Symmetry)
         out += self.Cell.info()
-        out += '\nDensity: %6.3f g/cm\n' % self.Properties.density()
+        out += 'Density: %6.3f g/cm\n\n' % self.Properties.density()
         out += self.Structure.info()
         out += '\n'
         # print "To see the full list of structure positions, type Crystal.Structure.info()"
@@ -1157,7 +1159,7 @@ class Atoms:
         :return: none
         """
         if not fc.cif_check(cifvals, self._required_cif):
-            warn('Atom site parameters cannot be read from cif')
+            warn('Atom site parameters cannot be read from cif')  # TODO: provide more details
             return
 
         keys = cifvals.keys()
@@ -1718,7 +1720,11 @@ class Symmetry:
             else:
                 self.spacegroup_dict = fc.spacegroup(1)
 
-        self.generate_matrices()
+        if len(self.symmetry_operations) == 1:
+            # use found spacegroup as none provided by CIF
+            self.load_spacegroup(sg_dict=self.spacegroup_dict)
+        else:
+            self.generate_matrices()
 
     def update_cif(self, cifvals):
         """

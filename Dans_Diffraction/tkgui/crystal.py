@@ -399,7 +399,12 @@ class CrystalGui:
         filename = filedialog.askopenfilename(
             title='Select CIF to open',
             initialdir=defdir,
-            filetypes=[('cif file', '.cif'), ('magnetic cif', '.mcif'), ('All files', '.*')],
+            filetypes=[
+                ('cif files', ('.cif', '.mcif')),
+                ('cif file', '.cif'),
+                ('magnetic cif', '.mcif'),
+                ('All files', '.*')
+            ],
             parent=self.root
         )
         if filename:
@@ -604,7 +609,7 @@ class LatparGui:
         var.pack()
 
     def fun_update(self):
-        "Update lattice parameters, close window"
+        """Update lattice parameters, close window"""
         a = self.a.get()
         b = self.b.get()
         c = self.c.get()
@@ -612,7 +617,7 @@ class LatparGui:
         beta = self.beta.get()
         gamma = self.gamma.get()
 
-        self.Cell.latt([a, b, c, alpha, beta, gamma])
+        self.Cell.latt(a, b, c, alpha, beta, gamma)
 
         # Close window
         self.root.destroy()

@@ -4,6 +4,7 @@ Ver. 3.5.8 11/08/2022
 """
 
 import os
+import json
 import numpy as np
 
 data_dir = os.path.join(os.path.dirname(__file__), 'data')
@@ -26,6 +27,7 @@ HKL = [
     (0, 1, 1),
     (1, 1, 1)
 ]
+STRUCTURES = json.load(open(os.path.join(data_dir, 'parsed_cif_output.json'), 'r'))
 
 
 # Calcualted using vesta
