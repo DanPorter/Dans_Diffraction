@@ -31,11 +31,8 @@ Version&nbsp;History:<br>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="Dans_Diffraction.functions_crystallography.html">Dans_Diffraction.functions_crystallography</a><br>
-<a href="Dans_Diffraction.functions_general.html">Dans_Diffraction.functions_general</a><br>
+</td><td width="25%" valign=top><a href="Dans_Diffraction.functions_lattice.html">Dans_Diffraction.functions_lattice</a><br>
 </td><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
-<a href="os.html">os</a><br>
-</td><td width="25%" valign=top><a href="re.html">re</a><br>
-<a href="sys.html">sys</a><br>
 </td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
@@ -59,7 +56,7 @@ Version&nbsp;History:<br>
 <font color="#000000" face="helvetica, arial"><a name="CrystalOrientation">class <strong>CrystalOrientation</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#CrystalOrientation">CrystalOrientation</a>(lattice_parameters=(),&nbsp;*args,&nbsp;**kwargs)<br>
+<td colspan=2><tt><a href="#CrystalOrientation">CrystalOrientation</a>(*lattice_parameters,&nbsp;**kwargs)<br>
 &nbsp;<br>
 <a href="#CrystalOrientation">CrystalOrientation</a>&nbsp;Class<br>
 &nbsp;<br>
@@ -70,7 +67,7 @@ Diffractometer&nbsp;frame&nbsp;according&nbsp;to&nbsp;Fig.&nbsp;1,&nbsp;H.&nbsp;
 &nbsp;&nbsp;y-axis&nbsp;:&nbsp;vector&nbsp;normal&nbsp;to&nbsp;x,z&nbsp;axes&nbsp;(parallel&nbsp;to&nbsp;beam&nbsp;(+z)&nbsp;in&nbsp;lab&nbsp;frame)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="CrystalOrientation-__init__"><strong>__init__</strong></a>(self, lattice_parameters=(), *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+<dl><dt><a name="CrystalOrientation-__init__"><strong>__init__</strong></a>(self, *lattice_parameters, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <dl><dt><a name="CrystalOrientation-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
 
@@ -195,6 +192,5 @@ Data descriptors defined here:<br>
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl><dt><a name="-string_matrix"><strong>string_matrix</strong></a>(m)</dt><dd><tt>Convert&nbsp;[3*3]&nbsp;array&nbsp;to&nbsp;string</tt></dd></dl>
  <dl><dt><a name="-string_vector"><strong>string_vector</strong></a>(v)</dt><dd><tt>Convert&nbsp;[3]&nbsp;array&nbsp;to&nbsp;string</tt></dd></dl>
- <dl><dt><a name="-warn"><strong>warn</strong></a>(message, category=None, stacklevel=1, source=None)</dt><dd><tt>Issue&nbsp;a&nbsp;warning,&nbsp;or&nbsp;maybe&nbsp;ignore&nbsp;it&nbsp;or&nbsp;raise&nbsp;an&nbsp;exception.</tt></dd></dl>
 </td></tr></table>
 </body></html>

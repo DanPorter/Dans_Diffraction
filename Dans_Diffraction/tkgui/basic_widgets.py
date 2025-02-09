@@ -105,11 +105,14 @@ def topmenu(root, menu_dict):
     # Setup menubar
     menubar = tk.Menu(root)
 
-    for item in menu_dict:
-        men = tk.Menu(menubar, tearoff=0)
-        for label, function in menu_dict[item].items():
-            men.add_command(label=label, command=function)
-        menubar.add_cascade(label=item, menu=men)
+    for item, obj in menu_dict.items():
+        if isinstance(obj, dict):
+            men = tk.Menu(menubar, tearoff=0)
+            for label, function in obj.items():
+                men.add_command(label=label, command=function)
+            menubar.add_cascade(label=item, menu=men)
+        else:
+            menubar.add_command(label=item,command=obj)
     root.config(menu=menubar)
 
 

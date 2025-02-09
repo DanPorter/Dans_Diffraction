@@ -37,4 +37,10 @@ if __name__ == '__main__':
             print(xtl.info())
         elif 'gui' in arg.lower():
             xtl.start_gui()
+        elif 'properties' in arg.lower():
+            from Dans_Diffraction.tkgui.properties import XrayInteractionsGui
+            XrayInteractionsGui()
+        elif 'fdmnes' in arg.lower():
+            from Dans_Diffraction.tkgui.fdmnes import AnaFDMNESgui
+            AnaFDMNESgui()
 

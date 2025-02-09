@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_general</strong></big></big> (version 2.2.2, 15/May/2024)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_general</strong></big></big> (version 2.2.3, 06/Feb/2025)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_general.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_general.py</a></font></td></tr></table>
     <p><tt>Module:&nbsp;Generally&nbsp;useful&nbsp;functions&nbsp;"functions_general.py"<br>
@@ -18,8 +18,8 @@ By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
 Diamond<br>
 2021<br>
 &nbsp;<br>
-Version&nbsp;2.2.0<br>
-Last&nbsp;updated:&nbsp;11/03/22<br>
+Version&nbsp;2.2.3<br>
+Last&nbsp;updated:&nbsp;06/02/25<br>
 &nbsp;<br>
 Version&nbsp;History:<br>
 06/01/18&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;created&nbsp;from&nbsp;DansGeneralProgs.py&nbsp;V2.3<br>
@@ -37,6 +37,7 @@ Version&nbsp;History:<br>
 15/11/21&nbsp;2.1.0&nbsp;&nbsp;Added&nbsp;normal_basis<br>
 11/03/22&nbsp;2.2.0&nbsp;&nbsp;Added&nbsp;Lorentzian,&nbsp;pVoight,&nbsp;peak_function&nbsp;functions<br>
 15/05/24&nbsp;2.2.2&nbsp;&nbsp;Added&nbsp;sph2cart,&nbsp;meshgrid_sphere<br>
+06/02/25&nbsp;2.2.3&nbsp;&nbsp;refactored&nbsp;norm&nbsp;to&nbsp;remove&nbsp;inspection&nbsp;errors<br>
 &nbsp;<br>
 @author:&nbsp;DGPorter</tt></p>
 <p>
@@ -83,6 +84,11 @@ including&nbsp;length,&nbsp;min,&nbsp;max,&nbsp;number&nbsp;of&nbsp;elements</tt
  <dl><dt><a name="-distance2line"><strong>distance2line</strong></a>(line_start, line_end, point)</dt><dd><tt>Calculate&nbsp;distance&nbsp;from&nbsp;a&nbsp;line&nbsp;between&nbsp;the&nbsp;start&nbsp;and&nbsp;end&nbsp;to&nbsp;an&nbsp;arbitary&nbsp;point&nbsp;in&nbsp;space<br>
 :param&nbsp;line_start:&nbsp;array,&nbsp;position&nbsp;of&nbsp;the&nbsp;start&nbsp;of&nbsp;the&nbsp;line<br>
 :param&nbsp;line_end:&nbsp;&nbsp;array,&nbsp;position&nbsp;of&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;line<br>
+:param&nbsp;point:&nbsp;array,&nbsp;arbitary&nbsp;position&nbsp;in&nbsp;space<br>
+:return:&nbsp;float</tt></dd></dl>
+ <dl><dt><a name="-distance2plane"><strong>distance2plane</strong></a>(line_start, line_end, point)</dt><dd><tt>Calculate&nbsp;distance&nbsp;from&nbsp;a&nbsp;plane&nbsp;(defined&nbsp;by&nbsp;a&nbsp;perpendicular&nbsp;vector)&nbsp;to&nbsp;an&nbsp;arbitary&nbsp;point&nbsp;in&nbsp;space<br>
+:param&nbsp;vector_start:&nbsp;array,&nbsp;position&nbsp;lying&nbsp;on&nbsp;plane&nbsp;and&nbsp;vector&nbsp;start<br>
+:param&nbsp;line_end:&nbsp;&nbsp;array,&nbsp;position&nbsp;of&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;vector<br>
 :param&nbsp;point:&nbsp;array,&nbsp;arbitary&nbsp;position&nbsp;in&nbsp;space<br>
 :return:&nbsp;float</tt></dd></dl>
  <dl><dt><a name="-find_index"><strong>find_index</strong></a>(A, value)</dt><dd><tt>Return&nbsp;the&nbsp;index&nbsp;of&nbsp;the&nbsp;closest&nbsp;number&nbsp;in&nbsp;array&nbsp;A&nbsp;to&nbsp;value<br>
@@ -213,11 +219,11 @@ E.G.<br>
  <dl><dt><a name="-nice_print"><strong>nice_print</strong></a>(precision=4, linewidth=300)</dt><dd><tt>Sets&nbsp;default&nbsp;printing&nbsp;of&nbsp;arrays&nbsp;to&nbsp;a&nbsp;nicer&nbsp;format</tt></dd></dl>
  <dl><dt><a name="-norm"><strong>norm</strong></a>(A)</dt><dd><tt>Returns&nbsp;normalised&nbsp;vector&nbsp;A<br>
 If&nbsp;A&nbsp;has&nbsp;2&nbsp;dimensions,&nbsp;returns&nbsp;an&nbsp;array&nbsp;of&nbsp;normalised&nbsp;vectors<br>
-The&nbsp;returned&nbsp;array&nbsp;will&nbsp;be&nbsp;the&nbsp;same&nbsp;shape&nbsp;as&nbsp;the&nbsp;given&nbsp;array.<br>
+The&nbsp;returned&nbsp;array&nbsp;of&nbsp;vectors&nbsp;will&nbsp;be&nbsp;squeezed&nbsp;to&nbsp;the&nbsp;minimum&nbsp;dimension<br>
 &nbsp;<br>
 E.G.<br>
-&nbsp;<a href="#-norm">norm</a>([1,1,1])&nbsp;=&nbsp;[1,1,1]/1.732&nbsp;=&nbsp;[&nbsp;0.57735,&nbsp;&nbsp;0.57735,&nbsp;&nbsp;0.57735]<br>
-&nbsp;<a href="#-norm">norm</a>(array([[1,1,1],[2,2,2]])&nbsp;=&nbsp;[&nbsp;[&nbsp;0.57735,&nbsp;&nbsp;0.57735,&nbsp;&nbsp;0.57735]&nbsp;,&nbsp;[&nbsp;0.57735,&nbsp;&nbsp;0.57735,&nbsp;&nbsp;0.57735]&nbsp;]</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-norm">norm</a>([1,1,1])&nbsp;=&nbsp;[1,1,1]/1.732&nbsp;=&nbsp;[&nbsp;0.57735,&nbsp;&nbsp;0.57735,&nbsp;&nbsp;0.57735]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-norm">norm</a>(array([[1,1,1],[2,2,2]])&nbsp;=&nbsp;[&nbsp;[&nbsp;0.57735,&nbsp;&nbsp;0.57735,&nbsp;&nbsp;0.57735]&nbsp;,&nbsp;[&nbsp;0.57735,&nbsp;&nbsp;0.57735,&nbsp;&nbsp;0.57735]&nbsp;]</tt></dd></dl>
  <dl><dt><a name="-normal_basis"><strong>normal_basis</strong></a>(vec, normal=(1, 0, 0), azi=0)</dt><dd><tt>Return&nbsp;a&nbsp;vector&nbsp;basis&nbsp;with&nbsp;3&nbsp;normal&nbsp;vectors&nbsp;such&nbsp;that:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[|normal&nbsp;x&nbsp;vec|,&nbsp;|vec&nbsp;x&nbsp;(normal&nbsp;x&nbsp;vec)|,&nbsp;|vec|]<br>
 if&nbsp;azi&nbsp;is&nbsp;given,&nbsp;the&nbsp;resulting&nbsp;vectors&nbsp;[0,1]&nbsp;will&nbsp;be&nbsp;rotated&nbsp;about&nbsp;[2]<br>
@@ -261,6 +267,7 @@ e.g.&nbsp;dgp.<a href="#-print_arrays">print_arrays</a>(1e6*np.random.rand(5,5))
 &nbsp;&nbsp;&nbsp;&nbsp;centre_y&nbsp;=&nbsp;if&nbsp;2D,&nbsp;centre&nbsp;along&nbsp;the&nbsp;y-axis&nbsp;(defaults&nbsp;to&nbsp;centre)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;fwhm_y&nbsp;=&nbsp;if&nbsp;2D,&nbsp;fwhm&nbsp;along&nbsp;the&nbsp;y-axis&nbsp;(defaults&nbsp;to&nbsp;fwhm)</tt></dd></dl>
  <dl><dt><a name="-quad"><strong>quad</strong></a>(A)</dt><dd><tt>Returns&nbsp;+/-1&nbsp;depending&nbsp;on&nbsp;quadrant&nbsp;of&nbsp;3D&nbsp;vector&nbsp;A<br>
+&nbsp;<br>
 i.e.:&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Returns<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;1,&nbsp;1,&nbsp;1]&nbsp;&nbsp;&nbsp;&nbsp;1<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[-1,&nbsp;1,&nbsp;1]&nbsp;&nbsp;&nbsp;&nbsp;1<br>

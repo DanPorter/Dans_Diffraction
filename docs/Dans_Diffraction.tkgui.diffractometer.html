@@ -1,0 +1,309 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module Dans_Diffraction.tkgui.diffractometer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.<a href="Dans_Diffraction.tkgui.html"><font color="#ffffff">tkgui</font></a>.diffractometer</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Ctkgui%5Cdiffractometer.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\tkgui\diffractometer.py</a></font></td></tr></table>
+    <p><tt>Dans-Diffraction<br>
+Diffractometer&nbsp;Simulator&nbsp;GUI<br>
+&nbsp;<br>
+Simulate&nbsp;a&nbsp;generic&nbsp;detector&nbsp;situated&nbsp;around&nbsp;the&nbsp;crystal&nbsp;sample.<br>
+The&nbsp;sample&nbsp;and&nbsp;detector&nbsp;orientation&nbsp;are&nbsp;specified&nbsp;like&nbsp;a&nbsp;6-axis&nbsp;diffractometer.<br>
+&nbsp;<br>
+The&nbsp;angle&nbsp;conventions&nbsp;are&nbsp;those&nbsp;according&nbsp;to&nbsp;H.&nbsp;You,&nbsp;J.&nbsp;Appl.&nbsp;Cryst.&nbsp;(1999).&nbsp;32,&nbsp;614<br>
+&nbsp;<br>
+On&nbsp;the&nbsp;top&nbsp;left,&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;is&nbsp;shown&nbsp;and&nbsp;any&nbsp;reflections&nbsp;incident&nbsp;on&nbsp;the&nbsp;detector&nbsp;are&nbsp;highlighted.<br>
+&nbsp;<br>
+On&nbsp;the&nbsp;top&nbsp;right,&nbsp;the&nbsp;detector&nbsp;image&nbsp;is&nbsp;shown&nbsp;and&nbsp;incident&nbsp;reflections&nbsp;are&nbsp;highlighted.<br>
+&nbsp;<br>
+On&nbsp;the&nbsp;bottom&nbsp;left,&nbsp;the&nbsp;lattice&nbsp;and&nbsp;detector&nbsp;orientation&nbsp;angles&nbsp;are&nbsp;controlled.<br>
+&nbsp;<br>
+On&nbsp;the&nbsp;bottom&nbsp;right,&nbsp;the&nbsp;incident&nbsp;beam,&nbsp;intensity&nbsp;calculation&nbsp;options&nbsp;and&nbsp;detector&nbsp;size&nbsp;and&nbsp;shaper&nbsp;are&nbsp;specified.<br>
+&nbsp;<br>
+Additional&nbsp;options&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;top&nbsp;menu.&nbsp;Any&nbsp;axis&nbsp;can&nbsp;be&nbsp;scanned&nbsp;to&nbsp;plot<br>
+the&nbsp;sum&nbsp;of&nbsp;the&nbsp;detector&nbsp;at&nbsp;each&nbsp;step<br>
+&nbsp;<br>
+&nbsp;Dr&nbsp;Daniel&nbsp;G&nbsp;Porter,&nbsp;dan.porter@diamond.ac.uk<br>
+&nbsp;www.diamond.ac.uk<br>
+&nbsp;Diamond&nbsp;Light&nbsp;Source,&nbsp;Chilton,&nbsp;Didcot,&nbsp;Oxon,&nbsp;OX11&nbsp;0DE,&nbsp;U.K.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="Dans_Diffraction.functions_crystallography.html">Dans_Diffraction.functions_crystallography</a><br>
+<a href="Dans_Diffraction.functions_general.html">Dans_Diffraction.functions_general</a><br>
+</td><td width="25%" valign=top><a href="Dans_Diffraction.functions_plotting.html">Dans_Diffraction.functions_plotting</a><br>
+<a href="tkinter.messagebox.html">tkinter.messagebox</a><br>
+</td><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+<a href="tkinter.html">tkinter</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="Dans_Diffraction.tkgui.diffractometer.html#Detector">Detector</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.tkgui.diffractometer.html#DiffractometerGui">DiffractometerGui</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Dans_Diffraction.tkgui.diffractometer.html#Lattice">Lattice</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Detector">class <strong>Detector</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Detector">Detector</a>(distance=1.0,&nbsp;normal_dir=(0,&nbsp;-1.0,&nbsp;0),&nbsp;x_size=1.0,&nbsp;z_size=1.0,&nbsp;pixel_size=0.01,&nbsp;labmatrix=array([[1.,&nbsp;0.,&nbsp;0.],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0.,&nbsp;1.,&nbsp;0.],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0.,&nbsp;0.,&nbsp;1.]]))<br>
+&nbsp;<br>
+<a href="#Detector">Detector</a>&nbsp;class<br>
+&nbsp;<br>
+&nbsp;distance:&nbsp;distance&nbsp;to&nbsp;detector&nbsp;in&nbsp;meters<br>
+&nbsp;normal_dir:&nbsp;(dx,&nbsp;dy,&nbsp;dz)&nbsp;detector&nbsp;normal<br>
+&nbsp;x_size:&nbsp;detector&nbsp;width&nbsp;along&nbsp;x-axis&nbsp;in&nbsp;meters<br>
+&nbsp;z_size:&nbsp;detector&nbsp;height&nbsp;along&nbsp;z-axis&nbsp;in&nbsp;meters<br>
+&nbsp;<br>
+assumes&nbsp;incident&nbsp;vector&nbsp;(0,1,0)<br>
+rotate&nbsp;delta&nbsp;(about&nbsp;z),&nbsp;gamma&nbsp;(about&nbsp;x)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Detector-__init__"><strong>__init__</strong></a>(self, distance=1.0, normal_dir=(0, -1.0, 0), x_size=1.0, z_size=1.0, pixel_size=0.01, labmatrix=array([[1., 0., 0.],
+       [0., 1., 0.],
+       [0., 0., 1.]]))</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="Detector-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
+<dl><dt><a name="Detector-check_vector_incident"><strong>check_vector_incident</strong></a>(self, vectors)</dt><dd><tt>Check&nbsp;a&nbsp;vector&nbsp;is&nbsp;in&nbsp;the&nbsp;direction&nbsp;of&nbsp;the&nbsp;detector</tt></dd></dl>
+
+<dl><dt><a name="Detector-corners"><strong>corners</strong></a>(self)</dt><dd><tt>Returns&nbsp;coordinates&nbsp;of&nbsp;4&nbsp;corners</tt></dd></dl>
+
+<dl><dt><a name="Detector-detector_image"><strong>detector_image</strong></a>(self, iuvw, intensity, peak_width=0.01, background=0)</dt><dd><tt>Generate&nbsp;detector&nbsp;image<br>
+:param&nbsp;iuvw:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;relative&nbsp;positions&nbsp;on&nbsp;detector<br>
+:param&nbsp;intensity:&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;intensity&nbsp;values<br>
+:param&nbsp;peak_width:&nbsp;float&nbsp;or&nbsp;[nx1],&nbsp;peak&nbsp;FWHM,&nbsp;in&nbsp;m<br>
+:param&nbsp;background:&nbsp;float,&nbsp;background&nbsp;level<br>
+:return:&nbsp;xx,&nbsp;yy,&nbsp;mesh,&nbsp;peak_x[m],&nbsp;peak_y[m]</tt></dd></dl>
+
+<dl><dt><a name="Detector-generate_detector"><strong>generate_detector</strong></a> = default_fun(*args, **kwargs)</dt></dl>
+
+<dl><dt><a name="Detector-height_lim"><strong>height_lim</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Detector-incident_position"><strong>incident_position</strong></a>(self, vectors)</dt><dd><tt>Return&nbsp;position&nbsp;of&nbsp;vector&nbsp;incident&nbsp;on&nbsp;detector</tt></dd></dl>
+
+<dl><dt><a name="Detector-kfkiq"><strong>kfkiq</strong></a>(self, wavelength_a)</dt><dd><tt>Return&nbsp;lines&nbsp;traving&nbsp;kf,&nbsp;ki&nbsp;and&nbsp;Q</tt></dd></dl>
+
+<dl><dt><a name="Detector-kfkiq_corners"><strong>kfkiq_corners</strong></a>(self, wavelength_a)</dt><dd><tt>Return&nbsp;lines&nbsp;to&nbsp;corners&nbsp;of&nbsp;kif,&nbsp;ki&nbsp;and&nbsp;Q</tt></dd></dl>
+
+<dl><dt><a name="Detector-ki"><strong>ki</strong></a>(self, wavelength_a)</dt></dl>
+
+<dl><dt><a name="Detector-peak_width_mm"><strong>peak_width_mm</strong></a>(self, delta_theta)</dt><dd><tt>Calculate&nbsp;peak&nbsp;width&nbsp;on&nbsp;detector&nbsp;in&nbsp;mm<br>
+:param&nbsp;delta_theta:&nbsp;float&nbsp;or&nbsp;array,&nbsp;peak&nbsp;width&nbsp;in&nbsp;degrees<br>
+:return:&nbsp;FWHM&nbsp;in&nbsp;mm</tt></dd></dl>
+
+<dl><dt><a name="Detector-q_shape"><strong>q_shape</strong></a>(self, wavelength_a)</dt><dd><tt>Return&nbsp;line&nbsp;in&nbsp;reciprocal&nbsp;space&nbsp;tracing&nbsp;the&nbsp;borders&nbsp;of&nbsp;the&nbsp;detector</tt></dd></dl>
+
+<dl><dt><a name="Detector-reflection_position"><strong>reflection_position</strong></a>(self, qxqyqz, wavelength_a)</dt><dd><tt>Return&nbsp;relative&nbsp;position&nbsp;of&nbsp;reflection&nbsp;on&nbsp;detector<br>
+:param&nbsp;qxqyqz:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;reciprocal&nbsp;lattice&nbsp;vectors&nbsp;q&nbsp;=&nbsp;h.a*&nbsp;+&nbsp;k.b*&nbsp;+&nbsp;l.c*<br>
+:param&nbsp;wavelength_a:&nbsp;incident&nbsp;beam&nbsp;wavelength&nbsp;in&nbsp;Angstroms<br>
+:return&nbsp;ixyz:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;positions&nbsp;on&nbsp;the&nbsp;detector<br>
+:return&nbsp;uvw:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;positions&nbsp;on&nbsp;the&nbsp;detector,&nbsp;relative&nbsp;to&nbsp;detector&nbsp;centre,&nbsp;or&nbsp;NaN&nbsp;if&nbsp;not&nbsp;incident<br>
+:return&nbsp;diff:&nbsp;[nx1]&nbsp;array&nbsp;of&nbsp;wavevector&nbsp;difference&nbsp;in&nbsp;A-1,&nbsp;where&nbsp;0&nbsp;is&nbsp;the&nbsp;condition&nbsp;for&nbsp;diffraction.</tt></dd></dl>
+
+<dl><dt><a name="Detector-relative_position"><strong>relative_position</strong></a>(self, vectors)</dt><dd><tt>Return&nbsp;a&nbsp;position&nbsp;coordinate&nbsp;relative&nbsp;to&nbsp;detector&nbsp;centre</tt></dd></dl>
+
+<dl><dt><a name="Detector-rotate_to"><strong>rotate_to</strong></a>(self, delta=0.0, gamma=0.0)</dt><dd><tt>Rotate&nbsp;detector&nbsp;position<br>
+:param&nbsp;delta:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees&nbsp;in&nbsp;vertical&nbsp;direction&nbsp;(about&nbsp;diff-z)<br>
+:param&nbsp;gamma:&nbsp;float&nbsp;angle&nbsp;in&nbsp;degrees&nbsp;in&nbsp;horizontal&nbsp;direction&nbsp;(about&nbsp;diff-x)<br>
+:return:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Detector-set_callbacks"><strong>set_callbacks</strong></a>(self, generate_detector=None, update_widgets=None, update_plots=None)</dt></dl>
+
+<dl><dt><a name="Detector-set_detector"><strong>set_detector</strong></a>(self, distance=1.0, normal_dir=(0, -1.0, 0), x_size=1.0, z_size=1.0, pixel_size=0.01)</dt></dl>
+
+<dl><dt><a name="Detector-set_labframe"><strong>set_labframe</strong></a>(self, labmatrix)</dt></dl>
+
+<dl><dt><a name="Detector-twotheta"><strong>twotheta</strong></a>(self)</dt><dd><tt>Return&nbsp;detector&nbsp;angle&nbsp;in&nbsp;degrees</tt></dd></dl>
+
+<dl><dt><a name="Detector-update_plots"><strong>update_plots</strong></a> = default_fun(*args, **kwargs)</dt></dl>
+
+<dl><dt><a name="Detector-update_widgets"><strong>update_widgets</strong></a> = default_fun(*args, **kwargs)</dt></dl>
+
+<dl><dt><a name="Detector-width_lim"><strong>width_lim</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>normal_dir</strong> = array([ 0., -1.,  0.])</dl>
+
+<dl><dt><strong>position</strong> = array([0., 0., 0.])</dl>
+
+<dl><dt><strong>x_axis</strong> = array([1., 0., 0.])</dl>
+
+<dl><dt><strong>z_axis</strong> = array([0., 0., 1.])</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DiffractometerGui">class <strong>DiffractometerGui</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#DiffractometerGui">DiffractometerGui</a>(xtl:&nbsp;Dans_Diffraction.classes_crystal.Crystal)<br>
+&nbsp;<br>
+View&nbsp;and&nbsp;edit&nbsp;the&nbsp;symmetry&nbsp;operations<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="DiffractometerGui-__init__"><strong>__init__</strong></a>(self, xtl: Dans_Diffraction.classes_crystal.Crystal)</dt><dd><tt>"Initialise</tt></dd></dl>
+
+<dl><dt><a name="DiffractometerGui-fun_i16"><strong>fun_i16</strong></a>(self)</dt><dd><tt>"Add&nbsp;I16&nbsp;parameters</tt></dd></dl>
+
+<dl><dt><a name="DiffractometerGui-fun_supernova"><strong>fun_supernova</strong></a>(self)</dt><dd><tt>Add&nbsp;SuperNova&nbsp;parameters</tt></dd></dl>
+
+<dl><dt><a name="DiffractometerGui-fun_wish"><strong>fun_wish</strong></a>(self)</dt><dd><tt>"Add&nbsp;Wish&nbsp;parameters</tt></dd></dl>
+
+<dl><dt><a name="DiffractometerGui-menu_new"><strong>menu_new</strong></a>(self)</dt><dd><tt>Create&nbsp;a&nbsp;new&nbsp;instance</tt></dd></dl>
+
+<dl><dt><a name="DiffractometerGui-menu_options"><strong>menu_options</strong></a>(self)</dt><dd><tt>Set&nbsp;plot&nbsp;options</tt></dd></dl>
+
+<dl><dt><a name="DiffractometerGui-menu_orientation"><strong>menu_orientation</strong></a>(self)</dt><dd><tt>Set&nbsp;lattice&nbsp;orientation</tt></dd></dl>
+
+<dl><dt><a name="DiffractometerGui-update"><strong>update</strong></a>(self, event=None)</dt><dd><tt>Update&nbsp;plot</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Lattice">class <strong>Lattice</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Lattice">Lattice</a>(crystal:&nbsp;Dans_Diffraction.classes_crystal.Crystal)<br>
+&nbsp;<br>
+Reciprocal&nbsp;<a href="#Lattice">Lattice</a><br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Lattice-__init__"><strong>__init__</strong></a>(self, crystal: Dans_Diffraction.classes_crystal.Crystal)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="Lattice-generate_hkl"><strong>generate_hkl</strong></a>(self, wavelength_a, max_q=4)</dt><dd><tt>Generate&nbsp;reflection&nbsp;list</tt></dd></dl>
+
+<dl><dt><a name="Lattice-generate_intensities"><strong>generate_intensities</strong></a>(self, calculate_index=())</dt><dd><tt>Generate&nbsp;list&nbsp;of&nbsp;structure&nbsp;factors</tt></dd></dl>
+
+<dl><dt><a name="Lattice-generate_refs"><strong>generate_refs</strong></a> = default_fun(*args, **kwargs)</dt></dl>
+
+<dl><dt><a name="Lattice-get_wavelength"><strong>get_wavelength</strong></a> = default_fun(*args, **kwargs)</dt></dl>
+
+<dl><dt><a name="Lattice-latt_str"><strong>latt_str</strong></a>(self)</dt><dd><tt>Generate&nbsp;list&nbsp;of&nbsp;reflections</tt></dd></dl>
+
+<dl><dt><a name="Lattice-rotate_to"><strong>rotate_to</strong></a>(self, phi=0.0, chi=0.0, eta=0.0, mu=0.0)</dt></dl>
+
+<dl><dt><a name="Lattice-set_callbacks"><strong>set_callbacks</strong></a>(self, generate_refs=None, update_widgets=None, update_plots=None, get_wavelength=None)</dt></dl>
+
+<dl><dt><a name="Lattice-set_orientation"><strong>set_orientation</strong></a>(self, umatrix=None, labmatrix=None)</dt></dl>
+
+<dl><dt><a name="Lattice-update_plots"><strong>update_plots</strong></a> = default_fun(*args, **kwargs)</dt></dl>
+
+<dl><dt><a name="Lattice-update_widgets"><strong>update_widgets</strong></a> = default_fun(*args, **kwargs)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-default_fun"><strong>default_fun</strong></a>(*args, **kwargs)</dt></dl>
+ <dl><dt><a name="-generate_reflections"><strong>generate_reflections</strong></a>(latt: Dans_Diffraction.tkgui.diffractometer.Lattice, det: Dans_Diffraction.tkgui.diffractometer.Detector, minimum_gaussian_intensity=0.01)</dt><dd><tt>Calulate&nbsp;reflections&nbsp;on&nbsp;detector</tt></dd></dl>
+ <dl><dt><a name="-reflist_str"><strong>reflist_str</strong></a>()</dt><dd><tt>Generate&nbsp;string&nbsp;from&nbsp;REFLIST</tt></dd></dl>
+ <dl><dt><a name="-tk_angle_element"><strong>tk_angle_element</strong></a>(name, parent, callback, help_message='', val_range=(-180, 180), initial=0)</dt><dd><tt>Slider&nbsp;element</tt></dd></dl>
+ <dl><dt><a name="-tk_beam"><strong>tk_beam</strong></a>(parent, xtl, callback)</dt><dd><tt>radiation&nbsp;tkinter&nbsp;widgets,&nbsp;returns&nbsp;Latt</tt></dd></dl>
+ <dl><dt><a name="-tk_detector"><strong>tk_detector</strong></a>(parent, callback)</dt><dd><tt>Create&nbsp;detector&nbsp;options&nbsp;widget</tt></dd></dl>
+ <dl><dt><a name="-tk_help"><strong>tk_help</strong></a>()</dt><dd><tt>Display&nbsp;help</tt></dd></dl>
+ <dl><dt><a name="-tk_hkl"><strong>tk_hkl</strong></a>(parent, latt: Dans_Diffraction.tkgui.diffractometer.Lattice, tth_axis: tkinter.DoubleVar, th_axis: tkinter.DoubleVar, callback)</dt><dd><tt>reflection&nbsp;frame</tt></dd></dl>
+ <dl><dt><a name="-tk_orientation"><strong>tk_orientation</strong></a>(parent, latt: Dans_Diffraction.tkgui.diffractometer.Lattice, det: Dans_Diffraction.tkgui.diffractometer.Detector, callback)</dt><dd><tt>Orientation&nbsp;options&nbsp;window</tt></dd></dl>
+ <dl><dt><a name="-tk_plot_options"><strong>tk_plot_options</strong></a>(parent, callback)</dt><dd><tt>Plot&nbsp;options&nbsp;window</tt></dd></dl>
+ <dl><dt><a name="-tk_scan"><strong>tk_scan</strong></a>(parent, angle_dict, latt, det)</dt></dl>
+ <dl><dt><a name="-update_3d"><strong>update_3d</strong></a>(array, line_obj)</dt><dd><tt>Update&nbsp;3D&nbsp;line&nbsp;<a href="builtins.html#object">object</a></tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>BF</strong> = ['Palatino', 14]<br>
+<strong>DEFAULT_DET_DISTANCE</strong> = 1000<br>
+<strong>DEFAULT_DET_HEIGHT</strong> = 200<br>
+<strong>DEFAULT_DET_PIXEL</strong> = 0.2<br>
+<strong>DEFAULT_DET_WIDTH</strong> = 200<br>
+<strong>DEFAULT_ENERGY</strong> = 8<br>
+<strong>DEFAULT_MAXQ</strong> = 4<br>
+<strong>DEFAULT_PEAKWIDTH</strong> = 0.2<br>
+<strong>DEFAULT_RESOLUTION</strong> = 200<br>
+<strong>FIGURE_3D_SIZE</strong> = [8, 4]<br>
+<strong>FIGURE_DET_SIZE</strong> = [7, 4]<br>
+<strong>FIGURE_DPI</strong> = 80<br>
+<strong>HF</strong> = ['Courier', 12]<br>
+<strong>LF</strong> = ['Palatino', 14]<br>
+<strong>MSG_CHI</strong> = "2nd rotation, right handed rotation about y''-axis."<br>
+<strong>MSG_DEL</strong> = 'Detector rotation, left handed rotation about diffractometer z-axis'<br>
+<strong>MSG_ETA</strong> = "3rd rotation, left handed rotation about z'-axis"<br>
+<strong>MSG_GAM</strong> = 'Detector rotation, right handed rotation about diffractometer x-axis'<br>
+<strong>MSG_MU</strong> = '4th rotation, right handed rotation about diffractometer x-axis'<br>
+<strong>MSG_PHI</strong> = "1st rotation, left handed roation about z'''-axis (crystal axis)"<br>
+<strong>OPTIONS</strong> = {'3d_basis': False, '3d_detector_corners': False, '3d_lattice': True, '3d_ref_arrows': False, 'det_clim': [0.0, 1.0], 'det_cmap': 'viridis', 'det_labels': True, 'det_log': False, 'fig_dpi': 80, 'maxq': 4.0, ...}<br>
+<strong>REFLIST</strong> = {'color': [], 'detx': array([], dtype=float64), 'dety': array([], dtype=float64), 'fwhm': array([], dtype=float64), 'hkl': array([], shape=(0, 3), dtype=int32), 'hkl_str': [], 'intensity': array([], dtype=float64), 'qxqyqz': array([], shape=(0, 3), dtype=float64), 'scaled': array([], dtype=float64)}<br>
+<strong>SF</strong> = ['Palatino', 14]<br>
+<strong>TABLEAU_COLORS</strong> = {'tab:blue': '#1f77b4', 'tab:brown': '#8c564b', 'tab:cyan': '#17becf', 'tab:gray': '#7f7f7f', 'tab:green': '#2ca02c', 'tab:olive': '#bcbd22', 'tab:orange': '#ff7f0e', 'tab:pink': '#e377c2', 'tab:purple': '#9467bd', 'tab:red': '#d62728'}<br>
+<strong>TF</strong> = ['Palatino', 12]<br>
+<strong>TTF</strong> = ('Helvetica', 10, 'bold italic')<br>
+<strong>bkg</strong> = 'snow'<br>
+<strong>btn</strong> = 'azure'<br>
+<strong>btn2</strong> = 'gold'<br>
+<strong>btn_active</strong> = 'grey'<br>
+<strong>btn_txt</strong> = 'black'<br>
+<strong>col_cycle</strong> = &lt;itertools.cycle object&gt;<br>
+<strong>ety</strong> = 'white'<br>
+<strong>ety_txt</strong> = 'black'<br>
+<strong>opt</strong> = 'azure'<br>
+<strong>opt_active</strong> = 'grey'<br>
+<strong>opt_txt</strong> = 'black'<br>
+<strong>txtcol</strong> = 'black'</td></tr></table>
+</body></html>

@@ -8,7 +8,7 @@ import numpy as np
 from .. import functions_general as fg
 from .. import functions_crystallography as fc
 from .. import functions_plotting as fp
-from .basic_widgets import tk, StringViewer, SelectionBox, messagebox
+from .basic_widgets import tk, StringViewer, SelectionBox, messagebox, topmenu
 from .basic_widgets import (TF, BF, SF, LF, HF,
                             bkg, ety, btn, opt, btn2,
                             btn_active, opt_active, txtcol,
@@ -312,9 +312,8 @@ class XrayInteractionsGui:
     Calculate X-Ray interactions with Matter
     """
 
-    def __init__(self, xtl):
+    def __init__(self, xtl=None):
         """Initialise"""
-        self.xtl = xtl
         # Create Tk inter instance
         self.root = tk.Tk()
         self.root.wm_title('X-Ray Interactions with Matter')
@@ -330,9 +329,9 @@ class XrayInteractionsGui:
         frame.pack(side=tk.LEFT, anchor=tk.N)
 
         # Crystal info
-        name = xtl.name
-        formula = xtl.Properties.molname()
-        density = round(xtl.Properties.density(), 3)
+        name = xtl.name if xtl else 'Fe'
+        formula = xtl.Properties.molname() if xtl else 'Fe'
+        density = round(xtl.Properties.density(), 3) if xtl else 92.735
 
         # Variables
         self.chem_formula = tk.StringVar(frame, formula)
@@ -363,6 +362,14 @@ class XrayInteractionsGui:
             'Wavelength (Å)': 'Å',
             'Wavelength (nm)': 'nm'
         }
+
+        # ---Menu---
+        menu = {
+            'Periodic Table': self.menu_info_table,
+            'Unit Converter': self.menu_converter,
+            'About': self.menu_about,
+        }
+        topmenu(self.root, menu)
 
         # ---Line 0---
         line = tk.Frame(frame)
@@ -459,6 +466,20 @@ class XrayInteractionsGui:
         var = tk.Button(line, text='Index of\nRefraction', font=BF, command=self.button_refraction, bg=btn,
                         activebackground=btn_active)
         var.pack(side=tk.LEFT)
+
+    def menu_info_table(self):
+        from .periodic_table import PeriodTableGui
+        PeriodTableGui()
+
+    def menu_converter(self):
+        """Open unit converter"""
+        from .converter import UnitConverter
+        UnitConverter()
+
+    def menu_about(self):
+        about = "Xray Interactions with Matter\nBy Dan Porter 2025\n\n"
+        about += "Inspired by CXRO: https://henke.lbl.gov/optical_constants/\n\n"
+        messagebox.showinfo('X-Ray Interactions with Matter', about)
 
     def get_scan(self):
         scan_type = self.scan_type.get()

@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module Dans_Diffraction.functions_lattice</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="Dans_Diffraction.html"><font color="#ffffff">Dans_Diffraction</font></a>.functions_lattice</strong></big></big> (version 1.0.0)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cgrp66007%5Conedrive%20-%20diamond%20light%20source%20ltd%5Cpythonprojects%5Cdans_diffraction%5Cdans_diffraction%5Cfunctions_lattice.py">c:\users\grp66007\onedrive - diamond light source ltd\pythonprojects\dans_diffraction\dans_diffraction\functions_lattice.py</a></font></td></tr></table>
+    <p><tt>Module:&nbsp;functions_lattice.py<br>
+&nbsp;<br>
+By&nbsp;Dan&nbsp;Porter,&nbsp;PhD<br>
+Diamond<br>
+2024<br>
+&nbsp;<br>
+&nbsp;<br>
+Version&nbsp;1.0<br>
+Last&nbsp;updated:&nbsp;17/10/24<br>
+&nbsp;<br>
+Version&nbsp;History:<br>
+17/10/24&nbsp;1.0.0&nbsp;&nbsp;Created&nbsp;module&nbsp;extracting&nbsp;lattice&nbsp;functions&nbsp;from&nbsp;functions_crystallography<br>
+&nbsp;<br>
+Acknoledgements:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;October&nbsp;2024&nbsp;&nbsp;&nbsp;&nbsp;Thanks&nbsp;to&nbsp;Lee&nbsp;Richter&nbsp;for&nbsp;pointing&nbsp;out&nbsp;the&nbsp;error&nbsp;in&nbsp;triclinic&nbsp;angles!<br>
+&nbsp;<br>
+@author:&nbsp;DGPorter</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-angles_allowed"><strong>angles_allowed</strong></a>(alpha=90, beta=90, gamma=90)</dt><dd><tt>Determine&nbsp;if&nbsp;lattice&nbsp;angles&nbsp;are&nbsp;suitable&nbsp;for&nbsp;basis&nbsp;vectors<br>
+&nbsp;<br>
+https://journals.iucr.org/a/issues/2011/01/00/au5114/index.html<br>
+As&nbsp;reported&nbsp;in&nbsp;International&nbsp;Tables&nbsp;for&nbsp;Crystallography:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Donnay&nbsp;&amp;&nbsp;Donnay,&nbsp;1959&nbsp;International&nbsp;Tables&nbsp;for&nbsp;X-ray&nbsp;Crystallography,&nbsp;Vol.&nbsp;II.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Koch,&nbsp;2004&nbsp;International&nbsp;Tables&nbsp;for&nbsp;Crystallography,&nbsp;Vol.&nbsp;C.<br>
+&nbsp;<br>
+:param&nbsp;alpha:&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;beta:&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:param&nbsp;gamma:&nbsp;angle&nbsp;in&nbsp;degrees<br>
+:return:&nbsp;bool,&nbsp;True&nbsp;if&nbsp;angles&nbsp;are&nbsp;suitable&nbsp;for&nbsp;creation&nbsp;of&nbsp;basis</tt></dd></dl>
+ <dl><dt><a name="-basis2bandl"><strong>basis2bandl</strong></a>(basis)</dt><dd><tt>Calculate&nbsp;the&nbsp;Busing&nbsp;and&nbsp;Levy&nbsp;B&nbsp;matrix&nbsp;from&nbsp;a&nbsp;real&nbsp;space&nbsp;UV<br>
+"choose&nbsp;the&nbsp;x-axis&nbsp;parallel&nbsp;to&nbsp;a*,&nbsp;the&nbsp;y-axis&nbsp;in&nbsp;the&nbsp;plane&nbsp;of&nbsp;a*&nbsp;and&nbsp;b*,&nbsp;and&nbsp;the&nbsp;z-axis&nbsp;perpendicular&nbsp;to&nbsp;that&nbsp;plane"<br>
+From:&nbsp;W.&nbsp;R.&nbsp;Busing&nbsp;and&nbsp;H.&nbsp;A.&nbsp;Levy,&nbsp;Acta&nbsp;Cryst.&nbsp;(1967).&nbsp;22,&nbsp;457-464<br>
+"Angle&nbsp;calculations&nbsp;for&nbsp;3-&nbsp;and&nbsp;4-circle&nbsp;X-ray&nbsp;and&nbsp;neutron&nbsp;diffractometers"<br>
+See&nbsp;also:&nbsp;https://docs.mantidproject.org/nightly/concepts/Lattice.html<br>
+&nbsp;<br>
+B&nbsp;=&nbsp;[[b1,&nbsp;b2&nbsp;*&nbsp;cos(beta3),&nbsp;b3&nbsp;*&nbsp;cos(beta2)],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[0,&nbsp;b2&nbsp;*&nbsp;sin(beta3),&nbsp;-b3&nbsp;*&nbsp;sin(beta2)&nbsp;*&nbsp;cos(alpha1)],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[0,&nbsp;0,&nbsp;1&nbsp;/&nbsp;a3]]<br>
+return&nbsp;2pi&nbsp;*&nbsp;B&nbsp;&nbsp;#&nbsp;equivalent&nbsp;to&nbsp;transpose([a*,&nbsp;b*,&nbsp;c*])</tt></dd></dl>
+ <dl><dt><a name="-basis2latpar"><strong>basis2latpar</strong></a>(basis_vectors)</dt><dd><tt>Convert&nbsp;UV=[a,b,c]&nbsp;to&nbsp;a,b,c,alpha,beta,gamma<br>
+&nbsp;a,b,c,alpha,beta,gamma&nbsp;=&nbsp;UV2latpar(UV)<br>
+&nbsp;<br>
+:param&nbsp;basis_vectors:&nbsp;[3*3]&nbsp;basis&nbsp;vectors&nbsp;array&nbsp;[a[3],&nbsp;b[3],&nbsp;c[3]]</tt></dd></dl>
+ <dl><dt><a name="-basis_1"><strong>basis_1</strong></a>(*lattice_parameters, **kwargs)</dt><dd><tt>Generate&nbsp;direct-space&nbsp;basis-vectors&nbsp;[a,&nbsp;b,&nbsp;c]&nbsp;from&nbsp;lattice&nbsp;parameters<br>
+Basis&nbsp;choice&nbsp;equivalent&nbsp;to&nbsp;that&nbsp;of&nbsp;materials&nbsp;project:<br>
+https://github.com/materialsproject/pymatgen/blob/v2024.10.3/src/pymatgen/core/lattice.py#L39-L1702<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vector&nbsp;c&nbsp;||&nbsp;z-axis<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vector&nbsp;a&nbsp;rotated&nbsp;by&nbsp;beta&nbsp;about&nbsp;y-axis&nbsp;from&nbsp;+ve&nbsp;x-axis<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vector&nbsp;b*&nbsp;||&nbsp;y-axis<br>
+&nbsp;<br>
+Calculate&nbsp;the&nbsp;lattice&nbsp;positions:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[[x,&nbsp;y,&nbsp;z]]&nbsp;=&nbsp;dot([[u,&nbsp;v,&nbsp;w]],&nbsp;[vec_a,&nbsp;vec_b,&nbsp;vec_c])<br>
+&nbsp;<br>
+:param&nbsp;lattice_parameters:&nbsp;float&nbsp;or&nbsp;list&nbsp;in&nbsp;Angstroms&nbsp;&amp;&nbsp;degrees,&nbsp;see&nbsp;<a href="#-gen_lattice_parameters">gen_lattice_parameters</a>()<br>
+:param&nbsp;kwargs:&nbsp;lattice&nbsp;parameters<br>
+:returns:&nbsp;[3x3]&nbsp;array,&nbsp;as&nbsp;[vec_a,&nbsp;vec_b,&nbsp;vec_c]&nbsp;in&nbsp;Angstroms</tt></dd></dl>
+ <dl><dt><a name="-basis_2"><strong>basis_2</strong></a>(*lattice_parameters, **kwargs)</dt><dd><tt>Generate&nbsp;direct-space&nbsp;basis-vectors&nbsp;[a,&nbsp;b,&nbsp;c]&nbsp;from&nbsp;lattice&nbsp;parameters<br>
+Basis&nbsp;choice&nbsp;equivalent&nbsp;to&nbsp;that&nbsp;of&nbsp;Vesta:<br>
+https://github.com/materialsproject/pymatgen/blob/v2024.10.3/src/pymatgen/core/lattice.py#L39-L1702<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vector&nbsp;a&nbsp;||&nbsp;x-axis<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vector&nbsp;b&nbsp;rotated&nbsp;by&nbsp;gamma&nbsp;about&nbsp;z-axis&nbsp;from&nbsp;+ve&nbsp;y-axis<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vector&nbsp;c*&nbsp;||&nbsp;z-axis<br>
+&nbsp;<br>
+Calculate&nbsp;the&nbsp;lattice&nbsp;positions:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[[x,&nbsp;y,&nbsp;z]]&nbsp;=&nbsp;dot([[u,&nbsp;v,&nbsp;w]],&nbsp;[vec_a,&nbsp;vec_b,&nbsp;vec_c])<br>
+&nbsp;<br>
+:param&nbsp;lattice_parameters:&nbsp;float&nbsp;or&nbsp;list&nbsp;in&nbsp;Angstroms&nbsp;&amp;&nbsp;degrees,&nbsp;see&nbsp;<a href="#-gen_lattice_parameters">gen_lattice_parameters</a>()<br>
+:param&nbsp;kwargs:&nbsp;lattice&nbsp;parameters<br>
+:returns:&nbsp;[3x3]&nbsp;array,&nbsp;as&nbsp;[vec_a,&nbsp;vec_b,&nbsp;vec_c]&nbsp;in&nbsp;Angstroms</tt></dd></dl>
+ <dl><dt><a name="-basis_3"><strong>basis_3</strong></a>(*lattice_parameters, **kwargs)</dt><dd><tt>Generate&nbsp;direct-space&nbsp;basis-vectors&nbsp;[a,&nbsp;b,&nbsp;c]&nbsp;from&nbsp;lattice&nbsp;parameters<br>
+Basis&nbsp;choice&nbsp;equivalent&nbsp;to&nbsp;the&nbsp;inverse&nbsp;of&nbsp;the&nbsp;Bmatrix&nbsp;of&nbsp;W.&nbsp;R.&nbsp;Busing&nbsp;and&nbsp;H.&nbsp;A.&nbsp;Levy,&nbsp;Acta&nbsp;Cryst.&nbsp;(1967)<br>
+https://docs.mantidproject.org/nightly/concepts/Lattice.html<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vector&nbsp;a*&nbsp;||&nbsp;x-axis<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vector&nbsp;b&nbsp;rotated&nbsp;by&nbsp;alpha&nbsp;about&nbsp;x-axis&nbsp;from&nbsp;+ve&nbsp;z-axis<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vector&nbsp;c&nbsp;||&nbsp;z-axis<br>
+&nbsp;<br>
+Calculate&nbsp;the&nbsp;lattice&nbsp;positions:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[[x,&nbsp;y,&nbsp;z]]&nbsp;=&nbsp;dot([[u,&nbsp;v,&nbsp;w]],&nbsp;[vec_a,&nbsp;vec_b,&nbsp;vec_c])<br>
+&nbsp;<br>
+:param&nbsp;lattice_parameters:&nbsp;float&nbsp;or&nbsp;list&nbsp;in&nbsp;Angstroms&nbsp;&amp;&nbsp;degrees,&nbsp;see&nbsp;<a href="#-gen_lattice_parameters">gen_lattice_parameters</a>()<br>
+:param&nbsp;kwargs:&nbsp;lattice&nbsp;parameters<br>
+:returns:&nbsp;[3x3]&nbsp;array,&nbsp;as&nbsp;[vec_a,&nbsp;vec_b,&nbsp;vec_c]&nbsp;in&nbsp;Angstroms</tt></dd></dl>
+ <dl><dt><a name="-busingandlevy"><strong>busingandlevy</strong></a>(*lattice_parameters, **kwargs)</dt><dd><tt>Calculate&nbsp;the&nbsp;Busing&nbsp;and&nbsp;Levy&nbsp;B-matrix&nbsp;from&nbsp;lattice&nbsp;parameters<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"we&nbsp;choose&nbsp;the&nbsp;x-axis&nbsp;parallel&nbsp;to&nbsp;a*,&nbsp;the&nbsp;y-axis&nbsp;in&nbsp;the&nbsp;plane&nbsp;of&nbsp;a*&nbsp;and&nbsp;b*,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;the&nbsp;z-axis&nbsp;perpendicular&nbsp;to&nbsp;that&nbsp;plane"<br>
+From:&nbsp;W.&nbsp;R.&nbsp;Busing&nbsp;and&nbsp;H.&nbsp;A.&nbsp;Levy,&nbsp;Acta&nbsp;Cryst.&nbsp;(1967).&nbsp;22,&nbsp;457-464<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"Angle&nbsp;calculations&nbsp;for&nbsp;3-&nbsp;and&nbsp;4-circle&nbsp;X-ray&nbsp;and&nbsp;neutron&nbsp;diffractometers"<br>
+See&nbsp;also:&nbsp;https://docs.mantidproject.org/nightly/concepts/Lattice.html<br>
+&nbsp;<br>
+Creates&nbsp;a&nbsp;matrix&nbsp;to&nbsp;transform&nbsp;(hkl)&nbsp;into&nbsp;a&nbsp;cartesian&nbsp;basis:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(qx,qy,qz)'&nbsp;=&nbsp;B.(h,k,l)'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(where&nbsp;'&nbsp;indicates&nbsp;a&nbsp;column&nbsp;vector)<br>
+&nbsp;<br>
+The&nbsp;B&nbsp;matrix&nbsp;is&nbsp;related&nbsp;to&nbsp;the&nbsp;reciprocal&nbsp;basis&nbsp;vectors:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(astar,&nbsp;bstar,&nbsp;cstar)&nbsp;=&nbsp;2&nbsp;*&nbsp;np.pi&nbsp;*&nbsp;B.T<br>
+Where&nbsp;cstar&nbsp;is&nbsp;defined&nbsp;along&nbsp;the&nbsp;z-axis<br>
+&nbsp;<br>
+:param&nbsp;lattice_parameters:&nbsp;float&nbsp;or&nbsp;list&nbsp;in&nbsp;Angstroms&nbsp;&amp;&nbsp;degrees,&nbsp;see&nbsp;<a href="#-gen_lattice_parameters">gen_lattice_parameters</a>()<br>
+:param&nbsp;kwargs:&nbsp;lattice&nbsp;parameters<br>
+:returns:&nbsp;[3x3]&nbsp;array&nbsp;B&nbsp;matrix&nbsp;in&nbsp;inverse-Angstroms&nbsp;(no&nbsp;2pi)</tt></dd></dl>
+ <dl><dt><a name="-choose_basis"><strong>choose_basis</strong></a>(name)</dt><dd><tt>Return&nbsp;a&nbsp;basis&nbsp;function&nbsp;based&nbsp;on&nbsp;a&nbsp;name<br>
+&nbsp;<br>
+Available&nbsp;options:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;1.&nbsp;'MaterialsProject':&nbsp;c&nbsp;||&nbsp;z,&nbsp;b*&nbsp;||&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;2.&nbsp;'Vesta':&nbsp;a&nbsp;||&nbsp;x,&nbsp;c*&nbsp;||&nbsp;z<br>
+&nbsp;&nbsp;&nbsp;&nbsp;3.&nbsp;'BusingandLevy':&nbsp;c&nbsp;||&nbsp;z,&nbsp;a*&nbsp;||&nbsp;x,&nbsp;'default'<br>
+&nbsp;<br>
+:param&nbsp;name:&nbsp;str&nbsp;name&nbsp;of&nbsp;basis<br>
+:return:&nbsp;function</tt></dd></dl>
+ <dl><dt><a name="-dspacing"><strong>dspacing</strong></a>(h, k, l, *lattice_parameters, **kwargs)</dt><dd><tt>Calculate&nbsp;the&nbsp;lattice&nbsp;d-spacing&nbsp;for&nbsp;Bragg&nbsp;reflection&nbsp;(h,k,l)<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;d&nbsp;=&nbsp;lambda&nbsp;/&nbsp;2&nbsp;*&nbsp;sin(theta)&nbsp;=&nbsp;2*pi&nbsp;/&nbsp;|h.a*&nbsp;+&nbsp;k.b*&nbsp;+&nbsp;l.c*|<br>
+&nbsp;<br>
+:param&nbsp;h,&nbsp;k,&nbsp;l:&nbsp;Miller-indices&nbsp;of&nbsp;reflection<br>
+:param&nbsp;lattice_parameters:&nbsp;float&nbsp;or&nbsp;list&nbsp;in&nbsp;Angstroms&nbsp;&amp;&nbsp;degrees,&nbsp;see&nbsp;<a href="#-gen_lattice_parameters">gen_lattice_parameters</a>()<br>
+:param&nbsp;kwargs:&nbsp;lattice&nbsp;parameters<br>
+:return:&nbsp;float&nbsp;in&nbsp;Angstroms</tt></dd></dl>
+ <dl><dt><a name="-gen_lattice_parameters"><strong>gen_lattice_parameters</strong></a>(*lattice_parameters, **kwargs)</dt><dd><tt>Generate&nbsp;list&nbsp;of&nbsp;lattice&nbsp;parameters:<br>
+&nbsp;a,b,c,alpha,beta,gamma&nbsp;=&nbsp;<a href="#-gen_lattice_parameters">gen_lattice_parameters</a>(*args)<br>
+args:<br>
+&nbsp;&nbsp;1&nbsp;-&gt;&nbsp;a=b=c=1,alpha=beta=gamma=90<br>
+&nbsp;&nbsp;[1,2,3]&nbsp;-&gt;&nbsp;a=1,b=2,c=3,alpha=beta=gamma=90<br>
+&nbsp;&nbsp;[1,2,3,120]&nbsp;-&gt;&nbsp;a=1,b=2,c=3,alpha=beta=90,gamma=120<br>
+&nbsp;&nbsp;[1,2,3,10,20,30]&nbsp;-&gt;&nbsp;a=1,b=2,c=3,alpha=10,beta=20,gamma=30<br>
+&nbsp;&nbsp;1,2,3,10,20,30&nbsp;-&gt;&nbsp;a=1,b=2,c=3,alpha=10,beta=20,gamma=30<br>
+&nbsp;&nbsp;a=1,b=2,c=3,alpha=10,beta=20,gamma=30&nbsp;-&gt;&nbsp;a=1,b=2,c=3,alpha=10,beta=20,gamma=30<br>
+&nbsp;<br>
+:param&nbsp;lattice_parameters:&nbsp;float&nbsp;or&nbsp;list&nbsp;in&nbsp;Angstroms&nbsp;&amp;&nbsp;degrees<br>
+:param&nbsp;kwargs:&nbsp;lattice&nbsp;parameters<br>
+:return:&nbsp;a,b,c,alpha,beta,gamma</tt></dd></dl>
+ <dl><dt><a name="-index_lattice"><strong>index_lattice</strong></a>(coords, basis_vectors)</dt><dd><tt>Index&nbsp;cartesian&nbsp;coordinates&nbsp;on&nbsp;a&nbsp;lattice&nbsp;defined&nbsp;by&nbsp;basis&nbsp;vectors<br>
+Usage&nbsp;(reciprocal&nbsp;space):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[[h,&nbsp;k,&nbsp;l],&nbsp;...]&nbsp;=&nbsp;<a href="#-index_lattice">index_lattice</a>([[qx,&nbsp;qy,&nbsp;qz],&nbsp;...],&nbsp;[a*,&nbsp;b*,&nbsp;c*])<br>
+Usage&nbsp;(direct&nbsp;space):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[u,&nbsp;v,&nbsp;w]&nbsp;=&nbsp;<a href="#-index_lattice">index_lattice</a>([x,&nbsp;y,&nbsp;z],&nbsp;[a,&nbsp;b,&nbsp;c])<br>
+&nbsp;<br>
+:param&nbsp;coords:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;coordinates<br>
+:param&nbsp;basis_vectors:&nbsp;[3*3]&nbsp;array&nbsp;of&nbsp;basis&nbsp;vectors&nbsp;[a[3],&nbsp;b[3],&nbsp;c[3]]<br>
+:return:&nbsp;[nx3]&nbsp;array&nbsp;of&nbsp;vectors&nbsp;in&nbsp;units&nbsp;of&nbsp;reciprocal&nbsp;lattice&nbsp;vectors</tt></dd></dl>
+ <dl><dt><a name="-lattice_volume"><strong>lattice_volume</strong></a>(*lattice_parameters, **kwargs)</dt><dd><tt>Calculate&nbsp;basis&nbsp;volume&nbsp;from&nbsp;lattice&nbsp;parameters<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;volume&nbsp;=&nbsp;vec_a&nbsp;.&nbsp;(vec_b&nbsp;X&nbsp;vec_c)<br>
+&nbsp;<br>
+:param&nbsp;lattice_parameters:&nbsp;float&nbsp;or&nbsp;list&nbsp;in&nbsp;Angstroms&nbsp;&amp;&nbsp;degrees,&nbsp;see&nbsp;<a href="#-gen_lattice_parameters">gen_lattice_parameters</a>()<br>
+:param&nbsp;kwargs:&nbsp;lattice&nbsp;parameters<br>
+:returns:&nbsp;float&nbsp;in&nbsp;Angstroms&nbsp;cubed</tt></dd></dl>
+ <dl><dt><a name="-random_basis"><strong>random_basis</strong></a>(symmetry='triclinic', basis_option='default')</dt><dd><tt>Generate&nbsp;a&nbsp;random&nbsp;basis&nbsp;of&nbsp;unit&nbsp;vectors&nbsp;from&nbsp;a&nbsp;real&nbsp;set&nbsp;of&nbsp;lattice&nbsp;parameters<br>
+:param&nbsp;symmetry:&nbsp;string&nbsp;'cubic',&nbsp;'tetragona',&nbsp;'rhobohedral',&nbsp;'monoclinic-a/b/c',&nbsp;'triclinic'<br>
+:param&nbsp;basis_option:&nbsp;str&nbsp;name&nbsp;of&nbsp;basis,&nbsp;'materialsproject',&nbsp;'vesta',&nbsp;'busingandlevy'<br>
+:return:&nbsp;[3x3]&nbsp;array,&nbsp;as&nbsp;[vec_a,&nbsp;vec_b,&nbsp;vec_c]&nbsp;in&nbsp;Angstroms</tt></dd></dl>
+ <dl><dt><a name="-random_lattice"><strong>random_lattice</strong></a>(symmetry='triclinic')</dt><dd><tt>Return&nbsp;a&nbsp;random&nbsp;set&nbsp;of&nbsp;real&nbsp;lattice&nbsp;parameters<br>
+:param&nbsp;symmetry:&nbsp;string&nbsp;'cubic',&nbsp;'tetragona',&nbsp;'rhobohedral',&nbsp;'monoclinic-a/b/c',&nbsp;'triclinic'<br>
+:return:&nbsp;(a,&nbsp;b,&nbsp;c,&nbsp;alpha,&nbsp;beta,&nbsp;gamma)&nbsp;lattice&nbsp;parameters&nbsp;in&nbsp;Angstroms/&nbsp;degrees</tt></dd></dl>
+ <dl><dt><a name="-reciprocal_basis"><strong>reciprocal_basis</strong></a>(basis_vectors)</dt><dd><tt>Return&nbsp;the&nbsp;reciprocal&nbsp;basis&nbsp;vectors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[a*,&nbsp;b*,&nbsp;c*]&nbsp;=&nbsp;2*pi*inv([a,&nbsp;b,&nbsp;c]).T<br>
+&nbsp;<br>
+:param&nbsp;basis_vectors:&nbsp;[3*3]&nbsp;basis&nbsp;vectors&nbsp;array&nbsp;[a[3],&nbsp;b[3],&nbsp;c[3]]<br>
+:return:&nbsp;[3*3]&nbsp;array&nbsp;of&nbsp;reciprocal&nbsp;vectors&nbsp;[a*[3],&nbsp;b*[3],&nbsp;c*[3]]</tt></dd></dl>
+ <dl><dt><a name="-reciprocal_lattice_parameters"><strong>reciprocal_lattice_parameters</strong></a>(*lattice_parameters, **kwargs)</dt><dd><tt>Return&nbsp;the&nbsp;reciprocal&nbsp;lattice&nbsp;parameters&nbsp;in&nbsp;inverse-angstroms&nbsp;and&nbsp;degrees<br>
+:param&nbsp;lattice_parameters:&nbsp;float&nbsp;or&nbsp;list&nbsp;in&nbsp;Angstroms&nbsp;&amp;&nbsp;degrees,&nbsp;see&nbsp;<a href="#-gen_lattice_parameters">gen_lattice_parameters</a>()<br>
+:param&nbsp;kwargs:&nbsp;lattice&nbsp;parameters<br>
+:return:&nbsp;a*,&nbsp;b*,&nbsp;c*,&nbsp;alpha*,&nbsp;beta*,&nbsp;gamma*</tt></dd></dl>
+</td></tr></table>
+</body></html>

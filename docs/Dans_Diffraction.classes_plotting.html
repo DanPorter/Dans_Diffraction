@@ -192,6 +192,15 @@ Data descriptors defined here:<br>
 :param&nbsp;gamma:<br>
 :return:&nbsp;None</tt></dd></dl>
 
+<dl><dt><a name="Plotting-plot_distance"><strong>plot_distance</strong></a>(self, min_d=0.65, max_d=3.2, labels=None, c_ele=None, elems=None, ranges=None, step=0.04)</dt><dd><tt>Plot&nbsp;atoms&nbsp;interatomic&nbsp;distances&nbsp;form&nbsp;each&nbsp;label.<br>
+:param&nbsp;c_ele&nbsp;(list,string):&nbsp;only&nbsp;sites&nbsp;with&nbsp;noted&nbsp;elements<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;None&nbsp;all&nbsp;site<br>
+:param&nbsp;elems&nbsp;(list,string):&nbsp;only&nbsp;distances&nbsp;with&nbsp;noted&nbsp;elements<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;None&nbsp;all&nbsp;site<br>
+:param&nbsp;min_d:&nbsp;minimum&nbsp;distance<br>
+:param&nbsp;max_d:&nbsp;maximum&nbsp;distance<br>
+:return:</tt></dd></dl>
+
 <dl><dt><a name="Plotting-plot_exchange_paths"><strong>plot_exchange_paths</strong></a>(self, cen_idx, nearest_neighbor_distance=6.6, exchange_type='O', bond_angle=90.0, search_in_cell=True, group_neighbors=True, disp=False)</dt><dd><tt>Calcualtes&nbsp;exchange&nbsp;paths&nbsp;and&nbsp;adds&nbsp;them&nbsp;to&nbsp;the&nbsp;crystal&nbsp;structure&nbsp;plot<br>
 :param&nbsp;cen_idx:&nbsp;index&nbsp;of&nbsp;central&nbsp;ion&nbsp;in&nbsp;xtl.Structure<br>
 :param&nbsp;nearest_neighbor_distance:&nbsp;Maximum&nbsp;radius&nbsp;to&nbsp;serach&nbsp;to<br>
@@ -210,7 +219,7 @@ and&nbsp;plot&nbsp;the&nbsp;atoms&nbsp;in&nbsp;each&nbsp;layer&nbsp;in&nbsp;a&nb
 :param&nbsp;show_labels:&nbsp;False*/True&nbsp;add&nbsp;text&nbsp;labels<br>
 :return:</tt></dd></dl>
 
-<dl><dt><a name="Plotting-plot_ms_azimuth"><strong>plot_ms_azimuth</strong></a>(self, hkl, energy_kev, azir=[0, 0, 1], pv=[1, 0], numsteps=3, peak_width=0.1, full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False, log=False)</dt><dd><tt>Run&nbsp;the&nbsp;multiple&nbsp;scattering&nbsp;code&nbsp;and&nbsp;plot&nbsp;the&nbsp;result<br>
+<dl><dt><a name="Plotting-plot_ms_azimuth"><strong>plot_ms_azimuth</strong></a>(self, hkl, energy_kev, azir=[0, 0, 1], pv=[1, 0], numsteps=3, peak_width=0.1, full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False, log=False, energy_sum_range=0.002)</dt><dd><tt>Run&nbsp;the&nbsp;multiple&nbsp;scattering&nbsp;code&nbsp;and&nbsp;plot&nbsp;the&nbsp;result<br>
 See&nbsp;multiple_scattering.py&nbsp;for&nbsp;more&nbsp;details.<br>
 &nbsp;<br>
 :param&nbsp;xtl:&nbsp;Crystal&nbsp;structure&nbsp;from&nbsp;Dans_Diffraction<br>
@@ -225,6 +234,7 @@ See&nbsp;multiple_scattering.py&nbsp;for&nbsp;more&nbsp;details.<br>
 :param&nbsp;sfonly:&nbsp;True/False:&nbsp;calculation&nbsp;type:&nbsp;sfonly&nbsp;*default<br>
 :param&nbsp;pv1xsf1:&nbsp;True/False:&nbsp;calculation&nbsp;type:&nbsp;pv1xsf1?<br>
 :param&nbsp;log:&nbsp;log&nbsp;y&nbsp;scale<br>
+:param&nbsp;energy_sum_range:&nbsp;energy&nbsp;in&nbsp;keV&nbsp;to&nbsp;sum&nbsp;the&nbsp;calculation&nbsp;over&nbsp;(from&nbsp;energy_kev-range/2&nbsp;to&nbsp;energy_kev+range/2)<br>
 :return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="Plotting-plot_multiple_scattering"><strong>plot_multiple_scattering</strong></a>(self, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], numsteps=60, full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False)</dt><dd><tt>Run&nbsp;the&nbsp;multiple&nbsp;scattering&nbsp;code&nbsp;and&nbsp;plot&nbsp;the&nbsp;result<br>
@@ -484,6 +494,15 @@ Methods inherited from <a href="Dans_Diffraction.classes_plotting.html#Plotting"
 :param&nbsp;gamma:<br>
 :return:&nbsp;None</tt></dd></dl>
 
+<dl><dt><a name="PlottingSuperstructure-plot_distance"><strong>plot_distance</strong></a>(self, min_d=0.65, max_d=3.2, labels=None, c_ele=None, elems=None, ranges=None, step=0.04)</dt><dd><tt>Plot&nbsp;atoms&nbsp;interatomic&nbsp;distances&nbsp;form&nbsp;each&nbsp;label.<br>
+:param&nbsp;c_ele&nbsp;(list,string):&nbsp;only&nbsp;sites&nbsp;with&nbsp;noted&nbsp;elements<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;None&nbsp;all&nbsp;site<br>
+:param&nbsp;elems&nbsp;(list,string):&nbsp;only&nbsp;distances&nbsp;with&nbsp;noted&nbsp;elements<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;None&nbsp;all&nbsp;site<br>
+:param&nbsp;min_d:&nbsp;minimum&nbsp;distance<br>
+:param&nbsp;max_d:&nbsp;maximum&nbsp;distance<br>
+:return:</tt></dd></dl>
+
 <dl><dt><a name="PlottingSuperstructure-plot_exchange_paths"><strong>plot_exchange_paths</strong></a>(self, cen_idx, nearest_neighbor_distance=6.6, exchange_type='O', bond_angle=90.0, search_in_cell=True, group_neighbors=True, disp=False)</dt><dd><tt>Calcualtes&nbsp;exchange&nbsp;paths&nbsp;and&nbsp;adds&nbsp;them&nbsp;to&nbsp;the&nbsp;crystal&nbsp;structure&nbsp;plot<br>
 :param&nbsp;cen_idx:&nbsp;index&nbsp;of&nbsp;central&nbsp;ion&nbsp;in&nbsp;xtl.Structure<br>
 :param&nbsp;nearest_neighbor_distance:&nbsp;Maximum&nbsp;radius&nbsp;to&nbsp;serach&nbsp;to<br>
@@ -502,7 +521,7 @@ and&nbsp;plot&nbsp;the&nbsp;atoms&nbsp;in&nbsp;each&nbsp;layer&nbsp;in&nbsp;a&nb
 :param&nbsp;show_labels:&nbsp;False*/True&nbsp;add&nbsp;text&nbsp;labels<br>
 :return:</tt></dd></dl>
 
-<dl><dt><a name="PlottingSuperstructure-plot_ms_azimuth"><strong>plot_ms_azimuth</strong></a>(self, hkl, energy_kev, azir=[0, 0, 1], pv=[1, 0], numsteps=3, peak_width=0.1, full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False, log=False)</dt><dd><tt>Run&nbsp;the&nbsp;multiple&nbsp;scattering&nbsp;code&nbsp;and&nbsp;plot&nbsp;the&nbsp;result<br>
+<dl><dt><a name="PlottingSuperstructure-plot_ms_azimuth"><strong>plot_ms_azimuth</strong></a>(self, hkl, energy_kev, azir=[0, 0, 1], pv=[1, 0], numsteps=3, peak_width=0.1, full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False, log=False, energy_sum_range=0.002)</dt><dd><tt>Run&nbsp;the&nbsp;multiple&nbsp;scattering&nbsp;code&nbsp;and&nbsp;plot&nbsp;the&nbsp;result<br>
 See&nbsp;multiple_scattering.py&nbsp;for&nbsp;more&nbsp;details.<br>
 &nbsp;<br>
 :param&nbsp;xtl:&nbsp;Crystal&nbsp;structure&nbsp;from&nbsp;Dans_Diffraction<br>
@@ -517,6 +536,7 @@ See&nbsp;multiple_scattering.py&nbsp;for&nbsp;more&nbsp;details.<br>
 :param&nbsp;sfonly:&nbsp;True/False:&nbsp;calculation&nbsp;type:&nbsp;sfonly&nbsp;*default<br>
 :param&nbsp;pv1xsf1:&nbsp;True/False:&nbsp;calculation&nbsp;type:&nbsp;pv1xsf1?<br>
 :param&nbsp;log:&nbsp;log&nbsp;y&nbsp;scale<br>
+:param&nbsp;energy_sum_range:&nbsp;energy&nbsp;in&nbsp;keV&nbsp;to&nbsp;sum&nbsp;the&nbsp;calculation&nbsp;over&nbsp;(from&nbsp;energy_kev-range/2&nbsp;to&nbsp;energy_kev+range/2)<br>
 :return:&nbsp;None</tt></dd></dl>
 
 <dl><dt><a name="PlottingSuperstructure-plot_multiple_scattering"><strong>plot_multiple_scattering</strong></a>(self, hkl, azir=[0, 0, 1], pv=[1, 0], energy_range=[7.8, 8.2], numsteps=60, full=False, pv1=False, pv2=False, sfonly=True, pv1xsf1=False)</dt><dd><tt>Run&nbsp;the&nbsp;multiple&nbsp;scattering&nbsp;code&nbsp;and&nbsp;plot&nbsp;the&nbsp;result<br>

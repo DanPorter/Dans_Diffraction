@@ -208,11 +208,14 @@ def doc_str():
 # tkGUI Activation
 def start_gui(xtl=None):
     """Start GUI window (requires tkinter)"""
-    try:
-        from .tkgui import CrystalGui
-        CrystalGui(xtl)
-    except ImportError:
-        print('GUI functionality not available, you need to install tkinter.')
+    from .tkgui import CrystalGui
+    CrystalGui(xtl)
+
+
+def start_properties_gui():
+    """Start XRay Interactions GUI"""
+    from .tkgui.properties import XrayInteractionsGui
+    XrayInteractionsGui()
 
 
 # FDMNES Activation
@@ -224,3 +227,9 @@ def activate_fdmnes(initial_dir=None, fdmnes_filename='fdmnes_win64.exe'):
     :return: None
     """
     fdmnes_checker(activate=True, fdmnes_filename=fdmnes_filename, initial_dir=initial_dir)
+
+
+def start_fdmnes_gui():
+    """Start GUI for FDMNES"""
+    from .tkgui.fdmnes import AnaFDMNESgui
+    AnaFDMNESgui()
