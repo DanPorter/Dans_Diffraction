@@ -467,6 +467,8 @@ class XrayInteractionsGui:
                         activebackground=btn_active)
         var.pack(side=tk.LEFT)
 
+        self.root.mainloop()
+
     def menu_info_table(self):
         from .periodic_table import PeriodTableGui
         PeriodTableGui()
