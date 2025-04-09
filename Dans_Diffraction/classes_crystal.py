@@ -2386,7 +2386,8 @@ class Superstructure(Crystal):
         self.Parent = Parent
         newUV = Parent.Cell.calculateR(P)
         self.new_cell(fl.basis2latpar(newUV))
-        self.scale = Parent.scale * np.prod(self.P)
+        parent_cells_in_supercell = np.prod(np.sqrt(np.sum(np.square(P), axis=1)))
+        self.scale = Parent.scale * parent_cells_in_supercell
 
         # Add exta functions
         self.Plot = PlottingSuperstructure(self)
