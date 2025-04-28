@@ -24,8 +24,8 @@ By Dan Porter, PhD
 Diamond
 2017
 
-Version 3.3.0
-Last updated: 06/02/25
+Version 3.3.1
+Last updated: 06/04/25
 
 Version History:
 27/07/17 1.0    Version History started.
@@ -49,7 +49,8 @@ Version History:
 15/11/21 3.2.2  Added Cell.orientation, updated Cell.UV()
 12/01/21 3.2.3  Added Symmetry.axial_vector
 22/05/23 3.2.4  Added Symmetry.wyckoff_label(), Symmetry.spacegroup_dict
-06/05/25 3.3.0  Symmetry.from_cif now loads operations from find_spacegroup if not already loaded
+06/05/24 3.3.0  Symmetry.from_cif now loads operations from find_spacegroup if not already loaded
+06/04/25 3.3.1  scale parameter of superlattice improved
 
 @author: DGPorter
 """
@@ -68,7 +69,7 @@ from .classes_scattering import Scattering
 from .classes_multicrystal import MultiCrystal
 from .classes_plotting import Plotting, PlottingSuperstructure
 
-__version__ = '3.3.0'
+__version__ = '3.3.1'
 
 
 class Crystal:
@@ -2386,7 +2387,8 @@ class Superstructure(Crystal):
         self.Parent = Parent
         newUV = Parent.Cell.calculateR(P)
         self.new_cell(fl.basis2latpar(newUV))
-        self.scale = Parent.scale * np.prod(self.P)
+        parent_cells_in_supercell = fc.calc_vol(P)
+        self.scale = Parent.scale * parent_cells_in_supercell
 
         # Add exta functions
         self.Plot = PlottingSuperstructure(self)

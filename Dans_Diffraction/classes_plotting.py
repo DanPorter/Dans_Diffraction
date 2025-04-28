@@ -1500,12 +1500,12 @@ class PlottingSuperstructure(Plotting):
         c_cart = self.xtl.Parent.Cell.calculateQ(centre)
 
         # Generate lattice of reciprocal space points
-        maxq = np.sqrt(q_max**2 + q_max**2 + np.sum(c_cart**2)) # generate all reflections
-        print('Max Q distance: %4.2f A-1'%maxq)
+        maxq = np.sqrt(q_max**2 + q_max**2 + np.sum(c_cart**2))  # generate all reflections
+        print('Max Q distance: %4.2f A-1' % maxq)
         hmax, kmax, lmax = fc.maxHKL(maxq, self.xtl.Cell.UVstar())
         HKL = fc.genHKL([hmax, -hmax], [kmax, -kmax], [lmax, -lmax])
-        HKL = HKL #+ centre  # reflection about central reflection
-        print('Number of reflections in sphere: %1.0f'%len(HKL))
+        HKL = HKL  # + centre  # reflection about central reflection
+        print('Number of reflections in sphere: %1.0f' % len(HKL))
 
         # Determine the directions in cartesian space
         x_cart = self.xtl.calculateQ_parent(x_axis)
@@ -1535,10 +1535,12 @@ class PlottingSuperstructure(Plotting):
             pHKL = self.xtl.superhkl2parent(HKLinbox)
             pHKL, inten = self.xtl.Parent.Symmetry.symmetric_intensity(pHKL, inten)
             HKL = self.xtl.parenthkl2super(pHKL)
+            print('Adding parent symmetry domains, adding %d reflections' % (len(HKL) - len(pHKL)))
         else:
             HKL = HKLinbox
         q = self.xtl.calculateQ_parent(HKL)
 
+        # remove reflections not in plot
         box_coord = fg.index_coordinates(q - c_cart, CELL)
         incell = np.all(np.abs(box_coord) <= 0.5, axis=1)
         plane_coord = 2 * q_max * box_coord[incell, :]
@@ -1661,21 +1663,26 @@ class PlottingSuperstructure(Plotting):
         mesh_vec_b = fg.index_coordinates(Q_vec_b, CELL) * 2 * q_max
 
         # Vector arrows and lattice point labels
-        cen_lab = '(%1.3g,%1.3g,%1.3g)' % (centre[0], centre[1], centre[2])
-        vec_a_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_a[0] + centre[0], vec_a[1] + centre[1], vec_a[2] + centre[2])
-        vec_b_lab = '(%1.3g,%1.3g,%1.3g)' % (vec_b[0] + centre[0], vec_b[1] + centre[1], vec_b[2] + centre[2])
+        supx, supy, supz = 0.0 + np.around(self.xtl.parenthkl2super(centre)[0], 3)
+        svax, svay, svaz = 0.0 + np.around(self.xtl.parenthkl2super(vec_a + centre)[0], 3)
+        svbx, svby, svbz = 0.0 + np.around(self.xtl.parenthkl2super(vec_b + centre)[0], 3)
+        cen_lab = '(%1.3g,%1.3g,%1.3g)$_{p}$' % (centre[0], centre[1], centre[2])
+        # cen_lab += '\n(%1.3g,%1.3g,%1.3g)$_{s}$' % (supx, supy, supz)
+        vec_a_lab = '(%1.3g,%1.3g,%1.3g)$_{p}$' % (vec_a[0] + centre[0], vec_a[1] + centre[1], vec_a[2] + centre[2])
+        vec_a_lab += '\n(%1.3g,%1.3g,%1.3g)$_{s}$' % (svax, svay, svaz)
+        vec_b_lab = '(%1.3g,%1.3g,%1.3g)$_{p}$' % (vec_b[0] + centre[0], vec_b[1] + centre[1], vec_b[2] + centre[2])
+        vec_b_lab += '\n(%1.3g,%1.3g,%1.3g)$_{s}$' % (svbx, svby, svbz)
 
         lattQ = fp.axis_lattice_points(mesh_vec_a, mesh_vec_b, plt.axis())
         fp.plot_lattice_lines(lattQ, mesh_vec_a, mesh_vec_b, lw=0.5, c='grey')
-        fp.plot_vector_arrows(mesh_vec_a, mesh_vec_b, vec_a_lab, vec_b_lab)
+        fp.plot_vector_arrows(mesh_vec_a, mesh_vec_b, vec_a_lab, vec_b_lab, color='k')
         plt.text(0 - (0.2 * q_max), 0 - (0.1 * q_max), cen_lab, fontname=fp.DEFAULT_FONT, weight='bold', size=18)
 
         # Plot labels
         xlab = r'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (x_axis[0], x_axis[1], x_axis[2])
         ylab = r'Q || (%1.3g,%1.3g,%1.3g) [$\AA^{-1}$]' % (y_axis[0], y_axis[1], y_axis[2])
-        supercentre = self.xtl.parenthkl2super(centre)[0]
         ttl = '%s\n(%1.3g,%1.3g,%1.3g)$_{p}$ = (%1.3g,%1.3g,%1.3g)$_{s}$' \
-              % (self.xtl.name, centre[0], centre[1], centre[2], supercentre[0], supercentre[1], supercentre[2])
+              % (self.xtl.name, centre[0], centre[1], centre[2], supx, supy, supz)
         fp.labels(ttl, xlab, ylab)
 
 

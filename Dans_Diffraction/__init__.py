@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017-2025
 
-Version 3.3.3
-Last updated: 06/02/2025
+Version 3.3.4
+Last updated: 12/04/2025
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -84,6 +84,7 @@ Version History:
 06/11/24 3.3.1  Fixed incorrect cell basis for triclinic cells. Added functions_lattice.py and tests. Thanks LeeRichter!
 20/11/24 3.3.2  Added alternate option for neutron scattering lengths
 06/02/25 3.3.3  Added scattering options for polarised neutron and x-ray scattering. Thanks dragonyanglong!
+12/04/25 3.3.4  Improved superstructure calculations by fixing scale parameter
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -113,7 +114,7 @@ Acknoledgements:
     Dec 2024    Thanks to dragonyanglong for pointing out the error with magnetic neutron scattering
 
 -----------------------------------------------------------------------------
-   Copyright 2024 Diamond Light Source Ltd.
+   Copyright 2018-2025 Diamond Light Source Ltd.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
