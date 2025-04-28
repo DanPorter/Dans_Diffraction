@@ -3,11 +3,11 @@ Dans_Diffraction Examples
 Build a supercell from multiple unit cells and simulate the diffraction pattern
 """
 
-import sys,os
+import sys, os
 import numpy as np
-import matplotlib.pyplot as plt # Plotting
+import matplotlib.pyplot as plt  # Plotting
 cf = os.path.dirname(__file__)
-sys.path.insert(0,os.path.join(cf,'..'))
+sys.path.insert(0, os.path.join(cf, '..'))
 import Dans_Diffraction as dif
 
 
@@ -23,8 +23,8 @@ P = [[3, 0, 0], [4, 5, 0], [0, 0, 1]]  # Stripe Supercell
 #sup = xtl.generate_superstructure(P)
 
 # Set discrete occupancies for average structure
-xtl.Atoms.occupancy[2]=0
-xtl.Atoms.occupancy[3]=1
+xtl.Atoms.occupancy[2] = 0
+xtl.Atoms.occupancy[3] = 1
 xtl.generate_structure()
 
 # Generate the superstructure, repeating the parent/average structure to fill the supercell

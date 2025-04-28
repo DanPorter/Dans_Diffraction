@@ -72,6 +72,7 @@ ATOMFILE = os.path.join(datadir, 'Dans Element Properties.txt')
 PENGFILE = os.path.join(datadir, 'peng.dat')
 NSLFILE = os.path.join(datadir, 'neutron_isotope_scattering_lengths.dat')
 NSLFILE_SEARS = os.path.join(datadir, 'neutron_isotope_scattering_lengths_sears.dat')
+ASFFILE = os.path.join(datadir, 'atomic_scattering_factors.npy')
 
 # List of Elements in order sorted by length of name
 ELEMENT_LIST = [
@@ -1236,8 +1237,7 @@ def atomic_scattering_factor(element, energy_kev=None):
     :param energy_kev: float or list energy in keV (None to return original, uninterpolated list)
     :return: f1, f2, shape dependent on shapes of element and energy_kev:  float, or [ene] or [ele, ene]
     """
-    asf_file = os.path.join(datadir, 'atomic_scattering_factors.npy')
-    asf = np.load(asf_file, allow_pickle=True)
+    asf = np.load(ASFFILE, allow_pickle=True)
     asf = asf.item()
 
     element = np.asarray(element, dtype=str).reshape(-1)
@@ -1295,8 +1295,7 @@ def xray_dispersion_corrections(elements, energy_kev=None):
     :param energy_kev: float or list energy in keV (None to return original, uninterpolated list)
     :return: f', f" with shape (len(energy), len(elements))
     """
-    asf_file = os.path.join(datadir, 'atomic_scattering_factors.npy')
-    asf = np.load(asf_file, allow_pickle=True)
+    asf = np.load(ASFFILE, allow_pickle=True)
     asf = asf.item()
 
     energy_kev = np.asarray(energy_kev, dtype=float).reshape(-1)
@@ -3446,7 +3445,7 @@ def group_intensities(q_values, intensity, min_overlap=0.01):
 def calc_vol(UV):
     """Calculate volume in Angstrom^3 from unit vectors"""
     a, b, c = UV
-    return np.dot(a, np.cross(b, c))
+    return np.abs(np.dot(a, np.cross(b, c)))
 
 
 def cif2table(cif):
