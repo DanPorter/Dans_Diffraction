@@ -70,9 +70,11 @@ datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this f
 datadir = os.path.join(datadir, 'data')
 ATOMFILE = os.path.join(datadir, 'Dans Element Properties.txt')
 PENGFILE = os.path.join(datadir, 'peng.dat')
+WAASKIRF_FILE = os.path.join(datadir, 'f0_WaasKirf.dat')
 NSLFILE = os.path.join(datadir, 'neutron_isotope_scattering_lengths.dat')
 NSLFILE_SEARS = os.path.join(datadir, 'neutron_isotope_scattering_lengths_sears.dat')
 ASFFILE = os.path.join(datadir, 'atomic_scattering_factors.npy')
+XMAFILE = os.path.join(datadir, 'XRayMassAtten_mup.dat')
 
 # List of Elements in order sorted by length of name
 ELEMENT_LIST = [
@@ -879,12 +881,12 @@ def atom_properties(elements=None, fields=None):
 
     if elements is not None:
         # elements must be a list e.g. ['Co','O']
-        elements = np.char.lower(np.asarray(elements).reshape(-1))
-        all_elements = [el.lower() for el in data['Element']]
+        elements = [str2element(el) for el in np.asarray(elements).reshape(-1)]
+        all_elements = data['Element'].tolist()
         # This will error if the required element doesn't exist
         try:
             # regex to remove additional characters
-            index = [all_elements.index(regex_sub_element.sub('', el)) for el in elements]
+            index = [all_elements.index(el) for el in elements]
         except ValueError as ve:
             raise Exception('Element not available: %s' % ve)
         data = data[index]
@@ -1083,10 +1085,9 @@ def xray_scattering_factor_WaasKirf(element, Qmag=0):
     :return: [m*n] array of scattering factors
     """
 
-    filename = os.path.join(datadir, 'f0_WaasKirf.dat')
-    data = np.loadtxt(filename)
+    data = np.loadtxt(WAASKIRF_FILE)
     # get names
-    with open(filename) as f:
+    with open(WAASKIRF_FILE) as f:
         lines = re.findall(r'#S\s+\d+\s+[A-Z].*?\n', f.read())
         table_names = [line[7:].strip() for line in lines]
 
@@ -1215,8 +1216,7 @@ def attenuation(element_z, energy_kev):
     element_z = np.asarray(element_z).reshape(-1)
     energy_kev = np.asarray(energy_kev).reshape(-1)
 
-    xma_file = os.path.join(datadir, 'XRayMassAtten_mup.dat')
-    xma_data = np.loadtxt(xma_file)
+    xma_data = np.loadtxt(XMAFILE)
 
     energies = xma_data[:, 0] / 1000.
     out = np.zeros([len(energy_kev), len(element_z)])
