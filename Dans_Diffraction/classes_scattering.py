@@ -67,13 +67,13 @@ class Scattering:
         print(xtl.Scatter.print_all_refelctions()) # Returns formated string of all allowed reflections
         
         Allowed radiation types:
-            'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
+            'xray','neutron','xray magnetic','neutron magnetic','xray resonant', 'custom'
     """
     
     #------Options-------
     # Standard Options
     _hkl = None  # added so recalculation not required
-    _scattering_type = 'xray'  # 'xray','neutron','xray magnetic','neutron magnetic','xray resonant'
+    _scattering_type = 'xray'  # 'xray','neutron','xray magnetic','neutron magnetic','xray resonant', 'custom'
     _scattering_specular_direction = [0, 0, 1]  # reflection
     _scattering_parallel_direction = [0, 0, 1]  # transmission
     _scattering_theta_offset = 0.0
@@ -527,9 +527,9 @@ class Scattering:
         if nenergy == 1 and npsi == 1:
             sf = sf[:, 0, 0]  # shape(nref)
         elif nenergy == 1:
-            sf = sf[:, 0, :]  # shape(nref, nenergy)
+            sf = sf[:, 0, :]  # shape(nref, npsi)
         elif npsi == 1:
-            sf = sf[:, :, 0]  # shape(nref, npsi)
+            sf = sf[:, :, 0]  # shape(nref, nenergy)
         if 'save' in kwargs:
             np.save(kwargs['save'], sf, allow_pickle=True)
             print("Saved %d structure factors to '%s'" % (sf.size, kwargs['save']))

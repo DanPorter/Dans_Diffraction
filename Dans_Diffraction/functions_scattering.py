@@ -56,7 +56,7 @@ import datetime
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 MAX_QR_ARRAY = 1.0e7
 TIME_REPORT = True
@@ -72,6 +72,7 @@ SCATTERING_TYPES = {
     'xray resonant': ['xray resonant', 'resonant', 'resonant xray', 'rxs'],
     'xray dispersion': ['dispersion', 'xray dispersion'],
     'electron': ['electron', 'ele', 'e'],
+    'custom': ['custom'],
 }
 
 
@@ -184,6 +185,34 @@ def sf_xray_dispersion(q, r, scattering_factor, occ=None, debyewaller=None, **kw
 
     neng = scattering_factor.shape[2]
     _debug('sf_xray_dispersion(phase.shape=%s, energies=%s)' % (phase.shape, neng))
+    sf = np.zeros([len(q), neng], dtype=complex)
+    for engval in range(neng):
+        sf[:, engval] = structure_factor(scattering_factor[:, :, engval], occ, debyewaller, phase)
+    if neng == 1:
+        return sf[:, 0]
+    return sf
+
+
+def sf_custom(q, r, scattering_factor, occ=None, debyewaller=None, **kwargs):
+    """
+    Calculate the structure factor using customised atomic scattering factors
+    :param q: [n,3] array of hkl reflections
+    :param r: [m,3] array of atomic positions in r.l.u.
+    :param scattering_factor: array [n,m,e]: energy dependent complex atomic form factor
+    :param occ: [m,1] array of atomic occupancies
+    :param debyewaller: [n,m] array of thermal factors for each atom and reflection
+    :param kwargs: additional options[*unused]
+    :return sf: [n, e] complex array of structure factors
+    """
+    phase = phase_factor_qr(q, r)
+    scattering_factor = np.asarray(scattering_factor, dtype=complex).reshape(*phase.shape, -1)
+    if occ is None:
+        occ = np.ones(phase.shape[1])
+    if debyewaller is None:
+        debyewaller = np.ones(phase.shape)
+
+    neng = scattering_factor.shape[2]
+    _debug('sf_custom(phase.shape=%s, energies=%s)' % (phase.shape, neng))
     sf = np.zeros([len(q), neng], dtype=complex)
     for engval in range(neng):
         sf[:, engval] = structure_factor(scattering_factor[:, :, engval], occ, debyewaller, phase)
@@ -837,6 +866,8 @@ def get_scattering_function(scattering_type):
         return sf_magnetic_xray_polarised
     if scattering_type in SCATTERING_TYPES['xray resonant']:
         return sf_magnetic_xray_resonant
+    if scattering_type in SCATTERING_TYPES['custom']:
+        return sf_custom  # sf_xray_dispersion is the most general as it allows energy
     raise Exception('Scattering name %s not recognised' % scattering_type)
 
 
@@ -885,7 +916,9 @@ def scattering_factors(scattering_type, atom_type, qmag, enval,
     elif scattering_type in SCATTERING_TYPES['xray fast']:
         return fc.atom_properties(atom_type, 'Z')
     elif scattering_type in SCATTERING_TYPES['xray dispersion']:
-        return fc.xray_scattering_factor_resonant(atom_type, qmag, enval)
+        return fc.xray_scattering_factor_resonant(atom_type, qmag, enval, use_waaskirf=use_wasskirf)
+    elif scattering_type in SCATTERING_TYPES['custom']:
+        return fc.custom_scattering_factor(atom_type, qmag, enval)
     elif use_wasskirf:
         return fc.xray_scattering_factor_WaasKirf(atom_type, qmag)
     else:

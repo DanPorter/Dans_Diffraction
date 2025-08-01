@@ -175,7 +175,7 @@ class Plotting:
             axs[i].hist(dist[site]['dist'], range=ranges,
                         bins=int((ranges[1] - ranges[0]) / step))
             axs[i].set(ylabel='n. Atoms')
-        axs[-1].set(xlabel='$\AA$')
+        axs[-1].set(xlabel=r'$\AA$')
         if len(dist) > 1:
             for ax in axs.flat:
                 ax.label_outer()
