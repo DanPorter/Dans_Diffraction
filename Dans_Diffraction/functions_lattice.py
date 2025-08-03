@@ -318,30 +318,31 @@ def random_lattice(symmetry='triclinic'):
     :param symmetry: string 'cubic', 'tetragona', 'rhobohedral', 'monoclinic-a/b/c', 'triclinic'
     :return: (a, b, c, alpha, beta, gamma) lattice parameters in Angstroms/ degrees
     """
-    def rlen():
+    def r_len():
         return np.random.normal(5., 2.0)
 
-    def rang():
+    def r_ang():
         return np.random.normal(90., 20.)
 
     if symmetry == 'cubic':
-        latt = 3 * [rlen()] + [90, 90, 90]
+        latt = 3 * [r_len()] + [90, 90, 90]
     elif symmetry == 'tetragonal':
-        latt = 2 * [rlen()] + [rlen()] + [90, 90, 90]
+        latt = 2 * [r_len()] + [r_len()] + [90, 90, 90]
     elif symmetry == 'hexagonal':
-        latt = 2 * [rlen()] + [rlen()] + [90, 90, 120]
+        latt = 2 * [r_len()] + [r_len()] + [90, 90, 120]
     elif symmetry == 'rhobohedral':
-        latt = 3 * [rlen()] + 3 * [rang()]
+        latt = 3 * [r_len()] + 3 * [r_ang()]
     elif symmetry == 'monoclinic-a':
-        latt = [rlen(), rlen(), rlen(), rang(), 90, 90]
+        latt = [r_len(), r_len(), r_len(), r_ang(), 90, 90]
     elif symmetry == 'monoclinic-b':
-        latt = [rlen(), rlen(), rlen(), 90, rang(), 90]
+        latt = [r_len(), r_len(), r_len(), 90, r_ang(), 90]
     elif symmetry == 'monoclinic-c':
-        latt = [rlen(), rlen(), rlen(), 90, 90, rang()]
+        latt = [r_len(), r_len(), r_len(), 90, 90, r_ang()]
     else:
-        while not angles_allowed(*(triclinic_angles := [rang(), rang(), rang()])):
-            pass
-        latt = [rlen(), rlen(), rlen()] + triclinic_angles
+        triclinic_angles = [r_ang(), r_ang(), r_ang()]
+        while not angles_allowed(*triclinic_angles):
+            triclinic_angles = [r_ang(), r_ang(), r_ang()]
+        latt = [r_len(), r_len(), r_len()] + triclinic_angles
     return tuple(latt)
 
 

@@ -1038,253 +1038,6 @@ def xray_scattering_factor(element, Qmag=0):
     return Qff
 
 
-def electron_scattering_factor(element, Qmag=0):
-    """
-    Read X-ray scattering factor table, calculate f(|Q|)
-    Uses the coefficients for analytical approximation to the scattering factors 
-      Peng, L. M.; Acta Crystallogr A  1996, 52 (2), 257–276. 
-      Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485. 
-    Qff = xray_scattering_factor(element, Qmag=[0])
-    :param element: [n*str] list or array of elements
-    :param Qmag: [m] array of wavevector distance, in A^-1
-    :return: [m*n] array of scattering factors
-    """
-
-    # Qmag should be a 1D array
-    Qmag = np.asarray(Qmag).reshape(-1)
-
-    try:
-        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, encoding='ascii', delimiter=',')
-    except TypeError:
-        # Numpy version < 1.14
-        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, delimiter=',')
-    # elements must be a list e.g. ['Co','O']
-    elements_l = np.asarray(element).reshape(-1)
-    all_elements = [el for el in data['Element']]
-    try:
-        index = [all_elements.index(el) for el in elements_l]
-    except ValueError as ve:
-        raise Exception('Element not available: %s' % ve)
-    data = data[index]
-    coef = data[['a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'a5', 'b5']]
-
-    Qff = np.zeros([len(Qmag), len(coef)])
-
-    # Loop over elements
-    for n in range(len(coef)):
-        a1 = coef['a1'][n]
-        b1 = coef['b1'][n]
-        a2 = coef['a2'][n]
-        b2 = coef['b2'][n]
-        a3 = coef['a3'][n]
-        b3 = coef['b3'][n]
-        a4 = coef['a4'][n]
-        b4 = coef['b4'][n]
-        a5 = coef['a5'][n]
-        b5 = coef['b5'][n]
-
-        # Array multiplication over Qmags
-        f = a1 * np.exp(-b1 * (Qmag / (4 * np.pi)) ** 2) + \
-            a2 * np.exp(-b2 * (Qmag / (4 * np.pi)) ** 2) + \
-            a3 * np.exp(-b3 * (Qmag / (4 * np.pi)) ** 2) + \
-            a4 * np.exp(-b4 * (Qmag / (4 * np.pi)) ** 2) + \
-            a5 * np.exp(-b5 * (Qmag / (4 * np.pi)) ** 2)
-        Qff[:, n] = f
-    return Qff
-
-
-def scattering_factor_coefficients_neutron_ndb(*elements):
-    """
-    Load scattering factor coefficents from differnt tables
-
-    table options:
-        'itc' -> x-ray scattering factors from international tabels Volume C (ITC, p578 Table 6.1.1.4)
-
-    Coefficients are used in the analytical approximation of the scattering factor:
-        f0[k] = c + [SUM a_i * EXP(-b_i * (k ^ 2))]  i=1,4
-    where k is the wavevector.
-
-    coefficients are returned in pairs (a_i, b_i), where c is given as the final element (c, 0):
-        coef = [(a_1, b_1), (a_2, b_2), ..., (c, 0)]
-    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
-    :return: list[tuple(float, float)] - list of pairs of coefficients
-    """
-    coefs = np.zeros([len(elements), 2])
-    nsl = read_neutron_scattering_lengths('neutron data booklet')
-    b_lengths = np.array([
-        nsl[element] if element in nsl else 0
-        for element in np.char.lower(np.asarray(elements).reshape(-1))
-    ])
-    for n, (element, b_length) in enumerate(zip(elements, b_lengths)):
-        coefs[n, :] = [b_length, 0]
-    return coefs
-
-
-def scattering_factor_coefficients_neutron_sears(*elements):
-    """
-    Load scattering factor coefficents from differnt tables
-
-    table options:
-        'itc' -> x-ray scattering factors from international tabels Volume C (ITC, p578 Table 6.1.1.4)
-
-    Coefficients are used in the analytical approximation of the scattering factor:
-        f0[k] = c + [SUM a_i * EXP(-b_i * (k ^ 2))]  i=1,4
-    where k is the wavevector.
-
-    coefficients are returned in pairs (a_i, b_i), where c is given as the final element (c, 0):
-        coef = [(a_1, b_1), (a_2, b_2), ..., (c, 0)]
-    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
-    :return: list[tuple(float, float)] - list of pairs of coefficients
-    """
-    coefs = np.zeros([len(elements), 2])
-    nsl = read_neutron_scattering_lengths('sears')
-    b_lengths = np.array([
-        nsl[element] if element in nsl else 0
-        for element in np.char.lower(np.asarray(elements).reshape(-1))
-    ])
-    for n, (element, b_length) in enumerate(zip(elements, b_lengths)):
-        coefs[n, :] = [b_length, 0]
-    return coefs
-
-
-def scattering_factor_coefficients_xray_itc(*elements):
-    """
-    Load scattering factor coefficents from differnt tables
-
-    table options:
-        'itc' -> x-ray scattering factors from international tabels Volume C (ITC, p578 Table 6.1.1.4)
-
-    Coefficients are used in the analytical approximation of the scattering factor:
-        f0[k] = c + [SUM a_i * EXP(-b_i * (k ^ 2))]  i=1,4
-    where k is the wavevector.
-
-    coefficients are returned in pairs (a_i, b_i), where c is given as the final element (c, 0):
-        coef = [(a_1, b_1), (a_2, b_2), ..., (c, 0)]
-    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
-    :return: list[tuple(float, float)] - list of pairs of coefficients
-    """
-    out = np.zeros([len(elements), 10])
-    data = atom_properties(None,  ['Element', 'a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'c'])
-    all_elements = list(data['Element'])
-    for n, element in enumerate(elements):
-        if element in all_elements:
-            idx = all_elements.index(element)
-            el, a1, b1, a2, b2, a3, b3, a4, b4, c = data[idx]
-            out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, c, 0]
-    return out
-
-
-def scattering_factor_coefficients_xray_waaskirf(*elements):
-    """
-    Load scattering factor coefficents from differnt tables
-
-    table options:
-        'waaskirf' -> x-ray scattering factors from Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431
-
-    Coefficients are used in the analytical approximation of the scattering factor:
-        f0[k] = c + [SUM a_i * EXP(-b_i * (k ^ 2))]  i=1,5
-    where k is the wavevector.
-
-    coefficients are returned in pairs (a_i, b_i), where c is given as the final element (c, 0):
-        coef = [(a_1, b_1), (a_2, b_2), ..., (c, 0)]
-    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
-    :return: list[tuple(float, float)] - list of pairs of coefficients
-    """
-    out = np.zeros([len(elements), 12])
-
-    data = read_waaskirf_scattering_factor_coefs()
-    for n, element in elements:
-        if element in data:
-            a1, a2, a3, a4, a5, c, b1, b2, b3, b4, b5 = data[element]
-            out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, a5, b5, c, 0]
-    return out
-
-
-def scattering_factor_coefficients_electron_peng(*elements):
-    """
-    Load scattering factor coefficents from differnt tables
-
-    table options:
-        'peng' -> electron scattering factors from Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485.
-
-    Coefficients are used in the analytical approximation of the scattering factor:
-        f0[k] = c + [SUM a_i * EXP(-b_i * (k ^ 2))]  i=1,5
-    where k is the wavevector.
-
-    coefficients are returned in pairs (a_i, b_i), where c is given as the final element (c, 0):
-        coef = [(a_1, b_1), (a_2, b_2), ..., (c, 0)]
-    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
-    :return: list[tuple(float, float)] - list of pairs of coefficients
-    """
-    out = np.zeros([len(elements), 10])
-
-    try:
-        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, encoding='ascii', delimiter=',')
-    except TypeError:
-        # Numpy version < 1.14
-        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, delimiter=',')
-
-    all_elements = list(data['Element'])
-    for n, element in elements:
-        if element in all_elements:
-            idx = all_elements.index(element)
-            a1, b1, a2, b2, a3, b3, a4, b4, c = data[idx][['a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'a5', 'b5']]
-            out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, c, 0]
-    return out
-
-
-def scattering_factor_coefficients(*elements, table='itc'):
-    """
-    Load scattering factor coefficents from differnt tables
-
-    table options:
-        'itc' -> x-ray scattering factors from international tabels Volume C (ITC, p578 Table 6.1.1.4)
-        'waaskirf' -> x-ray scattering factors from Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431
-        'peng' -> electron scattering factors from Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485.
-
-    Coefficients are used in the analytical approximation of the scattering factor:
-        f0[k] = c + [SUM a_i * EXP(-b_i * (k ^ 2))]  i=1,5
-    where k is the wavevector.
-
-    coefficients are returned in pairs (a_i, b_i), where c is given as the final element (c, 0):
-        coef = [(a_0, b_0), (a_1, b_1), ..., (c, 0)]
-    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
-    :param table: str table name
-    :return: list[tuple(float, float)] - list of pairs of coefficients
-    """
-    if table.lower() == 'itc':
-        coefs = scattering_factor_coefficients_xray_itc(*elements)
-    elif table.lower() == 'waaskirf':
-        coefs = scattering_factor_coefficients_xray_waaskirf(*elements)
-    elif table.lower() == 'peng':
-        coefs = scattering_factor_coefficients_electron_peng(*elements)
-    elif table.lower() == 'ndb':
-        coefs = scattering_factor_coefficients_neutron_ndb(*elements)
-    else:
-        raise ValueError('Unknown scattering factor table')
-    return coefs
-
-
-def analytical_scattering_factor(q_mag, *coefs):
-    """
-    Calculate the analytical scattering factor
-
-    f0[|Q|] = c + [SUM a_i * EXP(-b_i * (|Q| ^ 2))]  i=1,n
-    coefs = (a_1, b_1, a_2, b_2, ..., a_n, b_n)
-    f0 = analytical_scattering_factor(q_mag, *coefs)
-
-    :param q_mag: [m] array of wavevector distance, in A^-1
-    :param coefs: float values of coefficients
-    :return: [m] array of scattering factors
-    """
-    q_mag = np.asarray(q_mag, dtype=float).reshape(-1)
-    q = (q_mag / (4 * np.pi)) ** 2
-    # pad and reshape coefs into [n,2]
-    coefs = np.reshape(np.pad(coefs, [0, len(coefs) % 2]), [-1, 2])
-    f = sum(a * np.exp(-b * q) for a, b in coefs)
-    return f
-
-
 def xray_scattering_factor_WaasKirf(element, Qmag=0):
     """
     Read X-ray scattering factor table, calculate f(|Q|)
@@ -1364,6 +1117,227 @@ def xray_scattering_factor_resonant(elements, Qmag, energy_kev, use_waaskirf=Fal
     return Qff
 
 
+def electron_scattering_factor(element, Qmag=0):
+    """
+    Read X-ray scattering factor table, calculate f(|Q|)
+    Uses the coefficients for analytical approximation to the scattering factors 
+      Peng, L. M.; Acta Crystallogr A  1996, 52 (2), 257–276. 
+      Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485. 
+    Qff = xray_scattering_factor(element, Qmag=[0])
+    :param element: [n*str] list or array of elements
+    :param Qmag: [m] array of wavevector distance, in A^-1
+    :return: [m*n] array of scattering factors
+    """
+
+    # Qmag should be a 1D array
+    Qmag = np.asarray(Qmag).reshape(-1)
+
+    try:
+        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, encoding='ascii', delimiter=',')
+    except TypeError:
+        # Numpy version < 1.14
+        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, delimiter=',')
+    # elements must be a list e.g. ['Co','O']
+    elements_l = np.asarray(element).reshape(-1)
+    all_elements = [el for el in data['Element']]
+    try:
+        index = [all_elements.index(el) for el in elements_l]
+    except ValueError as ve:
+        raise Exception('Element not available: %s' % ve)
+    data = data[index]
+    coef = data[['a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'a5', 'b5']]
+
+    Qff = np.zeros([len(Qmag), len(coef)])
+
+    # Loop over elements
+    for n in range(len(coef)):
+        a1 = coef['a1'][n]
+        b1 = coef['b1'][n]
+        a2 = coef['a2'][n]
+        b2 = coef['b2'][n]
+        a3 = coef['a3'][n]
+        b3 = coef['b3'][n]
+        a4 = coef['a4'][n]
+        b4 = coef['b4'][n]
+        a5 = coef['a5'][n]
+        b5 = coef['b5'][n]
+
+        # Array multiplication over Qmags
+        f = a1 * np.exp(-b1 * (Qmag / (4 * np.pi)) ** 2) + \
+            a2 * np.exp(-b2 * (Qmag / (4 * np.pi)) ** 2) + \
+            a3 * np.exp(-b3 * (Qmag / (4 * np.pi)) ** 2) + \
+            a4 * np.exp(-b4 * (Qmag / (4 * np.pi)) ** 2) + \
+            a5 * np.exp(-b5 * (Qmag / (4 * np.pi)) ** 2)
+        Qff[:, n] = f
+    return Qff
+
+
+def scattering_factor_coefficients_neutron_ndb(*elements):
+    """
+    Load neutron scattering factor coefficents
+
+    Values are extracted from Periodic Table https://github.com/pkienzle/periodictable
+     - Values originally from Neutron Data Booklet, by A-J Dianoux, G. Lander (2003), with additions and corrections upto v1.7.0 (2023)
+
+    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
+    :return: list[tuple(float, float)] - list of pairs of coefficients
+    """
+    coefs = np.zeros([len(elements), 2])
+    nsl = read_neutron_scattering_lengths('neutron data booklet')
+    b_lengths = np.array([
+        nsl[element] if element in nsl else 0
+        for element in np.char.lower(np.asarray(elements).reshape(-1))
+    ])
+    for n, (element, b_length) in enumerate(zip(elements, b_lengths)):
+        coefs[n, :] = [b_length, 0]
+    return coefs
+
+
+def scattering_factor_coefficients_neutron_sears(*elements):
+    """
+    Load neutron scattering factor coefficents
+
+    Values are taken form the table:
+     - ITC Vol. C, Section 4.4.4., By V. F. Sears Table 4.4.4.1 (Jan 1995)
+
+    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
+    :return: list[tuple(float, float)] - list of pairs of coefficients
+    """
+    coefs = np.zeros([len(elements), 2])
+    nsl = read_neutron_scattering_lengths('sears')
+    b_lengths = np.array([
+        nsl[element] if element in nsl else 0
+        for element in np.char.lower(np.asarray(elements).reshape(-1))
+    ])
+    for n, (element, b_length) in enumerate(zip(elements, b_lengths)):
+        coefs[n, :] = [b_length, 0]
+    return coefs
+
+
+def scattering_factor_coefficients_xray_itc(*elements):
+    """
+    Load x-ray scattering factor coefficents
+
+    Uses the coefficients for analytical approximation to the scattering factors - ITC, p578 Table 6.1.1.4
+
+    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
+    :return: list[tuple(float, float)] - list of pairs of coefficients
+    """
+    out = np.zeros([len(elements), 10])
+    data = atom_properties(None,  ['Element', 'a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'c'])
+    all_elements = list(data['Element'])
+    for n, element in enumerate(elements):
+        if element in all_elements:
+            idx = all_elements.index(element)
+            el, a1, b1, a2, b2, a3, b3, a4, b4, c = data[idx]
+            out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, c, 0]
+    return out
+
+
+def scattering_factor_coefficients_xray_waaskirf(*elements):
+    """
+    Load x-ray scattering factor coefficents
+
+    Uses the coefficients for analytical approximation to the scattering factors from:
+       "Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431"
+    File from https://github.com/diffpy/libdiffpy/blob/master/src/runtime/f0_WaasKirf.dat
+
+    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
+    :return: list[tuple(float, float)] - list of pairs of coefficients
+    """
+    out = np.zeros([len(elements), 12])
+
+    data = read_waaskirf_scattering_factor_coefs()
+    for n, element in elements:
+        if element in data:
+            a1, a2, a3, a4, a5, c, b1, b2, b3, b4, b5 = data[element]
+            out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, a5, b5, c, 0]
+    return out
+
+
+def scattering_factor_coefficients_electron_peng(*elements):
+    """
+    Load electron scattering factor coefficents
+
+    Uses the coefficients for analytical approximation to the scattering factors
+      Peng, L. M.; Acta Crystallogr A  1996, 52 (2), 257–276.
+      Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485.
+
+    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
+    :return: list[tuple(float, float)] - list of pairs of coefficients
+    """
+    out = np.zeros([len(elements), 10])
+
+    try:
+        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, encoding='ascii', delimiter=',')
+    except TypeError:
+        # Numpy version < 1.14
+        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, delimiter=',')
+
+    all_elements = list(data['Element'])
+    for n, element in elements:
+        if element in all_elements:
+            idx = all_elements.index(element)
+            a1, b1, a2, b2, a3, b3, a4, b4, c = data[idx][['a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'a5', 'b5']]
+            out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, c, 0]
+    return out
+
+
+def scattering_factor_coefficients(*elements, table='itc'):
+    """
+    Load scattering factor coefficents from differnt tables
+
+    table options:
+        'itc' -> x-ray scattering factors from international tabels Volume C (ITC, p578 Table 6.1.1.4)
+        'waaskirf' -> x-ray scattering factors from Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431
+        'peng' -> electron scattering factors from Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485.
+        'ndb' -> neutron scattering lengths from Neutron data booklet
+        'sears' -> neutron scattering lengths from the international tables
+
+    Coefficients are used in the analytical approximation of the scattering factor:
+        f0[k] = c + [SUM a_i * EXP(-b_i * (k ^ 2))]  i=1,j
+    where k is the wavevector, j varies depending on which table is used.
+
+    coefficients are returned in pairs (a_i, b_i), where c is given as the final element (c, 0):
+        coef = [(a_0, b_0), (a_1, b_1), ..., (c, 0)]
+    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
+    :param table: str table name
+    :return: list[tuple(float, float)] - list of pairs of coefficients
+    """
+    # scattering factor ables
+    tables = {
+        'itc': scattering_factor_coefficients_xray_itc,
+        'waaskirf': scattering_factor_coefficients_xray_waaskirf,
+        'peng': scattering_factor_coefficients_electron_peng,
+        'ndb': scattering_factor_coefficients_neutron_ndb,
+        'sears': scattering_factor_coefficients_neutron_sears
+    }
+    table = table.lower()
+    if table.lower() not in tables:
+        raise ValueError(f'Unknown scattering factor table: {table}')
+    return tables[table](*elements)
+
+
+def analytical_scattering_factor(q_mag, *coefs):
+    """
+    Calculate the analytical scattering factor
+
+    f0[|Q|] = c + [SUM a_i * EXP(-b_i * (|Q| ^ 2))]  i=1,n
+    coefs = (a_1, b_1, a_2, b_2, ..., a_n, b_n)
+    f0 = analytical_scattering_factor(q_mag, *coefs)
+
+    :param q_mag: [m] array of wavevector distance, in A^-1
+    :param coefs: float values of coefficients
+    :return: [m] array of scattering factors
+    """
+    q_mag = np.asarray(q_mag, dtype=float).reshape(-1)
+    q = (q_mag / (4 * np.pi)) ** 2
+    # pad and reshape coefs into [n,2]
+    coefs = np.reshape(np.pad(coefs, [0, len(coefs) % 2]), [-1, 2])
+    f = sum(a * np.exp(-b * q) for a, b in coefs)
+    return f
+
+
 def add_custom_form_factor_coefs(element, *coefs, dispersion_table=None):
     """
     Custom form factor coefficients
@@ -1395,7 +1369,7 @@ def scattering_factor_coefficients_custom(*elements, default_table='itc'):
     return coefs
 
 
-def xray_dispersion_table_custom(*elements):
+def dispersion_table_custom(*elements):
     """
     Load custom table of x-ray dispersion corrections
         energy, f1, f2 = xray_dispersion_table_custom('element')
@@ -1440,7 +1414,7 @@ def custom_scattering_factor(elements, q_mag, energy_kev, default_table='itc'):
     qff = np.zeros([len(q_mag), len(elements), len(energy_kev)], dtype=complex)
 
     element_coefs = scattering_factor_coefficients_custom(*elements, default_table=default_table)
-    tables = xray_dispersion_table_custom(*elements)
+    tables = dispersion_table_custom(*elements)
     for n, el in enumerate(elements):
         coefs = element_coefs[el]
         tab_en, tab_f1, tab_f2 = tables[el]
@@ -1986,6 +1960,8 @@ def find_spacegroup(sg_symbol):
     """
     sg_symbol = sg_symbol.replace(' ', '').replace('\"', '')
     sg_dict = spacegroups()
+    if str(sg_symbol) in sg_dict:
+        return sg_dict[str(sg_symbol)]
     sg_keys = list(sg_dict.keys())
     sg_names = [sg['space group name'] for sg in sg_dict.values()]
     if sg_symbol in sg_names:
@@ -1993,12 +1969,21 @@ def find_spacegroup(sg_symbol):
         return sg_dict[key]
 
     sg_dict_mag = spacegroups_magnetic()
-    sg_keys = list(sg_dict_mag.keys())
-    sg_names = [sg['space group name'] for sg in sg_dict_mag.values()]
-    if sg_symbol in sg_names:
-        key = sg_keys[sg_names.index(sg_symbol)]
+    if str(sg_symbol) in sg_dict_mag:
+        return sg_dict_mag[str(sg_symbol)]
+    sg_keys_mag = list(sg_dict_mag.keys())
+    sg_names_mag = [sg['space group name'] for sg in sg_dict_mag.values()]
+    if sg_symbol in sg_names_mag:
+        key = sg_keys_mag[sg_names_mag.index(sg_symbol)]
         return sg_dict_mag[key]
-    # TODO: add closest matching spacegroup
+    # Find first matching spacegroup
+    sg_symbol = sg_symbol.lower()
+    for stored_symbol in sg_names:
+        if sg_symbol in stored_symbol.lower():
+            return sg_dict[sg_keys[sg_names.index(stored_symbol)]]
+    for stored_symbol in sg_names_mag:
+        if sg_symbol in stored_symbol.lower():
+            return sg_dict_mag[sg_keys_mag[sg_names_mag.index(stored_symbol)]]
     return None
 
 
