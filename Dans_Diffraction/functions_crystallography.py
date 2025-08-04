@@ -1248,7 +1248,7 @@ def scattering_factor_coefficients_xray_waaskirf(*elements):
     out = np.zeros([len(elements), 12])
 
     data = read_waaskirf_scattering_factor_coefs()
-    for n, element in elements:
+    for n, element in enumerate(elements):
         if element in data:
             a1, a2, a3, a4, a5, c, b1, b2, b3, b4, b5 = data[element]
             out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, a5, b5, c, 0]
@@ -1275,11 +1275,11 @@ def scattering_factor_coefficients_electron_peng(*elements):
         data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, delimiter=',')
 
     all_elements = list(data['Element'])
-    for n, element in elements:
+    for n, element in enumerate(elements):
         if element in all_elements:
             idx = all_elements.index(element)
-            a1, b1, a2, b2, a3, b3, a4, b4, c = data[idx][['a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'a5', 'b5']]
-            out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, c, 0]
+            a1, b1, a2, b2, a3, b3, a4, b4, a5, b5 = data[idx][['a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'a5', 'b5']]
+            out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, a5, b5]
     return out
 
 
@@ -1377,7 +1377,7 @@ def dispersion_table_custom(*elements):
     :return: {'element': np.array([energy_kev, f1, f2])}
     """
     # Generate table
-    log_step = 0.003  # 0.007 in original tables
+    log_step = 0.001  # 0.007 in original tables
     min_energy = 10.0
     max_energy = 30000
     energy_kev = 10 ** np.arange(np.log10(min_energy), np.log10(max_energy) + log_step, log_step) / 1000.
@@ -1391,15 +1391,77 @@ def dispersion_table_custom(*elements):
     return tables
 
 
-def custom_scattering_factor(elements, q_mag, energy_kev, default_table='itc'):
+def custom_scattering_factor(elements, q_mag, energy_kev=None, default_table='itc'):
     """
     Read X-ray scattering factor table, calculate f(|Q|)
-    Uses the coefficients for analytical approximation to the scattering factors - ITC, p578
-     Qff = xray_scattering_factor_resonant(element, energy_kev, qmag)
+     Qff = custom_scattering_factor(element, q_mag, energy_kev=None)
 
-    if resonant_energy = float(energy in keV), the total atomic scattering amplitude will be returned:
+    if energy_kev = array(energy in keV), the total atomic scattering amplitude will be returned:
         f(|Q|, E) = f0(|Q|) + f'(E) - if''(E)
-    See:
+
+    where f0 is the custom scattering factor calculated from analytical coefficients,
+    f' and f'' are the energy dependent dispersion corrections interpolated from
+    tabulated data.
+
+    if energy_kev is None, f' and f'' are not included.
+
+    Analytical coefficients and dispersion correction tables are taken for each element
+    from the interntal custom table (see add_custom_form_factor_coefs()).
+    If the element symbol is not found in the internal table, instead they are taken
+    from the default_table.
+
+    default_table options:
+        'itc' -> x-ray scattering factors from international tabels Volume C (ITC, p578 Table 6.1.1.4)
+        'waaskirf' -> x-ray scattering factors from Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431
+        'peng' -> electron scattering factors from Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485.
+        'ndb' -> neutron scattering lengths from Neutron data booklet
+        'sears' -> neutron scattering lengths from the international tables
+
+    :param elements: [n*str] list or array of elements
+    :param q_mag: [m] array wavevector distance |Q|, in A^-1
+    :param energy_kev: [o] array energy in keV or None [o==1]
+    :param default_table: scattering factor table to use if element not in custom list
+    :return: [m*n*o] complex array of scattering factors
+    """
+
+    if energy_kev is not None:
+        return custom_scattering_factor_resonant(elements, q_mag, energy_kev, default_table)
+
+    elements = np.asarray(elements, dtype=str).reshape(-1)
+    q_mag = np.asarray(q_mag).reshape(-1)
+    qff = np.zeros([len(q_mag), len(elements), 1], dtype=complex)
+    element_coefs = scattering_factor_coefficients_custom(*elements, default_table=default_table)
+    for n, el in enumerate(elements):
+        coefs = element_coefs[el]
+        f0 = analytical_scattering_factor(q_mag, *coefs)  # (n_q, )
+        qff[:, n, 0] = f0
+    return qff
+
+
+def custom_scattering_factor_resonant(elements, q_mag, energy_kev, default_table='itc'):
+    """
+    Read X-ray scattering factor table, calculate f(|Q|)
+     Qff = custom_scattering_factor(element, q_mag, energy_kev)
+
+    if energy_kev = array(energy in keV), the total atomic scattering amplitude will be returned:
+        f(|Q|, E) = f0(|Q|) + f'(E) - if''(E)
+
+    where f0 is the custom scattering factor calculated from analytical coefficients,
+    f' and f'' are the energy dependent dispersion corrections interpolated from
+    tabulated data.
+
+    Analytical coefficients and dispersion correction tables are taken for each element
+    from the interntal custom table (see add_custom_form_factor_coefs()).
+    If the element symbol is not found in the internal table, instead they are taken
+    from the default_table.
+
+    default_table options:
+        'itc' -> x-ray scattering factors from international tabels Volume C (ITC, p578 Table 6.1.1.4)
+        'waaskirf' -> x-ray scattering factors from Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431
+        'peng' -> electron scattering factors from Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485.
+        'ndb' -> neutron scattering lengths from Neutron data booklet
+        'sears' -> neutron scattering lengths from the international tables
+
     :param elements: [n*str] list or array of elements
     :param q_mag: [m] array wavevector distance |Q|, in A^-1
     :param energy_kev: [o] array energy in keV
