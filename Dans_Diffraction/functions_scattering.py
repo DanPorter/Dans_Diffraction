@@ -39,13 +39,14 @@ By Dan Porter, PhD
 Diamond
 2018
 
-Version 1.0
-Last updated: 06/02/25
+Version 1.1
+Last updated: 05/08/25
 
 Version History:
 11/11/18 0.1    Version History started.
 13/07/21 0.9    Functions re-written and tested
 06/02/25 1.0    Removed refrences to unpolarised magnetic scattering due to incorrect averaging
+05/08/25 1.1    Added custom scattering option
 
 @author: DGPorter
 """
@@ -836,6 +837,15 @@ def scatteringvectors(q, energy_kev, azi_ref_q=(1, 0, 0), psi=0, polarisation='s
 ########################################################################################################################
 # ----------------------------------------  ScatteringTypes  --------------------------------------------------------- #
 ########################################################################################################################
+
+
+def get_scattering_type(scattering_type):
+    """Return correct label for scattering type"""
+    scattering_type = scattering_type.lower()
+    for name, alt_names in SCATTERING_TYPES.items():
+        if scattering_type in alt_names:
+            return name
+    raise Exception(f"Scattering type {scattering_type} not recognized")
 
 
 def get_scattering_function(scattering_type):

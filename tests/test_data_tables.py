@@ -59,6 +59,11 @@ def test_old_new_functions():
     assert diff < 10, f"resonant scattering factors are incorrect"
 
 
+def test_magnetic_form_factor():
+    # TODO: add tests
+    assert True
+
+
 def test_custom_scattering_factor():
     coefs = (12.2841, 4.5791, 7.4409, 0.6784, 4.2034, 12.5359, 2.2488, 72.1692, 1.1118, 0.)
     table = np.array([

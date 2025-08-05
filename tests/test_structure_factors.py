@@ -95,3 +95,8 @@ def test_magnetic_mno():
         polarisation_vector=[1, 0, 0]
     )
     assert abs(xtl.Scatter.intensity([1, 1, 1]) - 4332.39) < 0.01, 'incorrect polarised neutron intensity'
+
+
+def test_magnetic_neutron():
+    # TODO: test against SF from https://taro-nakajima.github.io/fcal-n/
+    assert True

@@ -182,7 +182,7 @@ class Scattering:
         #out += '  use m1m1 approx.: %s\n' % self._resonant_approximation_m1m1
         return out
 
-    def setup_scatter(self, scattering_type=None, energy_kev=None, wavelength_a=None,
+    def setup_scatter(self, scattering_type=None, energy_kev=None, energy_mev=None, wavelength_a=None,
                       powder_units=None, powder_pixels=None, powder_lorentz=None, powder_overlap=None,
                       int_hkl=None, specular=None, parallel=None, theta_offset=None,
                       min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None,
@@ -217,13 +217,21 @@ class Scattering:
         """
 
         if scattering_type is not None:
-            self._scattering_type = scattering_type
+            self._scattering_type = fs.get_scattering_type(scattering_type)
 
         if energy_kev is not None:
             self._energy_kev = energy_kev
 
+        if energy_mev is not None:
+            self._energy_kev = energy_mev * 1e-6
+
         if wavelength_a is not None:
-            self._energy_kev = fc.wave2energy(wavelength_a)
+            if 'neutron' in self._scattering_type:
+                self._energy_kev = fc.neutron_energy(wavelength_a) * 1e-6  # meV
+            elif 'electron' in self._scattering_type:
+                self._energy_kev = fc.electron_energy(wavelength_a) * 1e-3  # eV
+            else:
+                self._energy_kev = fc.wave2energy(wavelength_a)
 
         if powder_units is not None:
             self._powder_units = powder_units

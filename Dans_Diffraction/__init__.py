@@ -31,8 +31,8 @@ By Dan Porter, PhD
 Diamond
 2017-2025
 
-Version 3.3.4
-Last updated: 12/04/2025
+Version 3.4.0
+Last updated: 05/08/2025
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -85,6 +85,7 @@ Version History:
 20/11/24 3.3.2  Added alternate option for neutron scattering lengths
 06/02/25 3.3.3  Added scattering options for polarised neutron and x-ray scattering. Thanks dragonyanglong!
 12/04/25 3.3.4  Improved superstructure calculations by fixing scale parameter
+05/08/25 3.4.0  Added custom atomic form factors and dispersion corrections
 
 Acknoledgements:
     2018        Thanks to Hepesu for help with Python3 support and ideas about breaking up calculations
@@ -112,6 +113,7 @@ Acknoledgements:
     Sep 2024    Thanks to thamnos for suggestion to add complex neutron scattering lengths
     Oct 2024    Thanks to Lee Richter for pointing out the error in triclinic basis definition
     Dec 2024    Thanks to dragonyanglong for pointing out the error with magnetic neutron scattering
+    May 2025    Thanks to vbhartiya for suggestions about magnetic neutron scattering
 
 -----------------------------------------------------------------------------
    Copyright 2018-2025 Diamond Light Source Ltd.
@@ -166,8 +168,8 @@ __all__ = ['fg', 'fp', 'fl', 'fc', 'Crystal', 'MultiCrystal', 'readcif',
            'Structures', 'Fdmnes', 'FdmnesAnalysis']
 
 
-__version__ = '3.3.3'
-__date__ = '2025/02/06'
+__version__ = '3.4.0'
+__date__ = '2025/08/05'
 
 
 # Build
