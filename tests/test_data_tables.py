@@ -60,8 +60,37 @@ def test_old_new_functions():
 
 
 def test_magnetic_form_factor():
-    # TODO: add tests
-    assert True
+    mff = dif.fc.load_magnetic_ff_coefs()
+    elements = [
+        # mmf label, element
+        ('Co0', 'Co'),
+        ('Co1', 'Co1+'),
+        ('Co3', 'Co3+'),
+        ('O', 'O'),
+        ('Ru1', 'Ru1+'),
+        ('U4', 'U4+')
+    ]
+    coefs = dif.fc.magnetic_ff_coefs(*(el for lab, el in elements))
+    for n, (label, element) in enumerate(elements):
+        if label in mff:
+            assert all(abs(coefs[n] - list(mff[label].values())[:21]) < 0.001), f"form factor coefficients for {element} wrong"
+
+    glande = dif.fc.magnetic_ff_g_factor(*(el for lab, el in elements))
+    check = [1.3333, 1.5, 2, 0, 2, 1.5]
+    assert all(abs(glande - check) < 0.01), 'incrorrect Lande g-factor'
+
+    ratio = [dif.fc.magnetic_ff_j2j0_ratio(g) for g in glande]
+    check = [0.5, 0.333, 0, 0, 0, 0.333]
+    assert all(abs(r - c) < 0.01 for r, c in zip(ratio, check)), 'incorrect j2j0 ratio'
+
+    qmag = [0, 4, 12]
+    ff = dif.fc.magnetic_form_factor(*(el for lab, el in elements), qmag=qmag)
+    check  = [
+        [ 0.9979,  0.9996,  0.9998,  0.    ,  1.    ,  1.0001],
+        [ 0.5198,  0.4582,  0.4902,  0.    ,  0.1202,  0.2987],
+        [ 0.036 ,  0.0208, -0.0073,  0.    ,  0.0158,  0.0129]
+    ]
+    assert (abs(ff - check) < 0.001).all(), "incorrect form factors"
 
 
 def test_custom_scattering_factor():

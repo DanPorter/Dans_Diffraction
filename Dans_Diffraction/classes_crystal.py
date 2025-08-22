@@ -1588,6 +1588,10 @@ class Atoms:
 
         return weights / total_weight
 
+    def scattering_factor_coefficients(self, table='itc'):
+        """Return scattering factor coefficients for the elements"""
+        return fc.scattering_factor_coefficients(*self.type, table=table)
+
     def info(self, idx=None, type=None):
         """
         Prints properties of all atoms

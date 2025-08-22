@@ -996,8 +996,11 @@ def neutron_scattering_length(elements, table='neutron data booklet'):
     """
     # b = atom_properties(element, ['Coh_b'])
     nsl = read_neutron_scattering_lengths(table)
-    b = np.array([nsl[element] for element in np.char.lower(np.asarray(elements).reshape(-1))])
-    return b
+    b_lengths = np.array([
+        nsl[element] if element in nsl else nsl.get(split_element_symbol(element)[0], 0)
+        for element in np.char.lower(np.asarray(elements).reshape(-1))
+    ])
+    return b_lengths
 
 
 def xray_scattering_factor(element, Qmag=0):
@@ -1179,15 +1182,11 @@ def scattering_factor_coefficients_neutron_ndb(*elements):
     Values are extracted from Periodic Table https://github.com/pkienzle/periodictable
      - Values originally from Neutron Data Booklet, by A-J Dianoux, G. Lander (2003), with additions and corrections upto v1.7.0 (2023)
 
-    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
-    :return: list[tuple(float, float)] - list of pairs of coefficients
+    :param elements: str element symbol, must appear in the selected table, or zero is returned
+    :return: list[float, float, ...] - list of pairs of coefficients
     """
     coefs = np.zeros([len(elements), 2])
-    nsl = read_neutron_scattering_lengths('neutron data booklet')
-    b_lengths = np.array([
-        nsl[element] if element in nsl else 0
-        for element in np.char.lower(np.asarray(elements).reshape(-1))
-    ])
+    b_lengths = neutron_scattering_length(elements, 'neutron data booklet')
     for n, (element, b_length) in enumerate(zip(elements, b_lengths)):
         coefs[n, :] = [b_length, 0]
     return coefs
@@ -1200,15 +1199,11 @@ def scattering_factor_coefficients_neutron_sears(*elements):
     Values are taken form the table:
      - ITC Vol. C, Section 4.4.4., By V. F. Sears Table 4.4.4.1 (Jan 1995)
 
-    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
-    :return: list[tuple(float, float)] - list of pairs of coefficients
+    :param elements: str element symbol, must appear in the selected table, or zero is returned
+    :return: array[n, c] - c is list of pairs of coefficients
     """
-    coefs = np.zeros([len(elements), 2])
-    nsl = read_neutron_scattering_lengths('sears')
-    b_lengths = np.array([
-        nsl[element] if element in nsl else 0
-        for element in np.char.lower(np.asarray(elements).reshape(-1))
-    ])
+    coefs = np.zeros([len(elements), 2], dtype=complex)
+    b_lengths = neutron_scattering_length(elements, 'sears')
     for n, (element, b_length) in enumerate(zip(elements, b_lengths)):
         coefs[n, :] = [b_length, 0]
     return coefs
@@ -1220,15 +1215,18 @@ def scattering_factor_coefficients_xray_itc(*elements):
 
     Uses the coefficients for analytical approximation to the scattering factors - ITC, p578 Table 6.1.1.4
 
-    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
-    :return: list[tuple(float, float)] - list of pairs of coefficients
+    :param elements: str element symbol, must appear in the selected table, or zero is returned
+    :return: array[n, c] - c is list of pairs of coefficients
     """
     out = np.zeros([len(elements), 10])
     data = atom_properties(None,  ['Element', 'a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'c'])
     all_elements = list(data['Element'])
     for n, element in enumerate(elements):
+        symbol, occupancy, charge = split_element_symbol(element)
         if element in all_elements:
-            idx = all_elements.index(element)
+            symbol = element
+        if symbol in all_elements:
+            idx = all_elements.index(symbol)
             el, a1, b1, a2, b2, a3, b3, a4, b4, c = data[idx]
             out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, c, 0]
     return out
@@ -1242,15 +1240,18 @@ def scattering_factor_coefficients_xray_waaskirf(*elements):
        "Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431"
     File from https://github.com/diffpy/libdiffpy/blob/master/src/runtime/f0_WaasKirf.dat
 
-    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
-    :return: list[tuple(float, float)] - list of pairs of coefficients
+    :param elements: str element symbol, must appear in the selected table, or zero is returned
+    :return: array[n, c] - c is list of pairs of coefficients
     """
     out = np.zeros([len(elements), 12])
 
     data = read_waaskirf_scattering_factor_coefs()
     for n, element in enumerate(elements):
+        symbol, occupancy, charge = split_element_symbol(element)
         if element in data:
-            a1, a2, a3, a4, a5, c, b1, b2, b3, b4, b5 = data[element]
+            symbol = element
+        if symbol in data:
+            a1, a2, a3, a4, a5, c, b1, b2, b3, b4, b5 = data[symbol]
             out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, a5, b5, c, 0]
     return out
 
@@ -1263,8 +1264,8 @@ def scattering_factor_coefficients_electron_peng(*elements):
       Peng, L. M.; Acta Crystallogr A  1996, 52 (2), 257–276.
       Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485.
 
-    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
-    :return: list[tuple(float, float)] - list of pairs of coefficients
+    :param elements: str element symbol, must appear in the selected table, or zero is returned
+    :return: array[n, c] - c is list of pairs of coefficients
     """
     out = np.zeros([len(elements), 10])
 
@@ -1276,8 +1277,11 @@ def scattering_factor_coefficients_electron_peng(*elements):
 
     all_elements = list(data['Element'])
     for n, element in enumerate(elements):
+        symbol, occupancy, charge = split_element_symbol(element)
         if element in all_elements:
-            idx = all_elements.index(element)
+            symbol = element
+        if symbol in all_elements:
+            idx = all_elements.index(symbol)
             a1, b1, a2, b2, a3, b3, a4, b4, a5, b5 = data[idx][['a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'a5', 'b5']]
             out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, a5, b5]
     return out
@@ -1300,9 +1304,9 @@ def scattering_factor_coefficients(*elements, table='itc'):
 
     coefficients are returned in pairs (a_i, b_i), where c is given as the final element (c, 0):
         coef = [(a_0, b_0), (a_1, b_1), ..., (c, 0)]
-    :param elements: str element symbol, must appear in the selected table, or a ValueError is raised
+    :param elements: str element symbol, must appear in the selected table, or zero is returned
     :param table: str table name
-    :return: list[tuple(float, float)] - list of pairs of coefficients
+    :return: array[n, c] - c is list of pairs of coefficients
     """
     # scattering factor ables
     tables = {
@@ -1518,7 +1522,86 @@ def load_magnetic_ff_coefs():
     return mff_mcphase
 
 
-def magnetic_form_factor(element, qmag=0., orbital_state=None, gfactor=None):
+def magnetic_ff_symbol(element):
+    """Convert element symbol into style used in magnetic form factor table"""
+    name, occ, charge = split_element_symbol(element)
+    charge = '' if int(charge) == 0 else f"{abs(charge):.0f}"
+    return f"{name.capitalize()}{charge}"
+
+
+def magnetic_ff_coefs(*elements):
+    """Return the magnetic form factor coefficients for an element"""
+    mff = load_magnetic_ff_coefs()
+    value_keys = (
+        'j0A', 'j0a', 'j0B', 'j0b', 'j0C', 'j0c', 'j0D',
+        'j2A', 'j2a', 'j2B', 'j2b', 'j2C', 'j2c', 'j2D',
+        'j4A', 'j4a', 'j4B', 'j4b', 'j4C', 'j4c', 'j4D',
+    )
+    coefs = np.zeros([len(elements), len(value_keys)])
+    for n, ele in enumerate(elements):
+        key = magnetic_ff_symbol(ele)
+        if key in mff:
+            coefs[n, :] = [mff[key][val] for val in value_keys]
+        # else:
+        #     print(f"Not in magnetic form factor table: {ele}")
+    return coefs
+
+
+def print_magnetic_ff_coefs(element):
+    """
+    Print analytical coefficients for the magnetic form factor of an element
+    :param element: element symbol
+    :return: str
+    """
+    mff = load_magnetic_ff_coefs()
+    name, occ, charge = split_element_symbol(element)
+    name = name.capitalize()
+    symbol = magnetic_ff_symbol(element)
+    out = ''
+    for key, coefs in mff.items():
+        if name in key:
+            star = '*' if symbol == key else ''
+            coef_str = ', '.join([f"{coef}={val:8}" for coef, val in coefs.items()])
+            out += f"{star+key:5}: {coef_str}\n"
+    return out
+
+
+def last_df_orbital(element):
+    """
+    Return the orbital configuration of the last d or f orbital in element
+    """
+    name, occ, charge = split_element_symbol(element)
+    return next(reversed([o for o in orbital_configuration(name, charge) if 'd' in o or 'f' in o]), '')
+
+
+def magnetic_ff_g_factor(*elements):
+    """
+    Return the lande g-factor of the given elements
+    """
+    g_factors = []
+    for ele in elements:
+        orbital = last_df_orbital(ele)
+        g_factors.append(glande(*hunds_rule(orbital)) if orbital else 0)
+    return np.squeeze(g_factors)
+
+
+def magnetic_ff_j2j0_ratio(gfactor, ratio_type=1):
+    """
+    Return the ratio of <J2>/<J0> based on the Lande g-factor
+    This comes from using the dipole approximation (small |Q|):
+        F(|Q|) = <j0(|Q|)> + (2-g)/g * <j2(|Q|)>,  where g is the Lande g-factor
+    The ratio is <j2> / j<0> = (2 - g) / g
+    if ratio_type == 2:
+    The ratio is <j2> / j<0> = (1 - 2 / g)
+    """
+    if abs(gfactor) < 0.0001:
+        return 0.0
+    if ratio_type == 2:
+        return 1 - (2 / gfactor)  # equ. 13 http://www.physics.mcgill.ca/~dominic/papers201x/CJP_88_2010_p771.pdf
+    return (2 - gfactor) / gfactor  # equ. 155 http://www.mcphase.de/manual/node130.html#jls
+
+
+def magnetic_form_factor(*elements, qmag=0., orbital_state=None, gfactor=None, j2j0_ratio=None):
     """
     Calcualte the magnetic form factor of an element or list of elements at wavevector |Q|
     Analytical approximation of the magnetic form factor:
@@ -1532,69 +1615,36 @@ def magnetic_form_factor(element, qmag=0., orbital_state=None, gfactor=None):
     The Lande g-factor is determined from the spin and orbital quantum numbers of the element in it's given state
     If the orbital state and g-factor is not given, the neutral d/f state is used (see atom_valence_state())
     E.G.
-        mff = magnetic_form_factor('Co2+', np.arange(0,4,0.1), '3d5')
+        mff = magnetic_form_factor('Co2+', qmag=np.arange(0,4,0.1), orbital_state='3d5')
 
-    :param element: str or list of str element symbols
+    :param elements: str element symbols
     :param qmag: magntude of the wavevector transfer, |Q|, in A^-1
     :param orbital_state: str, valence orbital to use to calculate the g-factor (must be same length as element)
     :param gfactor: float, g-factor to use to calculate orbital component (must be same length as element)
+    :param j2j0_ratio: float, value of <J2>/<J0>, rather than using g-factor
     :return: array([len(qmag), len(element)])
     """
-    elements = fg.liststr(element)
     # s = sin(th)/lambda = |Q|/4pi
     s2 = (np.asarray(qmag).reshape(-1) / (4 * np.pi)) ** 2
 
-    if gfactor is not None:
-        gfactor = np.asarray(gfactor).reshape(-1)
-    elif orbital_state is not None:
-        orbital_state = np.asarray(orbital_state, dtype=str).reshape(-1)
-        gfactor = [glande(*hunds_rule(o)) for o in orbital_state]
+    if j2j0_ratio is not None:
+        j2j0_ratio = np.asarray(j2j0_ratio).reshape(-1)
+    else:
+        if orbital_state is not None:
+            orbital_state = np.asarray(orbital_state, dtype=str).reshape(-1)
+            gfactor = np.array([glande(*hunds_rule(o)) for o in orbital_state])
+        elif gfactor is None:
+            gfactor = magnetic_ff_g_factor(*elements)
+        j2j0_ratio = np.array([magnetic_ff_j2j0_ratio(g) for g in np.reshape(gfactor, -1)])
 
-    mff = load_magnetic_ff_coefs()
+    # replicate last element if array is shorter than elements
+    j2j0_ratio = j2j0_ratio[list(range(j2j0_ratio.size)) + [-1] * (len(elements) - j2j0_ratio.size)]
+
+    coefs = magnetic_ff_coefs(*elements)  # (len(ele) * 21)
     qff = np.zeros([len(s2), len(elements)])
 
     # Loop over elements
-    for n, ele in enumerate(elements):
-        name, occ, charge = split_element_symbol(ele)
-        if name not in mff:
-            continue
-        if gfactor is None:
-            # same as atom_valence_state()
-            orbitals = [o for o in orbital_configuration(name, charge) if 'd' in o or 'f' in o]
-            if len(orbitals) == 0:
-                g = 0
-            else:
-                g = glande(*hunds_rule(orbitals[-1]))
-        else:
-            g = gfactor[n]
-        # print('%2s%d+ %3s S=%3.1f, L=%3.1f, J=%3.1f, g=%3.1f' % (name, charge, dstate, S, L, J, g))
-
-        key = '%s%d' % (name, abs(charge))
-        if ele in mff:
-            # print('key: %s' % ele)
-            coef = mff[ele]
-        elif key in mff:
-            # print('key: %s' % key)
-            coef = mff[key]
-        else:
-            # print('key: %s' % name)
-            coef = mff[name]  # approximate using neutral charge state
-
-        A0 = coef['j0A']
-        a0 = coef['j0a']
-        B0 = coef['j0B']
-        b0 = coef['j0b']
-        C0 = coef['j0C']
-        c0 = coef['j0c']
-        D0 = coef['j0D']
-        A2 = coef['j2A']
-        a2 = coef['j2a']
-        B2 = coef['j2B']
-        b2 = coef['j2b']
-        C2 = coef['j2C']
-        c2 = coef['j2c']
-        D2 = coef['j2D']
-
+    for n, ((A0, a0, B0, b0, C0, c0, D0, A2, a2, B2, b2, C2, c2, D2), rat) in enumerate(zip(coefs[:, :14], j2j0_ratio)):
         j0 = A0 * np.exp(-a0 * s2) + \
              B0 * np.exp(-b0 * s2) + \
              C0 * np.exp(-c0 * s2) + D0
@@ -1602,9 +1652,7 @@ def magnetic_form_factor(element, qmag=0., orbital_state=None, gfactor=None):
               B2 * np.exp(-b2 * s2) +
               C2 * np.exp(-c2 * s2) + D2) * s2
         # Dipole approximation for small q
-        # qff = (L+2*S)*j0*L*j2  # equ 6 https://www.ill.eu/sites/ccsl/ffacts/ffactnode2.html
-        qff[:, n] = j0 + j2 * (2 - g) / g  # equ. 155 http://www.mcphase.de/manual/node130.html#jls
-        # qff[:, n] = j0 + j2 * (1 - 2 / g)  # equ. 13 http://www.physics.mcgill.ca/~dominic/papers201x/CJP_88_2010_p771.pdf
+        qff[:, n] = j0 + (rat * j2)
     return qff
 
 
@@ -2417,6 +2465,7 @@ def glande(S, L, J):
     S = np.asarray(S, dtype=float)
     L = np.asarray(L, dtype=float)
     J = np.asarray(J, dtype=float)
+    J[abs(J) < 0.01] = 0.01
     gj = 1.5 + (S * (S + 1) - L * (L + 1)) / (2 * J * (J + 1))
     if np.isnan(gj):
         gj = 0.0

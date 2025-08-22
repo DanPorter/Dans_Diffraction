@@ -183,6 +183,7 @@ class Scattering:
         return out
 
     def setup_scatter(self, scattering_type=None, energy_kev=None, energy_mev=None, wavelength_a=None,
+                      use_sears=None, use_waaskirf=None,
                       powder_units=None, powder_pixels=None, powder_lorentz=None, powder_overlap=None,
                       int_hkl=None, specular=None, parallel=None, theta_offset=None,
                       min_theta=None, max_theta=None, min_twotheta=None, max_twotheta=None,
@@ -232,6 +233,12 @@ class Scattering:
                 self._energy_kev = fc.electron_energy(wavelength_a) * 1e-3  # eV
             else:
                 self._energy_kev = fc.wave2energy(wavelength_a)
+
+        if use_sears is not None:
+            self._use_sears_scattering_lengths = use_sears
+
+        if use_waaskirf is not None:
+            self._use_waaskirf_scattering_factor = use_waaskirf
 
         if powder_units is not None:
             self._powder_units = powder_units
@@ -514,7 +521,7 @@ class Scattering:
 
                     # Get magnetic form factors
                     if self._use_magnetic_form_factor:
-                        mf = fc.magnetic_form_factor(atom_type, qmag)
+                        mf = fc.magnetic_form_factor(*atom_type, qmag=qmag)
                     else:
                         mf = None
 
@@ -1069,7 +1076,7 @@ class Scattering:
         
         # Get magnetic form factors
         if self._use_magnetic_form_factor:
-            ff = fc.magnetic_form_factor(atom_type, Qmag)
+            ff = fc.magnetic_form_factor(*atom_type, qmag=Qmag)
         else:
             ff = np.ones([len(HKL), Nat])
         
@@ -1135,7 +1142,7 @@ class Scattering:
 
         # Get magnetic form factors
         if self._use_magnetic_form_factor:
-            ff = fc.magnetic_form_factor(atom_type, Qmag)
+            ff = fc.magnetic_form_factor(*atom_type, qmag=Qmag)
         else:
             ff = np.ones([len(HKL), Nat])
 
@@ -1359,7 +1366,7 @@ class Scattering:
 
         # Get magnetic form factors
         if self._use_magnetic_form_factor:
-            ff = fc.magnetic_form_factor(atom_type, Qmag)
+            ff = fc.magnetic_form_factor(*atom_type, qmag=Qmag)
         else:
             ff = np.ones([len(HKL), len(uvw)])
 
@@ -1628,6 +1635,24 @@ class Scattering:
         Jhat_psi = fg.norm(np.cross(Qhat, Ihat_psi))
         return np.vstack([Ihat_psi, Jhat_psi, Qhat])
 
+    def scattering_factors(self, hkl, energy_kev=None):
+        """Return the scattering factors[n, m] for each reflection, hkl[n,3] and each atom [m]"""
+
+        if energy_kev is None:
+            energy_kev = self._energy_kev
+
+        qmag = self.xtl.Cell.Qmag(hkl)
+        # Scattering factors
+        ff = fs.scattering_factors(
+            scattering_type=self._scattering_type,
+            atom_type=self.xtl.Structure.type,
+            qmag=qmag,
+            enval=energy_kev,
+            use_sears=self._use_sears_scattering_lengths,
+            use_wasskirf=self._use_waaskirf_scattering_factor,
+        )
+        return ff
+
     def print_scattering_coordinates(self, hkl, azim_zero=(1, 0, 0), psi=0):
         """
         Transform magnetic vector into components within the scattering plane
@@ -1675,7 +1700,56 @@ class Scattering:
             vals=(HKL[n][0],HKL[n][1],HKL[n][2],IN[n],IX[n],INM[n],IXM[n],IXRss[n],IXRsp[n],IXRps[n],IXRpp[n])
             outstr += fmt % vals
         return outstr
-    
+
+    def print_atom_scattering_factors(self, hkl, energy_kev=None):
+        """show scattering factors for each atom for each reflection"""
+        qmag = self.xtl.Cell.Qmag(hkl)
+        ff = self.scattering_factors(hkl, energy_kev)
+        hkl = np.asarray(hkl, dtype=float).reshape([-1, 3])
+
+        out = f"{self._scattering_type}\n"
+        for n, (h, k, l) in enumerate(hkl):
+            out += f"({h:.3g}, {k:.3g}, {l:.3g})  |Q| = {qmag[n]:.4g} A-1\n"
+            for m, ele in enumerate(self.xtl.Structure.type):
+                out += f"  {ele:5}: {ff[n, m]: 12.5f}\n"
+        return out
+
+    def print_scattering_factor_coefficients(self):
+        """generate string of scattering factor coefficients for each atom"""
+        scattering_type = fs.get_scattering_type(self._scattering_type)
+
+        if 'neutron' in scattering_type:
+            if self._use_sears_scattering_lengths:
+                table = 'sears'
+            else:
+                table = 'ndb'
+        elif 'electron' in scattering_type:
+            table = 'peng'
+        elif 'xray' in scattering_type:
+            if self._use_waaskirf_scattering_factor:
+                table = 'waaskirf'
+            else:
+                table = 'itc'
+        else:
+            raise Exception(f"Unknown scattering type: {scattering_type}")
+
+        coefs = fc.scattering_factor_coefficients(*self.xtl.Structure.type, table=table)
+        if not np.any(coefs[:, -1]):
+            coefs = coefs[:, :-1]  # trim final column if all zeros
+        n_doubles = coefs.shape[1] // 2
+        n_singles = coefs.shape[1] % 2
+
+        structrue = self.xtl.Structure
+        structure_list = zip(structrue.label, structrue.type, structrue.u, structrue.v, structrue.w)
+        out = f"{scattering_type}\n"
+        for n, (label, el, u, v, w) in enumerate(structure_list):
+            out += f"{n:3}  {label:6} {el:5}: {u:8.3g}, {v:8.3g}, {w:8.3g}  : "
+            out += ', '.join(f"a{d} = {coefs[n, 2*d]:.3f}, A{d} = {coefs[n, 2*d+1]:.3f}" for d in range(n_doubles))
+            out += (', ' * int(n_doubles > 0)) + (f"b = {coefs[n, -1]:.3f}" * n_singles)
+            out += '\n'
+        return out
+
+
     def old_intensity(self, HKL, scattering_type=None):
         """
         Calculate the squared structure factor for the given HKL
@@ -2303,48 +2377,50 @@ class Scattering:
         """
         Prints the atomic contributions to the structure factor
         """
-        
-        HKL = np.asarray(np.rint(HKL),dtype=float).reshape([-1,3])
+
+        HKL = np.asarray(np.rint(HKL), dtype=float).reshape([-1, 3])
         Nref = len(HKL)
-        
+
         # Calculate the full intensity
         I = self.intensity(HKL)
-        
+
         # Calculate the structure factors of the symmetric atomic sites
         base_label = self.xtl.Atoms.label
-        uvw,type,label,occ,uiso,mxmymz = self.xtl.Structure.get()
-        
+        uvw, atom_type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
+
         Qmag = self.xtl.Cell.Qmag(HKL)
-        
+
         # Get atomic form factors
-        ff = fc.xray_scattering_factor(type,Qmag)
-        
+        # ff = fc.xray_scattering_factor(atom_type, Qmag)
+        ff = self.scattering_factors(HKL)
+
         # Get Debye-Waller factor
-        dw = fc.debyewaller(uiso,Qmag)
-        
+        dw = fc.debyewaller(uiso, Qmag)
+
         # Calculate dot product
-        dot_KR = np.dot(HKL,uvw.T)
-        
+        dot_KR = np.dot(HKL, uvw.T)
+
         # Calculate structure factor
-        SF =  ff*dw*occ*np.exp(1j*2*np.pi*dot_KR)
-        
+        SF = ff * dw * occ * np.exp(1j * 2 * np.pi * dot_KR)
+
         # Sum structure factors of each base label in atoms
-        SFbase = np.zeros([len(HKL),len(base_label)],dtype=np.complex128)
+        SFbase = np.zeros([len(HKL), len(base_label) + 1], dtype=complex)
         for n in range(len(base_label)):
             label_idx = label == base_label[n]
-            SFbase[:,n] = np.sum(SF[:,label_idx],axis=1)
-        
+            SFbase[:, n] = np.sum(SF[:, label_idx], axis=1)
+        SFbase[:, -1] = SFbase.sum(axis=1)  # add the sum
+
         # Get the real part of the structure factor
-        #SFtot = np.sqrt(np.real(SF * np.conj(SF)))
+        # SFtot = np.sqrt(np.real(SF * np.conj(SF)))
         SFrel = np.real(SFbase)
         SFimg = np.imag(SFbase)
-        
+
         # Generate the results
         outstr = ''
-        outstr+= '( h, k, l) Intensity' + ' '.join(['%12s    '%x for x in base_label])+'\n'
+        outstr += '( h, k, l) Intensity ' + ' '.join(['%12s    ' % x for x in base_label]) + '      Total SF\n'
         for n in range(Nref):
-            ss = ' '.join(['%6.1f + i%-6.1f' % (x,y) for x,y in zip(SFrel[n],SFimg[n])])
-            outstr+= '(%2.0f,%2.0f,%2.0f) %9.2f    %s\n' % (HKL[n,0],HKL[n,1],HKL[n,2],I[n],ss)
+            ss = ' '.join(['%6.1f + i%-6.1f' % (x, y) for x, y in zip(SFrel[n], SFimg[n])])
+            outstr += '(%2.0f,%2.0f,%2.0f) %9.2f   %s\n' % (HKL[n, 0], HKL[n, 1], HKL[n, 2], I[n], ss)
         return outstr
 
     def print_symmetry_contributions(self, HKL):
@@ -2367,7 +2443,8 @@ class Scattering:
         # Calculate the structure factors
         uvw, type, label, occ, uiso, mxmymz = self.xtl.Structure.get()
         Qmag = self.xtl.Cell.Qmag(HKL)
-        ff = fc.xray_scattering_factor(type, Qmag)
+        # ff = fc.xray_scattering_factor(type, Qmag)
+        ff = self.scattering_factors(HKL)
         dw = fc.debyewaller(uiso, Qmag)
         dot_KR = np.dot(HKL, uvw.T)
         phase = np.exp(1j * 2 * np.pi * dot_KR)

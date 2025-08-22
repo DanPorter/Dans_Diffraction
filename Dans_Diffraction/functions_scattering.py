@@ -264,7 +264,7 @@ def sf_magnetic_neutron(q, r, moment, magnetic_formfactor=None, occ=None,  debye
         sfm = np.array([0., 0., 0.])
         for m, mom in enumerate(moment):
             # Calculate Magnetic part
-            qm = mom - np.dot(qh, mom) * qh
+            qm = mom - np.dot(qh, mom) * qh  # [mx, my, mz]
 
             # Calculate structure factor
             sfm = sfm + (magnetic_formfactor[n, m] * debyewaller[n, m] * occ[m] * phase[n, m] * qm)
@@ -273,7 +273,9 @@ def sf_magnetic_neutron(q, r, moment, magnetic_formfactor=None, occ=None,  debye
         # sf[n] = np.dot(sfm, incident_polarisation_vector)
         # sf[n] = np.dot(sfm, sfm)  # maximum possible
         # average polarisation  # 6/2/25: this method is incorrect for averaging polarisations, should combine intensity
-        sf[n] = (np.dot(sfm, [1, 0, 0]) + np.dot(sfm, [0, 1, 0]) + np.dot(sfm, [0, 0, 1])) / 3
+        # sf[n] = (np.dot(sfm, [1, 0, 0]) + np.dot(sfm, [0, 1, 0]) + np.dot(sfm, [0, 0, 1])) / 3
+        # magnitude of moment structure factor
+        sf[n] = np.sqrt(np.dot(sfm, sfm))
     return sf
 
 
@@ -368,8 +370,10 @@ def sf_magnetic_xray(q, r, moment, magnetic_formfactor=None, occ=None, debyewall
         for m, mom in enumerate(moment):
             sfm = sfm + magnetic_formfactor[n, m] * debyewaller[n, m] * occ[m] * phase[n, m] * mom
 
-        # average polarisation
-        sf[n] = (np.dot(sfm, [1, 0, 0]) + np.dot(sfm, [0, 1, 0]) + np.dot(sfm, [0, 0, 1])) / 3
+        # average polarisation # 6/2/25: this method is incorrect for averaging polarisations, should combine intensity
+        # sf[n] = (np.dot(sfm, [1, 0, 0]) + np.dot(sfm, [0, 1, 0]) + np.dot(sfm, [0, 0, 1])) / 3
+        # magnitude of moment structure factor
+        sf[n] = np.sqrt(np.dot(sfm, sfm))
     return sf
 
 
@@ -867,9 +871,9 @@ def get_scattering_function(scattering_type):
     if scattering_type in SCATTERING_TYPES['electron']:
         return sf_atom
     if scattering_type in SCATTERING_TYPES['xray magnetic']:
-        return sf_magnetic_xray_polarised
+        return sf_magnetic_xray
     if scattering_type in SCATTERING_TYPES['neutron magnetic']:
-        return sf_magnetic_neutron_polarised
+        return sf_magnetic_neutron
     if scattering_type in SCATTERING_TYPES['neutron polarised']:
         return sf_magnetic_neutron_polarised
     if scattering_type in SCATTERING_TYPES['xray polarised']:

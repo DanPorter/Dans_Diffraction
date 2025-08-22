@@ -31,6 +31,7 @@ import numpy as np
 
 from . import functions_general as fg
 from . import functions_crystallography as fc
+from . import functions_scattering as fs
 from .classes_orbitals import CrystalOrbitals
 
 __version__ = '2.0'
@@ -119,7 +120,30 @@ class Properties:
         :return: [nxm] array of scattering factors for each atom and reflection
         """
         qmag = self.xtl.Cell.Qmag(hkl)
-        return fc.magnetic_form_factor(self.xtl.Structure.type, qmag)
+        return fc.magnetic_form_factor(*self.xtl.Structure.type, qmag=qmag)
+
+    def scattering_factors(self, scattering_type, hkl, energy_kev=None,
+                           use_sears=False, use_wasskirf=False):
+        """
+        Return an array of scattering factors based on the radiation
+        :param scattering_type: str radiation, see "get_scattering_function()"
+        :param hkl: [mx1] or None, float array of wavevector magnitudes for reflections
+        :param energy_kev: [ox1] or None, float array of energies in keV
+        :param use_sears: if True, use neutron scattering lengths from ITC Vol. C, By V. F. Sears
+        :param use_wasskirf: if True, use x-ray scattering factors from Waasmaier and Kirfel
+        :return: [nxmxo] array of scattering factors
+        """
+        qmag = self.xtl.Cell.Qmag(hkl)
+        # Scattering factors
+        ff = fs.scattering_factors(
+            scattering_type=scattering_type,
+            atom_type=self.xtl.Structure.type,
+            qmag=qmag,
+            enval=energy_kev,
+            use_sears=use_sears,
+            use_wasskirf=use_wasskirf,
+        )
+        return np.squeeze(ff)
 
     def xray_edges(self):
         """
