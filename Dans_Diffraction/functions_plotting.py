@@ -135,11 +135,8 @@ def labels(ttl=None, xvar=None, yvar=None, zvar=None, legend=False, size='Normal
         plt.gca().set_ylabel(yvar, fontsize=lab, fontname=font)
 
     if zvar is not None:
-        # Don't think this works, use ax.set_zaxis
         plt.gca().set_zlabel(zvar, fontsize=lab, fontname=font)
-        for t in plt.gca().zaxis.get_major_ticks():
-            t.label.set_fontsize(tik)
-            t.label.set_fontname(font)
+        plt.gca().zaxis.set_tick_params(labelsize=lab, labelfontfamily=font)
 
     if legend:
         plt.legend(loc=0, frameon=False, prop={'size': leg, 'family': 'serif'})
