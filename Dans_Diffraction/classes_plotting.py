@@ -175,7 +175,7 @@ class Plotting:
             axs[i].hist(dist[site]['dist'], range=ranges,
                         bins=int((ranges[1] - ranges[0]) / step))
             axs[i].set(ylabel='n. Atoms')
-        axs[-1].set(xlabel='$\AA$')
+        axs[-1].set(xlabel=r'$\AA$')
         if len(dist) > 1:
             for ax in axs.flat:
                 ax.label_outer()
@@ -955,7 +955,86 @@ class Plotting:
         ax.set_zlim3d(-q_max, q_max)
         
         fp.labels(self.xtl.name,'Qx','Qy','Qz')
-    
+
+    def plot_3Dintensity(self, q_max=4.0, central_hkl=(0, 0, 0), show_forbidden=False):
+        """
+        Plot Reciprocal Space lattice points in 3D, with point size and colour based on the intensity
+        """
+        from matplotlib.colors import Normalize
+
+        # Generate lattice of reciprocal space points
+        hmax, kmax, lmax = fc.maxHKL(q_max, self.xtl.Cell.UVstar())
+        HKL = fc.genHKL([hmax, -hmax], [kmax, -kmax], [lmax, -lmax])
+        HKL = HKL + central_hkl  # reflection about central reflection
+        Q = self.xtl.Cell.calculateQ(HKL)
+        intensity = self.xtl.Scatter.intensity(HKL)
+        reflections = intensity > 0.1
+        extinctions = intensity < 0.1
+
+        # Create plot
+        fig = plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
+        ax = fig.add_subplot(111, projection='3d')
+
+        # Create cell box
+        uvw = np.array([[0., 0, 0], [1, 0, 0], [1, 0, 1], [1, 1, 1], [1, 1, 0], [0, 1, 0], [0, 1, 1],
+                        [0, 0, 1], [1, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1], [0, 1, 1], [0, 1, 0], [0, 0, 0],
+                        [0, 0, 1]])
+        bpos = self.xtl.Cell.calculateQ(uvw + central_hkl)
+        ax.plot(bpos[:, 0], bpos[:, 1], bpos[:, 2], '-', c='k')  # cell box
+        fp.plot_arrow(bpos[[0, 1], 0], bpos[[0, 1], 1], bpos[[0, 1], 2], col='r', width=4, arrow_size=10)  # a*
+        fp.plot_arrow(bpos[[0, 5], 0], bpos[[0, 5], 1], bpos[[0, 5], 2], col='g', width=4, arrow_size=10)  # b*
+        fp.plot_arrow(bpos[[0, 7], 0], bpos[[0, 7], 1], bpos[[0, 7], 2], col='b', width=4, arrow_size=10)  # c*
+
+        cmap = plt.get_cmap('hot_r')
+        vmin, vmax = 0, np.median(intensity[intensity > 0.1])
+
+        norm_intensity = intensity / intensity.max()
+        # colours = cmap(norm_intensity)
+        norm = Normalize(vmin=vmin, vmax=vmax)
+        max_point_size = 500
+        sizes = max_point_size * norm_intensity
+
+        # Reflections
+        sct = ax.scatter(Q[reflections,0], Q[reflections,1], Q[reflections,2],
+                         c=intensity[reflections], s=sizes[reflections],
+                         marker='o', cmap=cmap, norm=norm)
+        # Extinctions
+        if show_forbidden:
+            ax.scatter(Q[extinctions,0], Q[extinctions,1], Q[extinctions,2], marker='x', c='k', s=20)
+
+        cx, cy, cz = self.xtl.Cell.calculateQ(central_hkl).squeeze()
+        ax.set_xlim3d(cx - 2 * q_max, cx + 2 * q_max)
+        ax.set_ylim3d(cy - 2 * q_max, cy + 2 * q_max)
+        ax.set_zlim3d(cz - 2 * q_max, cz + 2 * q_max)
+
+        fp.labels(self.xtl.name, 'Qx', 'Qy', 'Qz')
+        plt.colorbar(sct, label='intensity')
+
+    def plot_intensity_histogram(self, q_max=4.0):
+        """
+        Plot histogram of intensity of reflections
+        """
+        # Generate lattice of reciprocal space points
+        hmax, kmax, lmax = fc.maxHKL(q_max, self.xtl.Cell.UVstar())
+        HKL = fc.genHKL([hmax, -hmax], [kmax, -kmax], [lmax, -lmax])
+        # HKL = HKL + centre  # reflection about central reflection
+        Q = self.xtl.Cell.calculateQ(HKL)
+        qmag = fg.mag(Q)
+        intensity = self.xtl.Scatter.intensity(HKL)
+
+        n_bins = 100 if len(qmag) > 100 else len(qmag)
+        log_bins = np.logspace(0, np.log10(intensity.max()), n_bins)
+
+        fig = plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
+        ax = fig.add_subplot(111)
+        # ax.hist(np.log10(intensity[intensity > 0]), bins=log_bins)
+        ax.hist(np.log10(intensity + 1), bins=log_bins)
+        ax.set_xscale('log')
+        ax.set_xlabel('intensity')
+        ax.set_ylabel('Count')
+        ax.set_title(self.xtl.name)
+
+
     def quick_intensity_cut(self,x_axis=[1,0,0],y_axis=[0,1,0],centre=[0,0,0], q_max=4.0,cut_width=0.05):
         """
         Plot a cut through reciprocal space, visualising the intensity as different sized markers
