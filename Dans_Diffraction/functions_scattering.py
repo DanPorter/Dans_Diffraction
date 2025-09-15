@@ -39,13 +39,14 @@ By Dan Porter, PhD
 Diamond
 2018
 
-Version 1.0
-Last updated: 06/02/25
+Version 1.1
+Last updated: 05/08/25
 
 Version History:
 11/11/18 0.1    Version History started.
 13/07/21 0.9    Functions re-written and tested
 06/02/25 1.0    Removed refrences to unpolarised magnetic scattering due to incorrect averaging
+05/08/25 1.1    Added custom scattering option
 
 @author: DGPorter
 """
@@ -56,7 +57,7 @@ import datetime
 from . import functions_general as fg
 from . import functions_crystallography as fc
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 MAX_QR_ARRAY = 1.0e7
 TIME_REPORT = True
@@ -72,6 +73,7 @@ SCATTERING_TYPES = {
     'xray resonant': ['xray resonant', 'resonant', 'resonant xray', 'rxs'],
     'xray dispersion': ['dispersion', 'xray dispersion'],
     'electron': ['electron', 'ele', 'e'],
+    'custom': ['custom'],
 }
 
 
@@ -192,6 +194,34 @@ def sf_xray_dispersion(q, r, scattering_factor, occ=None, debyewaller=None, **kw
     return sf
 
 
+def sf_custom(q, r, scattering_factor, occ=None, debyewaller=None, **kwargs):
+    """
+    Calculate the structure factor using customised atomic scattering factors
+    :param q: [n,3] array of hkl reflections
+    :param r: [m,3] array of atomic positions in r.l.u.
+    :param scattering_factor: array [n,m,e]: energy dependent complex atomic form factor
+    :param occ: [m,1] array of atomic occupancies
+    :param debyewaller: [n,m] array of thermal factors for each atom and reflection
+    :param kwargs: additional options[*unused]
+    :return sf: [n, e] complex array of structure factors
+    """
+    phase = phase_factor_qr(q, r)
+    scattering_factor = np.asarray(scattering_factor, dtype=complex).reshape(*phase.shape, -1)
+    if occ is None:
+        occ = np.ones(phase.shape[1])
+    if debyewaller is None:
+        debyewaller = np.ones(phase.shape)
+
+    neng = scattering_factor.shape[2]
+    _debug('sf_custom(phase.shape=%s, energies=%s)' % (phase.shape, neng))
+    sf = np.zeros([len(q), neng], dtype=complex)
+    for engval in range(neng):
+        sf[:, engval] = structure_factor(scattering_factor[:, :, engval], occ, debyewaller, phase)
+    if neng == 1:
+        return sf[:, 0]
+    return sf
+
+
 ########################################################################################################################
 # -----------------------------------  MAGNETIC STRUCTURE FACTORS  --------------------------------------------------- #
 ########################################################################################################################
@@ -234,7 +264,7 @@ def sf_magnetic_neutron(q, r, moment, magnetic_formfactor=None, occ=None,  debye
         sfm = np.array([0., 0., 0.])
         for m, mom in enumerate(moment):
             # Calculate Magnetic part
-            qm = mom - np.dot(qh, mom) * qh
+            qm = mom - np.dot(qh, mom) * qh  # [mx, my, mz]
 
             # Calculate structure factor
             sfm = sfm + (magnetic_formfactor[n, m] * debyewaller[n, m] * occ[m] * phase[n, m] * qm)
@@ -243,7 +273,9 @@ def sf_magnetic_neutron(q, r, moment, magnetic_formfactor=None, occ=None,  debye
         # sf[n] = np.dot(sfm, incident_polarisation_vector)
         # sf[n] = np.dot(sfm, sfm)  # maximum possible
         # average polarisation  # 6/2/25: this method is incorrect for averaging polarisations, should combine intensity
-        sf[n] = (np.dot(sfm, [1, 0, 0]) + np.dot(sfm, [0, 1, 0]) + np.dot(sfm, [0, 0, 1])) / 3
+        # sf[n] = (np.dot(sfm, [1, 0, 0]) + np.dot(sfm, [0, 1, 0]) + np.dot(sfm, [0, 0, 1])) / 3
+        # magnitude of moment structure factor
+        sf[n] = np.sqrt(np.dot(sfm, sfm))
     return sf
 
 
@@ -338,8 +370,10 @@ def sf_magnetic_xray(q, r, moment, magnetic_formfactor=None, occ=None, debyewall
         for m, mom in enumerate(moment):
             sfm = sfm + magnetic_formfactor[n, m] * debyewaller[n, m] * occ[m] * phase[n, m] * mom
 
-        # average polarisation
-        sf[n] = (np.dot(sfm, [1, 0, 0]) + np.dot(sfm, [0, 1, 0]) + np.dot(sfm, [0, 0, 1])) / 3
+        # average polarisation # 6/2/25: this method is incorrect for averaging polarisations, should combine intensity
+        # sf[n] = (np.dot(sfm, [1, 0, 0]) + np.dot(sfm, [0, 1, 0]) + np.dot(sfm, [0, 0, 1])) / 3
+        # magnitude of moment structure factor
+        sf[n] = np.sqrt(np.dot(sfm, sfm))
     return sf
 
 
@@ -809,6 +843,15 @@ def scatteringvectors(q, energy_kev, azi_ref_q=(1, 0, 0), psi=0, polarisation='s
 ########################################################################################################################
 
 
+def get_scattering_type(scattering_type):
+    """Return correct label for scattering type"""
+    scattering_type = scattering_type.lower()
+    for name, alt_names in SCATTERING_TYPES.items():
+        if scattering_type in alt_names:
+            return name
+    raise Exception(f"Scattering type {scattering_type} not recognized")
+
+
 def get_scattering_function(scattering_type):
     """
     Return function for given scattering type
@@ -828,15 +871,17 @@ def get_scattering_function(scattering_type):
     if scattering_type in SCATTERING_TYPES['electron']:
         return sf_atom
     if scattering_type in SCATTERING_TYPES['xray magnetic']:
-        return sf_magnetic_xray_polarised
+        return sf_magnetic_xray
     if scattering_type in SCATTERING_TYPES['neutron magnetic']:
-        return sf_magnetic_neutron_polarised
+        return sf_magnetic_neutron
     if scattering_type in SCATTERING_TYPES['neutron polarised']:
         return sf_magnetic_neutron_polarised
     if scattering_type in SCATTERING_TYPES['xray polarised']:
         return sf_magnetic_xray_polarised
     if scattering_type in SCATTERING_TYPES['xray resonant']:
         return sf_magnetic_xray_resonant
+    if scattering_type in SCATTERING_TYPES['custom']:
+        return sf_custom  # sf_xray_dispersion is the most general as it allows energy
     raise Exception('Scattering name %s not recognised' % scattering_type)
 
 
@@ -885,7 +930,9 @@ def scattering_factors(scattering_type, atom_type, qmag, enval,
     elif scattering_type in SCATTERING_TYPES['xray fast']:
         return fc.atom_properties(atom_type, 'Z')
     elif scattering_type in SCATTERING_TYPES['xray dispersion']:
-        return fc.xray_scattering_factor_resonant(atom_type, qmag, enval)
+        return fc.xray_scattering_factor_resonant(atom_type, qmag, enval, use_waaskirf=use_wasskirf)
+    elif scattering_type in SCATTERING_TYPES['custom']:
+        return fc.custom_scattering_factor(atom_type, qmag, enval)
     elif use_wasskirf:
         return fc.xray_scattering_factor_WaasKirf(atom_type, qmag)
     else:

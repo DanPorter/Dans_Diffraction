@@ -1457,6 +1457,45 @@ class Plotting:
         fp.labels(ttl, r'$\psi$ (deg)', 'Intensity')
         #plt.subplots_adjust(bottom=0.2)
 
+    def plot_scattering_factors(self, q_max=4, energy_range=None, q_range=None):
+        """
+        Plot atomic scattering factors across wavevector or energy
+
+        if q_range has more values than energy_range, figures will plot scattering factor vs Q
+        for each energy.
+        if energy_range has more values than q_range, figures will plot scattering factor vs energy
+        for each value of Q.
+
+        :param q_max: use a q_range of 0-q_max
+        :param energy_range: energy range in keV
+        :param q_range: range of wavecectors, or None to use q_max
+        :return: None
+        """
+
+        if q_range is None:
+            q_range = np.arange(0, q_max, 0.01)
+        atom_types, atom_idx = np.unique(self.xtl.Structure.type, return_index=True)
+        atom_scattering_factors = self.xtl.Scatter.scattering_factors(qmag=q_range, energy_kev=energy_range)
+        ttl = f"{self.xtl.Scatter._scattering_type}"
+        # plot multiple figures of lower dimension
+        if atom_scattering_factors.shape[2] > atom_scattering_factors.shape[0]: # energy_range > q_range
+            # different figures for different values of Q
+            for n in range(atom_scattering_factors.shape[0]):
+                plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
+                nttl = ttl + f" Q={q_range[n]:.2g}" + r" $\AA^{-1}$"
+                for atom, idx in zip(atom_types, atom_idx):
+                    plt.plot(energy_range, atom_scattering_factors[n, idx, :], label=atom)
+                fp.labels(nttl, 'Energy [keV]', 'Atomic scattering factor', legend=True)
+        else:
+            # different figures for different values of E
+            for n in range(atom_scattering_factors.shape[2]):
+                plt.figure(figsize=self._figure_size, dpi=self._figure_dpi)
+                nttl = ttl + (f" E = {energy_range[n]} keV" if atom_scattering_factors.shape[2] > 1 else "")
+                for atom, idx in zip(atom_types, atom_idx):
+                    plt.plot(q_range, np.abs(atom_scattering_factors[:, idx, n]), label=atom)
+                fp.labels(nttl, r'Q $\AA^{-1}$', 'Atomic scattering factor', legend=True)
+
+
     r''' Remove tensor_scattering 26/05/20
     def tensor_scattering_azimuth(self, atom_label, hkl, energy_kev, azir=[0, 0, 1], process='E1E1',
                                   rank=2, time=+1, parity=+1, mk=None, lk=None, sk=None):

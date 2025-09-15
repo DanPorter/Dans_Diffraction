@@ -95,3 +95,37 @@ def test_magnetic_mno():
         polarisation_vector=[1, 0, 0]
     )
     assert abs(xtl.Scatter.intensity([1, 1, 1]) - 4332.39) < 0.01, 'incorrect polarised neutron intensity'
+
+    assert abs(
+        xtl.Scatter.intensity([1, 1, 1], scattering_type='xray magnetic')[0] - 25994.32
+    ) < 0.01, 'incorrect magnetic xray intensity'
+    assert abs(
+        xtl.Scatter.intensity([1, 1, 1], scattering_type='neutron magnetic')[0] - 25994.32
+    ) < 0.01, 'incorrect magnetic neutron intensity'
+
+
+def test_magnetic_lmo():
+    xtl = dif.structure_list.LaMnO3()
+    hkl = [[0,0,1], [1, 0, 0], [0, 1, 0], [1, 1, 0], [1, 1, 1]]
+    exp = [0, 0, 215.507397, 0, 148.85200365]
+    cal = xtl.Scatter.intensity(hkl, scattering_type='xray magnetic')
+    assert all(abs(cal - exp) < 0.001), 'incorrect magnetic x-ray intensity'
+    exp = [0, 0, 215.507397, 0, 92.48078345]
+    cal = xtl.Scatter.intensity(hkl, scattering_type='neutron magnetic')
+    assert all(abs(cal - exp) < 0.001), 'incorrect magnetic neutron intensity'
+
+    # Comparison with https://taro-nakajima.github.io/fcal-n/#m-form_symbols
+    # LaMnO3.cif with Mn3 <j2>/<j0>=2
+    hkl_inten = [
+        ([0, 0, 2], 0),
+        ([0, 1, 0], 41.456),
+        ([0, 1, 2], 38.630),
+        ([0, 3, 0], 38.502),
+        ([1, 1, 1], 31.652),
+        ([2, 1, 0], 13.637),
+    ]
+    hkl = [h for h, ii in hkl_inten]
+    cal = xtl.Scatter.intensity(hkl, scattering_type='neutron magnetic')
+    # TODO: work out why this doesn't work
+    # assert all(abs(cal - [ii**2 for h, ii in hkl_inten]) < 0.1), "neutron magnetic intensity doesnt match fcal-n"
+

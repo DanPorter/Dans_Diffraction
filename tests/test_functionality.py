@@ -36,7 +36,7 @@ def test_properties():
     print('\nCobalt Weight = %6.2f g' % weight[0])
     xsf = dif.fc.xray_scattering_factor('Co', 3)
     print('Cobalt x-ray scattering factor @ 3A = %6.2f' % xsf[0, 0])
-    mff = dif.fc.magnetic_form_factor('Co', 0.5)
+    mff = dif.fc.magnetic_form_factor('Co', qmag=0.5)
     print('Cobalt magnetic form factor @ 0.5A = %6.2f' % mff[0, 0])
     att = dif.fc.attenuation(27, 8)
     print('Cobalt attenuation @ 8.00keV = %6.2f cm^2/g' % att)

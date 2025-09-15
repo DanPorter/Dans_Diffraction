@@ -31,7 +31,7 @@ The data is taken from a number of sources:
 * Element weights and radii: [Wikipedia](http://en.wikipedia.org/wiki/List_of_elements_by_atomic_properties)
 * X-ray Mass Attenuation Coefficients: [NIST](https://www.nist.gov/pml/x-ray-mass-attenuation-coefficients)
 * X-ray Atomic Scattering Factors: [CXRO](http://henke.lbl.gov/optical_constants/asf.html)
-* X-ray edges: [x-ray database](http://xdb.lbl.gov/Section1/Table_1-1.pdf)
+* X-ray edges: [x-ray database](https://xdb.lbl.gov/Section1/Sec_1-1.html)
 * Electron configurations: [Wikipedia](https://en.wikipedia.org/wiki/Electron_configurations_of_the_elements_(data_page))
 * Space Group symmetry operations: [Bilbao Crystallographic Server](https://www.cryst.ehu.es/)
 

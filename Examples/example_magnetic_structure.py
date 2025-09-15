@@ -25,7 +25,7 @@ plt.show()
 
 #xtl._scattering_type = 'xray magnetic' # neutron magnetic
 xtl.Scatter.setup_scatter(
-    type='xray magnetic',
+    scattering_type='xray magnetic',
     energy_kev=2.838,
     specular=[1,0,0],
     min_theta=-20,

@@ -838,7 +838,7 @@ def plot_magnetic_form_factor(elements, maxq=10):
     """
 
     q = np.linspace(0, maxq, 200)
-    mff = fc.magnetic_form_factor(elements, q)
+    mff = fc.magnetic_form_factor(*elements, qmag=q)
 
     newplot(q, mff)
     plt.legend(np.asarray(elements).reshape(-1), loc=0, frameon=False, fontsize=18)

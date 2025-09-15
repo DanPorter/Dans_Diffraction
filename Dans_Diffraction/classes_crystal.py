@@ -51,6 +51,7 @@ Version History:
 22/05/23 3.2.4  Added Symmetry.wyckoff_label(), Symmetry.spacegroup_dict
 06/05/24 3.3.0  Symmetry.from_cif now loads operations from find_spacegroup if not already loaded
 06/04/25 3.3.1  scale parameter of superlattice improved
+15/09/25 3.3.2  Atoms.type changed to always be array type
 
 @author: DGPorter
 """
@@ -1088,6 +1089,7 @@ class Atoms:
         "_atom_site_fract_y",
         "_atom_site_fract_z",
     ]
+    _type_str_fmt = '<U8'
 
     def __init__(self, u=[0], v=[0], w=[0], type=None,
                  label=None, occupancy=None, uiso=None, mxmymz=None):
@@ -1100,9 +1102,9 @@ class Atoms:
         # ---Defaults---
         # type
         if type is None:
-            self.type = np.asarray([self._default_atom] * Natoms)
+            self.type = np.asarray([self._default_atom] * Natoms, dtype=self._type_str_fmt)
         else:
-            self.type = np.asarray(type, dtype=str).reshape(-1)
+            self.type = np.asarray(type, dtype=self._type_str_fmt).reshape(-1)
         # label
         if label is None:
             self.label = self.type.copy()
@@ -1136,7 +1138,7 @@ class Atoms:
 
     def __getitem__(self, idx):
         if isinstance(idx, str):
-            idx = self.label.index(idx)
+            idx = list(self.label).index(idx)
         return self.atom(idx)
 
     def fromcif(self, cifvals):
@@ -1221,8 +1223,8 @@ class Atoms:
         self.u = u
         self.v = v
         self.w = w
-        self.type = element
-        self.label = label
+        self.type = np.array(element, dtype=self._type_str_fmt)
+        self.label = np.array(label, dtype=self._type_str_fmt)
         self.occupancy = occ
         self.uiso = uiso
         self.mx = mx
@@ -1276,19 +1278,21 @@ class Atoms:
             return atoms[0]
         return atoms
 
-    def changeatom(self, idx=None, u=None, v=None, w=None, type=None,
+    def changeatom(self, idx, u=None, v=None, w=None, type=None,
                    label=None, occupancy=None, uiso=None, mxmymz=None):
         """
-        Change an atoms properties
-        :param idx:
-        :param u:
-        :param v:
-        :param w:
-        :param type:
-        :param label:
-        :param occupancy:
-        :param uiso:
-        :param mxmymz:
+        Change an atom site's properties.
+        If properties are given as None, they are not changed.
+
+        :param idx: atom array index
+        :param u: atomic position u in relative coordinates along basis vector a
+        :param v: atomic position u in relative coordinates along basis vector b
+        :param w: atomic position u in relative coordinates along basis vector c
+        :param type: atomic element type
+        :param label: atomic site label
+        :param occupancy: atom site occupancy
+        :param uiso: atom site isotropic thermal parameter
+        :param mxmymz: atom site magnetic vector (mx, my, mz)
         :return: None
         """
 
@@ -1307,7 +1311,7 @@ class Atoms:
         if label is not None:
             old_labels = list(self.label)
             old_labels[idx] = label
-            self.label = np.array(old_labels)
+            self.label = np.array(old_labels, dtype=self._type_str_fmt)
 
         if occupancy is not None:
             self.occupancy[idx] = occupancy
@@ -1433,11 +1437,11 @@ class Atoms:
         """
 
         uvw = self.uvw()
-        type = self.type
+        atom_type = self.type
         rem_atom_idx = []
-        for n in range(0, len(type) - 1):
+        for n in range(0, len(atom_type) - 1):
             match_position = fg.mag(uvw[n, :] - uvw[n + 1:, :]) < min_distance
-            match_type = type[n] == type[n + 1:]
+            match_type = atom_type[n] == atom_type[n + 1:]
             if all_types:
                 rem_atom_idx += list(1 + n + np.where(match_position)[0])
             else:
@@ -1587,6 +1591,10 @@ class Atoms:
         total_weight = sum(weights)
 
         return weights / total_weight
+
+    def scattering_factor_coefficients(self, table='itc'):
+        """Return scattering factor coefficients for the elements"""
+        return fc.scattering_factor_coefficients(*self.type, table=table)
 
     def info(self, idx=None, type=None):
         """

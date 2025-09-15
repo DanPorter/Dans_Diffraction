@@ -11,7 +11,7 @@ Usage:
     OR
     - from Dans_Diffraction import functions_crystallography as fc
 
-Version 4.0.1
+Version 4.1.0
 
 Version History:
 09/07/15 0.1    Version History started.
@@ -45,6 +45,7 @@ Version History:
 26/09/24 3.9.0  Added complex neutron scattering lengths for isotopes from package periodictable
 06/11/24 4.0.0  Fixed error with triclinic bases, added function_lattice.
 20/11/24 4.0.1  Added alternative neutron scattering length table
+28/06/25 4.1.0  Added new magnetic form factor calculation, plus new formulas
 
 Acknoledgements:
     April 2020  Thanks to ChunHai Wang for helpful suggestions in readcif!
@@ -63,16 +64,19 @@ from warnings import warn
 from . import functions_general as fg
 from . import functions_lattice as fl
 
-__version__ = '4.0.1'
+__version__ = '5.0.0'
 
 # File directory - location of "Dans Element Properties.txt"
 datadir = os.path.abspath(os.path.dirname(__file__))  # same directory as this file
 datadir = os.path.join(datadir, 'data')
 ATOMFILE = os.path.join(datadir, 'Dans Element Properties.txt')
 PENGFILE = os.path.join(datadir, 'peng.dat')
+WAASKIRF_FILE = os.path.join(datadir, 'f0_WaasKirf.dat')
 NSLFILE = os.path.join(datadir, 'neutron_isotope_scattering_lengths.dat')
 NSLFILE_SEARS = os.path.join(datadir, 'neutron_isotope_scattering_lengths_sears.dat')
 ASFFILE = os.path.join(datadir, 'atomic_scattering_factors.npy')
+XMAFILE = os.path.join(datadir, 'XRayMassAtten_mup.dat')
+MAGFF_FILE = os.path.join(datadir, 'McPhase_Mag_FormFactors.txt')
 
 # List of Elements in order sorted by length of name
 ELEMENT_LIST = [
@@ -103,6 +107,9 @@ ELEMENT_LIST = [
 element_regex = re.compile('|'.join(ELEMENT_LIST))
 regex_sub_element = re.compile('[^a-zA-Z]')  # 'Li' = regex_sub_element.sub('', '7-Li2+')
 
+# Custom atomic form factors
+CUSTOM_FORM_FACTOR_COEFS = {}  # {'el': (a1, b1, a2, b2, ...)}
+CUSTOM_DISPERSION_TABLE = {}  # {'el': np.array(en, f1, f2)}
 
 # Required CIF keys, must be available and not '?'
 CIF_REQUIRES = [
@@ -879,12 +886,12 @@ def atom_properties(elements=None, fields=None):
 
     if elements is not None:
         # elements must be a list e.g. ['Co','O']
-        elements = np.char.lower(np.asarray(elements).reshape(-1))
-        all_elements = [el.lower() for el in data['Element']]
+        elements = [str2element(el) for el in np.asarray(elements).reshape(-1)]
+        all_elements = data['Element'].tolist()
         # This will error if the required element doesn't exist
         try:
             # regex to remove additional characters
-            index = [all_elements.index(regex_sub_element.sub('', el)) for el in elements]
+            index = [all_elements.index(el) for el in elements]
         except ValueError as ve:
             raise Exception('Element not available: %s' % ve)
         data = data[index]
@@ -916,6 +923,21 @@ def print_atom_properties(elements=None):
         propval = ' '.join(['%10s' % ele for ele in prop[key]])
         out += '%8s : %s\n' % (key, propval)
     return out
+
+
+def read_waaskirf_scattering_factor_coefs():
+    """
+    Read X-ray scattering factor table
+    Uses the coefficients for analytical approximation to the scattering factors from:
+       "Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431"
+    File from https://github.com/diffpy/libdiffpy/blob/master/src/runtime/f0_WaasKirf.dat
+    :return: {'element': array([a1, a2, a3, a4, a5, c, b1, b2, b3, b4, b5])}
+    """
+    data = np.loadtxt(WAASKIRF_FILE)
+    with open(WAASKIRF_FILE) as f:
+        lines = re.findall(r'#S\s+\d+\s+[A-Z].*?\n', f.read())
+        table_names = [line[7:].strip() for line in lines]
+    return {element: coefs for element, coefs in zip(table_names, data)}
 
 
 def read_neutron_scattering_lengths(table='neutron data booklet'):
@@ -974,8 +996,11 @@ def neutron_scattering_length(elements, table='neutron data booklet'):
     """
     # b = atom_properties(element, ['Coh_b'])
     nsl = read_neutron_scattering_lengths(table)
-    b = np.array([nsl[element] for element in np.char.lower(np.asarray(elements).reshape(-1))])
-    return b
+    b_lengths = np.array([
+        nsl[element] if element in nsl else nsl.get(split_element_symbol(element)[0], 0)
+        for element in np.char.lower(np.asarray(elements).reshape(-1))
+    ])
+    return b_lengths
 
 
 def xray_scattering_factor(element, Qmag=0):
@@ -1013,6 +1038,85 @@ def xray_scattering_factor(element, Qmag=0):
             a3 * np.exp(-b3 * (Qmag / (4 * np.pi)) ** 2) + \
             a4 * np.exp(-b4 * (Qmag / (4 * np.pi)) ** 2) + c
         Qff[:, n] = f
+    return Qff
+
+
+def xray_scattering_factor_WaasKirf(element, Qmag=0):
+    """
+    Read X-ray scattering factor table, calculate f(|Q|)
+    Uses the coefficients for analytical approximation to the scattering factors from:
+       "Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431"
+    File from https://github.com/diffpy/libdiffpy/blob/master/src/runtime/f0_WaasKirf.dat
+     Qff = xray_scattering_factor_WaasKirf(element, Qmag=[0])
+    :param element: [n*str] list or array of elements
+    :param Qmag: [m] array of wavevector distance, in A^-1
+    :return: [m*n] array of scattering factors
+    """
+
+    data = np.loadtxt(WAASKIRF_FILE)
+    # get names
+    with open(WAASKIRF_FILE) as f:
+        lines = re.findall(r'#S\s+\d+\s+[A-Z].*?\n', f.read())
+        table_names = [line[7:].strip() for line in lines]
+
+    # Qmag should be a 1D array
+    Qmag = np.asarray(Qmag).reshape(-1)
+    element = np.asarray(element, dtype=str).reshape(-1)
+
+    # data table: a1  a2  a3  a4  a5  c  b1  b2  b3  b4  b5
+    idx = [table_names.index(el) for el in element]
+    coef = data[idx, :]
+
+    Qff = np.zeros([len(Qmag), len(element)])
+
+    # Loop over elements
+    for n in range(len(element)):
+        a1, a2, a3, a4, a5, c, b1, b2, b3, b4, b5 = coef[n, :]
+
+        # Array multiplication over Qmags
+        # f0[k] = c + [SUM a_i * EXP(-b_i * (k ^ 2))]  i=1,5
+        f = a1 * np.exp(-b1 * (Qmag / (4 * np.pi)) ** 2) + \
+            a2 * np.exp(-b2 * (Qmag / (4 * np.pi)) ** 2) + \
+            a3 * np.exp(-b3 * (Qmag / (4 * np.pi)) ** 2) + \
+            a4 * np.exp(-b4 * (Qmag / (4 * np.pi)) ** 2) + \
+            a5 * np.exp(-b5 * (Qmag / (4 * np.pi)) ** 2) + c
+        Qff[:, n] = f
+    return Qff
+
+
+def xray_scattering_factor_resonant(elements, Qmag, energy_kev, use_waaskirf=False):
+    """
+    Read X-ray scattering factor table, calculate f(|Q|)
+    Uses the coefficients for analytical approximation to the scattering factors - ITC, p578
+     Qff = xray_scattering_factor_resonant(element, energy_kev, qmag)
+
+    if resonant_energy = float(energy in keV), the total atomic scattering amplitude will be returned:
+        f(|Q|, E) = f0(|Q|) + f'(E) - if''(E)
+    See:
+    :param elements: [n*str] list or array of elements
+    :param Qmag: [m] array wavevector distance |Q|, in A^-1
+    :param energy_kev: [o] array energy in keV
+    :param use_waaskirf: if True, use f0 scattering factor coefficients from the table of Waasmaier and Kirfel
+    :return: [m*n*o] complex array of scattering factors
+    """
+
+    # Qmag and energy_kev should be a 1D array
+    Qmag = np.asarray(Qmag).reshape(-1)
+    energy_kev = np.asarray(energy_kev).reshape(-1)
+
+    f1, f2 = xray_dispersion_corrections(elements, energy_kev)  # shape (len(energy), len(element))
+    Qff = np.zeros([len(Qmag), len(elements), len(energy_kev)], dtype=complex)
+    # Broadcast dispersion corrections
+    Qff[:, :, :] = f1.T - 1j * f2.T  # change from + to - on 2/July/2023
+
+    if use_waaskirf:
+        f = xray_scattering_factor_WaasKirf(elements, Qmag)
+    else:
+        f = xray_scattering_factor(elements, Qmag)
+
+    for n in range(len(elements)):
+        for e in range(len(energy_kev)):
+            Qff[:, n, e] += f[:, n]
     return Qff
 
 
@@ -1071,99 +1175,493 @@ def electron_scattering_factor(element, Qmag=0):
     return Qff
 
 
-def xray_scattering_factor_WaasKirf(element, Qmag=0):
+def scattering_factor_coefficients_neutron_ndb(*elements):
     """
-    Read X-ray scattering factor table, calculate f(|Q|)
+    Load neutron scattering factor coefficents
+
+    Values are extracted from Periodic Table https://github.com/pkienzle/periodictable
+     - Values originally from Neutron Data Booklet, by A-J Dianoux, G. Lander (2003), with additions and corrections upto v1.7.0 (2023)
+
+    :param elements: str element symbol, must appear in the selected table, or zero is returned
+    :return: list[float, float, ...] - list of pairs of coefficients
+    """
+    coefs = np.zeros([len(elements), 2])
+    b_lengths = neutron_scattering_length(elements, 'neutron data booklet')
+    for n, (element, b_length) in enumerate(zip(elements, b_lengths)):
+        coefs[n, :] = [b_length, 0]
+    return coefs
+
+
+def scattering_factor_coefficients_neutron_sears(*elements):
+    """
+    Load neutron scattering factor coefficents
+
+    Values are taken form the table:
+     - ITC Vol. C, Section 4.4.4., By V. F. Sears Table 4.4.4.1 (Jan 1995)
+
+    :param elements: str element symbol, must appear in the selected table, or zero is returned
+    :return: array[n, c] - c is list of pairs of coefficients
+    """
+    coefs = np.zeros([len(elements), 2], dtype=complex)
+    b_lengths = neutron_scattering_length(elements, 'sears')
+    for n, (element, b_length) in enumerate(zip(elements, b_lengths)):
+        coefs[n, :] = [b_length, 0]
+    return coefs
+
+
+def scattering_factor_coefficients_xray_itc(*elements):
+    """
+    Load x-ray scattering factor coefficents
+
+    Uses the coefficients for analytical approximation to the scattering factors - ITC, p578 Table 6.1.1.4
+
+    :param elements: str element symbol, must appear in the selected table, or zero is returned
+    :return: array[n, c] - c is list of pairs of coefficients
+    """
+    out = np.zeros([len(elements), 10])
+    data = atom_properties(None,  ['Element', 'a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'c'])
+    all_elements = list(data['Element'])
+    for n, element in enumerate(elements):
+        symbol, occupancy, charge = split_element_symbol(element)
+        if element in all_elements:
+            symbol = element
+        if symbol in all_elements:
+            idx = all_elements.index(symbol)
+            el, a1, b1, a2, b2, a3, b3, a4, b4, c = data[idx]
+            out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, c, 0]
+    return out
+
+
+def scattering_factor_coefficients_xray_waaskirf(*elements):
+    """
+    Load x-ray scattering factor coefficents
+
     Uses the coefficients for analytical approximation to the scattering factors from:
        "Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431"
     File from https://github.com/diffpy/libdiffpy/blob/master/src/runtime/f0_WaasKirf.dat
-     Qff = xray_scattering_factor_WaasKirf(element, Qmag=[0])
-    :param element: [n*str] list or array of elements
-    :param Qmag: [m] array of wavevector distance, in A^-1
-    :return: [m*n] array of scattering factors
+
+    :param elements: str element symbol, must appear in the selected table, or zero is returned
+    :return: array[n, c] - c is list of pairs of coefficients
     """
+    out = np.zeros([len(elements), 12])
 
-    filename = os.path.join(datadir, 'f0_WaasKirf.dat')
-    data = np.loadtxt(filename)
-    # get names
-    with open(filename) as f:
-        lines = re.findall(r'#S\s+\d+\s+[A-Z].*?\n', f.read())
-        table_names = [line[7:].strip() for line in lines]
-
-    # Qmag should be a 1D array
-    Qmag = np.asarray(Qmag).reshape(-1)
-    element = np.asarray(element, dtype=str).reshape(-1)
-
-    # data table: a1  a2  a3  a4  a5  c  b1  b2  b3  b4  b5
-    idx = [table_names.index(el) for el in element]
-    coef = data[idx, :]
-
-    Qff = np.zeros([len(Qmag), len(element)])
-
-    # Loop over elements
-    for n in range(len(element)):
-        a1, a2, a3, a4, a5, c, b1, b2, b3, b4, b5 = coef[n, :]
-
-        # Array multiplication over Qmags
-        # f0[k] = c + [SUM a_i * EXP(-b_i * (k ^ 2))]  i=1,5
-        f = a1 * np.exp(-b1 * (Qmag / (4 * np.pi)) ** 2) + \
-            a2 * np.exp(-b2 * (Qmag / (4 * np.pi)) ** 2) + \
-            a3 * np.exp(-b3 * (Qmag / (4 * np.pi)) ** 2) + \
-            a4 * np.exp(-b4 * (Qmag / (4 * np.pi)) ** 2) + \
-            a5 * np.exp(-b5 * (Qmag / (4 * np.pi)) ** 2) + c
-        Qff[:, n] = f
-    return Qff
+    data = read_waaskirf_scattering_factor_coefs()
+    for n, element in enumerate(elements):
+        symbol, occupancy, charge = split_element_symbol(element)
+        if element in data:
+            symbol = element
+        if symbol in data:
+            a1, a2, a3, a4, a5, c, b1, b2, b3, b4, b5 = data[symbol]
+            out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, a5, b5, c, 0]
+    return out
 
 
-def xray_scattering_factor_resonant(element, Qmag, energy_kev):
+def scattering_factor_coefficients_electron_peng(*elements):
+    """
+    Load electron scattering factor coefficents
+
+    Uses the coefficients for analytical approximation to the scattering factors
+      Peng, L. M.; Acta Crystallogr A  1996, 52 (2), 257–276.
+      Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485.
+
+    :param elements: str element symbol, must appear in the selected table, or zero is returned
+    :return: array[n, c] - c is list of pairs of coefficients
+    """
+    out = np.zeros([len(elements), 10])
+
+    try:
+        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, encoding='ascii', delimiter=',')
+    except TypeError:
+        # Numpy version < 1.14
+        data = np.genfromtxt(PENGFILE, skip_header=0, dtype=None, names=True, delimiter=',')
+
+    all_elements = list(data['Element'])
+    for n, element in enumerate(elements):
+        symbol, occupancy, charge = split_element_symbol(element)
+        if element in all_elements:
+            symbol = element
+        if symbol in all_elements:
+            idx = all_elements.index(symbol)
+            a1, b1, a2, b2, a3, b3, a4, b4, a5, b5 = data[idx][['a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'a5', 'b5']]
+            out[n, :] = [a1, b1, a2, b2, a3, b3, a4, b4, a5, b5]
+    return out
+
+
+def scattering_factor_coefficients(*elements, table='itc'):
+    """
+    Load scattering factor coefficents from differnt tables
+
+    table options:
+        'itc' -> x-ray scattering factors from international tabels Volume C (ITC, p578 Table 6.1.1.4)
+        'waaskirf' -> x-ray scattering factors from Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431
+        'peng' -> electron scattering factors from Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485.
+        'ndb' -> neutron scattering lengths from Neutron data booklet
+        'sears' -> neutron scattering lengths from the international tables
+
+    Coefficients are used in the analytical approximation of the scattering factor:
+        f0[k] = c + [SUM a_i * EXP(-b_i * (k ^ 2))]  i=1,j
+    where k is the wavevector, j varies depending on which table is used.
+
+    coefficients are returned in pairs (a_i, b_i), where c is given as the final element (c, 0):
+        coef = [(a_0, b_0), (a_1, b_1), ..., (c, 0)]
+    :param elements: str element symbol, must appear in the selected table, or zero is returned
+    :param table: str table name
+    :return: array[n, c] - c is list of pairs of coefficients
+    """
+    # scattering factor ables
+    tables = {
+        'itc': scattering_factor_coefficients_xray_itc,
+        'waaskirf': scattering_factor_coefficients_xray_waaskirf,
+        'peng': scattering_factor_coefficients_electron_peng,
+        'ndb': scattering_factor_coefficients_neutron_ndb,
+        'sears': scattering_factor_coefficients_neutron_sears
+    }
+    table = table.lower()
+    if table not in tables:
+        raise ValueError(f'Unknown scattering factor table: {table}')
+    return tables[table](*elements)
+
+
+def analytical_scattering_factor(q_mag, *coefs):
+    """
+    Calculate the analytical scattering factor
+
+    f0[|Q|] = c + [SUM a_i * EXP(-b_i * (|Q| ^ 2))]  i=1,n
+    coefs = (a_1, b_1, a_2, b_2, ..., a_n, b_n)
+    f0 = analytical_scattering_factor(q_mag, *coefs)
+
+    :param q_mag: [m] array of wavevector distance, in A^-1
+    :param coefs: float values of coefficients
+    :return: [m] array of scattering factors
+    """
+    q_mag = np.asarray(q_mag, dtype=float).reshape(-1)
+    q = (q_mag / (4 * np.pi)) ** 2
+    # pad and reshape coefs into [n,2]
+    coefs = np.reshape(np.pad(coefs, [0, len(coefs) % 2]), [-1, 2])
+    f = sum(a * np.exp(-b * q) for a, b in coefs)
+    return f
+
+
+def add_custom_form_factor_coefs(element, *coefs, dispersion_table=None):
+    """
+    Custom form factor coefficients
+    :param element: element name to add or replace
+    :param coefs: a1, b1, a2, b2, ... scattering factor coefficients
+    :param dispersion_table: None or array([energy_kev, f1, f2])
+    :return:
+    """
+    CUSTOM_FORM_FACTOR_COEFS.update({element: coefs})
+    if dispersion_table is not None:
+        dispersion_table = np.asarray(dispersion_table, dtype=float)
+        if dispersion_table.ndim != 2 or dispersion_table.shape[0] != 3:
+            raise Exception(f"dispersion table wrong shape, should be (3, n): {dispersion_table.shape}")
+        CUSTOM_DISPERSION_TABLE.update({element: dispersion_table})
+
+
+def scattering_factor_coefficients_custom(*elements, default_table='itc'):
+    """
+    Load custom scattering factor coefficients from internal table
+    :param elements: str element symbol
+    :param default_table: scattering factor table to use if element not in custom list
+    :return: {'element': array([a1, b1, a2, b2, ...])}
+    """
+    default_coefs = scattering_factor_coefficients(*elements, table=default_table)
+    coefs = {
+        el: CUSTOM_FORM_FACTOR_COEFS[el] if el in CUSTOM_FORM_FACTOR_COEFS else default_coefs[n]
+        for n, el in enumerate(elements)
+    }
+    return coefs
+
+
+def dispersion_table_custom(*elements):
+    """
+    Load custom table of x-ray dispersion corrections
+        energy, f1, f2 = xray_dispersion_table_custom('element')
+    :param elements: str element symbols
+    :return: {'element': np.array([energy_kev, f1, f2])}
+    """
+    # Generate table
+    log_step = 0.001  # 0.007 in original tables
+    min_energy = 10.0
+    max_energy = 30000
+    energy_kev = 10 ** np.arange(np.log10(min_energy), np.log10(max_energy) + log_step, log_step) / 1000.
+    f1, f2 = xray_dispersion_corrections(elements, energy_kev)
+
+    tables = {
+        el: CUSTOM_DISPERSION_TABLE[el]
+        if el in CUSTOM_DISPERSION_TABLE else np.array([energy_kev, f1[:, n], f2[:, n]])
+        for n, el in enumerate(elements)
+    }
+    return tables
+
+
+def custom_scattering_factor(elements, q_mag, energy_kev=None, default_table='itc'):
     """
     Read X-ray scattering factor table, calculate f(|Q|)
-    Uses the coefficients for analytical approximation to the scattering factors - ITC, p578
-     Qff = xray_scattering_factor_resonant(element, energy_kev, qmag)
+     Qff = custom_scattering_factor(element, q_mag, energy_kev=None)
 
-    if resonant_energy = float(energy in keV), the total atomic scattering amplitude will be returned:
+    if energy_kev = array(energy in keV), the total atomic scattering amplitude will be returned:
         f(|Q|, E) = f0(|Q|) + f'(E) - if''(E)
-    See:
-    :param element: [n*str] list or array of elements
-    :param Qmag: [m] array wavevector distance |Q|, in A^-1
+
+    where f0 is the custom scattering factor calculated from analytical coefficients,
+    f' and f'' are the energy dependent dispersion corrections interpolated from
+    tabulated data.
+
+    if energy_kev is None, f' and f'' are not included.
+
+    Analytical coefficients and dispersion correction tables are taken for each element
+    from the interntal custom table (see add_custom_form_factor_coefs()).
+    If the element symbol is not found in the internal table, instead they are taken
+    from the default_table.
+
+    default_table options:
+        'itc' -> x-ray scattering factors from international tabels Volume C (ITC, p578 Table 6.1.1.4)
+        'waaskirf' -> x-ray scattering factors from Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431
+        'peng' -> electron scattering factors from Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485.
+        'ndb' -> neutron scattering lengths from Neutron data booklet
+        'sears' -> neutron scattering lengths from the international tables
+
+    :param elements: [n*str] list or array of elements
+    :param q_mag: [m] array wavevector distance |Q|, in A^-1
+    :param energy_kev: [o] array energy in keV or None [o==1]
+    :param default_table: scattering factor table to use if element not in custom list
+    :return: [m*n*o] complex array of scattering factors
+    """
+
+    if energy_kev is not None:
+        return custom_scattering_factor_resonant(elements, q_mag, energy_kev, default_table)
+
+    elements = np.asarray(elements, dtype=str).reshape(-1)
+    q_mag = np.asarray(q_mag).reshape(-1)
+    qff = np.zeros([len(q_mag), len(elements), 1], dtype=complex)
+    element_coefs = scattering_factor_coefficients_custom(*elements, default_table=default_table)
+    for n, el in enumerate(elements):
+        coefs = element_coefs[el]
+        f0 = analytical_scattering_factor(q_mag, *coefs)  # (n_q, )
+        qff[:, n, 0] = f0
+    return qff
+
+
+def custom_scattering_factor_resonant(elements, q_mag, energy_kev, default_table='itc'):
+    """
+    Read X-ray scattering factor table, calculate f(|Q|)
+     Qff = custom_scattering_factor(element, q_mag, energy_kev)
+
+    if energy_kev = array(energy in keV), the total atomic scattering amplitude will be returned:
+        f(|Q|, E) = f0(|Q|) + f'(E) - if''(E)
+
+    where f0 is the custom scattering factor calculated from analytical coefficients,
+    f' and f'' are the energy dependent dispersion corrections interpolated from
+    tabulated data.
+
+    Analytical coefficients and dispersion correction tables are taken for each element
+    from the interntal custom table (see add_custom_form_factor_coefs()).
+    If the element symbol is not found in the internal table, instead they are taken
+    from the default_table.
+
+    default_table options:
+        'itc' -> x-ray scattering factors from international tabels Volume C (ITC, p578 Table 6.1.1.4)
+        'waaskirf' -> x-ray scattering factors from Waasmaier and Kirfel, Acta Cryst. (1995) A51, 416-431
+        'peng' -> electron scattering factors from Peng, L.-M.  Acta Cryst A 1998, 54 (4), 481–485.
+        'ndb' -> neutron scattering lengths from Neutron data booklet
+        'sears' -> neutron scattering lengths from the international tables
+
+    :param elements: [n*str] list or array of elements
+    :param q_mag: [m] array wavevector distance |Q|, in A^-1
     :param energy_kev: [o] array energy in keV
+    :param default_table: scattering factor table to use if element not in custom list
     :return: [m*n*o] complex array of scattering factors
     """
 
     # Qmag and energy_kev should be a 1D array
-    Qmag = np.asarray(Qmag).reshape(-1)
+    elements = np.asarray(elements, dtype=str).reshape(-1)
+    q_mag = np.asarray(q_mag).reshape(-1)
     energy_kev = np.asarray(energy_kev).reshape(-1)
+    qff = np.zeros([len(q_mag), len(elements), len(energy_kev)], dtype=complex)
 
-    coef = atom_properties(element, ['a1', 'b1', 'a2', 'b2', 'a3', 'b3', 'a4', 'b4', 'c'])
-    f1, f2 = xray_dispersion_corrections(element, energy_kev)  # shape (len(energy), len(element))
+    element_coefs = scattering_factor_coefficients_custom(*elements, default_table=default_table)
+    tables = dispersion_table_custom(*elements)
+    for n, el in enumerate(elements):
+        coefs = element_coefs[el]
+        tab_en, tab_f1, tab_f2 = tables[el]
+        f0 = analytical_scattering_factor(q_mag, *coefs)  # (n_q, )
+        f1 = np.interp(energy_kev, tab_en, tab_f1)  # (n_en, )
+        f2 = np.interp(energy_kev, tab_en, tab_f2)  # (n_en, )
+        qff[:, n, :] = np.array([
+            [
+                _f0 if np.isnan(_f1) or np.isnan(_f2) else _f0 + (_f1 - 1j * _f2)
+                for _f1, _f2 in zip(f1, f2)  # loop over energy
+            ] for _f0 in f0  # loop over q values
+        ])
+    return qff
 
-    Qff = np.zeros([len(Qmag), len(coef), len(energy_kev)], dtype=complex)
-    # Broadcast dispersion corrections
-    Qff[:, :, :] = f1.T - 1j * f2.T  # change from + to - on 2/July/2023
+
+def load_magnetic_ff_coefs():
+    """
+    Magnetic Form Factor, Coefficients of the analytical approximation
+    Downloaded from McPhase website, 10/5/2020
+    http://www.mcphase.de/manual/node130.html
+    Some modifications were required after downloading to read the file.
+    :return: dict['element']['coefficient']
+    """
+    # Read McPhase data
+    with open(MAGFF_FILE) as f:
+        lines = f.readlines()
+    lines = [l.replace('= ', '=').split() for l in lines if l[0] != '#']
+
+    # Build dict
+    mff_mcphase = {}
+    for ln in lines:
+        if ln[0] not in mff_mcphase:
+            mff_mcphase[ln[0]] = {}
+        for ii in ln[2:]:
+            if '=' in ii:
+                k, val = ii.split('=')
+            else:
+                raise NameError('%s\nline: %s has the wrong format' % (ln, ii))
+            mff_mcphase[ln[0]][k] = float(val)
+        el = str2element(ln[0])
+        if el not in mff_mcphase:
+            # Create default atom from first mention
+            mff_mcphase[el] = mff_mcphase[ln[0]]
+    return mff_mcphase
+
+
+def magnetic_ff_symbol(element):
+    """Convert element symbol into style used in magnetic form factor table"""
+    name, occ, charge = split_element_symbol(element)
+    charge = '' if int(charge) == 0 else f"{abs(charge):.0f}"
+    return f"{name.capitalize()}{charge}"
+
+
+def magnetic_ff_coefs(*elements):
+    """Return the magnetic form factor coefficients for an element"""
+    mff = load_magnetic_ff_coefs()
+    value_keys = (
+        'j0A', 'j0a', 'j0B', 'j0b', 'j0C', 'j0c', 'j0D',
+        'j2A', 'j2a', 'j2B', 'j2b', 'j2C', 'j2c', 'j2D',
+        'j4A', 'j4a', 'j4B', 'j4b', 'j4C', 'j4c', 'j4D',
+    )
+    coefs = np.zeros([len(elements), len(value_keys)])
+    for n, ele in enumerate(elements):
+        key = magnetic_ff_symbol(ele)
+        if key in mff:
+            coefs[n, :] = [mff[key][val] for val in value_keys]
+        # else:
+        #     print(f"Not in magnetic form factor table: {ele}")
+    return coefs
+
+
+def print_magnetic_ff_coefs(element):
+    """
+    Print analytical coefficients for the magnetic form factor of an element
+    :param element: element symbol
+    :return: str
+    """
+    mff = load_magnetic_ff_coefs()
+    name, occ, charge = split_element_symbol(element)
+    name = name.capitalize()
+    symbol = magnetic_ff_symbol(element)
+    out = ''
+    for key, coefs in mff.items():
+        if name in key:
+            star = '*' if symbol == key else ''
+            coef_str = ', '.join([f"{coef}={val:8}" for coef, val in coefs.items()])
+            out += f"{star+key:5}: {coef_str}\n"
+    return out
+
+
+def last_df_orbital(element):
+    """
+    Return the orbital configuration of the last d or f orbital in element
+    """
+    name, occ, charge = split_element_symbol(element)
+    return next(reversed([o for o in orbital_configuration(name, charge) if 'd' in o or 'f' in o]), '')
+
+
+def magnetic_ff_g_factor(*elements):
+    """
+    Return the lande g-factor of the given elements
+    """
+    g_factors = []
+    for ele in elements:
+        orbital = last_df_orbital(ele)
+        g_factors.append(glande(*hunds_rule(orbital)) if orbital else 0)
+    return np.squeeze(g_factors)
+
+
+def magnetic_ff_j2j0_ratio(gfactor, ratio_type=1):
+    """
+    Return the ratio of <J2>/<J0> based on the Lande g-factor
+    This comes from using the dipole approximation (small |Q|):
+        F(|Q|) = <j0(|Q|)> + (2-g)/g * <j2(|Q|)>,  where g is the Lande g-factor
+    The ratio is <j2> / j<0> = (2 - g) / g
+    if ratio_type == 2:
+    The ratio is <j2> / j<0> = (1 - 2 / g)
+    """
+    if abs(gfactor) < 0.0001:
+        return 0.0
+    if ratio_type == 2:
+        return 1 - (2 / gfactor)  # equ. 13 http://www.physics.mcgill.ca/~dominic/papers201x/CJP_88_2010_p771.pdf
+    return (2 - gfactor) / gfactor  # equ. 155 http://www.mcphase.de/manual/node130.html#jls
+
+
+def magnetic_form_factor(*elements, qmag=0., orbital_state=None, gfactor=None, j2j0_ratio=None):
+    """
+    Calcualte the magnetic form factor of an element or list of elements at wavevector |Q|
+    Analytical approximation of the magnetic form factor:
+        <j0(|Q|)> = A*exp(-a*s^2) + B*exp(-b*s^2) + C*exp(-c*s^2) + D, where s = sin(theta)/lambda in A-1
+        <j2(|Q|)> = A*Q^2*exp(-a*s^2) + B*Q^2*exp(-b*s^2) + C*Q^2*exp(-c*s^2) + D*Q^2
+    Using the dipole approximation (small |Q|):
+        F(|Q|) = <j0(|Q|)> + (2-g)/g * <j2(|Q|)>,  where g is the Lande g-factor
+    See more about the approximatio here: https://www.ill.eu/sites/ccsl/ffacts/ffactnode3.html
+    Coefficients for the analytical approximation are available in the International Tables of Crystallography, Vol C
+    Here they have been copied from the web, published by the program McPhase: http://www.mcphase.de/manual/node130.html
+    The Lande g-factor is determined from the spin and orbital quantum numbers of the element in it's given state
+    If the orbital state and g-factor is not given, the neutral d/f state is used (see atom_valence_state())
+    E.G.
+        mff = magnetic_form_factor('Co2+', qmag=np.arange(0,4,0.1), orbital_state='3d5')
+
+    :param elements: str element symbols
+    :param qmag: magntude of the wavevector transfer, |Q|, in A^-1
+    :param orbital_state: str, valence orbital to use to calculate the g-factor (must be same length as element)
+    :param gfactor: float, g-factor to use to calculate orbital component (must be same length as element)
+    :param j2j0_ratio: float, value of <J2>/<J0>, rather than using g-factor
+    :return: array([len(qmag), len(element)])
+    """
+    # s = sin(th)/lambda = |Q|/4pi
+    s2 = (np.asarray(qmag).reshape(-1) / (4 * np.pi)) ** 2
+
+    if j2j0_ratio is not None:
+        j2j0_ratio = np.asarray(j2j0_ratio).reshape(-1)
+    else:
+        if orbital_state is not None:
+            orbital_state = np.asarray(orbital_state, dtype=str).reshape(-1)
+            gfactor = np.array([glande(*hunds_rule(o)) for o in orbital_state])
+        elif gfactor is None:
+            gfactor = magnetic_ff_g_factor(*elements)
+        j2j0_ratio = np.array([magnetic_ff_j2j0_ratio(g) for g in np.reshape(gfactor, -1)])
+
+    # replicate last element if array is shorter than elements
+    j2j0_ratio = j2j0_ratio[list(range(j2j0_ratio.size)) + [-1] * (len(elements) - j2j0_ratio.size)]
+
+    coefs = magnetic_ff_coefs(*elements)  # (len(ele) * 21)
+    qff = np.zeros([len(s2), len(elements)])
 
     # Loop over elements
-    for n in range(len(coef)):
-        a1 = coef['a1'][n]
-        b1 = coef['b1'][n]
-        a2 = coef['a2'][n]
-        b2 = coef['b2'][n]
-        a3 = coef['a3'][n]
-        b3 = coef['b3'][n]
-        a4 = coef['a4'][n]
-        b4 = coef['b4'][n]
-        c = coef['c'][n]
-
-        # Array multiplication over Qmags
-        f = a1 * np.exp(-b1 * (Qmag / (4 * np.pi)) ** 2) + \
-            a2 * np.exp(-b2 * (Qmag / (4 * np.pi)) ** 2) + \
-            a3 * np.exp(-b3 * (Qmag / (4 * np.pi)) ** 2) + \
-            a4 * np.exp(-b4 * (Qmag / (4 * np.pi)) ** 2) + c
-        for e in range(len(energy_kev)):
-            Qff[:, n, e] += f
-    return Qff
+    for n, ((A0, a0, B0, b0, C0, c0, D0, A2, a2, B2, b2, C2, c2, D2), rat) in enumerate(zip(coefs[:, :14], j2j0_ratio)):
+        j0 = A0 * np.exp(-a0 * s2) + \
+             B0 * np.exp(-b0 * s2) + \
+             C0 * np.exp(-c0 * s2) + D0
+        j2 = (A2 * np.exp(-a2 * s2) +
+              B2 * np.exp(-b2 * s2) +
+              C2 * np.exp(-c2 * s2) + D2) * s2
+        # Dipole approximation for small q
+        qff[:, n] = j0 + (rat * j2)
+    return qff
 
 
-def magnetic_form_factor(element, Qmag=0.):
+def magnetic_form_factor_old(element, Qmag=0.):
     """
     Read Magnetic form factor table, calculate <j0(|Q|)>
     Analytical approximation of the magnetic form factor:
@@ -1215,8 +1713,7 @@ def attenuation(element_z, energy_kev):
     element_z = np.asarray(element_z).reshape(-1)
     energy_kev = np.asarray(energy_kev).reshape(-1)
 
-    xma_file = os.path.join(datadir, 'XRayMassAtten_mup.dat')
-    xma_data = np.loadtxt(xma_file)
+    xma_data = np.loadtxt(XMAFILE)
 
     energies = xma_data[:, 0] / 1000.
     out = np.zeros([len(energy_kev), len(element_z)])
@@ -1298,20 +1795,30 @@ def xray_dispersion_corrections(elements, energy_kev=None):
     asf = np.load(ASFFILE, allow_pickle=True)
     asf = asf.item()
 
-    energy_kev = np.asarray(energy_kev, dtype=float).reshape(-1)
     elements = np.asarray(elements, dtype=str).reshape(-1)
+    if energy_kev is None:
+        if len(elements) == 1:
+            energy_kev = np.array(asf[elements[0]]['energy']) / 1000.
+        else:
+            log_step = 0.003  # 0.007 in tables
+            min_energy = 10.0
+            max_energy = 30000
+            energy_kev = 10**np.arange(np.log10(min_energy), np.log10(max_energy) + log_step, log_step) / 1000.
+    else:
+        energy_kev = np.asarray(energy_kev, dtype=float).reshape(-1)
     if1 = np.zeros([len(energy_kev), len(elements)])
     if2 = np.zeros([len(energy_kev), len(elements)])
     for n, el in enumerate(elements):
-        z = asf[el]['Z']
-        energy = np.array(asf[el]['energy']) / 1000.  # eV -> keV
-        f1 = np.array(asf[el]['f1'])
-        f2 = np.array(asf[el]['f2'])
-        f1[f1 < -1000] = np.nan
-        f2[f2 < -1000] = np.nan
-        # interpolate and subtract f0==Z
-        if1[:, n] = np.interp(energy_kev, energy, f1) - z
-        if2[:, n] = -np.interp(energy_kev, energy, f2)
+        if el in asf:
+            z = asf[el]['Z']
+            energy = np.array(asf[el]['energy']) / 1000.  # eV -> keV
+            f1 = np.array(asf[el]['f1'])
+            f2 = np.array(asf[el]['f2'])
+            f1[f1 < -1000] = np.nan
+            f2[f2 < -1000] = np.nan
+            # interpolate and subtract f0==Z (where does this come from???)
+            if1[:, n] = np.interp(energy_kev, energy, f1) - z
+            if2[:, n] = -np.interp(energy_kev, energy, f2)
     return if1, if2
 
 
@@ -1568,6 +2075,8 @@ def find_spacegroup(sg_symbol):
     """
     sg_symbol = sg_symbol.replace(' ', '').replace('\"', '')
     sg_dict = spacegroups()
+    if str(sg_symbol) in sg_dict:
+        return sg_dict[str(sg_symbol)]
     sg_keys = list(sg_dict.keys())
     sg_names = [sg['space group name'] for sg in sg_dict.values()]
     if sg_symbol in sg_names:
@@ -1575,12 +2084,21 @@ def find_spacegroup(sg_symbol):
         return sg_dict[key]
 
     sg_dict_mag = spacegroups_magnetic()
-    sg_keys = list(sg_dict_mag.keys())
-    sg_names = [sg['space group name'] for sg in sg_dict_mag.values()]
-    if sg_symbol in sg_names:
-        key = sg_keys[sg_names.index(sg_symbol)]
+    if str(sg_symbol) in sg_dict_mag:
+        return sg_dict_mag[str(sg_symbol)]
+    sg_keys_mag = list(sg_dict_mag.keys())
+    sg_names_mag = [sg['space group name'] for sg in sg_dict_mag.values()]
+    if sg_symbol in sg_names_mag:
+        key = sg_keys_mag[sg_names_mag.index(sg_symbol)]
         return sg_dict_mag[key]
-    # TODO: add closest matching spacegroup
+    # Find first matching spacegroup
+    sg_symbol = sg_symbol.lower()
+    for stored_symbol in sg_names:
+        if sg_symbol in stored_symbol.lower():
+            return sg_dict[sg_keys[sg_names.index(stored_symbol)]]
+    for stored_symbol in sg_names_mag:
+        if sg_symbol in stored_symbol.lower():
+            return sg_dict_mag[sg_keys_mag[sg_names_mag.index(stored_symbol)]]
     return None
 
 
@@ -1894,6 +2412,83 @@ def count_charges(list_of_elements, occupancy=None, divideby=1, latex=False):
     for a in ats:
         outstr += [element_charge_string(a, atno[a], chno[a], latex)]
     return outstr
+
+
+def hunds_rule(state):
+    """
+    Determine S,L,J numbers using Hunds Rules
+     S, L, J = Hunds('3d3')
+    :param state: str orbital state nl
+    :returns S, L, J ints
+    """
+    n = int(state[0])
+    if 's' in state:
+        l = 0
+    elif 'p' in state:
+        l = 1
+    elif 'd' in state:
+        l = 2
+    elif 'f' in state:
+        l = 3
+    else:
+        raise ValueError('%s is not a known state' % state)
+
+    nelec = int(state[2:])
+    norbits = 2 * l + 1
+    orbits = 2 * list(range(l, -l - 1, -1))
+    orb_spin = np.zeros(2 * norbits)
+
+    for op in range(nelec):
+        if op >= norbits:
+            orb_spin[op] = -1
+        else:
+            orb_spin[op] = 1
+
+    S = 0.5 * np.sum(orb_spin)
+    L = np.sum(np.abs(orb_spin) * (orbits))
+
+    if nelec > norbits:
+        # More than half-filled
+        J = np.abs(L + S)
+    else:
+        # Less than half filled
+        J = np.abs(L - S)
+
+    return S, L, J
+
+
+def glande(S, L, J):
+    """
+    Calculate the Lande g-value
+        https://en.wikipedia.org/wiki/Land%C3%A9_g-factor
+    :param S: int Spin value
+    :param L: int orbital
+    :param J: int L + S value
+    :return: float G
+    """
+
+    S = np.asarray(S, dtype=float)
+    L = np.asarray(L, dtype=float)
+    J = np.asarray(J, dtype=float)
+    J[abs(J) < 0.01] = 0.01
+    gj = 1.5 + (S * (S + 1) - L * (L + 1)) / (2 * J * (J + 1))
+    if np.isnan(gj):
+        gj = 0.0
+    return gj
+
+
+def atom_valence_state(element, charge=0):
+    """
+    Very simple way of determining the default neutral valence state of a transition metal
+    :param element: str element symbole
+    :param charge: float charge state (assumes this is a nominal charge state)
+    :return: str e.g. '3d7'
+    """
+    orbitals = orbital_configuration(element, charge)
+    dstates = [o for o in orbitals if 'd' in o or 'f' in o]
+    if len(dstates) > 0:
+        return dstates[-1]
+    return orbitals[-1]
 
 
 def molecular_weight(compound_name):

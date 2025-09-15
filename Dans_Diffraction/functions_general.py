@@ -1270,6 +1270,15 @@ def peak_function(func_name, *args, **kwargs):
     raise ValueError('%s not available as peak function.' % func_name)
 
 
+def liststr(string):
+    """
+    Convert str or list of str to list of str
+    :param string: str, byteString, list, array
+    :return: list of str
+    """
+    return list(np.asarray(string, dtype=str).reshape(-1))
+
+
 def frange(start, stop=None, step=1):
     """
     Returns a list of floats from start to stop in step increments
