@@ -1317,7 +1317,7 @@ def scattering_factor_coefficients(*elements, table='itc'):
         'sears': scattering_factor_coefficients_neutron_sears
     }
     table = table.lower()
-    if table.lower() not in tables:
+    if table not in tables:
         raise ValueError(f'Unknown scattering factor table: {table}')
     return tables[table](*elements)
 
@@ -1486,8 +1486,13 @@ def custom_scattering_factor_resonant(elements, q_mag, energy_kev, default_table
         tab_en, tab_f1, tab_f2 = tables[el]
         f0 = analytical_scattering_factor(q_mag, *coefs)  # (n_q, )
         f1 = np.interp(energy_kev, tab_en, tab_f1)  # (n_en, )
-        f2 = np.interp(energy_kev, tab_en, tab_f2)  # (n_ej, )
-        qff[:, n, :] = np.array([[_f0 + _f1 - 1j * _f2 for _f1, _f2 in zip(f1, f2)] for _f0 in f0])
+        f2 = np.interp(energy_kev, tab_en, tab_f2)  # (n_en, )
+        qff[:, n, :] = np.array([
+            [
+                _f0 if np.isnan(_f1) or np.isnan(_f2) else _f0 + (_f1 - 1j * _f2)
+                for _f1, _f2 in zip(f1, f2)  # loop over energy
+            ] for _f0 in f0  # loop over q values
+        ])
     return qff
 
 

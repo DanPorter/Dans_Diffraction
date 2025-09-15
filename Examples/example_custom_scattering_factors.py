@@ -21,8 +21,18 @@ table = np.array([
     [-0.4833, -3.7933, -3.7862, -3.7791, -3.772, -3.765, -3.7579, -3.7508, -3.7437, -3.7367]  # f2
 ])
 dif.fc.add_custom_form_factor_coefs('Co3+', *coefs, dispersion_table=table)
-xtl.Structure.changeatom(3, type='Co3+')
+xtl.Atoms.changeatom(1, type='Co3+')
+xtl.generate_structure()
+xtl.Structure.type[3] = 'Co'
 
+
+# Display scattering factors
+print(xtl.Scatter.print_scattering_factor_coefficients())
+
+xtl.Scatter.setup_scatter(scattering_type='custom', output=False)
+xtl.Plot.plot_scattering_factors(q_max=6)
+
+# Calculate structure factors
 en = np.arange(7.7, 7.8, 0.01)
 ref = [0, 0, 3]
 inten1 = xtl.Scatter.xray_dispersion(ref, en)

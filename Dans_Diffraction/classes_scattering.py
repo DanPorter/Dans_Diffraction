@@ -41,6 +41,7 @@ Version History:
 16/05/24 2.3.4  Added printed progress bar to generate_intensity_cut during convolusion
 17/05/24 2.3.4  Changed generate_intensity_cut to make it much faster
 23/12/24 2.3.5  Added polarised neutron options
+15/09/25 2.4.0  Added custom scattering factors
 
 @author: DGPorter
 """
@@ -54,7 +55,7 @@ from . import functions_scattering as fs
 from . import multiple_scattering as ms
 # from . import tensor_scattering as ts  # Removed V1.7
 
-__version__ = '2.3.5'
+__version__ = '2.4.0'
 
 
 class Scattering:
@@ -1635,13 +1636,14 @@ class Scattering:
         Jhat_psi = fg.norm(np.cross(Qhat, Ihat_psi))
         return np.vstack([Ihat_psi, Jhat_psi, Qhat])
 
-    def scattering_factors(self, hkl, energy_kev=None):
+    def scattering_factors(self, hkl=(0, 0, 0), energy_kev=None, qmag=None):
         """Return the scattering factors[n, m] for each reflection, hkl[n,3] and each atom [m]"""
 
         if energy_kev is None:
             energy_kev = self._energy_kev
 
-        qmag = self.xtl.Cell.Qmag(hkl)
+        if qmag is None:
+            qmag = self.xtl.Cell.Qmag(hkl)
         # Scattering factors
         ff = fs.scattering_factors(
             scattering_type=self._scattering_type,
@@ -1733,22 +1735,24 @@ class Scattering:
         else:
             raise Exception(f"Unknown scattering type: {scattering_type}")
 
-        coefs = fc.scattering_factor_coefficients(*self.xtl.Structure.type, table=table)
-        if not np.any(coefs[:, -1]):
-            coefs = coefs[:, :-1]  # trim final column if all zeros
-        n_doubles = coefs.shape[1] // 2
-        n_singles = coefs.shape[1] % 2
+        element_coefs = fc.scattering_factor_coefficients_custom(*self.xtl.Structure.type, default_table=table)
+
 
         structrue = self.xtl.Structure
         structure_list = zip(structrue.label, structrue.type, structrue.u, structrue.v, structrue.w)
         out = f"{scattering_type}\n"
         for n, (label, el, u, v, w) in enumerate(structure_list):
             out += f"{n:3}  {label:6} {el:5}: {u:8.3g}, {v:8.3g}, {w:8.3g}  : "
-            out += ', '.join(f"a{d} = {coefs[n, 2*d]:.3f}, A{d} = {coefs[n, 2*d+1]:.3f}" for d in range(n_doubles))
-            out += (', ' * int(n_doubles > 0)) + (f"b = {coefs[n, -1]:.3f}" * n_singles)
+
+            coefs = element_coefs[el]
+            if abs(coefs[-1]) < 1e-6:
+                coefs = coefs[:-1]  # trim final column if all zeros
+            n_doubles = len(coefs) // 2
+            n_singles = len(coefs) % 2
+            out += ', '.join(f"a{d} = {coefs[2*d]:.3f}, A{d} = {coefs[2*d+1]:.3f}" for d in range(n_doubles))
+            out += (', ' * int(n_doubles > 0)) + (f"b = {coefs[-1]:.3f}" * n_singles)
             out += '\n'
         return out
-
 
     def old_intensity(self, HKL, scattering_type=None):
         """
