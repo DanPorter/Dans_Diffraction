@@ -10,7 +10,7 @@ or
 $ python -m pip install git+https://github.com/DanPorter/Dans_Diffraction.git
 
 Requirements:
-Python 3.5+ with packages: Numpy, Matplotlib, Tkinter
+Python 3.7+ with packages: Numpy, Matplotlib, Tkinter
 BuiltIn packages used: sys, os, re, glob, warnings, json, itertools
 
 Usage:
@@ -32,7 +32,7 @@ Diamond
 2017-2025
 
 Version 3.4.0
-Last updated: 05/08/2025
+Last updated: 15/09/2025
 
 Version History:
 02/03/18 1.0    Version History started.
@@ -169,7 +169,7 @@ __all__ = ['fg', 'fp', 'fl', 'fc', 'Crystal', 'MultiCrystal', 'readcif',
 
 
 __version__ = '3.4.0'
-__date__ = '2025/08/05'
+__date__ = '2025/09/15'
 
 
 # Build
